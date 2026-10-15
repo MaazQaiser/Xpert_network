@@ -225,8 +225,16 @@ export function runTurn(
   const firstName = ctx.user.name.split(' ')[0] ?? ctx.user.name;
 
   switch (action.kind) {
-    case 'start':
-      return askGoal(brief, null, firstName);
+    case 'start': {
+      if (!action.goalType) return askGoal(brief, null, firstName);
+      const next = { ...brief, goalType: action.goalType };
+      return result(
+        withStep(next, 'goal'),
+        GOAL_TYPE_LABELS[action.goalType],
+        `Hi ${firstName}. Let’s scope your research. In one sentence, what would a good outcome look like? For example, the decision you need to make and by when.`,
+        starterChips(action.goalType),
+      );
+    }
 
     case 'goal-type': {
       const next = { ...brief, goalType: action.goalType };

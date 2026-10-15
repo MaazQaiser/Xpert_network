@@ -35,6 +35,14 @@ describe('goal chat engine', () => {
     });
   });
 
+  it('skips the goal-type question when onboarding already chose one (F1 deep link)', () => {
+    const result = runTurn(makeBrief(), { kind: 'start', goalType: 'expand' }, ctx);
+    expect(result.brief.goalType).toBe('expand');
+    expect(result.userText).toBe('Expand to a new region');
+    expect(result.reply).toMatch(/^Hi Bilal/);
+    expect(result.widget?.kind).not.toBe('goal-types');
+  });
+
   it('completes the goal step once there is a goal type and a one-line objective', () => {
     const brief = play([{ kind: 'goal-type', goalType: 'expand' }]);
     expect(brief.stepStatus.goal).toBe('active');

@@ -1,9 +1,15 @@
 import type { Metadata } from 'next';
-import { GoalChat } from '@/features/goal-chat';
+import { GoalChat, goalTypeSchema } from '@/features/goal-chat';
 
 export const metadata: Metadata = { title: 'Research brief' };
 
-export default async function BriefPage({ params }: { params: Promise<{ briefId: string }> }) {
+type BriefPageProps = {
+  params: Promise<{ briefId: string }>;
+  searchParams: Promise<{ goal?: string | string[] }>;
+};
+
+export default async function BriefPage({ params, searchParams }: BriefPageProps) {
   const { briefId } = await params;
-  return <GoalChat briefId={briefId} />;
+  const goal = goalTypeSchema.safeParse((await searchParams).goal);
+  return <GoalChat briefId={briefId} initialGoal={goal.success ? goal.data : null} />;
 }

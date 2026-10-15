@@ -26,6 +26,7 @@ export type AppShellProps = {
   /** Shown after "Proptyop", e.g. "Admin". */
   productSuffix?: string;
   homeHref: string;
+  /** Empty for focused tasks such as onboarding: no menu button, no side nav. */
   navItems: NavItem[];
   /** HeaderGlobalAction buttons (theme, notifications, user). */
   headerActions?: ReactNode;
@@ -45,50 +46,55 @@ export function AppShell({
 }: AppShellProps) {
   const pathname = usePathname();
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const hasNav = navItems.length > 0;
 
   return (
     <>
       <Theme as={Header} theme="g100" aria-label="Proptyop">
         <SkipToContent href="#main-content" />
-        <HeaderMenuButton
-          aria-label={isNavOpen ? 'Close menu' : 'Open menu'}
-          isActive={isNavOpen}
-          aria-expanded={isNavOpen}
-          onClick={() => setIsNavOpen((open) => !open)}
-        />
+        {hasNav ? (
+          <HeaderMenuButton
+            aria-label={isNavOpen ? 'Close menu' : 'Open menu'}
+            isActive={isNavOpen}
+            aria-expanded={isNavOpen}
+            onClick={() => setIsNavOpen((open) => !open)}
+          />
+        ) : null}
         <HeaderName as={Link} href={homeHref} prefix="">
           Proptyop
           {productSuffix ? <span className={styles.suffix}>&nbsp;{productSuffix}</span> : null}
         </HeaderName>
         <HeaderGlobalBar>{headerActions}</HeaderGlobalBar>
-        <SideNav
-          aria-label="Main navigation"
-          expanded={isNavOpen}
-          onOverlayClick={() => setIsNavOpen(false)}
-          href={homeHref}
-        >
-          <SideNavItems>
-            {navItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-              return (
-                <SideNavLink
-                  key={item.href}
-                  as={Link}
-                  href={item.href}
-                  renderIcon={item.icon}
-                  isActive={isActive}
-                  aria-current={isActive ? 'page' : undefined}
-                  onClick={() => setIsNavOpen(false)}
-                >
-                  {item.label}
-                </SideNavLink>
-              );
-            })}
-          </SideNavItems>
-        </SideNav>
+        {hasNav ? (
+          <SideNav
+            aria-label="Main navigation"
+            expanded={isNavOpen}
+            onOverlayClick={() => setIsNavOpen(false)}
+            href={homeHref}
+          >
+            <SideNavItems>
+              {navItems.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                return (
+                  <SideNavLink
+                    key={item.href}
+                    as={Link}
+                    href={item.href}
+                    renderIcon={item.icon}
+                    isActive={isActive}
+                    aria-current={isActive ? 'page' : undefined}
+                    onClick={() => setIsNavOpen(false)}
+                  >
+                    {item.label}
+                  </SideNavLink>
+                );
+              })}
+            </SideNavItems>
+          </SideNav>
+        ) : null}
       </Theme>
       {headerExtras}
-      <main id="main-content" className={styles.content}>
+      <main id="main-content" className={hasNav ? styles.content : styles.contentFull}>
         {children}
       </main>
     </>

@@ -53,3 +53,9 @@
 .trigger {
   box-shadow: 0 $spacing-02 $spacing-05 $shadow;
 }
+
+.scenarios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}

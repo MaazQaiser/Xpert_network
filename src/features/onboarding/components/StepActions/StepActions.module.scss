@@ -1,0 +1,8 @@
+@use '@carbon/react/scss/spacing' as *;
+
+.root {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-04;
+  padding-block-start: $spacing-04;
+}

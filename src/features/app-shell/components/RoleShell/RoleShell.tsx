@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { RequireRole, ROLE_HOME, type Role } from '@/features/auth';
+import { OnboardingGate } from '@/features/onboarding';
 import { BalanceBadge } from '@/features/wallet';
 import { ThemeToggle } from '@/providers/ThemeToggle';
 import { AppShell } from '@/shared/ui';
@@ -21,23 +22,27 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
   return (
     <RequireRole role={role}>
       {(user) => (
-        <AppShell
-          {...(SUFFIX[role] ? { productSuffix: SUFFIX[role] } : {})}
-          homeHref={ROLE_HOME[role]}
-          navItems={NAVIGATION[role]}
-          headerActions={
-            <>
-              {role === 'client' ? <BalanceBadge /> : null}
-              <ThemeToggle />
-              <UserPanel user={user} />
-            </>
-          }
-        >
-          <div className={styles.page}>
-            {role === 'client' ? <LowBalanceBanner /> : null}
-            {children}
-          </div>
-        </AppShell>
+        <OnboardingGate role={role}>
+          {(isFocused) => (
+            <AppShell
+              {...(SUFFIX[role] ? { productSuffix: SUFFIX[role] } : {})}
+              homeHref={ROLE_HOME[role]}
+              navItems={isFocused ? [] : NAVIGATION[role]}
+              headerActions={
+                <>
+                  {role === 'client' && !isFocused ? <BalanceBadge /> : null}
+                  <ThemeToggle />
+                  <UserPanel user={user} />
+                </>
+              }
+            >
+              <div className={styles.page}>
+                {role === 'client' && !isFocused ? <LowBalanceBanner /> : null}
+                {children}
+              </div>
+            </AppShell>
+          )}
+        </OnboardingGate>
       )}
     </RequireRole>
   );

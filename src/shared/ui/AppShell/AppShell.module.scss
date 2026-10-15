@@ -15,3 +15,8 @@
     margin-inline-start: $pt-shell-side-nav-width;
   }
 }
+
+.contentFull {
+  margin-block-start: $pt-shell-header-height;
+  min-block-size: calc(100vh - $pt-shell-header-height);
+}

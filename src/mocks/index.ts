@@ -12,6 +12,7 @@ export {
 } from './controls';
 export type { PrototypeControls, CoverageScenario } from './controls';
 export { USERS, PERSONA_SUMMARY } from './fixtures/users';
+export { scenarios } from './scenarios';
 
 /** Toolbar "Reset demo": wipe data and toggles back to the seed. */
 export function resetDemo(): void {

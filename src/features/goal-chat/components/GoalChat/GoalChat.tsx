@@ -9,6 +9,7 @@ import { routes } from '@/shared/config/routes';
 import { useConversation } from '../../api/queries';
 import { useTurn } from '../../hooks/useTurn';
 import { STEP_IDS, progressPercent, type StepId } from '../../model/steps';
+import type { GoalType } from '../../model/brief.schema';
 import type { Conversation } from '../../model/turn.schema';
 import { BriefStepper } from '../BriefStepper/BriefStepper';
 import { ChatThread } from '../ChatThread/ChatThread';
@@ -41,7 +42,9 @@ function GoalChatSkeleton() {
   );
 }
 
-function GoalChatView({ data, briefId }: { data: Conversation; briefId: string }) {
+type GoalChatViewProps = { data: Conversation; briefId: string; initialGoal: GoalType | null };
+
+function GoalChatView({ data, briefId, initialGoal }: GoalChatViewProps) {
   const turn = useTurn(briefId);
   const isWide = useBreakpointUp('xlg');
   const { brief, messages } = data;
@@ -51,7 +54,10 @@ function GoalChatView({ data, briefId }: { data: Conversation; briefId: string }
   const { send } = turn;
   useEffect(() => {
     if (messages.length > 0) return;
-    const timer = window.setTimeout(() => send({ kind: 'start' }), 0);
+    const timer = window.setTimeout(
+      () => send(initialGoal ? { kind: 'start', goalType: initialGoal } : { kind: 'start' }),
+      0,
+    );
     return () => window.clearTimeout(timer);
     // Only when the conversation is empty; `send` identity changes every stream update.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,7 +114,14 @@ function GoalChatView({ data, briefId }: { data: Conversation; briefId: string }
 }
 
 /** F2 ★ goal chat: stepper + chat + live brief (PRODUCT_PLAN §5). */
-export function GoalChat({ briefId }: { briefId: string }) {
+export function GoalChat({
+  briefId,
+  initialGoal = null,
+}: {
+  briefId: string;
+  /** Goal chosen during onboarding (F1); used only for the first turn of an empty brief. */
+  initialGoal?: GoalType | null;
+}) {
   const conversation = useConversation(briefId);
   return (
     <AsyncBoundary
@@ -116,7 +129,7 @@ export function GoalChat({ briefId }: { briefId: string }) {
       loading={<GoalChatSkeleton />}
       errorTitle="Your brief didn’t load"
     >
-      {(data) => <GoalChatView data={data} briefId={briefId} />}
+      {(data) => <GoalChatView data={data} briefId={briefId} initialGoal={initialGoal} />}
     </AsyncBoundary>
   );
 }

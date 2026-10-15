@@ -1,0 +1,64 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-07;
+  max-inline-size: 48rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-05;
+}
+
+.stepper {
+  flex: 1 1 24rem;
+}
+
+.skeleton {
+  margin-block-start: $spacing-07;
+}
+
+.stepTitle {
+  @include type-style('heading-03');
+}
+
+.help {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+  margin-block-start: $spacing-03;
+  max-inline-size: 60ch;
+}
+
+.field {
+  max-inline-size: 28rem;
+}
+
+.optionDetail {
+  color: $text-secondary;
+}
+
+.tile {
+  margin-block-end: $spacing-03;
+}
+
+.tileTitle {
+  @include type-style('heading-compact-02');
+
+  display: block;
+}
+
+.tileDetail {
+  @include type-style('body-01');
+
+  display: block;
+  margin-block-start: $spacing-02;
+  color: $text-secondary;
+}

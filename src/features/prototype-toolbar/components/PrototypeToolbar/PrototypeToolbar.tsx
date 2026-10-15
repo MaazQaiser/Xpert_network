@@ -19,6 +19,7 @@ import {
   getControls,
   PERSONA_SUMMARY,
   resetDemo,
+  scenarios,
   setControls,
   subscribeControls,
   USERS,
@@ -61,6 +62,12 @@ export function PrototypeToolbar() {
   };
 
   const currentPersona = session.data?.user?.personaId ?? null;
+  const currentRole = session.data?.user?.role ?? null;
+
+  /** Scenario actions change mock data; refetch everything so the UI catches up. */
+  const runScenario = (action: () => boolean) => {
+    if (action()) void queryClient.invalidateQueries();
+  };
 
   return (
     <Theme theme="g90" className={styles.root}>
@@ -128,6 +135,19 @@ export function PrototypeToolbar() {
               <RadioButton id="coverage-all" value="all" labelText="All questions covered" />
               <RadioButton id="coverage-none" value="none" labelText="Nothing covered" />
             </RadioButtonGroup>
+            <fieldset className={styles.fieldset}>
+              <legend className={styles.legend}>Scenarios</legend>
+              <div className={styles.scenarios}>
+                <Button
+                  kind="tertiary"
+                  size="sm"
+                  disabled={currentRole !== 'client' && currentRole !== 'expert'}
+                  onClick={() => runScenario(scenarios.restartOnboarding)}
+                >
+                  Restart onboarding
+                </Button>
+              </div>
+            </fieldset>
             <Button
               kind="danger--tertiary"
               size="sm"

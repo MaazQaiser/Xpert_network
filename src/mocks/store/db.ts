@@ -1,7 +1,9 @@
 import type { ChatMessage, ResearchBrief, TurnResult } from '@/features/goal-chat';
 import type { User } from '@/features/auth';
+import type { ClientOnboarding, ExpertOnboarding } from '@/features/onboarding';
 import type { Wallet } from '@/features/wallet';
 import { USERS } from '../fixtures/users';
+import { SEED_CLIENT_ONBOARDING, SEED_EXPERT_ONBOARDING } from '../fixtures/onboarding';
 import { SEED_OWNED_REPORTS, seedWallet } from '../fixtures/wallet';
 
 /** A custom research request created from a brief (F4 builds on this). */
@@ -22,6 +24,8 @@ export type DemoState = {
   users: Record<string, User>;
   /** Last verification email sent, per user (F0 verify-email notice). */
   verificationSentAt: Record<string, string>;
+  clientOnboarding: Record<string, ClientOnboarding>;
+  expertOnboarding: Record<string, ExpertOnboarding>;
   briefs: Record<string, ResearchBrief>;
   messages: Record<string, ChatMessage[]>;
   /** Completed turns by turnId, so retried turns are idempotent. */
@@ -42,6 +46,8 @@ function seed(): DemoState {
     sessionUserId: null,
     users: Object.fromEntries(Object.values(USERS).map((user) => [user.id, user])),
     verificationSentAt: {},
+    clientOnboarding: structuredClone(SEED_CLIENT_ONBOARDING),
+    expertOnboarding: structuredClone(SEED_EXPERT_ONBOARDING),
     briefs: {},
     messages: {},
     turns: {},

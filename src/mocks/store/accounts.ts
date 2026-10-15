@@ -1,5 +1,6 @@
 import type { AuthProvider, SignUpRole, User } from '@/features/auth';
 import { createId } from '@/shared/lib/id';
+import { newClientOnboarding, newExpertOnboarding } from '../fixtures/onboarding';
 import { db, type DemoState } from './db';
 
 type NewAccount = {
@@ -21,6 +22,10 @@ export function findUserByEmail(email: string): User | null {
 const initialisers: ((draft: DemoState, user: User) => void)[] = [
   (draft, user) => {
     if (user.role === 'client') draft.wallets[user.id] = { balance: 0, held: 0, transactions: [] };
+  },
+  (draft, user) => {
+    if (user.role === 'client') draft.clientOnboarding[user.id] = newClientOnboarding();
+    if (user.role === 'expert') draft.expertOnboarding[user.id] = newExpertOnboarding();
   },
 ];
 
