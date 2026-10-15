@@ -26,34 +26,37 @@ export function UserPanel({ user, settingsHref }: { user: User; settingsHref?: s
       >
         <UserAvatar size={20} />
       </HeaderGlobalAction>
-      <HeaderPanel
-        expanded={isOpen}
-        aria-label="Account"
-        onHeaderPanelFocus={() => setIsOpen(false)}
-      >
-        <div className={styles.panel}>
-          <p className={styles.name}>{user.name}</p>
-          <p className={styles.meta}>{user.title}</p>
-          <p className={styles.meta}>
-            {user.organisation} · {ROLE_LABEL[user.role]}
-          </p>
-          {settingsHref ? (
-            <Link href={settingsHref} className={styles.settings} onClick={() => setIsOpen(false)}>
-              Profile and settings
-            </Link>
-          ) : null}
-          <Button
-            kind="ghost"
-            size="sm"
-            renderIcon={Logout}
-            className={styles.logout}
-            onClick={() =>
-              logout.mutate(undefined, { onSuccess: () => router.push(ROLE_LOGIN[user.role]) })
-            }
-          >
-            Log out
-          </Button>
-        </div>
+      <HeaderPanel expanded={isOpen} onHeaderPanelFocus={() => setIsOpen(false)}>
+        {/* Rendered only while open, so closed-panel links aren't in the tab order. */}
+        {isOpen ? (
+          <section className={styles.panel} aria-label="Account">
+            <p className={styles.name}>{user.name}</p>
+            <p className={styles.meta}>{user.title}</p>
+            <p className={styles.meta}>
+              {user.organisation} · {ROLE_LABEL[user.role]}
+            </p>
+            {settingsHref ? (
+              <Link
+                href={settingsHref}
+                className={styles.settings}
+                onClick={() => setIsOpen(false)}
+              >
+                Profile and settings
+              </Link>
+            ) : null}
+            <Button
+              kind="ghost"
+              size="sm"
+              renderIcon={Logout}
+              className={styles.logout}
+              onClick={() =>
+                logout.mutate(undefined, { onSuccess: () => router.push(ROLE_LOGIN[user.role]) })
+              }
+            >
+              Log out
+            </Button>
+          </section>
+        ) : null}
       </HeaderPanel>
     </>
   );

@@ -16,6 +16,8 @@
 
 .body {
   @include type-style('body-02');
+
+  overflow-wrap: anywhere;
 }
 
 .help {

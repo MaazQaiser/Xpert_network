@@ -10,6 +10,8 @@
 }
 
 .toolbar {
+  // Grid item of the Stack: don't let the stepper's min width widen the page.
+  min-inline-size: 0;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -18,7 +20,9 @@
 }
 
 .stepper {
-  flex: 1 1 24rem;
+  flex: 1 1 18rem;
+  min-inline-size: 0;
+  overflow-x: auto;
 }
 
 .skeleton {

@@ -1,3 +1,4 @@
+@use '@carbon/react/scss/breakpoint' as *;
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
@@ -34,7 +35,10 @@
 }
 
 .position {
+  // Fieldsets default to min-width: min-content, which overflows on phones.
+  min-inline-size: 0;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: $spacing-05;
   padding: $spacing-05;
   border: 1px solid $border-subtle-01;
@@ -48,7 +52,7 @@
 
 .years {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr));
   gap: $spacing-05;
   max-inline-size: 28rem;
 }
@@ -72,6 +76,7 @@
 }
 
 .section {
+  min-inline-size: 0;
   display: grid;
   gap: $spacing-04;
   padding-block: $spacing-05;
@@ -80,6 +85,7 @@
 
 .sectionHeader {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: $spacing-04;
@@ -89,10 +95,22 @@
   @include type-style('heading-compact-02');
 }
 
+.stepperNav {
+  // Horizontal below lg: scroll the steps rather than the page (F2 pattern).
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-x: auto;
+}
+
 .facts {
   display: grid;
-  grid-template-columns: minmax(8rem, 12rem) 1fr;
-  gap: $spacing-03 $spacing-05;
+  grid-template-columns: minmax(0, 1fr);
+  gap: $spacing-02 $spacing-05;
+
+  @include breakpoint(md) {
+    grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr);
+    row-gap: $spacing-03;
+  }
 }
 
 .factRow {
@@ -107,6 +125,8 @@
 
 .definition {
   @include type-style('body-01');
+
+  overflow-wrap: anywhere;
 }
 
 .tags {

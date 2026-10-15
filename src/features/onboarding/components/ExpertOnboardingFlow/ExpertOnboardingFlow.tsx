@@ -103,7 +103,7 @@ function ExpertOnboardingView({ profile }: { profile: ExpertOnboarding }) {
 
   return (
     <div className={isVertical ? styles.layout : undefined}>
-      <nav aria-label="Profile steps">
+      <nav aria-label="Profile steps" className={styles.stepperNav}>
         <ProgressIndicator
           currentIndex={index}
           vertical={isVertical}
