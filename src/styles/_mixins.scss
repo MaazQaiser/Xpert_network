@@ -19,7 +19,7 @@
   }
 }
 
-// ——— Proptyop look (ADR 0009) ————————————————————————————————————————————
+// ——— Xpert Network look (ADR 0009) ————————————————————————————————————————————
 
 /// Page and hero titles: a Carbon type token in Inter semibold, like Notion's page titles.
 @mixin display-heading($token: 'heading-05') {
@@ -29,9 +29,9 @@
 
 /// Translucent glass fill over the page gradient (cards). No backdrop-filter here: it would
 /// make the card the containing block for fixed descendants such as Carbon modals.
-/// Values are Proptyop custom properties from _themes.scss (ADR 0009).
+/// Values are Xpert Network custom properties from _themes.scss (ADR 0009).
 @mixin glass-fill {
-  /* stylelint-disable carbon/theme-use -- Proptyop glass tokens (ADR 0009) */
+  /* stylelint-disable carbon/theme-use -- Xpert Network glass tokens (ADR 0009) */
   background: var(--pt-glass-bg);
   box-shadow: var(--pt-glass-shadow);
   /* stylelint-enable carbon/theme-use */
@@ -52,7 +52,7 @@
     inset: 0;
     pointer-events: none;
 
-    /* stylelint-disable-next-line carbon/theme-use -- Proptyop glass token (ADR 0009) */
+    /* stylelint-disable-next-line carbon/theme-use -- Xpert Network glass token (ADR 0009) */
     background: var(--pt-glass-bg);
   }
 }
@@ -62,7 +62,7 @@
 @mixin surface-card($radius: radius.$border-radius-16) {
   @include glass-fill;
 
-  /* stylelint-disable-next-line carbon/theme-use -- Proptyop glass token (ADR 0009) */
+  /* stylelint-disable-next-line carbon/theme-use -- Xpert Network glass token (ADR 0009) */
   border: 1px solid var(--pt-glass-border);
   border-radius: $radius;
 }

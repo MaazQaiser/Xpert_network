@@ -1,7 +1,7 @@
 import type { LibraryItem } from '@/features/library';
 
 const PROVENANCE =
-  'Built from recorded expert interviews, checked by Proptyop analysts, and anonymised after the commissioning client’s exclusivity period ended.';
+  'Built from recorded expert interviews, checked by Xpert Network analysts, and anonymised after the commissioning client’s exclusivity period ended.';
 
 export const LIBRARY_ITEMS: LibraryItem[] = [
   {

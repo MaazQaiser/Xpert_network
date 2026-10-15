@@ -1,4 +1,4 @@
-# Front-End Architecture — Proptyop
+# Front-End Architecture — Xpert Network
 
 Next.js App Router + TypeScript, organised by **feature** (feature-sliced, simplified). Goal: any feature can be understood, tested and changed in one folder.
 
@@ -7,7 +7,7 @@ Next.js App Router + TypeScript, organised by **feature** (feature-sliced, simpl
 ## 1. Repository layout
 
 ```
-proptyop-web/
+xpert-network-web/
 ├─ CLAUDE.md
 ├─ .claude/
 │  └─ skills/
@@ -203,5 +203,5 @@ Record decisions in `docs/adr/NNNN-kebab-title.md`: Context → Decision → Con
 - 0006 Front-end prototype: MSW + fixtures + scripted AI behind `shared/api`; real backend swapped in later
 - 0007 Serve IBM Plex from /public via Carbon's font-face
 - 0008 `exactOptionalPropertyTypes` off
-- 0009 Proptyop look: Notion-like neutral themes, glass panels, black buttons, Inter
+- 0009 Xpert Network look: Notion-like neutral themes, glass panels, black buttons, Inter
 - 0010 8px corners on buttons and form fields (the one Carbon-internals exception)

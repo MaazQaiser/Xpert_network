@@ -21,12 +21,12 @@ type ChatThreadProps = {
 function AssistantHeader({ at }: { at?: string }) {
   return (
     <div className={styles.meta}>
-      <span className={styles.author}>Proptyop assistant</span>
+      <span className={styles.author}>Xpert Network assistant</span>
       <AIExplainLabel
         size="mini"
         aria-label="About this reply"
-        summary="Written by Proptyop’s research assistant to scope your brief. It doesn’t give investment advice."
-        basis="Your answers in this chat and the Proptyop library catalogue"
+        summary="Written by Xpert Network’s research assistant to scope your brief. It doesn’t give investment advice."
+        basis="Your answers in this chat and the Xpert Network library catalogue"
       />
       {at ? (
         <time dateTime={at} title={formatDateTime(at)} className={styles.time}>

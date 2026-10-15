@@ -1,4 +1,4 @@
-// Proptyop themes (ADR 0009): Carbon's white / g100 token sets with a Notion-like neutral
+// Xpert Network themes (ADR 0009): Carbon's white / g100 token sets with a Notion-like neutral
 // palette (white page fading from a soft orange glow, glass panels, black buttons) and a
 // burnt-orange accent for links, focus and the active nav item. This is the ONLY place
 // raw colour values may appear; every component uses Carbon tokens.
@@ -216,10 +216,10 @@ $dark-overrides: (
   skeleton-element: $night-40,
 );
 
-/// Emits a full Proptyop theme. Carbon's own white/g100 theme comes first so its component
+/// Emits a full Xpert Network theme. Carbon's own white/g100 theme comes first so its component
 /// tokens (notifications, tags, …) keep their per-theme values — Carbon only resolves them
 /// for its built-in theme maps. Our overrides and button tokens then replace the base tokens.
-@mixin proptyop-theme($mode) {
+@mixin app-theme($mode) {
   @include theme.theme(if($mode == light, themes.$white, themes.$g100));
 
   @each $token, $value in if($mode == light, $light-overrides, $dark-overrides) {

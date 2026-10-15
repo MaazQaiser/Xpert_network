@@ -1,4 +1,4 @@
-# Proptyop — Front-End Prototype Plan
+# Xpert Network — Front-End Prototype Plan
 
 > Status: v0.2 · Owner: Maaz · Last updated: 2026-10-15
 > **Scope: front end only.** This is a high-fidelity, clickable **design prototype** built in Next.js + Carbon. There is **no real backend**: data, AI and payments are mocked. The goal is to **get the flows and the user experience right**, so the real build later is a swap of the mock layer, not a redesign.
@@ -20,11 +20,11 @@ Real auth, real database, real payments and payouts, real LLM/voice integration,
 
 ---
 
-## 2. What Proptyop is (product context)
+## 2. What Xpert Network is (product context)
 
 An **expert-backed research library**:
 
-- **Clients** (investors, business expanders) describe a goal in a guided AI chat. Proptyop confirms their needs, then sells matching **library reports** for **credits** or **quotes custom research**. Clients save and organise everything in a **workspace**.
+- **Clients** (investors, business expanders) describe a goal in a guided AI chat. Xpert Network confirms their needs, then sells matching **library reports** for **credits** or **quotes custom research**. Clients save and organise everything in a **workspace**.
 - **Experts** sign up, get approved, pick **open calls**, and give **voice or text interviews to an AI interviewer**. They get paid per accepted interview.
 - **Super admins** use a **separate login** to approve experts, send quotes, publish calls, check interviews, publish reports and manage credits.
 
@@ -85,7 +85,7 @@ Layout: a vertical Carbon `ProgressIndicator` on the left (sections + status) an
 | 3 | **Questions** | What they need to know | 3–10 prioritised questions | AI suggests questions as checkable cards; drag to reorder; add your own |
 | 4 | **Constraints** | Deadline, budget (credits), depth | Deadline + budget range | Inline date picker + credit slider inside the chat |
 | 5 | **Needs summary** | AI shows the **Research Brief** | Client clicks **Confirm needs** | Editable structured card: objective, subject, questions, constraints. Edits sync back to the steps |
-| 6 | **Options** | Proptyop shows what it can do | Client picks an option | **Coverage map**: per question, *Covered / Partly / Not covered* by library items. Three option cards: ① Buy library reports (credits) ② Request custom research (quote) ③ Mix |
+| 6 | **Options** | Xpert Network shows what it can do | Client picks an option | **Coverage map**: per question, *Covered / Partly / Not covered* by library items. Three option cards: ① Buy library reports (credits) ② Request custom research (quote) ③ Mix |
 | 7 | **Checkout / Request** | Confirm purchase **or** submit for a quote | Done screen | Credit balance check; low balance → top-up inline. Request → "Quote within 24h" confirmation + where to find it |
 
 Behaviour:
@@ -271,7 +271,7 @@ Run after phases 3, 5 and 7. 5 participants per persona type.
 
 | Task | Persona | Success signal |
 |---|---|---|
-| "Find out how [Company] sales have trended and decide if Proptyop can help" | P1 | Completes F2 → chooses an option in < 8 min without help |
+| "Find out how [Company] sales have trended and decide if Xpert Network can help" | P1 | Completes F2 → chooses an option in < 8 min without help |
 | "Plan sourcing for a café franchise in [Region]" | P1b | Understands the coverage map; requests a quote |
 | "Accept the quote you received" | P1 / P1b | Can explain held vs. spent credits |
 | "Save this report into a new folder and label it" | P1 | < 60s |

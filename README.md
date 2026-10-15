@@ -1,6 +1,6 @@
-# Proptyop — front-end prototype
+# Xpert Network — front-end prototype
 
-Clickable, high-fidelity prototype of Proptyop, an expert-backed research library. Next.js + Carbon, with all data, auth, payments and AI mocked in the browser (MSW). Start with [`CLAUDE.md`](CLAUDE.md) and [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md).
+Clickable, high-fidelity prototype of Xpert Network, an expert-backed research library. Next.js + Carbon, with all data, auth, payments and AI mocked in the browser (MSW). Start with [`CLAUDE.md`](CLAUDE.md) and [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md).
 
 ## Run it
 

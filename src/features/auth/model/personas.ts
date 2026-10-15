@@ -33,7 +33,7 @@ export const DEMO_ACCOUNTS: {
     personaId: 'ops',
     role: 'admin',
     name: 'Omar Siddiqui',
-    email: 'omar@proptyop.example',
+    email: 'omar@xpertnetwork.example',
     summary: 'Research operations admin',
   },
 ];

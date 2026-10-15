@@ -1,10 +1,10 @@
-# Proptyop Design System — built on IBM Carbon v11
+# Xpert Network Design System — built on IBM Carbon v11
 
-Carbon is our foundation. This doc defines **how Proptyop uses Carbon**: which themes, tokens, components and patterns, plus the small set of product-specific extensions we allow.
+Carbon is our foundation. This doc defines **how Xpert Network uses Carbon**: which themes, tokens, components and patterns, plus the small set of product-specific extensions we allow.
 
 References: **`carbon` skill** (`.claude/skills/carbon` — exact component/Sass/token API, read before coding) · carbondesignsystem.com · react.carbondesignsystem.com (Storybook) · Carbon for AI guidelines.
 
-> This doc is **policy** (what Proptyop allows). For **API facts** (props, Sass module paths, token names), the `carbon` skill is authoritative — e.g. `references/elements/themes.md`, `references/elements/layout.md`, `references/react/components/AILabel.md`.
+> This doc is **policy** (what Xpert Network allows). For **API facts** (props, Sass module paths, token names), the `carbon` skill is authoritative — e.g. `references/elements/themes.md`, `references/elements/layout.md`, `references/react/components/AILabel.md`.
 
 ---
 
@@ -26,7 +26,7 @@ pnpm add @carbon/react @carbon/icons-react @carbon/pictograms-react @carbon/char
 
 `src/styles/globals.scss`
 
-See `src/styles/globals.scss`: Carbon config → `$font-families` (Inter / Plex Mono) → `@font-face` (`_fonts.scss`) → `@carbon/react` → Proptyop themes (`_themes.scss`). Details and reasons in ADR 0009.
+See `src/styles/globals.scss`: Carbon config → `$font-families` (Inter / Plex Mono) → `@font-face` (`_fonts.scss`) → `@carbon/react` → Xpert Network themes (`_themes.scss`). Details and reasons in ADR 0009.
 
 Next.js notes:
 
@@ -41,9 +41,9 @@ Next.js notes:
 
 | Area | Carbon theme | Why |
 |---|---|---|
-| App (default, light) | `white` + Proptyop overrides | Gradient page (orange glow → white), glass panels, black buttons, orange accent for links/focus/active (ADR 0009) |
+| App (default, light) | `white` + Xpert Network overrides | Gradient page (orange glow → white), glass panels, black buttons, orange accent for links/focus/active (ADR 0009) |
 | App alt surfaces (side panels, filters) | `g10` layer | Subtle separation |
-| Dark mode | `g100` + Proptyop overrides | User preference / system setting |
+| Dark mode | `g100` + Xpert Network overrides | User preference / system setting |
 | UI Shell header + side nav | App theme (light or dark) | Borderless header; side nav floats as a rounded panel at `lg+`; accent bar marks the active item |
 | Admin header | `g100` (Carbon) | Separate realm must look different |
 
@@ -69,7 +69,7 @@ Next.js notes:
 
 Status must **never rely on colour alone** — pair with icon + text (Carbon `Tag`, `InlineNotification`, status icons).
 
-### 4.2 Proptyop extension tokens (`src/styles/_tokens.scss`)
+### 4.2 Xpert Network extension tokens (`src/styles/_tokens.scss`)
 
 Only add tokens here when Carbon has no semantic equivalent. Each must map to a Carbon palette value and have both light and dark values.
 
@@ -148,9 +148,9 @@ Productive curves by default. Durations: `$duration-fast-01` (70ms) · `fast-02`
 
 ---
 
-## 5. Component map (Carbon → Proptyop usage)
+## 5. Component map (Carbon → Xpert Network usage)
 
-| Proptyop need | Carbon component(s) |
+| Xpert Network need | Carbon component(s) |
 |---|---|
 | App frame, global nav, user menu | `Header`, `SideNav`, `HeaderGlobalAction`, `HeaderPanel` (UI Shell) |
 | Library list / request queue | `DataTable` (+ toolbar, batch actions, sorting, pagination, expandable rows) |
@@ -171,7 +171,7 @@ Productive curves by default. Durations: `$duration-fast-01` (70ms) · `fast-02`
 
 ---
 
-## 6. Proptyop product components (`src/shared/ui`)
+## 6. Xpert Network product components (`src/shared/ui`)
 
 Allowed when a pattern repeats ≥ 3 times. Each wraps Carbon, has a story, and an a11y test.
 

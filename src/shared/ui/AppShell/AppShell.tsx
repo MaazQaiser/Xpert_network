@@ -23,7 +23,7 @@ export type NavItem = {
 };
 
 export type AppShellProps = {
-  /** Shown after "Proptyop", e.g. "Admin". */
+  /** Shown after "Xpert Network", e.g. "Admin". */
   productSuffix?: string;
   homeHref: string;
   /** Empty for focused tasks such as onboarding: no menu button, no side nav. */
@@ -63,7 +63,7 @@ export function AppShell({
         />
       ) : null}
       <HeaderName as={Link} href={homeHref} prefix="">
-        Proptyop
+        Xpert Network
         {productSuffix ? <span className={styles.suffix}>&nbsp;{productSuffix}</span> : null}
       </HeaderName>
       <HeaderGlobalBar>{headerActions}</HeaderGlobalBar>
@@ -101,11 +101,11 @@ export function AppShell({
   return (
     <>
       {chromeTheme ? (
-        <Theme as={Header} theme={chromeTheme} aria-label="Proptyop">
+        <Theme as={Header} theme={chromeTheme} aria-label="Xpert Network">
           {chrome}
         </Theme>
       ) : (
-        <Header aria-label="Proptyop" className={styles.header}>
+        <Header aria-label="Xpert Network" className={styles.header}>
           {chrome}
         </Header>
       )}

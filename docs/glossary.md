@@ -12,7 +12,7 @@ Use these terms in copy, routes and code (UX_PRINCIPLES §2).
 | Library        | Published, expert-backed reports clients can buy with credits                            |
 | Report         | One library item, built from expert interviews                                           |
 | Custom request | Research commissioned for a client's brief; starts with a quote                          |
-| Quote          | Proptyop's offer for a custom request: scope, experts, timeline, credits                 |
+| Quote          | Xpert Network's offer for a custom request: scope, experts, timeline, credits                 |
 | Credits        | The currency clients spend; 1 credit ≈ US$5 in the prototype                             |
 | Held credits   | Credits reserved when a quote is accepted; not spendable, not yet spent                  |
 | Open call      | A request for experts to give interviews on a topic                                      |

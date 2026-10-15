@@ -24,7 +24,7 @@ export class ApiError extends Error {
 }
 
 const FALLBACK_MESSAGES: Record<string, string> = {
-  network: "We couldn't reach Proptyop. Check your connection and try again.",
+  network: "We couldn't reach Xpert Network. Check your connection and try again.",
   invalid_response: 'We received something unexpected. Try again in a moment.',
   server_error: 'Something went wrong on our side. Try again in a moment.',
   not_found: "We couldn't find that. It may have been moved or deleted.",

@@ -84,7 +84,8 @@ function Pending({ profile }: { profile: ExpertOnboarding }) {
         </ol>
       </section>
       <p className={styles.help}>
-        Questions? Email <a href="mailto:experts@proptyop.example">experts@proptyop.example</a>.
+        Questions? Email{' '}
+        <a href="mailto:experts@xpertnetwork.example">experts@xpertnetwork.example</a>.
       </p>
     </div>
   );
@@ -164,7 +165,7 @@ function Rejected({ profile }: { profile: ExpertOnboarding }) {
         </div>
         <p className={styles.help}>
           Think we got it wrong? Email{' '}
-          <a href="mailto:experts@proptyop.example">experts@proptyop.example</a>.
+          <a href="mailto:experts@xpertnetwork.example">experts@xpertnetwork.example</a>.
         </p>
       </Stack>
     </div>

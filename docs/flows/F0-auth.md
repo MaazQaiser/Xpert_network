@@ -21,7 +21,7 @@
 - Password: at least 10 characters with a letter and a number. Rules show as a checklist while typing; one actionable error on blur/submit.
 - Email sign-up creates an **unverified** account and logs it in. The role guard (`RequireRole`) sends unverified users to `/verify-email` from any app page.
 - After verifying (or a first Google/LinkedIn sign-up, which counts as verified), clients go to `/onboarding` (F1) and experts to `/expert/onboarding` (F7).
-- Google/LinkedIn on **log in** with an identity that has no account → “No Proptyop account uses … yet. Sign up with Google instead.”
+- Google/LinkedIn on **log in** with an identity that has no account → “No Xpert Network account uses … yet. Sign up with Google instead.”
 - Email already registered → “An account already uses this email. Log in instead, or reset your password.”
 - Admin accounts are refused on the main login and on Google/LinkedIn; clients and experts are refused on `/admin/login`.
 
@@ -41,7 +41,7 @@
 | Field validation                 | Submit an empty sign-up / log-in form                   |
 | Email already registered         | Sign up with `sara.almansouri@mail.example`             |
 | Account not found                | Log in with an unknown email, or Google → Layla Nasser  |
-| Wrong realm                      | Log in on `/login` with `omar@proptyop.example`         |
+| Wrong realm                      | Log in on `/login` with `omar@xpertnetwork.example`     |
 | Server error on submit / chooser | Toolbar _API error_ on, then submit or open the chooser |
 | Slow submit / chooser skeleton   | Toolbar _Slow network_                                  |
 | Unverified account redirected    | Sign up with email, then open `/home` directly          |

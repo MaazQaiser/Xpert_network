@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: 'Log in' };
 
 export default function LoginPage() {
   return (
-    <AuthFrame title="Log in to Proptyop">
+    <AuthFrame title="Log in to Xpert Network">
       <LoginForm realm="app" />
     </AuthFrame>
   );

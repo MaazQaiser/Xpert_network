@@ -6,7 +6,7 @@ import { env } from '@/shared/config/env';
 import '@/styles/globals.scss';
 
 export const metadata: Metadata = {
-  title: { default: 'Proptyop', template: '%s · Proptyop' },
+  title: { default: 'Xpert Network', template: '%s · Xpert Network' },
   description: 'Expert-backed research for investors and businesses expanding into new markets.',
 };
 

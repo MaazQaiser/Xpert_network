@@ -1,6 +1,6 @@
-# AI-Native Design — Proptyop
+# AI-Native Design — Xpert Network
 
-AI is not a chatbot bolted on the side. In Proptyop, AI is **woven into the research workflow**: asking the library, scoping requests, matching experts, and turning interviews into insight. This doc defines how AI shows up in the UI, built on **Carbon for AI** guidelines and NN/g research on generative-AI UX.
+AI is not a chatbot bolted on the side. In Xpert Network, AI is **woven into the research workflow**: asking the library, scoping requests, matching experts, and turning interviews into insight. This doc defines how AI shows up in the UI, built on **Carbon for AI** guidelines and NN/g research on generative-AI UX.
 
 ---
 
@@ -16,7 +16,7 @@ AI is not a chatbot bolted on the side. In Proptyop, AI is **woven into the rese
 
 ---
 
-## 2. Proptyop AI surfaces (initial)
+## 2. Xpert Network AI surfaces (initial)
 
 | Surface | User | What AI does | Human control |
 |---|---|---|---|
@@ -70,7 +70,7 @@ AI is not a chatbot bolted on the side. In Proptyop, AI is **woven into the rese
 
 | Situation | UI response |
 |---|---|
-| Nothing relevant in library | "I couldn't find this in the Proptyop library." + *Request research on this* CTA |
+| Nothing relevant in library | "I couldn't find this in the Xpert Network library." + *Request research on this* CTA |
 | Low confidence | Warning-style inline notice + show sources so user can judge |
 | Model/timeout error | Plain error + *Retry*; preserve the prompt |
 | Policy refusal | Neutral explanation, no blame, suggest rephrasing |

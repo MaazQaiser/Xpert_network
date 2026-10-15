@@ -30,6 +30,6 @@ export function MockProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  if (!isReady) return <Loading description="Loading Proptyop" withOverlay={false} />;
+  if (!isReady) return <Loading description="Loading Xpert Network" withOverlay={false} />;
   return <>{children}</>;
 }

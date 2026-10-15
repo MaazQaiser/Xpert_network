@@ -27,7 +27,7 @@ const SEEDS: Record<string, Seed[]> = {
     },
     {
       event: 'account',
-      title: 'Welcome to Proptyop',
+      title: 'Welcome to Xpert Network',
       body: 'Start with a goal and we’ll scope the research with you.',
       href: '/ask',
       read: true,
@@ -45,7 +45,7 @@ const SEEDS: Record<string, Seed[]> = {
     },
     {
       event: 'account',
-      title: 'Welcome to Proptyop',
+      title: 'Welcome to Xpert Network',
       body: 'Start with a goal and we’ll scope the research with you.',
       href: '/ask',
       read: true,
@@ -102,7 +102,7 @@ export function welcomeNotification(role: Role, now = new Date()): Notification 
   return {
     id: createId('ntf'),
     event: 'account',
-    title: 'Welcome to Proptyop',
+    title: 'Welcome to Xpert Network',
     body:
       role === 'expert'
         ? 'Finish your expert profile and we’ll review it within 2 business days.'

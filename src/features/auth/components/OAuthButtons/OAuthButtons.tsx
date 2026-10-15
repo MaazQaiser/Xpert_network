@@ -65,7 +65,7 @@ export function OAuthButtons({ role, onSuccess }: OAuthButtonsProps) {
           <p className={styles.help}>
             {provider ? <BrandLogo provider={provider} size={16} /> : null}
             <span>
-              Continue to Proptyop. In the real product this is {providerLabel}’s own screen.
+              Continue to Xpert Network. In the real product this is {providerLabel}’s own screen.
             </span>
           </p>
           {signIn.isError ? (

@@ -100,7 +100,7 @@ function ProfileForm({ profile, role }: { profile: Profile; role: Exclude<Role, 
           id="profile-name"
           labelText="Full name"
           autoComplete="name"
-          helperText={role === 'expert' ? 'Only Proptyop staff see your name.' : undefined}
+          helperText={role === 'expert' ? 'Only Xpert Network staff see your name.' : undefined}
           className={styles.field}
           invalid={Boolean(errors.name)}
           invalidText={errors.name?.message}

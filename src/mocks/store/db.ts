@@ -49,6 +49,7 @@ export type DemoState = {
   requests: Record<string, MockRequest>;
 };
 
+// Key keeps the product's former name so testers' saved demo data survives the rename.
 const STORAGE_KEY = 'proptyop.demo.v2';
 
 function seed(): DemoState {

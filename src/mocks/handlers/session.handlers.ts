@@ -58,7 +58,7 @@ export const sessionHandlers = [
       return errorResponse(
         403,
         'wrong_realm',
-        'This login is for Proptyop staff. Clients and experts log in on the main site.',
+        'This login is for Xpert Network staff. Clients and experts log in on the main site.',
       );
     }
     logIn(user);
@@ -135,7 +135,7 @@ export const authHandlers = [
       return errorResponse(
         404,
         'account_not_found',
-        `No Proptyop account uses ${identity.email} yet. Sign up with ${PROVIDER_LABEL[provider]} instead.`,
+        `No Xpert Network account uses ${identity.email} yet. Sign up with ${PROVIDER_LABEL[provider]} instead.`,
       );
     }
     const user = createAccount({ ...identity, role, provider, emailVerified: true });

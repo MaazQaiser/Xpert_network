@@ -2,7 +2,7 @@ type Level = 'debug' | 'info' | 'warn' | 'error';
 
 function log(level: Level, event: string, data?: Record<string, unknown>) {
   if (process.env.NODE_ENV === 'test') return;
-  console[level](`[proptyop] ${event}`, data ?? '');
+  console[level](`[xpert-network] ${event}`, data ?? '');
 }
 
 /** Never log PII or research content (FRONTEND_STANDARDS §9) — ids and event names only. */

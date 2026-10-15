@@ -29,7 +29,7 @@ export function RoleSelect({ initialRole = 'client' }: { initialRole?: SignUpRol
   return (
     <Stack gap={6}>
       <TileGroup
-        legend="How will you use Proptyop?"
+        legend="How will you use Xpert Network?"
         name="role"
         valueSelected={choice}
         onChange={(value) => setChoice(value as SignUpRole)}

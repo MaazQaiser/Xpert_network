@@ -1,4 +1,4 @@
-# Front-End Standards — Proptyop
+# Front-End Standards — Xpert Network
 
 How we write, test, review and ship code.
 

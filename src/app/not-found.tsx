@@ -6,7 +6,7 @@ export default function NotFound() {
     <main className={styles.root}>
       <h1 className={styles.title}>We couldn’t find that page</h1>
       <p className={styles.body}>The link may be out of date, or the page has moved.</p>
-      <Link href="/">Go to the Proptyop home page</Link>
+      <Link href="/">Go to the Xpert Network home page</Link>
     </main>
   );
 }

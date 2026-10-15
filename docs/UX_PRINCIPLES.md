@@ -1,6 +1,6 @@
-# UX Principles — NN/g heuristics applied to Proptyop
+# UX Principles — NN/g heuristics applied to Xpert Network
 
-Grounded in Nielsen Norman Group research (10 Usability Heuristics, forms, search, empty states, error messages, progressive disclosure). Each heuristic below has **concrete Proptyop rules** Claude Code should apply.
+Grounded in Nielsen Norman Group research (10 Usability Heuristics, forms, search, empty states, error messages, progressive disclosure). Each heuristic below has **concrete Xpert Network rules** Claude Code should apply.
 
 ---
 

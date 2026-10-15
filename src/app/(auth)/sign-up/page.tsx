@@ -13,7 +13,7 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
     return (
       <AuthFrame
         title="Create your account"
-        description="Tell us how you’ll use Proptyop. You’ll add your details next."
+        description="Tell us how you’ll use Xpert Network. You’ll add your details next."
       >
         <RoleSelect />
       </AuthFrame>

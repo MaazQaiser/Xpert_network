@@ -1,4 +1,4 @@
-# CLAUDE.md — Proptyop Front End
+# CLAUDE.md — Xpert Network Front End
 
 > Read this first. It is the contract for every change Claude Code makes in this repo.
 > Details live in `/docs`. When a rule here conflicts with a doc, this file wins.
@@ -7,9 +7,9 @@
 
 > **Mode: front-end design prototype.** No real backend. All data, auth, payments and AI are mocked behind `shared/api` + `src/mocks` (MSW, fixtures, scripted AI). The goal is **getting flows and UX right**. Never add backend services, databases or real third-party integrations; add a mock instead.
 
-**Proptyop** is an expert-backed research library. Three roles:
+**Xpert Network** is an expert-backed research library. Three roles:
 
-- **Clients** (investors, business expanders) define a goal in a guided AI chat with a stepper. Proptyop confirms their needs, then sells matching **library reports** for credits or quotes **custom research**. Clients organise everything in a **workspace** of folders and labels.
+- **Clients** (investors, business expanders) define a goal in a guided AI chat with a stepper. Xpert Network confirms their needs, then sells matching **library reports** for credits or quotes **custom research**. Clients organise everything in a **workspace** of folders and labels.
 - **Experts** sign up, get vetted, answer **open calls**, and give **voice or text interviews to our AI interviewer**. They get paid per accepted interview.
 - **Super admins** use a separate login to vet experts, send quotes, publish calls, QA interviews, publish reports and manage credits and payouts.
 
@@ -20,7 +20,7 @@ Full plan: [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md) — flows F0–F17, sc
 | Concern | Choice |
 |---|---|
 | Framework | Next.js (App Router, latest stable), React, TypeScript `strict` |
-| Design system | Carbon v11 — `@carbon/react`, `@carbon/icons-react`, `@carbon/pictograms-react`, `@carbon/charts-react` — with the Proptyop Notion-like themes: gradient page, glass panels, black buttons, orange accent, Inter (ADR 0009) |
+| Design system | Carbon v11 — `@carbon/react`, `@carbon/icons-react`, `@carbon/pictograms-react`, `@carbon/charts-react` — with the Xpert Network Notion-like themes: gradient page, glass panels, black buttons, orange accent, Inter (ADR 0009) |
 | Styling | Sass (`.module.scss`) using Carbon tokens only. No Tailwind, no CSS-in-JS |
 | Server state | TanStack Query |
 | Client state | React state → URL search params → Zustand (only if truly global) |

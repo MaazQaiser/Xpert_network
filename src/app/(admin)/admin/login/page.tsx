@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: 'Admin log in' };
 export default function AdminLoginPage() {
   return (
     <PublicShell variant="admin">
-      <AuthFrame title="Admin console" description="For Proptyop staff only.">
+      <AuthFrame title="Admin console" description="For Xpert Network staff only.">
         <LoginForm realm="admin" />
       </AuthFrame>
     </PublicShell>

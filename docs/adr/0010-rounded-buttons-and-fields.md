@@ -5,7 +5,7 @@
 
 ## Context
 
-The Proptyop look (ADR 0009) uses soft, rounded surfaces. Stakeholders asked for 8px corners on buttons and input fields to match. Carbon v11 exposes a supported radius hook for buttons (`--cds-button-radius`) but none for form fields; its only rounded-field styling is behind the unreleased `enable-v12-release` flag, at a fixed 4px.
+The Xpert Network look (ADR 0009) uses soft, rounded surfaces. Stakeholders asked for 8px corners on buttons and input fields to match. Carbon v11 exposes a supported radius hook for buttons (`--cds-button-radius`) but none for form fields; its only rounded-field styling is behind the unreleased `enable-v12-release` flag, at a fixed 4px.
 
 ## Decision
 

@@ -25,21 +25,21 @@
     IBM-Plex-Mono: true,
   )
 );
-@use 'fonts' as proptyop-fonts;
+@use 'fonts' as app-fonts;
 @use '@carbon/react';
 @use '@carbon/react/scss/theme';
 @use '@carbon/react/scss/motion' as *;
-@use 'themes' as proptyop;
+@use 'themes' as app-themes;
 @use 'carbon-shape';
 
 // Global theme: warm stone light by default, warm dark when the user (or the system)
 // prefers dark. ThemeProvider writes data-carbon-theme on <html> (`white` / `g100`).
 :root {
-  @include proptyop.proptyop-theme(light);
+  @include app-themes.app-theme(light);
 }
 
 :root[data-carbon-theme='g100'] {
-  @include proptyop.proptyop-theme(dark);
+  @include app-themes.app-theme(dark);
 
   color-scheme: dark;
 }

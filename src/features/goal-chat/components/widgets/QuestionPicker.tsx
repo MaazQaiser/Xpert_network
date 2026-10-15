@@ -98,7 +98,7 @@ export function QuestionPicker({
           size="mini"
           aria-label="About the suggested questions"
           summary="Suggested from your goal and subjects, using the questions experts are most often asked for similar briefs."
-          basis="Your goal, subjects and Proptyop’s question library"
+          basis="Your goal, subjects and Xpert Network’s question library"
         />
       </div>
       <ol className={styles.questionList} aria-labelledby="question-list-label">

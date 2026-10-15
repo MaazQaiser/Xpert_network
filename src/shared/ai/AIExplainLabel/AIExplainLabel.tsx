@@ -20,7 +20,7 @@ export type AIExplainLabelProps = {
   'aria-label'?: string;
 };
 
-/** Carbon AILabel with Proptyop's standard explainability content (AI_NATIVE §3). */
+/** Carbon AILabel with Xpert Network's standard explainability content (AI_NATIVE §3). */
 export function AIExplainLabel({
   summary,
   basis,

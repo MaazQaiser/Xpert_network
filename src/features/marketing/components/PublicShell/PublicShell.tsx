@@ -26,10 +26,11 @@ export function PublicShell({ children, variant = 'public' }: PublicShellProps) 
     <>
       <SkipToContent href="#main-content" />
       <HeaderName as={Link} href="/" prefix="">
-        Proptyop{variant === 'admin' ? <span className={styles.suffix}>&nbsp;Admin</span> : null}
+        Xpert Network
+        {variant === 'admin' ? <span className={styles.suffix}>&nbsp;Admin</span> : null}
       </HeaderName>
       {variant === 'public' ? (
-        <HeaderNavigation aria-label="Proptyop">
+        <HeaderNavigation aria-label="Xpert Network">
           <HeaderMenuItem as={Link} href="/login">
             Log in
           </HeaderMenuItem>
@@ -48,11 +49,11 @@ export function PublicShell({ children, variant = 'public' }: PublicShellProps) 
     <>
       {/* The admin realm keeps a dark header so staff always know where they are (F0, F11). */}
       {variant === 'admin' ? (
-        <Theme as={Header} theme="g100" aria-label="Proptyop">
+        <Theme as={Header} theme="g100" aria-label="Xpert Network">
           {chrome}
         </Theme>
       ) : (
-        <Header aria-label="Proptyop" className={styles.header}>
+        <Header aria-label="Xpert Network" className={styles.header}>
           {chrome}
         </Header>
       )}

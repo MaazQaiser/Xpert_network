@@ -16,7 +16,7 @@ export function ExpertProfilePanel() {
         </h2>
         <p className={styles.help}>
           Clients see your headline, years of experience and regions — never your name. To change
-          your expertise or conflicts, email experts@proptyop.example; changes are re-reviewed.
+          your expertise or conflicts, email experts@xpertnetwork.example; changes are re-reviewed.
         </p>
       </div>
       <AsyncBoundary
