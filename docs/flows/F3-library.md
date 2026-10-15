@@ -45,6 +45,20 @@
 - Purchase feedback is an inline success notice at the top of the reader (persistent and announced) rather than a transient toast.
 - Q&A history is per visit (not saved) in the prototype.
 
+## Screenshots
+
+1280 × 860 (Ask at 1600 wide), light and dark. Checked at 320px (no horizontal scroll), for a visible focus stop on each Tab, and with axe in both themes.
+
+| Screen                | Light                                                                   | Dark                                                                  |
+| --------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Library shelves       | ![Library shelves, light](screenshots/F3-library-light.jpg)             | ![Library shelves, dark](screenshots/F3-library-dark.jpg)             |
+| Table view (filtered) | ![Table view (filtered), light](screenshots/F3-library-table-light.jpg) | ![Table view (filtered), dark](screenshots/F3-library-table-dark.jpg) |
+| No results            | ![No results, light](screenshots/F3-library-empty-light.jpg)            | ![No results, dark](screenshots/F3-library-empty-dark.jpg)            |
+| Report preview        | ![Report preview, light](screenshots/F3-preview-light.jpg)              | ![Report preview, dark](screenshots/F3-preview-dark.jpg)              |
+| Buy confirmation      | ![Buy confirmation, light](screenshots/F3-buy-confirm-light.jpg)        | ![Buy confirmation, dark](screenshots/F3-buy-confirm-dark.jpg)        |
+| Reader                | ![Reader, light](screenshots/F3-reader-light.jpg)                       | ![Reader, dark](screenshots/F3-reader-dark.jpg)                       |
+| Ask this report       | ![Ask this report, light](screenshots/F3-ask-light.jpg)                 | ![Ask this report, dark](screenshots/F3-ask-dark.jpg)                 |
+
 ## Open / next
 
 - Save to folder and labels in the reader (F5, phase 4).

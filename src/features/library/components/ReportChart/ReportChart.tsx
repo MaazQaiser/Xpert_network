@@ -31,10 +31,13 @@ export function ReportChart({ chart, caption }: { chart: Chart; caption?: string
   };
   return (
     <figure className={styles.root}>
-      <SimpleBarChart
-        data={chart.points.map((point) => ({ group: point.label, value: point.value }))}
-        options={options}
-      />
+      {/* Our wrapper lets the column shrink; Carbon Charts resizes to it. */}
+      <div className={styles.chart}>
+        <SimpleBarChart
+          data={chart.points.map((point) => ({ group: point.label, value: point.value }))}
+          options={options}
+        />
+      </div>
       <div className={styles.footer}>
         {caption ? <figcaption className={styles.caption}>{caption}</figcaption> : null}
         <Button

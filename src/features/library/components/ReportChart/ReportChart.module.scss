@@ -4,8 +4,14 @@
 
 .root {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: $spacing-03;
   min-inline-size: 0;
+}
+
+.chart {
+  min-inline-size: 0;
+  overflow: hidden;
 }
 
 .footer {
