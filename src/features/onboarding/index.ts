@@ -13,3 +13,7 @@ export {
 export { OnboardingGate } from './components/OnboardingGate/OnboardingGate';
 export { ClientOnboardingFlow } from './components/ClientOnboardingFlow/ClientOnboardingFlow';
 export { OptionMultiSelect } from './components/OptionMultiSelect/OptionMultiSelect';
+export { ExpertOnboardingFlow } from './components/ExpertOnboardingFlow/ExpertOnboardingFlow';
+export { ExpertPending } from './components/ExpertPending/ExpertPending';
+export { ExpertHome } from './components/ExpertHome/ExpertHome';
+export { ExpertProfileSummary } from './components/ExpertProfileSummary/ExpertProfileSummary';

@@ -132,3 +132,15 @@ export const SECTION_STEPS: SectionStep[] = ['basics', 'work', 'expertise', 'com
 export function missingSections(profile: ExpertOnboarding): SectionStep[] {
   return SECTION_STEPS.filter((step) => profile[step] === null);
 }
+
+/** Adds business days (Mon–Fri) for the "decision by" date on the pending page. */
+export function addBusinessDays(from: Date, days: number): Date {
+  const next = new Date(from);
+  let remaining = days;
+  while (remaining > 0) {
+    next.setDate(next.getDate() + 1);
+    const day = next.getDay();
+    if (day !== 0 && day !== 6) remaining -= 1;
+  }
+  return next;
+}

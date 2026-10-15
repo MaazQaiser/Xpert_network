@@ -146,6 +146,22 @@ export function PrototypeToolbar() {
                 >
                   Restart onboarding
                 </Button>
+                <Button
+                  kind="tertiary"
+                  size="sm"
+                  disabled={currentRole !== 'expert'}
+                  onClick={() => runScenario(() => scenarios.decideExpert('approved'))}
+                >
+                  Approve expert
+                </Button>
+                <Button
+                  kind="tertiary"
+                  size="sm"
+                  disabled={currentRole !== 'expert'}
+                  onClick={() => runScenario(() => scenarios.decideExpert('rejected'))}
+                >
+                  Reject expert
+                </Button>
               </div>
             </fieldset>
             <Button

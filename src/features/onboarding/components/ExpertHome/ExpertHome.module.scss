@@ -1,0 +1,48 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-09;
+  max-inline-size: 64rem;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-05;
+  padding: $spacing-07;
+}
+
+.heroTitle {
+  @include type-style('heading-03');
+}
+
+.heroBody {
+  @include type-style('body-02');
+
+  color: $text-secondary;
+  max-inline-size: 60ch;
+}
+
+.section {
+  display: grid;
+  gap: $spacing-04;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $spacing-04;
+}
+
+.meta {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}

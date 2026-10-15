@@ -1,0 +1,56 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-07;
+  max-inline-size: 44rem;
+}
+
+.pictogram {
+  inline-size: $spacing-11;
+  block-size: $spacing-11;
+  fill: $icon-primary;
+}
+
+.title {
+  @include type-style('heading-05');
+
+  margin-block-start: $spacing-04;
+}
+
+.subtitle {
+  @include type-style('heading-03');
+}
+
+.body {
+  @include type-style('body-02');
+
+  margin-block-start: $spacing-04;
+  max-inline-size: 60ch;
+}
+
+.steps {
+  @include type-style('body-02');
+
+  display: grid;
+  gap: $spacing-04;
+  margin-block-start: $spacing-05;
+  padding-inline-start: $spacing-06;
+  list-style: decimal;
+  max-inline-size: 60ch;
+}
+
+.help {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-04;
+}

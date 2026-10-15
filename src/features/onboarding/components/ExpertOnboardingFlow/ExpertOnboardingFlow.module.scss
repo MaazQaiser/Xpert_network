@@ -1,0 +1,134 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-07;
+  max-inline-size: 56rem;
+}
+
+.skeleton {
+  margin-block-start: $spacing-07;
+}
+
+.stepTitle {
+  @include type-style('heading-03');
+}
+
+.help {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+  margin-block-start: $spacing-03;
+  max-inline-size: 60ch;
+}
+
+.field {
+  max-inline-size: 28rem;
+}
+
+.narrow {
+  max-inline-size: 12rem;
+}
+
+.position {
+  display: grid;
+  gap: $spacing-05;
+  padding: $spacing-05;
+  border: 1px solid $border-subtle-01;
+}
+
+.positionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+}
+
+.positionTitle {
+  @include type-style('heading-compact-01');
+}
+
+.years {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: $spacing-05;
+  max-inline-size: 28rem;
+}
+
+.fieldset {
+  display: grid;
+  gap: $spacing-03;
+}
+
+.legend {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+  margin-block-end: $spacing-03;
+}
+
+.error {
+  @include type-style('helper-text-01');
+
+  color: $text-error;
+}
+
+.section {
+  display: grid;
+  gap: $spacing-04;
+  padding-block: $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+}
+
+.sectionTitle {
+  @include type-style('heading-compact-02');
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) 1fr;
+  gap: $spacing-03 $spacing-05;
+}
+
+.factRow {
+  display: contents;
+}
+
+.term {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.definition {
+  @include type-style('body-01');
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-02;
+}
+
+.missing {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(12rem, 16rem) 1fr;
+  gap: $spacing-09;
+  align-items: start;
+}
