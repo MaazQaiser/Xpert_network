@@ -6,6 +6,7 @@ import { profileHandlers } from './profile.handlers';
 import { requestsHandlers } from './requests.handlers';
 import { authHandlers, sessionHandlers } from './session.handlers';
 import { walletHandlers } from './wallet.handlers';
+import { workspaceHandlers } from './workspace.handlers';
 
 export const handlers = [
   ...sessionHandlers,
@@ -16,6 +17,7 @@ export const handlers = [
   ...libraryHandlers,
   ...requestsHandlers,
   ...walletHandlers,
+  ...workspaceHandlers,
   ...briefsHandlers,
   ...subjectsHandlers,
 ];

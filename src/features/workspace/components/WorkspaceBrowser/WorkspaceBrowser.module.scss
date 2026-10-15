@@ -1,0 +1,394 @@
+@use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/utilities/visually-hidden' as *;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-07;
+  min-inline-size: 0;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: $spacing-06;
+  align-items: start;
+
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(14rem, 17rem) minmax(0, 1fr);
+    gap: $spacing-07;
+  }
+}
+
+/* Side column: a select on narrow screens, the tree from lg. */
+.nav {
+  @include mx.surface-card;
+
+  display: grid;
+  gap: $spacing-06;
+  min-inline-size: 0;
+  padding: $spacing-05;
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include breakpoint(lg) {
+    position: sticky;
+    inset-block-start: $spacing-09;
+    grid-template-columns: minmax(0, 1fr);
+    padding: $spacing-05 $spacing-03;
+  }
+}
+
+.navSection {
+  display: grid;
+  align-content: start;
+  gap: $spacing-03;
+  min-inline-size: 0;
+}
+
+.navHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03;
+
+  @include breakpoint(lg) {
+    padding-inline-start: $spacing-03;
+  }
+}
+
+.navTitle {
+  @include type-style('heading-compact-01');
+}
+
+.navHelp {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+
+  @include breakpoint(lg) {
+    padding-inline: $spacing-03;
+  }
+}
+
+.tree.tree {
+  display: none;
+
+  @include breakpoint(lg) {
+    display: block;
+  }
+}
+
+.viewSelect {
+  @include breakpoint(lg) {
+    display: none;
+  }
+}
+
+.nodeLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03;
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+
+.nodeName {
+  overflow: hidden;
+  min-inline-size: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nodeCount {
+  @include type-style('label-01');
+
+  flex: none;
+  color: $text-secondary;
+}
+
+.labelList {
+  display: grid;
+  gap: $spacing-01;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-02;
+  min-inline-size: 0;
+}
+
+.labelFilter {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  gap: $spacing-03;
+  min-inline-size: 0;
+  min-block-size: $spacing-07;
+  padding: $spacing-02 $spacing-03;
+  border: 0;
+  border-radius: radius.$border-radius-08;
+  background: transparent;
+  color: $text-primary;
+  cursor: pointer;
+  text-align: start;
+
+  &:hover {
+    background: $layer-hover-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: -2px;
+  }
+
+  &[aria-pressed='true'] {
+    @include type-style('heading-compact-01');
+
+    background: $layer-selected-01;
+  }
+}
+
+/* Label colour chips reuse Carbon's tag component tokens so they match the Tags in the table.
+   Those tokens aren't exported as Sass theme tokens, so the theme-use rule can't see them. */
+/* stylelint-disable carbon/theme-use */
+.swatch {
+  flex: none;
+  inline-size: $spacing-04;
+  block-size: $spacing-04;
+  border: 1px solid var(--cds-tag-color-gray);
+  border-radius: 50%;
+  background: var(--cds-tag-background-gray);
+
+  @each $color in (blue, teal, green, purple, magenta, red, cyan, warm-gray) {
+    &[data-color='#{$color}'] {
+      border-color: var(--cds-tag-color-#{$color});
+      background: var(--cds-tag-background-#{$color});
+    }
+  }
+}
+/* stylelint-enable carbon/theme-use */
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  min-inline-size: 0;
+}
+
+.viewHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-04;
+}
+
+.viewTitleGroup {
+  min-inline-size: 0;
+}
+
+.viewPath {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.viewTitle {
+  @include type-style('heading-04');
+
+  overflow-wrap: anywhere;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+}
+
+.viewCount {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: end;
+  gap: $spacing-04;
+
+  @include breakpoint(md) {
+    grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr));
+  }
+
+  @include breakpoint(xlg) {
+    grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr)) auto;
+  }
+}
+
+.statusRegion:empty {
+  display: none;
+}
+
+.notice.notice {
+  min-inline-size: 0;
+  max-inline-size: none;
+}
+
+.table {
+  min-inline-size: 0;
+}
+
+.toolbarHint {
+  @include type-style('helper-text-01');
+
+  align-self: center;
+  inline-size: 100%;
+  padding-inline: $spacing-05;
+  color: $text-secondary;
+}
+
+.nameCell {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-03;
+  padding-block: $spacing-03;
+  min-inline-size: 0;
+}
+
+.typeIcon {
+  flex: none;
+  margin-block-start: $spacing-01;
+  fill: $icon-secondary;
+}
+
+.nameColumn {
+  @include breakpoint(md) {
+    inline-size: 45%;
+  }
+}
+
+.menuColumn {
+  inline-size: $spacing-09;
+}
+
+.nameText {
+  display: grid;
+  justify-items: start;
+  gap: $spacing-02;
+  min-inline-size: 0;
+}
+
+.itemLink {
+  @include type-style('heading-compact-01');
+
+  color: $text-primary;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+
+  &:hover {
+    color: $link-primary-hover;
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+}
+
+.pinIcon {
+  margin-inline-start: $spacing-02;
+  fill: $icon-secondary;
+  vertical-align: text-bottom;
+}
+
+.itemMeta {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.itemLabels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-02;
+}
+
+.itemLabels > * {
+  margin: 0;
+}
+
+.fromMd {
+  display: none;
+
+  @include breakpoint(md) {
+    display: table-cell;
+  }
+}
+
+.fromLg {
+  display: none;
+
+  @include breakpoint(lg) {
+    display: table-cell;
+  }
+}
+
+.visuallyHidden {
+  @include visually-hidden;
+}
+
+.dialogBody {
+  display: grid;
+  gap: $spacing-05;
+}
+
+.dialogNotice.dialogNotice {
+  min-inline-size: 0;
+  max-inline-size: none;
+}
+
+.preview {
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.previewLabel {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.labelChoices {
+  display: grid;
+  gap: $spacing-03;
+}
+
+.legend {
+  @include type-style('helper-text-01');
+
+  margin-block-end: $spacing-03;
+  color: $text-secondary;
+}
+
+.labelChoice {
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}

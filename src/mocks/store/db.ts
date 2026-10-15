@@ -17,6 +17,7 @@ import {
   type ProfileExtras,
 } from '../fixtures/profile';
 import { SEED_OWNED_REPORTS, SEED_PURCHASES, seedWallet } from '../fixtures/wallet';
+import { SEED_WORKSPACES, type StoredWorkspace } from '../fixtures/workspace';
 
 export type DemoState = {
   version: 2;
@@ -45,6 +46,8 @@ export type DemoState = {
   requests: Record<string, StoredRequest>;
   /** Delivered custom reports, readable in the F3 viewer by their owner. */
   customReports: Record<string, { ownerId: string; item: LibraryItem; content: MockReport }>;
+  /** F5: each client's folders, labels and per-item organisation. */
+  workspaces: Record<string, StoredWorkspace>;
 };
 
 // Key keeps the product's former name so testers' saved demo data survives the rename.
@@ -83,6 +86,7 @@ function seed(): DemoState {
     reportUpdates: {},
     requests: seedRequests(),
     customReports: {},
+    workspaces: structuredClone(SEED_WORKSPACES),
   };
 }
 
