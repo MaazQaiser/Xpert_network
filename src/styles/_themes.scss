@@ -59,7 +59,8 @@ $light-overrides: (
   background-active: rgba($ink, 0.1),
   background-selected: rgba($ink, 0.06),
   background-selected-hover: rgba($ink, 0.1),
-  background-brand: $orange-60,
+  // Only Carbon's table batch-action bar uses this; it matches the black primary buttons.
+  background-brand: $black-60,
   background-inverse: $ink,
   layer-01: $mist-10,
   layer-hover-01: $mist-20,
@@ -141,7 +142,7 @@ $dark-overrides: (
   background-active: rgba($chalk, 0.12),
   background-selected: rgba($chalk, 0.08),
   background-selected-hover: rgba($chalk, 0.12),
-  background-brand: $orange-60,
+  background-brand: $charcoal-60,
   background-inverse: $chalk,
   layer-01: $night-10,
   layer-hover-01: $night-30,
