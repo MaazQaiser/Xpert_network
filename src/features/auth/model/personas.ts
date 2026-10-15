@@ -37,8 +37,3 @@ export const DEMO_ACCOUNTS: {
     summary: 'Research operations admin',
   },
 ];
-
-export function findDemoAccount(email: string) {
-  const normalised = email.trim().toLowerCase();
-  return DEMO_ACCOUNTS.find((account) => account.email === normalised);
-}

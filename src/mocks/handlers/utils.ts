@@ -1,7 +1,6 @@
 import { delay, HttpResponse } from 'msw';
 import { getControls } from '../controls';
 import { db } from '../store/db';
-import { USERS } from '../fixtures/users';
 import type { User } from '@/features/auth';
 
 /** Base latency from env; "Slow network" multiplies it (PRODUCT_PLAN §8). */
@@ -32,7 +31,7 @@ export function injectedError() {
 
 export function currentUser(): User | null {
   const id = db.get().sessionUserId;
-  return Object.values(USERS).find((user) => user.id === id) ?? null;
+  return id ? (db.get().users[id] ?? null) : null;
 }
 
 export function unauthorized() {

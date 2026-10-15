@@ -1,4 +1,5 @@
 import type { ChatMessage, ResearchBrief, TurnResult } from '@/features/goal-chat';
+import type { User } from '@/features/auth';
 import type { Wallet } from '@/features/wallet';
 import { USERS } from '../fixtures/users';
 import { SEED_OWNED_REPORTS, seedWallet } from '../fixtures/wallet';
@@ -15,8 +16,12 @@ export type MockRequest = {
 };
 
 export type DemoState = {
-  version: 1;
+  version: 2;
   sessionUserId: string | null;
+  /** Demo personas plus accounts created through sign-up (F0). */
+  users: Record<string, User>;
+  /** Last verification email sent, per user (F0 verify-email notice). */
+  verificationSentAt: Record<string, string>;
   briefs: Record<string, ResearchBrief>;
   messages: Record<string, ChatMessage[]>;
   /** Completed turns by turnId, so retried turns are idempotent. */
@@ -26,15 +31,17 @@ export type DemoState = {
   requests: Record<string, MockRequest>;
 };
 
-const STORAGE_KEY = 'proptyop.demo.v1';
+const STORAGE_KEY = 'proptyop.demo.v2';
 
 function seed(): DemoState {
   const clientIds = Object.values(USERS)
     .filter((user) => user.role === 'client')
     .map((user) => user.id);
   return {
-    version: 1,
+    version: 2,
     sessionUserId: null,
+    users: Object.fromEntries(Object.values(USERS).map((user) => [user.id, user])),
+    verificationSentAt: {},
     briefs: {},
     messages: {},
     turns: {},
@@ -50,7 +57,8 @@ function load(): DemoState {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return seed();
     const parsed = JSON.parse(raw) as DemoState;
-    return parsed.version === 1 ? parsed : seed();
+    // Slices added after a tester's data was saved fall back to the seed.
+    return parsed.version === 2 ? { ...seed(), ...parsed } : seed();
   } catch {
     return seed();
   }

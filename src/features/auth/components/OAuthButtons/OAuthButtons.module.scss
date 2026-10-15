@@ -1,0 +1,53 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.buttons {
+  display: grid;
+  gap: $spacing-03;
+}
+
+.provider {
+  inline-size: 100%;
+  max-inline-size: none;
+}
+
+.help {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+.accounts {
+  display: grid;
+  gap: $spacing-02;
+}
+
+.account {
+  inline-size: 100%;
+  max-inline-size: none;
+  block-size: auto;
+  padding-block: $spacing-03;
+}
+
+.avatar {
+  flex-shrink: 0;
+  margin-inline-end: $spacing-04;
+}
+
+.identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: start;
+}
+
+.name {
+  @include type-style('heading-compact-01');
+}
+
+.email {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}

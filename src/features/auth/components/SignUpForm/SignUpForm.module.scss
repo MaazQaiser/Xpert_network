@@ -1,0 +1,42 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-07;
+}
+
+.role {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+.divider {
+  @include type-style('label-01');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-04;
+  color: $text-secondary;
+
+  &::before,
+  &::after {
+    flex: 1;
+    border-block-start: 1px solid $border-subtle-01;
+    content: '';
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-06;
+}
+
+.alt {
+  @include type-style('body-01');
+}

@@ -1,9 +1,16 @@
 import '@testing-library/jest-dom/vitest';
-import { afterAll, afterEach, beforeAll } from 'vitest';
+import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import { server } from '@/mocks/node';
 import { db } from '@/mocks/store/db';
 import { resetControls } from '@/mocks/controls';
+import { mockLocation, mockRouter, resetNavigationMock } from './navigation';
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => mockRouter,
+  usePathname: () => mockLocation.pathname,
+  useSearchParams: () => new URLSearchParams(mockLocation.search),
+}));
 
 // jsdom gaps that Carbon relies on.
 if (!window.matchMedia) {
@@ -38,6 +45,7 @@ beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
 afterEach(() => {
   cleanup();
   server.resetHandlers();
+  resetNavigationMock();
   db.reset();
   resetControls();
 });

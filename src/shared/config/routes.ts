@@ -3,7 +3,11 @@ export const routes = {
   landing: '/',
   login: '/login',
   signUp: '/sign-up',
+  signUpAs: (role: 'client' | 'expert') => `/sign-up?role=${role}`,
   roleSelect: '/role-select',
+  verifyEmail: '/verify-email',
+  forgotPassword: '/forgot-password',
+  resetPassword: (token: string) => `/reset-password?token=${encodeURIComponent(token)}`,
   client: {
     home: '/home',
     ask: '/ask',
@@ -15,12 +19,15 @@ export const routes = {
     workspace: '/workspace',
     wallet: '/wallet',
     settings: '/settings',
+    onboarding: '/onboarding',
   },
   expert: {
     home: '/expert/home',
     calls: '/expert/calls',
     earnings: '/expert/earnings',
     profile: '/expert/profile',
+    onboarding: '/expert/onboarding',
+    pending: '/expert/pending',
   },
   admin: {
     login: '/admin/login',

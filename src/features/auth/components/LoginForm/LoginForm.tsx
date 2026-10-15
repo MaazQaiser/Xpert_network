@@ -5,20 +5,16 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button, Form, InlineNotification, PasswordInput, Stack, TextInput } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
+import { routes } from '@/shared/config/routes';
 import { useLogin } from '../../api/useLogin';
-import { DEMO_ACCOUNTS, findDemoAccount } from '../../model/personas';
-import { ROLE_HOME, type PersonaId } from '../../model/session.schema';
+import { loginFormSchema, type LoginFormValues } from '../../model/credentials';
+import { DEMO_ACCOUNTS } from '../../model/personas';
+import { ROLE_HOME, type LoginInput, type OAuthResult } from '../../model/session.schema';
+import { OAuthButtons } from '../OAuthButtons/OAuthButtons';
 import styles from './LoginForm.module.scss';
-
-const loginFormSchema = z.object({
-  email: z.email('Enter an email address like name@company.com.'),
-  password: z.string().min(1, 'Enter your password.'),
-});
-type LoginFormValues = z.infer<typeof loginFormSchema>;
 
 type LoginFormProps = {
   /** Admins use a separate login realm (PRODUCT_PLAN F0, F11). */
@@ -43,34 +39,19 @@ export function LoginForm({ realm }: LoginFormProps) {
     defaultValues: { email: accounts[0]?.email ?? '', password: '' },
   });
 
-  const signIn = async (personaId: PersonaId) => {
+  const signIn = async (input: LoginInput) => {
     setFormError(null);
     try {
-      const session = await login.mutateAsync({ personaId });
+      const session = await login.mutateAsync(input);
+      // Unverified accounts and unfinished onboarding are redirected by the role guard.
       if (session.user) router.push(ROLE_HOME[session.user.role]);
     } catch (error) {
       setFormError(toUserMessage(error));
     }
   };
 
-  const onSubmit = handleSubmit(async ({ email }) => {
-    const account = findDemoAccount(email);
-    if (!account) {
-      setFormError('We couldn’t find an account with that email. Check it, or sign up.');
-      return;
-    }
-    if (realm === 'app' && account.role === 'admin') {
-      setFormError('Admin accounts log in through the admin console.');
-      return;
-    }
-    if (realm === 'admin' && account.role !== 'admin') {
-      setFormError(
-        'This login is for Proptyop staff. Clients and experts log in on the main site.',
-      );
-      return;
-    }
-    await signIn(account.personaId);
-  });
+  const onSubmit = handleSubmit(({ email, password }) => signIn({ email, password, realm }));
+  const onOAuth = ({ user }: OAuthResult) => router.push(ROLE_HOME[user.role]);
 
   return (
     <div className={styles.root}>
@@ -103,6 +84,11 @@ export function LoginForm({ realm }: LoginFormProps) {
             invalidText={errors.password?.message}
             {...register('password')}
           />
+          {realm === 'app' ? (
+            <Link href={routes.forgotPassword} className={styles.forgot}>
+              Forgot password?
+            </Link>
+          ) : null}
           <div className={styles.actions}>
             <Button
               type="submit"
@@ -111,10 +97,16 @@ export function LoginForm({ realm }: LoginFormProps) {
             >
               Log in
             </Button>
-            {realm === 'app' ? <Link href="/sign-up">Create an account</Link> : null}
+            {realm === 'app' ? <Link href={routes.signUp}>Create an account</Link> : null}
           </div>
         </Stack>
       </Form>
+
+      {realm === 'app' ? (
+        <section aria-label="Other ways to log in">
+          <OAuthButtons role={null} onSuccess={onOAuth} />
+        </section>
+      ) : null}
 
       <section className={styles.demo} aria-labelledby="demo-accounts-heading">
         <h2 id="demo-accounts-heading" className={styles.demoHeading}>
@@ -127,7 +119,7 @@ export function LoginForm({ realm }: LoginFormProps) {
               <Button
                 kind="tertiary"
                 className={styles.account}
-                onClick={() => void signIn(account.personaId)}
+                onClick={() => void signIn({ personaId: account.personaId })}
                 disabled={login.isPending}
               >
                 <span className={styles.tileName}>{account.name}</span>

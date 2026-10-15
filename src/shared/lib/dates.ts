@@ -33,3 +33,9 @@ export function addDays(date: Date, days: number): Date {
   next.setDate(next.getDate() + days);
   return next;
 }
+
+const timeOnly = new Intl.DateTimeFormat('en-GB', { timeStyle: 'short' });
+
+export function formatTime(iso: string): string {
+  return timeOnly.format(new Date(iso));
+}

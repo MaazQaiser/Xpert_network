@@ -9,6 +9,8 @@ export const USERS: Record<PersonaId, User> = {
     title: 'Investment analyst',
     organisation: 'Meridian Gulf Capital',
     email: 'ayesha.rahman@meridiangulf.example',
+    emailVerified: true,
+    provider: 'email',
   },
   bilal: {
     id: 'usr_bilal',
@@ -18,6 +20,8 @@ export const USERS: Record<PersonaId, User> = {
     title: 'Franchise owner',
     organisation: 'Haddad Hospitality',
     email: 'bilal@haddadhospitality.example',
+    emailVerified: true,
+    provider: 'email',
   },
   sara: {
     id: 'usr_sara',
@@ -27,6 +31,8 @@ export const USERS: Record<PersonaId, User> = {
     title: 'Former supply-chain manager, F&B',
     organisation: 'Independent expert',
     email: 'sara.almansouri@mail.example',
+    emailVerified: true,
+    provider: 'email',
   },
   ops: {
     id: 'usr_ops',
@@ -36,6 +42,8 @@ export const USERS: Record<PersonaId, User> = {
     title: 'Research operations',
     organisation: 'Proptyop',
     email: 'omar@proptyop.example',
+    emailVerified: true,
+    provider: 'email',
   },
 };
 

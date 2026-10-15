@@ -63,7 +63,7 @@ export function Landing() {
             Answer open calls on topics you know and get paid for each accepted interview. Speak or
             type with our AI interviewer, at a time that suits you.
           </p>
-          <Button as={Link} href="/sign-up" kind="ghost" renderIcon={ArrowRight}>
+          <Button as={Link} href="/sign-up?role=expert" kind="ghost" renderIcon={ArrowRight}>
             Join as an expert
           </Button>
         </Column>

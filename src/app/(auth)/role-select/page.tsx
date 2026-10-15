@@ -1,13 +1,7 @@
-import type { Metadata } from 'next';
-import { RoleSelect } from '@/features/auth';
-import { AuthFrame } from '@/features/marketing';
+import { redirect } from 'next/navigation';
+import { routes } from '@/shared/config/routes';
 
-export const metadata: Metadata = { title: 'Choose your role' };
-
+/** Role select is step 1 of sign-up (F0). */
 export default function RoleSelectPage() {
-  return (
-    <AuthFrame title="How will you use Proptyop?">
-      <RoleSelect />
-    </AuthFrame>
-  );
+  redirect(routes.signUp);
 }

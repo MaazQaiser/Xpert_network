@@ -1,0 +1,31 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+.pictogram {
+  inline-size: $spacing-10;
+  block-size: $spacing-10;
+  fill: $icon-primary;
+}
+
+.body {
+  @include type-style('body-02');
+}
+
+.help {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-04;
+}
