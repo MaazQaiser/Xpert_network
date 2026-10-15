@@ -1,0 +1,183 @@
+@use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/utilities/focus-outline' as *;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  min-inline-size: 0;
+  max-block-size: calc(100vh - #{$spacing-11});
+  padding: $spacing-05;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
+
+.title {
+  @include type-style('heading-03');
+}
+
+.scope {
+  @include type-style('helper-text-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+  color: $text-secondary;
+}
+
+.starters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.turns {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+.turn {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+}
+
+.question {
+  @include type-style('body-compact-01');
+
+  align-self: flex-end;
+  max-inline-size: 90%;
+  padding: $spacing-03 $spacing-04;
+  border-radius: radius.$border-radius-16 radius.$border-radius-16 radius.$border-radius-04
+    radius.$border-radius-16;
+  background: $layer-accent-01;
+}
+
+.answer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-04;
+  min-inline-size: 0;
+}
+
+.answerText {
+  @include type-style('body-01');
+}
+
+.partial {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+.citation {
+  @include type-style('label-01');
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: $spacing-05;
+  block-size: $spacing-05;
+  margin-inline: $spacing-01;
+  padding-inline: $spacing-01;
+  border: 0;
+  border-radius: radius.$border-radius-04;
+  background: $layer-accent-01;
+  color: $link-primary;
+  cursor: pointer;
+  vertical-align: super;
+
+  &:hover {
+    background: $layer-accent-hover-01;
+  }
+
+  &:focus {
+    @include focus-outline('outline');
+  }
+}
+
+.notInReport {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-03;
+}
+
+.muted {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+.sourcesTitle {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+  margin-block-end: $spacing-02;
+}
+
+.sources {
+  display: grid;
+  gap: $spacing-02;
+}
+
+.sourceLink {
+  @include type-style('body-compact-01');
+
+  display: inline-flex;
+  align-items: baseline;
+  gap: $spacing-03;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: $link-primary;
+  cursor: pointer;
+  text-align: start;
+  text-decoration: underline;
+
+  &:focus {
+    @include focus-outline('outline');
+  }
+}
+
+.sourceNumber {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.followUps {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.notice.notice {
+  min-inline-size: 0;
+  max-inline-size: none;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: $spacing-03;
+  margin-block-start: auto;
+  padding-block-start: $spacing-04;
+  border-block-start: 1px solid $border-subtle-01;
+}

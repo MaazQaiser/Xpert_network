@@ -6,6 +6,13 @@ import { db } from '@/mocks/store/db';
 import { resetControls } from '@/mocks/controls';
 import { mockLocation, mockRouter, resetNavigationMock } from './navigation';
 
+// Carbon Charts draws with SVG APIs jsdom lacks; tests get a labelled stand-in instead.
+vi.mock('@carbon/charts-react', () => ({
+  SimpleBarChart: ({ options }: { options: { title?: string } }) => (
+    <div role="img" aria-label={options.title ?? 'Chart'} />
+  ),
+}));
+
 vi.mock('next/navigation', () => ({
   useRouter: () => mockRouter,
   usePathname: () => mockLocation.pathname,

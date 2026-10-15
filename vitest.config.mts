@@ -7,7 +7,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: ['./src/test/setup.ts'],
+    setupFiles: ['./src/test/setup.tsx'],
     include: ['src/**/*.test.{ts,tsx}'],
     css: { modules: { classNameStrategy: 'non-scoped' } },
     coverage: { include: ['src/features/*/model/**', 'src/shared/**'] },

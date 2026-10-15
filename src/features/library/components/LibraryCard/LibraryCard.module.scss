@@ -1,0 +1,88 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/utilities/focus-outline' as *;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  @include mx.surface-card;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  block-size: 100%;
+  min-inline-size: 0;
+  padding: $spacing-06;
+
+  &:hover {
+    border-color: $border-strong-01;
+  }
+}
+
+.eyebrow {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.title {
+  @include type-style('heading-03');
+}
+
+// The whole card is clickable through the title link (one tab stop).
+.link {
+  color: $text-primary;
+  text-decoration: none;
+
+  &::after {
+    position: absolute;
+    border-radius: inherit;
+    content: '';
+    inset: 0;
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus::after {
+    @include focus-outline('outline');
+  }
+}
+
+.summary {
+  @include type-style('body-01');
+
+  display: -webkit-box;
+  overflow: hidden;
+  color: $text-secondary;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.meta {
+  @include type-style('helper-text-01');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-02;
+  color: $text-secondary;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+  margin-block-start: auto;
+  padding-block-start: $spacing-03;
+}
+
+.price {
+  @include type-style('body-compact-01');
+}
+
+.currency {
+  color: $text-secondary;
+}

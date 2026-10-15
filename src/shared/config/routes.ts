@@ -14,6 +14,7 @@ export const routes = {
     brief: (briefId: string) => `/ask/${briefId}`,
     library: '/library',
     report: (itemId: string) => `/library/${itemId}`,
+    reportRead: (itemId: string) => `/library/${itemId}/read`,
     requests: '/requests',
     request: (requestId: string) => `/requests/${requestId}`,
     workspace: '/workspace',

@@ -7,6 +7,9 @@ export const CREDIT_PACKS: CreditPack[] = [
   { id: 'pack_1500', credits: 1500, label: 'Research desk', isPopular: false },
 ];
 
+/** When the seeded reports were bought (matches the seeded purchase transactions). */
+export const SEED_PURCHASED_AT = '2026-10-02T14:40:00.000Z';
+
 /** Each client starts with a recent top-up and one owned report. */
 export const SEED_OWNED_REPORTS: Record<string, string[]> = {
   usr_ayesha: ['lib_uae_retail'],
@@ -34,7 +37,7 @@ export function seedWallet(userId: string): Wallet {
         type: 'purchase' as const,
         amount: -item.priceCredits,
         description: item.title,
-        at: '2026-10-02T14:40:00.000Z',
+        at: SEED_PURCHASED_AT,
       })),
     ],
   };

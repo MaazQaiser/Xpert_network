@@ -240,7 +240,6 @@ function TwoFactorSection({ security }: { security: Security }) {
       <Modal
         open={isSettingUp}
         modalHeading="Turn on two-step verification"
-        modalLabel="Security"
         primaryButtonText="Turn on"
         secondaryButtonText="Cancel"
         primaryButtonDisabled={setTwoFactor.isPending}

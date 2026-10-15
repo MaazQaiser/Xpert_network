@@ -1,0 +1,213 @@
+@use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '../../../../styles/mixins' as mx;
+@use '../../../../styles/tokens' as *;
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: $spacing-07;
+  align-items: start;
+
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  min-inline-size: 0;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03 $spacing-05;
+}
+
+.fact {
+  @include type-style('body-compact-01');
+
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-02;
+  color: $text-secondary;
+}
+
+.card {
+  @include mx.surface-card;
+
+  display: grid;
+  gap: $spacing-04;
+  min-inline-size: 0;
+  padding: $spacing-06;
+}
+
+.sectionTitle {
+  @include type-style('heading-03');
+}
+
+.help {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+.toc {
+  display: grid;
+}
+
+.tocItem {
+  @include type-style('body-02');
+
+  display: grid;
+  grid-template-columns: $spacing-07 minmax(0, 1fr);
+  align-items: baseline;
+  gap: $spacing-03;
+  padding-block: $spacing-03;
+  border-block-end: 1px solid $border-subtle-01;
+
+  &:last-child {
+    border-block-end: 0;
+  }
+}
+
+.tocNumber {
+  @include type-style('label-02');
+
+  color: $text-secondary;
+}
+
+.experts {
+  display: grid;
+  gap: $spacing-04;
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.expert {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: $spacing-04;
+}
+
+.expertIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: $spacing-08;
+  block-size: $spacing-08;
+  border-radius: radius.$border-radius-max;
+  background: $layer-accent-01;
+}
+
+.expertRole {
+  @include type-style('heading-compact-01');
+
+  display: block;
+}
+
+.expertMeta {
+  @include type-style('body-compact-01');
+
+  display: block;
+  color: $text-secondary;
+}
+
+.provenance {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: $spacing-04;
+  padding: $spacing-05 $spacing-06;
+  border-inline-start: $spacing-01 solid $border-interactive;
+}
+
+.provenanceIcon {
+  fill: $icon-primary;
+}
+
+.provenanceTitle {
+  @include type-style('heading-compact-02');
+
+  margin-block-end: $spacing-02;
+}
+
+.aside {
+  min-inline-size: 0;
+
+  @include breakpoint(lg) {
+    position: sticky;
+    inset-block-start: $pt-floating-nav-top;
+  }
+}
+
+.purchase {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-04;
+  padding: $spacing-06;
+}
+
+.priceLabel {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.price {
+  @include type-style('heading-05');
+}
+
+.balance {
+  @include type-style('body-compact-01');
+
+  padding-block: $spacing-03;
+}
+
+.buy.buy {
+  inline-size: 100%;
+  max-inline-size: none;
+}
+
+.notice.notice {
+  min-inline-size: 0;
+  max-inline-size: none;
+}
+
+.modalTitle {
+  @include type-style('heading-compact-02');
+}
+
+.summary {
+  @include type-style('body-compact-01');
+
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: $spacing-03 $spacing-06;
+
+  dt {
+    color: $text-secondary;
+  }
+}
+
+.skeletonChart {
+  inline-size: 100%;
+  block-size: $spacing-13;
+}
+
+.skeletonAside {
+  inline-size: 100%;
+  block-size: $spacing-13;
+}

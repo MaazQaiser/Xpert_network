@@ -1,4 +1,5 @@
 import { briefsHandlers, subjectsHandlers } from './briefs.handlers';
+import { libraryHandlers } from './library.handlers';
 import { notificationsHandlers } from './notifications.handlers';
 import { onboardingHandlers } from './onboarding.handlers';
 import { profileHandlers } from './profile.handlers';
@@ -11,6 +12,7 @@ export const handlers = [
   ...onboardingHandlers,
   ...profileHandlers,
   ...notificationsHandlers,
+  ...libraryHandlers,
   ...walletHandlers,
   ...briefsHandlers,
   ...subjectsHandlers,

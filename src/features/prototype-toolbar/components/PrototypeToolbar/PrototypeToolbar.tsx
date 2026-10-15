@@ -170,6 +170,14 @@ export function PrototypeToolbar() {
                 >
                   Push notification
                 </Button>
+                <Button
+                  kind="tertiary"
+                  size="sm"
+                  disabled={currentRole !== 'client'}
+                  onClick={() => runScenario(scenarios.updateOwnedReport)}
+                >
+                  Update owned report
+                </Button>
               </div>
             </fieldset>
             <Button

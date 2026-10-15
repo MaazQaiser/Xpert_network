@@ -1,0 +1,213 @@
+@use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/motion' as *;
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '../../../../styles/mixins' as mx;
+@use '../../../../styles/tokens' as *;
+
+.notices {
+  display: grid;
+  gap: $spacing-03;
+  margin-block-end: $spacing-06;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.notice.notice {
+  min-inline-size: 0;
+  max-inline-size: none;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: $spacing-07;
+  align-items: start;
+
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(12rem, 14rem) minmax(0, 1fr);
+  }
+
+  @include breakpoint(max) {
+    grid-template-columns: minmax(12rem, 14rem) minmax(0, 1fr) minmax(20rem, 24rem);
+  }
+}
+
+.toc {
+  @include mx.surface-card;
+
+  display: grid;
+  gap: $spacing-03;
+  padding: $spacing-05;
+
+  @include breakpoint(lg) {
+    position: sticky;
+    inset-block-start: $pt-floating-nav-top;
+  }
+}
+
+.tocTitle {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.tocLink {
+  @include type-style('body-compact-01');
+
+  display: grid;
+  grid-template-columns: $spacing-05 minmax(0, 1fr);
+  gap: $spacing-03;
+  padding: $spacing-03;
+  border-radius: radius.$border-radius-08;
+  color: $text-secondary;
+  text-decoration: none;
+
+  &:hover {
+    background: $background-hover;
+    color: $text-primary;
+  }
+
+  &[aria-current='location'] {
+    background: $background-selected;
+    color: $text-primary;
+  }
+}
+
+.tocNumber {
+  color: $text-secondary;
+}
+
+.article {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-09;
+  min-inline-size: 0;
+  padding: $spacing-06 $spacing-05;
+
+  @include breakpoint(md) {
+    padding: $spacing-08 $spacing-07;
+  }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  min-inline-size: 0;
+  scroll-margin-block-start: $pt-floating-nav-top;
+  transition: background-color $duration-moderate-02;
+}
+
+.highlighted {
+  border-radius: radius.$border-radius-08;
+  background: $highlight;
+  outline: $spacing-03 solid $highlight;
+}
+
+.sectionTitle {
+  @include type-style('heading-04');
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.sectionNumber {
+  color: $text-secondary;
+}
+
+.lead {
+  @include type-style('heading-compact-02');
+  @include mx.reading-width;
+}
+
+.paragraph {
+  @include type-style('body-02');
+  @include mx.reading-width;
+}
+
+.figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(11rem, 100%), 1fr));
+  gap: $spacing-04;
+}
+
+.figure {
+  display: grid;
+  gap: $spacing-02;
+  padding: $spacing-05;
+  border: 1px solid $border-subtle-01;
+  border-radius: radius.$border-radius-08;
+}
+
+.figureValue {
+  @include type-style('heading-04');
+}
+
+.figureLabel {
+  @include type-style('body-compact-01');
+}
+
+.figureNote {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.quote {
+  display: grid;
+  gap: $spacing-03;
+  padding-inline-start: $spacing-05;
+  border-inline-start: $spacing-01 solid $border-interactive;
+}
+
+.quoteText {
+  @include type-style('quotation-01', true);
+}
+
+.quoteSource {
+  @include type-style('helper-text-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+  color: $text-secondary;
+}
+
+.provenance {
+  @include type-style('helper-text-01');
+
+  padding-block-start: $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
+  color: $text-secondary;
+}
+
+.askAside {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  min-inline-size: 0;
+
+  @include breakpoint(max) {
+    position: sticky;
+    grid-column: auto;
+    grid-row: auto;
+    inset-block-start: $pt-floating-nav-top;
+  }
+}
+
+.askHidden {
+  display: none;
+}
+
+.skeletonChart {
+  inline-size: 100%;
+  block-size: $spacing-13;
+}

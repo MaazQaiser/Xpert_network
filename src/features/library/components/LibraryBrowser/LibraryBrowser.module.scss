@@ -1,0 +1,120 @@
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-07;
+  min-inline-size: 0;
+}
+
+.toolbar {
+  display: grid;
+  gap: $spacing-05;
+  min-inline-size: 0;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: end;
+  gap: $spacing-05;
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include breakpoint(lg) {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  }
+}
+
+.owned {
+  padding-block-end: $spacing-03;
+}
+
+.resultsBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+}
+
+.applied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+  min-inline-size: 0;
+}
+
+.count {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+  margin-inline-end: $spacing-03;
+}
+
+.viewSwitch {
+  flex: 0 0 auto;
+  inline-size: $spacing-13;
+}
+
+.shelves {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-09;
+}
+
+.shelf {
+  display: grid;
+  gap: $spacing-05;
+}
+
+.shelfTitle {
+  @include type-style('heading-03');
+}
+
+.shelfCount {
+  color: $text-secondary;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: $spacing-05;
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include breakpoint(max) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.skeleton {
+  @include mx.surface-card;
+
+  inline-size: 100%;
+  block-size: $spacing-13;
+}
+
+.emptyActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-04;
+}
+
+.table {
+  min-inline-size: 0;
+  overflow-x: auto;
+}
+
+.numeric {
+  text-align: end;
+}

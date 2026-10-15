@@ -13,7 +13,7 @@ import {
   SEED_PROFILE_EXTRAS,
   type ProfileExtras,
 } from '../fixtures/profile';
-import { SEED_OWNED_REPORTS, seedWallet } from '../fixtures/wallet';
+import { SEED_OWNED_REPORTS, SEED_PURCHASED_AT, seedWallet } from '../fixtures/wallet';
 
 /** A custom research request created from a brief (F4 builds on this). */
 export type MockRequest = {
@@ -46,6 +46,10 @@ export type DemoState = {
   turns: Record<string, TurnResult>;
   wallets: Record<string, Wallet>;
   ownedReports: Record<string, string[]>;
+  /** When each owned report was bought, per user (F3 "updated since you bought it"). */
+  reportPurchases: Record<string, Record<string, string>>;
+  /** Report updates pushed by the toolbar scenario, by library item id. */
+  reportUpdates: Record<string, { updatedAt: string; note: string }>;
   requests: Record<string, MockRequest>;
 };
 
@@ -76,6 +80,15 @@ function seed(): DemoState {
     turns: {},
     wallets: Object.fromEntries(clientIds.map((id) => [id, seedWallet(id)])),
     ownedReports: Object.fromEntries(clientIds.map((id) => [id, SEED_OWNED_REPORTS[id] ?? []])),
+    reportPurchases: Object.fromEntries(
+      clientIds.map((id) => [
+        id,
+        Object.fromEntries(
+          (SEED_OWNED_REPORTS[id] ?? []).map((itemId) => [itemId, SEED_PURCHASED_AT]),
+        ),
+      ]),
+    ),
+    reportUpdates: {},
     requests: {},
   };
 }

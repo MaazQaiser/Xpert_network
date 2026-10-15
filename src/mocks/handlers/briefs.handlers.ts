@@ -335,6 +335,8 @@ export const briefsHandlers = [
       draft.briefs[brief.id] = submitted;
       (draft.messages[brief.id] ??= []).push(assistantMessage);
       draft.ownedReports[user.id] = [...owned, ...purchasedReportIds];
+      const purchases = (draft.reportPurchases[user.id] ??= {});
+      for (const itemId of purchasedReportIds) purchases[itemId] = now.toISOString();
       const userWallet = draft.wallets[user.id];
       if (userWallet && total > 0 && option !== 'custom') {
         userWallet.balance -= total;

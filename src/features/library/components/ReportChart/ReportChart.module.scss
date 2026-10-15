@@ -1,0 +1,57 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  display: grid;
+  gap: $spacing-03;
+  min-inline-size: 0;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
+
+.caption {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.hidden {
+  display: none;
+}
+
+.table {
+  @include type-style('body-compact-01');
+
+  inline-size: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: $spacing-03 $spacing-04;
+    border-block-end: 1px solid $border-subtle-01;
+    text-align: start;
+  }
+
+  thead th {
+    @include type-style('heading-compact-01');
+  }
+}
+
+.numeric.numeric {
+  text-align: end;
+}
+
+.tableCaption {
+  @include type-style('label-01');
+
+  padding-block-end: $spacing-03;
+  color: $text-secondary;
+  text-align: start;
+}

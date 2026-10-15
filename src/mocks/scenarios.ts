@@ -1,5 +1,6 @@
 import type { Notification } from '@/features/notifications';
 import { createId } from '@/shared/lib/id';
+import { LIBRARY_ITEMS } from './fixtures/library';
 import { demoNotification } from './fixtures/notifications';
 import {
   DEMO_REJECTION_NOTE,
@@ -57,6 +58,32 @@ export const scenarios = {
       href: decision === 'approved' ? '/expert/home' : '/expert/pending',
       read: false,
       createdAt: new Date().toISOString(),
+    });
+    return true;
+  },
+
+  /** F3: the newest report the client owns gets updated (shows "updated since you bought it"). */
+  updateOwnedReport(): boolean {
+    const id = db.get().sessionUserId;
+    const owned = id ? (db.get().ownedReports[id] ?? []) : [];
+    const itemId = owned.at(-1);
+    if (!id || !itemId) return false;
+    const title = LIBRARY_ITEMS.find((item) => item.id === itemId)?.title ?? 'A report you own';
+    const now = new Date();
+    db.update((draft) => {
+      draft.reportUpdates[itemId] = {
+        updatedAt: now.toISOString(),
+        note: 'Experts added new figures for 2026 to the first section.',
+      };
+    });
+    notify(id, {
+      id: createId('ntf'),
+      event: 'report_published',
+      title: 'A report you own was updated',
+      body: `${title} — new figures for 2026.`,
+      href: `/library/${itemId}/read`,
+      read: false,
+      createdAt: now.toISOString(),
     });
     return true;
   },
