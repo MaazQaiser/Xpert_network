@@ -54,8 +54,23 @@ The side nav is hidden until the expert is approved; the header keeps theme, not
 - Rejection is framed as “changes needed” with one actionable note; resubmitting keeps all answers.
 - Work-history years use selects (not free text) so dates are always valid; “Present” is the empty end year.
 
+## Screenshots
+
+1280 × 860, light (white) and dark (g100). Regenerated 2026-10-15; every screen was also checked at 320px (no horizontal scroll) and for a visible focus stop on each Tab.
+
+| Screen                    | Light                                                                    | Dark                                                                   |
+| ------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| 1. Basics                 | ![1. Basics, light](screenshots/F7-basics-light.jpg)                     | ![1. Basics, dark](screenshots/F7-basics-dark.jpg)                     |
+| 2. Work history           | ![2. Work history, light](screenshots/F7-work-history-light.jpg)         | ![2. Work history, dark](screenshots/F7-work-history-dark.jpg)         |
+| 3. Expertise & regions    | ![3. Expertise & regions, light](screenshots/F7-expertise-light.jpg)     | ![3. Expertise & regions, dark](screenshots/F7-expertise-dark.jpg)     |
+| 4. Compliance & conflicts | ![4. Compliance & conflicts, light](screenshots/F7-compliance-light.jpg) | ![4. Compliance & conflicts, dark](screenshots/F7-compliance-dark.jpg) |
+| 5. Submit                 | ![5. Submit, light](screenshots/F7-review-light.jpg)                     | ![5. Submit, dark](screenshots/F7-review-dark.jpg)                     |
+| Pending approval          | ![Pending approval, light](screenshots/F7-pending-light.jpg)             | ![Pending approval, dark](screenshots/F7-pending-dark.jpg)             |
+| Changes needed            | ![Changes needed, light](screenshots/F7-changes-needed-light.jpg)        | ![Changes needed, dark](screenshots/F7-changes-needed-dark.jpg)        |
+| Approved                  | ![Approved, light](screenshots/F7-approved-light.jpg)                    | ![Approved, dark](screenshots/F7-approved-dark.jpg)                    |
+| Expert home               | ![Expert home, light](screenshots/F7-expert-home-light.jpg)              | ![Expert home, dark](screenshots/F7-expert-home-dark.jpg)              |
+
 ## Open / next
 
-- Screenshots for this spec (light + dark).
 - Admin side of the decision (F12) will replace the toolbar scenario.
 - Editing an approved profile (re-review) is not designed yet; the profile is read-only in F17.

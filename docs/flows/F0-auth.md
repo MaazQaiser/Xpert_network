@@ -56,7 +56,19 @@ Demo persona buttons and the toolbar persona switch still log in directly (they 
 - No real email is sent: the notice has a clearly labelled prototype button that does what the emailed link would.
 - Passwords are never stored by the mock; any password logs in.
 
+## Screenshots
+
+1280 × 860, light (white) and dark (g100). Regenerated 2026-10-15; every screen was also checked at 320px (no horizontal scroll) and for a visible focus stop on each Tab.
+
+| Screen                        | Light                                                                             | Dark                                                                            |
+| ----------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Role select                   | ![Role select, light](screenshots/F0-role-select-light.jpg)                       | ![Role select, dark](screenshots/F0-role-select-dark.jpg)                       |
+| Sign up                       | ![Sign up, light](screenshots/F0-sign-up-light.jpg)                               | ![Sign up, dark](screenshots/F0-sign-up-dark.jpg)                               |
+| Google account chooser (mock) | ![Google account chooser (mock), light](screenshots/F0-account-chooser-light.jpg) | ![Google account chooser (mock), dark](screenshots/F0-account-chooser-dark.jpg) |
+| Verify email                  | ![Verify email, light](screenshots/F0-verify-email-light.jpg)                     | ![Verify email, dark](screenshots/F0-verify-email-dark.jpg)                     |
+| Log in                        | ![Log in, light](screenshots/F0-log-in-light.jpg)                                 | ![Log in, dark](screenshots/F0-log-in-dark.jpg)                                 |
+| Forgot password               | ![Forgot password, light](screenshots/F0-forgot-password-light.jpg)               | ![Forgot password, dark](screenshots/F0-forgot-password-dark.jpg)               |
+
 ## Open / next
 
-- Screenshots for this spec (light + dark).
 - Two-step verification at log in is shown only as a setting (F17).

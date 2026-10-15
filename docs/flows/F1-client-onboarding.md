@@ -42,7 +42,16 @@
 - The side nav and wallet badge are hidden during onboarding so the task has focus; the header keeps theme, notifications and account actions.
 - The goal step reuses F2’s goal types and labels so the hand-off reads as one conversation.
 
+## Screenshots
+
+1280 × 860, light (white) and dark (g100). Regenerated 2026-10-15; every screen was also checked at 320px (no horizontal scroll) and for a visible focus stop on each Tab.
+
+| Screen               | Light                                                              | Dark                                                             |
+| -------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| 1. About you         | ![1. About you, light](screenshots/F1-about-you-light.jpg)         | ![1. About you, dark](screenshots/F1-about-you-dark.jpg)         |
+| 2. What you research | ![2. What you research, light](screenshots/F1-interests-light.jpg) | ![2. What you research, dark](screenshots/F1-interests-dark.jpg) |
+| 3. First goal        | ![3. First goal, light](screenshots/F1-first-goal-light.jpg)       | ![3. First goal, dark](screenshots/F1-first-goal-dark.jpg)       |
+
 ## Open / next
 
-- Screenshots for this spec (light + dark).
 - Use research interests to rank the library (F3) and the home page.

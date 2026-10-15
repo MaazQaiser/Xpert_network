@@ -52,8 +52,20 @@ Expert approvals and rejections from the toolbar (F7) also arrive as notificatio
 - Email is read-only in the prototype; changing it needs re-verification, which isn’t designed yet.
 - Theme preference stays device-local (as before); other settings are account-level (mock backend).
 
+## Screenshots
+
+1280 × 860, light (white) and dark (g100). Regenerated 2026-10-15; every screen was also checked at 320px (no horizontal scroll) and for a visible focus stop on each Tab.
+
+| Screen                        | Light                                                                                | Dark                                                                               |
+| ----------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| Notification centre           | ![Notification centre, light](screenshots/F17-notification-centre-light.jpg)         | ![Notification centre, dark](screenshots/F17-notification-centre-dark.jpg)         |
+| Settings · Profile            | ![Settings · Profile, light](screenshots/F17-settings-profile-light.jpg)             | ![Settings · Profile, dark](screenshots/F17-settings-profile-dark.jpg)             |
+| Settings · Notifications      | ![Settings · Notifications, light](screenshots/F17-settings-notifications-light.jpg) | ![Settings · Notifications, dark](screenshots/F17-settings-notifications-dark.jpg) |
+| Settings · Security           | ![Settings · Security, light](screenshots/F17-settings-security-light.jpg)           | ![Settings · Security, dark](screenshots/F17-settings-security-dark.jpg)           |
+| Settings · Appearance         | ![Settings · Appearance, light](screenshots/F17-settings-appearance-light.jpg)       | ![Settings · Appearance, dark](screenshots/F17-settings-appearance-dark.jpg)       |
+| Expert · Profile and settings | ![Expert · Profile and settings, light](screenshots/F17-expert-profile-light.jpg)    | ![Expert · Profile and settings, dark](screenshots/F17-expert-profile-dark.jpg)    |
+
 ## Open / next
 
-- Screenshots for this spec (light + dark).
 - Admin settings page (admins get the notification centre only).
 - Respecting preferences when notifications are created (the mock shows everything in-app).
