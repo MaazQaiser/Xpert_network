@@ -284,9 +284,9 @@ Measures: task success, time on task, errors, SEQ (single ease question) per tas
 
 ## 14. Open UX questions
 
-1. Are experts **anonymous** to clients (role + years + region) or named? (Affects report and request screens.)
+1. ~~Are experts **anonymous** to clients (role + years + region) or named?~~ **Decided 2026-10-15: anonymous** (role + years + region).
 2. Should the goal chat allow **free-form chat** after step 7, or end the session and start a new one?
-3. Credit price display: credits only, or credits + currency equivalent?
+3. ~~Credit price display: credits only, or credits + currency equivalent?~~ **Decided 2026-10-15: credits + currency**, e.g. "120 credits (≈ $600)".
 4. Can clients **message** admins on a quote, or only accept/decline?
 5. Voice interview: push-to-talk or always listening?
 6. Admin as `/admin` in the same app (recommended for the prototype) vs. a separate subdomain later?

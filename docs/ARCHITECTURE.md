@@ -189,7 +189,7 @@ Source of truth: `PRODUCT_PLAN.md` §4 (flows) and §9 (mock data shapes).
 | `notifications` | F17 | Notification |
 | `prototype-toolbar` | — | Persona, Scenario, StateToggles |
 
-Route groups in `src/app`: `(marketing)`, `(auth)`, `(client)`, `(expert)`, `(admin)`. Each has its own layout/shell and a role guard in `middleware.ts`. Admin uses a separate auth realm.
+Route groups in `src/app`: `(marketing)`, `(auth)`, `(client)`, `(expert)`, `(admin)`. Each has its own layout/shell and a client-side role guard (`RequireRole`, via `features/app-shell` `RoleShell`); Next 16 renames `middleware.ts` to `proxy.ts` if a server-side guard is added later. Admin uses a separate auth realm (`/admin/login`; console under `(admin)/admin/(console)`).
 
 ## 10. ADRs
 
@@ -201,3 +201,5 @@ Record decisions in `docs/adr/NNNN-kebab-title.md`: Context → Decision → Con
 - 0004 TanStack Query for server state
 - 0005 Vendor the `carbon` reference skill into `.claude/skills` (pinned) + Carbon MCP for live lookups
 - 0006 Front-end prototype: MSW + fixtures + scripted AI behind `shared/api`; real backend swapped in later
+- 0007 Serve IBM Plex from /public via Carbon's font-face
+- 0008 `exactOptionalPropertyTypes` off

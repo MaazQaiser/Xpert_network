@@ -6,7 +6,7 @@ How we write, test, review and ship code.
 
 ## 1. TypeScript
 
-- `strict: true`, `noUncheckedIndexedAccess: true`, `exactOptionalPropertyTypes: true`.
+- `strict: true`, `noUncheckedIndexedAccess: true`. (`exactOptionalPropertyTypes` is off — conflicts with CSS-module typings and Carbon props; see ADR 0008.)
 - No `any`. Use `unknown` + narrowing. No non-null `!` except in tests.
 - Prefer `type` for props/unions, `interface` only when extending.
 - Derive types from Zod: `type Request = z.infer<typeof requestSchema>`.
