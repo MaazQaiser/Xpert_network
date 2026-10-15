@@ -1,0 +1,8 @@
+// Reflow fix for 320px screens (ADR 0011). Carbon gives inline notifications an 18rem
+// minimum width, wider than the content box of a 320px phone with our 16px gutters, so
+// they pushed pages sideways (WCAG 1.4.10). This only lifts the minimum; it changes
+// nothing in wider containers. Re-check on Carbon upgrades.
+.cds--inline-notification,
+.cds--actionable-notification--inline {
+  min-inline-size: 0;
+}

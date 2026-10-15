@@ -53,7 +53,7 @@ export function AppShell({
 
   const chrome = (
     <>
-      <SkipToContent href="#main-content" />
+      <SkipToContent href="#main-content" className={styles.skipLink} />
       {hasNav ? (
         <HeaderMenuButton
           aria-label={isNavOpen ? 'Close menu' : 'Open menu'}

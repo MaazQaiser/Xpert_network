@@ -23,7 +23,7 @@
       }
     },
     {
-      "files": ["src/styles/_carbon-shape.scss"],
+      "files": ["src/styles/_carbon-shape.scss", "src/styles/_carbon-reflow.scss"],
       "rules": {
         "selector-class-pattern": null,
         "selector-no-qualifying-type": null

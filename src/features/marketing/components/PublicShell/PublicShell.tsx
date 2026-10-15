@@ -24,7 +24,7 @@ type PublicShellProps = {
 export function PublicShell({ children, variant = 'public' }: PublicShellProps) {
   const chrome = (
     <>
-      <SkipToContent href="#main-content" />
+      <SkipToContent href="#main-content" className={styles.skipLink} />
       <HeaderName as={Link} href="/" prefix="">
         Xpert Network
         {variant === 'admin' ? <span className={styles.suffix}>&nbsp;Admin</span> : null}

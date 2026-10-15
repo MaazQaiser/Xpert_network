@@ -31,6 +31,7 @@
 @use '@carbon/react/scss/motion' as *;
 @use 'themes' as app-themes;
 @use 'carbon-shape';
+@use 'carbon-reflow';
 
 // Global theme: warm stone light by default, warm dark when the user (or the system)
 // prefers dark. ThemeProvider writes data-carbon-theme on <html> (`white` / `g100`).

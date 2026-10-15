@@ -21,3 +21,9 @@
   border-block-end-color: transparent;
   box-shadow: none;
 }
+
+// The header's transparent --cds-background would leave the skip link see-through over the
+// product name; give it an opaque surface while it's shown.
+.skipLink.skipLink:focus {
+  background-color: $layer-02;
+}
