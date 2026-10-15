@@ -1,0 +1,26 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/utilities/focus-outline' as *;
+
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-03;
+  block-size: 100%;
+  padding-inline: $spacing-05;
+  color: $text-primary;
+  text-decoration: none;
+
+  &:hover {
+    background: $background-hover;
+  }
+
+  &:focus {
+    @include focus-outline('outline');
+  }
+}
+
+.amount {
+  @include type-style('body-compact-01');
+}

@@ -1,0 +1,75 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  padding-block-end: $spacing-12;
+}
+
+.hero {
+  padding-block: $spacing-10 $spacing-09;
+}
+
+.eyebrow {
+  @include type-style('label-02');
+
+  color: $text-secondary;
+  margin-block-end: $spacing-05;
+}
+
+.title {
+  @include type-style('fluid-display-01', true);
+
+  margin-block-end: $spacing-06;
+}
+
+.lead {
+  @include type-style('fluid-paragraph-01', true);
+
+  color: $text-secondary;
+  max-inline-size: 60ch;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-05;
+  margin-block-start: $spacing-08;
+}
+
+.values {
+  row-gap: $spacing-05;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+  block-size: 100%;
+}
+
+.pictogram {
+  color: $icon-secondary;
+  margin-block-end: $spacing-05;
+}
+
+.tileTitle {
+  @include type-style('heading-03');
+}
+
+.tileBody {
+  @include type-style('body-02');
+
+  color: $text-secondary;
+  margin-block-end: $spacing-05;
+}
+
+.experts {
+  padding-block-start: $spacing-10;
+}
+
+.sectionTitle {
+  @include type-style('heading-04');
+
+  margin-block-end: $spacing-04;
+}

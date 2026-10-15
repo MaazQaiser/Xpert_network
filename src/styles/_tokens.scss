@@ -1,0 +1,14 @@
+// Proptyop extension tokens (DESIGN_SYSTEM.md §4.2).
+// Only add a token here when Carbon has no semantic equivalent.
+@use '@carbon/react/scss/theme' as *;
+
+$pt-request-open: $support-info;
+$pt-request-progress: $support-warning;
+$pt-request-delivered: $support-success;
+$pt-confidence-high: $support-success;
+$pt-confidence-low: $support-warning;
+
+// UI Shell geometry, from Carbon's ui-shell mini-units (1 mini-unit = 8px).
+// Carbon exposes these only inside its shell styles, so we mirror them here.
+$pt-shell-header-height: 3rem; // mini-units(6)
+$pt-shell-side-nav-width: 16rem; // mini-units(32)

@@ -1,0 +1,41 @@
+// Carbon config must be set once, before anything else uses it.
+// Plex is copied into /public/fonts by scripts/copy-fonts.mjs (see ADR 0007).
+@use '@carbon/react/scss/config' with (
+  $font-path: '/fonts/plex',
+  $use-per-family-plex: true
+);
+@use '@carbon/react/scss/fonts' with (
+  $fonts: (
+    IBM-Plex-Serif: false,
+  )
+);
+@use '@carbon/react';
+@use '@carbon/react/scss/theme';
+@use '@carbon/react/scss/themes';
+@use '@carbon/react/scss/motion' as *;
+
+// Global theme: white by default, g100 when the user (or the system) prefers dark.
+// ThemeProvider writes data-carbon-theme on <html>.
+:root {
+  @include theme.theme(themes.$white);
+}
+
+:root[data-carbon-theme='g100'] {
+  @include theme.theme(themes.$g100);
+
+  color-scheme: dark;
+}
+
+body {
+  background: theme.$background;
+  color: theme.$text-primary;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: $duration-fast-01;
+    transition-duration: $duration-fast-01;
+  }
+}

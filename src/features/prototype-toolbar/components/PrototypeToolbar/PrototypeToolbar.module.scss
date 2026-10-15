@@ -1,0 +1,53 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  position: fixed;
+  inset-block-end: $spacing-05;
+  inset-inline-end: $spacing-05;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $spacing-03;
+  background: transparent;
+}
+
+.panel {
+  inline-size: min(22rem, calc(100vw - #{$spacing-07}));
+  max-block-size: 75vh;
+  overflow-y: auto;
+  padding: $spacing-05;
+  background: $layer-01;
+  color: $text-primary;
+  box-shadow: 0 $spacing-02 $spacing-05 $shadow;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: $spacing-05;
+}
+
+.title {
+  @include type-style('heading-compact-02');
+}
+
+.fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+}
+
+.legend {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+  margin-block-end: $spacing-03;
+}
+
+.trigger {
+  box-shadow: 0 $spacing-02 $spacing-05 $shadow;
+}

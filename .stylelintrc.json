@@ -1,0 +1,16 @@
+{
+  "extends": ["stylelint-config-standard-scss"],
+  "plugins": ["stylelint-plugin-carbon-tokens"],
+  "ignoreFiles": ["public/**", ".next/**", "coverage/**"],
+  "rules": {
+    "carbon/theme-use": true,
+    "carbon/layout-use": true,
+    "carbon/type-use": true,
+    "carbon/motion-duration-use": true,
+    "carbon/motion-easing-use": true,
+    "color-no-hex": true,
+    "declaration-no-important": true,
+    "selector-class-pattern": "^[a-z][a-zA-Z0-9]*$",
+    "scss/dollar-variable-pattern": null
+  }
+}

@@ -1,0 +1,39 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  margin-block-end: $spacing-07;
+}
+
+.breadcrumb {
+  margin-block-end: $spacing-02;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: $spacing-05;
+}
+
+.title {
+  @include type-style('heading-05');
+}
+
+.subtitle {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+  margin-block-start: $spacing-03;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}

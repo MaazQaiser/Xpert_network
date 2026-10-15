@@ -1,0 +1,39 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/motion' as *;
+
+.root {
+  position: relative;
+}
+
+.text {
+  @include type-style('body-02');
+
+  white-space: pre-wrap;
+}
+
+.cursor {
+  display: inline-block;
+  inline-size: $spacing-02;
+  block-size: $spacing-05;
+  margin-inline-start: $spacing-01;
+  vertical-align: text-bottom;
+  background: $icon-primary;
+  animation: blink $duration-slow-02 motion(standard, productive) infinite;
+}
+
+.srOnly {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}

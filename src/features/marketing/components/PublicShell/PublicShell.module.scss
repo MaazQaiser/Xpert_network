@@ -1,0 +1,11 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '../../../../styles/tokens' as *;
+@use '@carbon/react/scss/theme' as *;
+
+.suffix {
+  color: $text-secondary;
+}
+
+.main {
+  margin-block-start: $pt-shell-header-height;
+}

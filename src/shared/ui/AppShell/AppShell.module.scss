@@ -1,0 +1,17 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '../../../styles/tokens' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/theme' as *;
+
+.suffix {
+  color: $text-secondary;
+}
+
+.content {
+  margin-block-start: $pt-shell-header-height;
+  min-block-size: calc(100vh - $pt-shell-header-height);
+
+  @include breakpoint(lg) {
+    margin-inline-start: $pt-shell-side-nav-width;
+  }
+}

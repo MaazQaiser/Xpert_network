@@ -1,0 +1,26 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  max-inline-size: 36ch;
+}
+
+.eyebrow {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.summary {
+  @include type-style('body-01');
+}
+
+.meta {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}

@@ -1,0 +1,22 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  padding-block: $spacing-10;
+}
+
+.title {
+  @include type-style('heading-05');
+}
+
+.description {
+  @include type-style('body-02');
+
+  color: $text-secondary;
+  margin-block-start: $spacing-04;
+}
+
+.body {
+  margin-block-start: $spacing-08;
+}

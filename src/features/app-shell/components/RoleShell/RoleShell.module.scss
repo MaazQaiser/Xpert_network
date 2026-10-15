@@ -1,0 +1,11 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+
+.page {
+  padding-block: $spacing-07;
+  padding-inline: $spacing-05;
+
+  @include breakpoint(md) {
+    padding-inline: $spacing-07;
+  }
+}

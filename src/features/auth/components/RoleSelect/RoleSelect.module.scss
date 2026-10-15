@@ -1,0 +1,21 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.tile {
+  margin-block-end: $spacing-03;
+}
+
+.title {
+  @include type-style('heading-compact-02');
+
+  display: block;
+}
+
+.description {
+  @include type-style('body-01');
+
+  display: block;
+  margin-block-start: $spacing-02;
+  color: $text-secondary;
+}
