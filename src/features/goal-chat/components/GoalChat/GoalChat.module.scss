@@ -1,0 +1,29 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: $spacing-07;
+
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  @include breakpoint(xlg) {
+    grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr) minmax(16rem, 20rem);
+  }
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  min-inline-size: 0;
+}
+
+.skeletonBlock {
+  inline-size: 100%;
+  block-size: $spacing-13;
+}

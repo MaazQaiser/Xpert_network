@@ -67,7 +67,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     listeners.forEach((listener) => listener());
   }, []);
 
-  const value = useMemo(() => ({ preference, theme, setPreference }), [preference, theme, setPreference]);
+  const value = useMemo(
+    () => ({ preference, theme, setPreference }),
+    [preference, theme, setPreference],
+  );
 
   return (
     <ThemeContext.Provider value={value}>

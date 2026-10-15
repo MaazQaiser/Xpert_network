@@ -6,3 +6,4 @@ export { AIExplainLabel } from './AIExplainLabel/AIExplainLabel';
 export type { AIExplainLabelProps } from './AIExplainLabel/AIExplainLabel';
 export { StreamingText } from './StreamingText/StreamingText';
 export { AIStepIndicator } from './AIStepIndicator/AIStepIndicator';
+export { AIFeedback } from './AIFeedback/AIFeedback';

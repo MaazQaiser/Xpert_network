@@ -17,7 +17,11 @@ import {
 import type { User } from '@/features/auth';
 import { createId } from '@/shared/lib/id';
 import { ALL_SUBJECTS } from '../../fixtures/entities';
-import { OBJECTIVE_STARTERS, QUESTION_BANK, SUBJECT_SUGGESTIONS } from '../../fixtures/questionBank';
+import {
+  OBJECTIVE_STARTERS,
+  QUESTION_BANK,
+  SUBJECT_SUGGESTIONS,
+} from '../../fixtures/questionBank';
 import { resolveSubject } from './subjects';
 
 export type EngineContext = {
@@ -25,6 +29,8 @@ export type EngineContext = {
   now: Date;
   /** Lazily computed when the turn needs it (options step). */
   getCoverage: (brief: ResearchBrief) => CoverageResult;
+  /** The widget on the latest assistant message, if any. */
+  lastWidget: Widget | null;
 };
 
 export type EngineResult = {
@@ -61,7 +67,8 @@ function completeStep(
   const isRevisit = GATHERING_STEPS.includes(step) && stepStatus.summary !== 'todo';
   const next: StepId = isRevisit
     ? 'summary'
-    : (STEP_IDS.slice(STEP_IDS.indexOf(step) + 1).find((id) => stepStatus[id] !== 'done') ?? 'checkout');
+    : (STEP_IDS.slice(STEP_IDS.indexOf(step) + 1).find((id) => stepStatus[id] !== 'done') ??
+      'checkout');
   return withStep({ ...brief, stepStatus }, next);
 }
 
@@ -168,7 +175,10 @@ function askQuestions(brief: ResearchBrief, userText: string | null): EngineResu
     withStep(brief, 'questions'),
     userText,
     'Here are the questions experts are usually asked for a goal like yours. Keep the ones that matter, put them in priority order, and add your own. Choose between 3 and 10.',
-    { kind: 'questions', suggestions: brief.questions.length ? brief.questions : suggestQuestions(brief) },
+    {
+      kind: 'questions',
+      suggestions: brief.questions.length ? brief.questions : suggestQuestions(brief),
+    },
     ['Reading your goal', 'Drafting questions'],
   );
 }
@@ -206,7 +216,11 @@ function showSummary(brief: ResearchBrief, userText: string | null, lead: string
 
 // ——— Turn handler ————————————————————————————————————————————————
 
-export function runTurn(input: ResearchBrief, action: TurnAction, ctx: EngineContext): EngineResult {
+export function runTurn(
+  input: ResearchBrief,
+  action: TurnAction,
+  ctx: EngineContext,
+): EngineResult {
   const brief: ResearchBrief = { ...input, updatedAt: ctx.now.toISOString() };
   const firstName = ctx.user.name.split(' ')[0] ?? ctx.user.name;
 
@@ -229,9 +243,17 @@ export function runTurn(input: ResearchBrief, action: TurnAction, ctx: EngineCon
 
     case 'subject-add': {
       if (brief.subjects.some((s) => s.id === action.subject.id)) {
-        return result(brief, null, `${action.subject.label} is already in your brief.`, subjectsWidget(brief));
+        return result(
+          brief,
+          null,
+          `${action.subject.label} is already in your brief.`,
+          subjectsWidget(brief),
+        );
       }
-      const next = invalidateConfirmation({ ...brief, subjects: [...brief.subjects, action.subject] });
+      const next = invalidateConfirmation({
+        ...brief,
+        subjects: [...brief.subjects, action.subject],
+      });
       return result(
         withStep(next, 'subject'),
         action.subject.label,
@@ -253,12 +275,21 @@ export function runTurn(input: ResearchBrief, action: TurnAction, ctx: EngineCon
 
     case 'subjects-done': {
       if (brief.subjects.length === 0) {
-        const next = { ...brief, stepStatus: { ...brief.stepStatus, subject: 'attention' as const } };
-        return result(next, null, 'Add at least one company, industry or region first, so experts know what to focus on.', subjectsWidget(next));
+        const next = {
+          ...brief,
+          stepStatus: { ...brief.stepStatus, subject: 'attention' as const },
+        };
+        return result(
+          next,
+          null,
+          'Add at least one company, industry or region first, so experts know what to focus on.',
+          subjectsWidget(next),
+        );
       }
       const labels = brief.subjects.map((s) => s.label).join(', ');
       const done = completeStep(brief, 'subject');
-      if (done.currentStep === 'summary') return showSummary(done, `Focus on ${labels}`, 'Subjects updated.');
+      if (done.currentStep === 'summary')
+        return showSummary(done, `Focus on ${labels}`, 'Subjects updated.');
       const withQuestions = { ...done, questions: brief.questions.length ? brief.questions : [] };
       return askQuestions(withQuestions, `Focus on ${labels}`);
     }
@@ -287,18 +318,27 @@ export function runTurn(input: ResearchBrief, action: TurnAction, ctx: EngineCon
       const next = invalidateConfirmation({ ...brief, constraints: action.constraints });
       const complete = Boolean(deadline) && budgetCredits !== null;
       const done = completeStep(next, 'constraints', complete ? 'done' : 'attention');
-      return showSummary(done, 'Constraints set', complete ? 'Thanks.' : 'Noted — we’ll suggest a deadline and budget in any quote.');
+      return showSummary(
+        done,
+        'Constraints set',
+        complete ? 'Thanks.' : 'Noted — we’ll suggest a deadline and budget in any quote.',
+      );
     }
 
     case 'skip': {
       if (action.step !== 'constraints') throw new TurnRejected('This step can’t be skipped.');
       const constraints = { deadline: null, budgetCredits: null, depth: 'standard' as const };
       const done = completeStep({ ...brief, constraints }, 'constraints', 'attention');
-      return showSummary(done, 'Skip for now', 'No problem — we’ll suggest a deadline and budget in any quote.');
+      return showSummary(
+        done,
+        'Skip for now',
+        'No problem — we’ll suggest a deadline and budget in any quote.',
+      );
     }
 
     case 'confirm-needs': {
-      if (brief.questions.length < 3) throw new TurnRejected('Add at least 3 questions before confirming.');
+      if (brief.questions.length < 3)
+        throw new TurnRejected('Add at least 3 questions before confirming.');
       const confirmed: ResearchBrief = completeStep({ ...brief, status: 'confirmed' }, 'summary');
       const coverage = ctx.getCoverage(confirmed);
       const counts = summariseCoverage(coverage.items);
@@ -309,23 +349,36 @@ export function runTurn(input: ResearchBrief, action: TurnAction, ctx: EngineCon
       } else if (counts.full === 0 && counts.partial === 0) {
         reply = `None of your ${counts.total} questions are answered by the library yet. Custom research with expert interviews would cover all of them.`;
       } else {
-        reply = `${counts.full} of your ${counts.total} questions are covered by the library${counts.partial ? `, ${counts.partial} partly` : ''}, and ${counts.none} ${counts.none === 1 ? 'isn’t' : 'aren’t'} covered yet. See why for each question, then pick how to proceed.`;
+        const gaps = [
+          counts.partial ? `${counts.partial} partly` : null,
+          counts.none ? `${counts.none} not at all yet` : null,
+        ].filter(Boolean);
+        reply = `${counts.full} of your ${counts.total} questions are fully covered by the library${gaps.length ? `; ${gaps.join(' and ')}` : ''}. See why for each question, then pick how to proceed.`;
       }
       return result(
         withStep(confirmed, 'options'),
         'Confirm needs',
         reply,
         { kind: 'options', coverage },
-        ['Searching the library', `Matching ${counts.total} questions to report sections`, 'Checking coverage'],
+        [
+          'Searching the library',
+          `Matching ${counts.total} questions to report sections`,
+          'Checking coverage',
+        ],
       );
     }
 
     case 'choose-option': {
       const next = completeStep({ ...brief, chosenOption: action.option }, 'options');
-      const labels = { library: 'Buy library reports', custom: 'Request custom research', mix: 'Mix: reports plus custom research' };
+      const labels = {
+        library: 'Buy library reports',
+        custom: 'Request custom research',
+        mix: 'Mix: reports plus custom research',
+      };
       const replies = {
         library: 'Here’s your order. Credits are only taken when you confirm.',
-        custom: 'Review what we’ll quote for. Requesting a quote is free — nothing is charged until you accept it.',
+        custom:
+          'Review what we’ll quote for. Requesting a quote is free — nothing is charged until you accept it.',
         mix: 'You’ll buy the reports that answer covered questions now, and we’ll quote custom research for the rest.',
       };
       return result(withStep(next, 'checkout'), labels[action.option], replies[action.option], {
@@ -340,23 +393,39 @@ export function runTurn(input: ResearchBrief, action: TurnAction, ctx: EngineCon
 }
 
 function revisit(brief: ResearchBrief, step: StepId, ctx: EngineContext): EngineResult {
-  if (brief.status === 'submitted') throw new TurnRejected('This brief has been submitted and can’t be changed.');
+  if (brief.status === 'submitted')
+    throw new TurnRejected('This brief has been submitted and can’t be changed.');
   const lead = `Let’s revisit ${STEP_LABELS[step].label.toLowerCase()}. Your current answers are filled in.`;
   const next = withStep(brief, step);
   switch (step) {
     case 'goal':
-      return result(next, null, `${lead} Pick a different goal type or describe the outcome again.`, {
-        kind: 'goal-types',
-        options: ['invest', 'expand', 'market', 'other'],
-      });
+      return result(
+        next,
+        null,
+        `${lead} Pick a different goal type or describe the outcome again.`,
+        {
+          kind: 'goal-types',
+          options: ['invest', 'expand', 'market', 'other'],
+        },
+      );
     case 'subject':
       return result(next, null, lead, subjectsWidget(next));
     case 'questions':
       return result(next, null, lead, { kind: 'questions', suggestions: brief.questions });
     case 'constraints':
       return result(next, null, lead, { kind: 'constraints' });
+    case 'summary':
+      return result(
+        next,
+        null,
+        'Here’s your research brief again. Edit it or confirm your needs.',
+        { kind: 'summary' },
+      );
     case 'options':
-      return result(next, null, 'Here are your options again.', { kind: 'options', coverage: ctx.getCoverage(brief) });
+      return result(next, null, 'Here are your options again.', {
+        kind: 'options',
+        coverage: ctx.getCoverage(brief),
+      });
     default:
       throw new TurnRejected('That step can’t be revisited.');
   }
@@ -405,7 +474,12 @@ function handleText(brief: ResearchBrief, text: string, ctx: EngineContext): Eng
         return runTurn(brief, { kind: 'subject-add', subject: resolution.subject }, ctx);
       }
       if (resolution.kind === 'ambiguous') {
-        return result(brief, text, `Did you mean one of these for “${text}”?`, subjectsWidget(brief, resolution.candidates, text));
+        return result(
+          brief,
+          text,
+          `Did you mean one of these for “${text}”?`,
+          subjectsWidget(brief, resolution.candidates, text),
+        );
       }
       return result(
         brief,
@@ -416,12 +490,23 @@ function handleText(brief: ResearchBrief, text: string, ctx: EngineContext): Eng
     }
 
     case 'questions': {
+      // Typed questions join the picker's list; the brief changes only when the list is submitted.
       const question: Question = { id: createId('q'), text, topic: 'custom', source: 'user' };
-      const next = { ...brief, questions: [...brief.questions, question] };
-      return result(next, text, 'Added your question to the list. Reorder or remove questions, then continue.', {
-        kind: 'questions',
-        suggestions: [...(brief.questions.length ? brief.questions : suggestQuestions(brief)), question],
-      });
+      const base =
+        ctx.lastWidget?.kind === 'questions'
+          ? ctx.lastWidget.suggestions
+          : brief.questions.length
+            ? brief.questions
+            : suggestQuestions(brief);
+      return result(
+        brief,
+        text,
+        'Added your question to the list. Reorder or untick questions, then continue.',
+        {
+          kind: 'questions',
+          suggestions: [...base, question],
+        },
+      );
     }
 
     default:
@@ -440,11 +525,16 @@ function handleText(brief: ResearchBrief, text: string, ctx: EngineContext): Eng
 function currentWidget(brief: ResearchBrief, ctx: EngineContext): Widget | null {
   switch (brief.currentStep) {
     case 'goal':
-      return brief.goalType ? starterChips(brief.goalType) : { kind: 'goal-types', options: ['invest', 'expand', 'market', 'other'] };
+      return brief.goalType
+        ? starterChips(brief.goalType)
+        : { kind: 'goal-types', options: ['invest', 'expand', 'market', 'other'] };
     case 'subject':
       return subjectsWidget(brief);
     case 'questions':
-      return { kind: 'questions', suggestions: brief.questions.length ? brief.questions : suggestQuestions(brief) };
+      return {
+        kind: 'questions',
+        suggestions: brief.questions.length ? brief.questions : suggestQuestions(brief),
+      };
     case 'constraints':
       return { kind: 'constraints' };
     case 'summary':
@@ -456,7 +546,12 @@ function currentWidget(brief: ResearchBrief, ctx: EngineContext): Widget | null 
   }
 }
 
-export function toMessage(role: ChatMessage['role'], text: string, step: StepId, widget: Widget | null, now: Date): ChatMessage {
+export function toMessage(
+  role: ChatMessage['role'],
+  text: string,
+  step: StepId,
+  widget: Widget | null,
+  now: Date,
+): ChatMessage {
   return { id: createId('msg'), role, text, step, widget, createdAt: now.toISOString() };
 }
-

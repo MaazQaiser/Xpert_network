@@ -57,7 +57,8 @@ export function AppShell({
           onClick={() => setIsNavOpen((open) => !open)}
         />
         <HeaderName as={Link} href={homeHref} prefix="">
-          Proptyop{productSuffix ? <span className={styles.suffix}>&nbsp;{productSuffix}</span> : null}
+          Proptyop
+          {productSuffix ? <span className={styles.suffix}>&nbsp;{productSuffix}</span> : null}
         </HeaderName>
         <HeaderGlobalBar>{headerActions}</HeaderGlobalBar>
         <SideNav

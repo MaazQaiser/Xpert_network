@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "proptyop-demo",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev:demo"],
+      "port": 3000
+    }
+  ]
+}

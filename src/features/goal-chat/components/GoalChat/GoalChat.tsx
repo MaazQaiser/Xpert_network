@@ -1,0 +1,122 @@
+'use client';
+
+import { useEffect } from 'react';
+import { ProgressBar, SkeletonPlaceholder, SkeletonText } from '@carbon/react';
+import { AsyncBoundary, PageHeader, StatusTag } from '@/shared/ui';
+import { useBreakpointUp } from '@/shared/hooks/useMediaQuery';
+import { formatDateTime, formatRelative } from '@/shared/lib/dates';
+import { routes } from '@/shared/config/routes';
+import { useConversation } from '../../api/queries';
+import { useTurn } from '../../hooks/useTurn';
+import { STEP_IDS, progressPercent, type StepId } from '../../model/steps';
+import type { Conversation } from '../../model/turn.schema';
+import { BriefStepper } from '../BriefStepper/BriefStepper';
+import { ChatThread } from '../ChatThread/ChatThread';
+import { Composer } from '../Composer/Composer';
+import { LiveBriefPanel } from '../LiveBriefPanel/LiveBriefPanel';
+import styles from './GoalChat.module.scss';
+
+const PLACEHOLDERS: Partial<Record<StepId, string>> = {
+  goal: 'Describe your goal in a sentence…',
+  subject: 'Type a company, region or industry…',
+  questions: 'Type a question to add it to the list…',
+};
+
+const STATUS = {
+  draft: { tone: 'info', label: 'Draft' },
+  confirmed: { tone: 'progress', label: 'Confirmed' },
+  submitted: { tone: 'success', label: 'Submitted' },
+} as const;
+
+function GoalChatSkeleton() {
+  return (
+    <div className={styles.layout} aria-busy="true" aria-label="Loading your brief">
+      <SkeletonText paragraph lineCount={7} />
+      <div className={styles.chat}>
+        <SkeletonText heading width="40%" />
+        <SkeletonText paragraph lineCount={3} />
+        <SkeletonPlaceholder className={styles.skeletonBlock} />
+      </div>
+    </div>
+  );
+}
+
+function GoalChatView({ data, briefId }: { data: Conversation; briefId: string }) {
+  const turn = useTurn(briefId);
+  const isWide = useBreakpointUp('xlg');
+  const { brief, messages } = data;
+
+  // A new brief opens with the assistant's first question. Deferred a tick so React's
+  // strict-mode double mount doesn't start (and abort) two streams.
+  const { send } = turn;
+  useEffect(() => {
+    if (messages.length > 0) return;
+    const timer = window.setTimeout(() => send({ kind: 'start' }), 0);
+    return () => window.clearTimeout(timer);
+    // Only when the conversation is empty; `send` identity changes every stream update.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length]);
+
+  const percent = progressPercent(brief.stepStatus);
+  const doneCount = STEP_IDS.filter(
+    (id) => brief.stepStatus[id] === 'done' || brief.stepStatus[id] === 'attention',
+  ).length;
+  const status = STATUS[brief.status];
+
+  return (
+    <>
+      <PageHeader
+        title={brief.title === 'Untitled brief' ? 'New research brief' : brief.title}
+        breadcrumbs={[{ label: 'Home', href: routes.client.home }]}
+        subtitle={
+          <>
+            Saved automatically ·{' '}
+            <time dateTime={brief.updatedAt} title={formatDateTime(brief.updatedAt)}>
+              updated {formatRelative(brief.updatedAt)}
+            </time>
+          </>
+        }
+        actions={<StatusTag tone={status.tone} label={status.label} />}
+      >
+        <ProgressBar
+          label="Brief progress"
+          value={percent}
+          max={100}
+          helperText={`${doneCount} of ${STEP_IDS.length} steps complete`}
+          size="small"
+        />
+      </PageHeader>
+      <div className={styles.layout}>
+        <BriefStepper
+          brief={brief}
+          isBusy={turn.isBusy}
+          onRevisit={(step) => turn.send({ kind: 'revisit', step })}
+        />
+        <div className={styles.chat}>
+          <ChatThread brief={brief} messages={messages} turn={turn} />
+          <Composer
+            placeholder={PLACEHOLDERS[brief.currentStep] ?? 'Type a message…'}
+            isBusy={turn.isBusy}
+            isDisabled={brief.status === 'submitted'}
+            onSend={(text) => turn.send({ kind: 'text', text }, text)}
+          />
+        </div>
+        {isWide ? <LiveBriefPanel brief={brief} /> : null}
+      </div>
+    </>
+  );
+}
+
+/** F2 ★ goal chat: stepper + chat + live brief (PRODUCT_PLAN §5). */
+export function GoalChat({ briefId }: { briefId: string }) {
+  const conversation = useConversation(briefId);
+  return (
+    <AsyncBoundary
+      query={conversation}
+      loading={<GoalChatSkeleton />}
+      errorTitle="Your brief didn’t load"
+    >
+      {(data) => <GoalChatView data={data} briefId={briefId} />}
+    </AsyncBoundary>
+  );
+}

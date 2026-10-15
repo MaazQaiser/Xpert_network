@@ -1,0 +1,227 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+}
+
+.chips,
+.candidates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-02;
+}
+
+.label {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+  margin-block-end: $spacing-03;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.sectionTitle {
+  @include type-style('heading-compact-02');
+}
+
+.muted {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.attention {
+  color: $text-secondary;
+}
+
+.buttonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-05;
+}
+
+.inlineForm {
+  display: flex;
+  align-items: flex-end;
+  gap: $spacing-03;
+
+  > :first-child {
+    flex: 1;
+  }
+}
+
+// Questions
+.questionList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+}
+
+.questionRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03;
+  padding: $spacing-03 $spacing-04;
+  background: $layer-02;
+  border-inline-start: $spacing-01 solid transparent;
+
+  &[data-selected='true'] {
+    border-inline-start-color: $border-interactive;
+  }
+}
+
+.questionActions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-01;
+}
+
+// Summary card
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  background: $layer-02;
+}
+
+.summaryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
+
+.summaryTitle {
+  @include type-style('heading-03');
+}
+
+.definitions {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+
+  dt {
+    @include type-style('label-01');
+
+    color: $text-secondary;
+    margin-block-end: $spacing-02;
+  }
+
+  dd {
+    @include type-style('body-01');
+  }
+}
+
+.numbered {
+  @include type-style('body-01');
+
+  padding-inline-start: $spacing-06;
+  list-style: decimal;
+
+  li + li {
+    margin-block-start: $spacing-02;
+  }
+}
+
+// Coverage
+.coverageList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.coverageRow {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  padding: $spacing-04;
+  background: $layer-02;
+}
+
+.coverageQuestion {
+  @include type-style('body-01');
+}
+
+.coverageMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+// Options
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.optionTile {
+  margin-block-end: $spacing-03;
+}
+
+.optionTitle {
+  @include type-style('heading-compact-01');
+
+  display: block;
+}
+
+.recommended {
+  color: $text-secondary;
+}
+
+.optionBody {
+  @include type-style('body-compact-01');
+
+  display: block;
+  margin-block-start: $spacing-02;
+  color: $text-secondary;
+}
+
+// Checkout
+.numeric {
+  text-align: end;
+  white-space: nowrap;
+}
+
+.total {
+  @include type-style('heading-compact-01');
+}
+
+.done {
+  display: flex;
+  gap: $spacing-04;
+  padding: $spacing-05;
+  background: $layer-02;
+  border-inline-start: $spacing-02 solid $support-success;
+}
+
+.doneIcon {
+  flex-shrink: 0;
+  fill: $support-success;
+}

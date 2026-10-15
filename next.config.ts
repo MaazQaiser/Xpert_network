@@ -19,7 +19,10 @@ const nextConfig: NextConfig = {
   turbopack: {
     resolveAlias: {
       // MSW's browser worker only exists in the browser; SSR gets a no-op stub (ADR 0006).
-      '@/mocks/browser': { browser: './src/mocks/browser.ts', default: './src/mocks/browser.stub.ts' },
+      '@/mocks/browser': {
+        browser: './src/mocks/browser.ts',
+        default: './src/mocks/browser.stub.ts',
+      },
     },
   },
   async headers() {

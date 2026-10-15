@@ -29,7 +29,9 @@ function load(): PrototypeControls {
   if (typeof window === 'undefined') return DEFAULT_CONTROLS;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? { ...DEFAULT_CONTROLS, ...(JSON.parse(raw) as Partial<PrototypeControls>) } : DEFAULT_CONTROLS;
+    return raw
+      ? { ...DEFAULT_CONTROLS, ...(JSON.parse(raw) as Partial<PrototypeControls>) }
+      : DEFAULT_CONTROLS;
   } catch {
     return DEFAULT_CONTROLS;
   }

@@ -48,7 +48,8 @@ export function ndjsonStream(
   const slow = getControls().slowNetwork ? 3 : 1;
   const stream = new ReadableStream({
     async start(controller) {
-      const send = (event: unknown) => controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+      const send = (event: unknown) =>
+        controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
       const pause = (ms: number) => (isTest ? Promise.resolve() : delay(ms * slow));
       try {
         await produce(send, pause);

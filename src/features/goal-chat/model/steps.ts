@@ -61,6 +61,6 @@ export function progressPercent(status: Record<StepId, StepStatus>): number {
 /** A step can be reopened when it's finished and the brief hasn't been submitted. */
 export function canRevisit(step: StepId, status: Record<StepId, StepStatus>, isSubmitted: boolean) {
   if (isSubmitted) return false;
-  if (!GATHERING_STEPS.includes(step) && step !== 'options') return false;
+  if (!GATHERING_STEPS.includes(step) && step !== 'summary' && step !== 'options') return false;
   return status[step] === 'done' || status[step] === 'attention';
 }

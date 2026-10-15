@@ -13,7 +13,8 @@ export const sessionHandlers = [
   http.post('/api/session', async ({ request }) => {
     await simulateNetwork();
     const parsed = loginInputSchema.safeParse(await request.json());
-    if (!parsed.success) return errorResponse(422, 'invalid_input', 'Choose who you want to log in as.');
+    if (!parsed.success)
+      return errorResponse(422, 'invalid_input', 'Choose who you want to log in as.');
     const user = USERS[parsed.data.personaId];
     db.update((draft) => {
       draft.sessionUserId = user.id;

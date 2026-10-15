@@ -4,12 +4,14 @@
 
 .root {
   position: fixed;
-  inset-block-end: $spacing-05;
-  inset-inline-end: $spacing-05;
+
+  // A tab on the right edge, clear of page content and the chat composer.
+  inset-block-start: 40vh;
+  inset-inline-end: 0;
   z-index: 9000;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  flex-direction: row-reverse;
+  align-items: flex-start;
   gap: $spacing-03;
   background: transparent;
 }

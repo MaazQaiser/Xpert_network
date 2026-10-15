@@ -11,6 +11,9 @@ type Options = {
 
 type Scope = 'exact' | 'broader' | 'other' | 'unscoped';
 
+/** Topics set at country level: a country-wide report fully answers a city question. */
+const NATIONAL_TOPICS = new Set(['licensing', 'regulation', 'staffing']);
+
 /** How well a report's scope fits the brief's companies and regions. */
 function scopeFit(item: LibraryItem, brief: ResearchBrief): { scope: Scope; note: string } {
   const companyIds = brief.subjects.filter((s) => s.kind === 'company').map((s) => s.id);
@@ -75,7 +78,13 @@ export function computeCoverage(brief: ResearchBrief, options: Options): Coverag
           questionId: question.id,
           coverage: 'full',
           reason: `Answered in “${section.title}”.`,
-          matches: [{ libraryItemId: fallback.id, reportTitle: fallback.title, sectionTitle: section.title }],
+          matches: [
+            {
+              libraryItemId: fallback.id,
+              reportTitle: fallback.title,
+              sectionTitle: section.title,
+            },
+          ],
         };
       }
     }
@@ -89,16 +98,25 @@ export function computeCoverage(brief: ResearchBrief, options: Options): Coverag
       };
     }
 
-    const isFull = scenario === 'all' || best.fit.scope === 'exact' || best.fit.scope === 'unscoped';
+    const isNational = best.fit.scope === 'broader' && NATIONAL_TOPICS.has(question.topic);
+    const isFull =
+      scenario === 'all' ||
+      best.fit.scope === 'exact' ||
+      best.fit.scope === 'unscoped' ||
+      isNational;
     usedReports.set(best.item.id, (usedReports.get(best.item.id) ?? new Set()).add(question.id));
     return {
       questionId: question.id,
       coverage: isFull ? 'full' : 'partial',
       reason: isFull
-        ? `Answered in “${best.section.title}”.`
+        ? `Answered in “${best.section.title}”${isNational ? ' — the rules apply nationwide' : ''}.`
         : `Partly: “${best.section.title}” ${best.fit.note}.`,
       matches: [
-        { libraryItemId: best.item.id, reportTitle: best.item.title, sectionTitle: best.section.title },
+        {
+          libraryItemId: best.item.id,
+          reportTitle: best.item.title,
+          sectionTitle: best.section.title,
+        },
       ],
     };
   });

@@ -1,0 +1,29 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-09;
+  max-inline-size: 64rem;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-05;
+  padding: $spacing-07;
+}
+
+.heroTitle {
+  @include type-style('heading-04');
+}
+
+.heroBody {
+  @include type-style('body-02');
+
+  color: $text-secondary;
+  max-inline-size: 60ch;
+}

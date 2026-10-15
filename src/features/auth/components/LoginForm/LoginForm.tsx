@@ -6,15 +6,7 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import {
-  Button,
-  ClickableTile,
-  Form,
-  InlineNotification,
-  PasswordInput,
-  Stack,
-  TextInput,
-} from '@carbon/react';
+import { Button, Form, InlineNotification, PasswordInput, Stack, TextInput } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
 import { useLogin } from '../../api/useLogin';
@@ -37,7 +29,9 @@ export function LoginForm({ realm }: LoginFormProps) {
   const router = useRouter();
   const login = useLogin();
   const [formError, setFormError] = useState<string | null>(null);
-  const accounts = DEMO_ACCOUNTS.filter((a) => (realm === 'admin' ? a.role === 'admin' : a.role !== 'admin'));
+  const accounts = DEMO_ACCOUNTS.filter((a) =>
+    realm === 'admin' ? a.role === 'admin' : a.role !== 'admin',
+  );
 
   const {
     register,
@@ -70,7 +64,9 @@ export function LoginForm({ realm }: LoginFormProps) {
       return;
     }
     if (realm === 'admin' && account.role !== 'admin') {
-      setFormError('This login is for Proptyop staff. Clients and experts log in on the main site.');
+      setFormError(
+        'This login is for Proptyop staff. Clients and experts log in on the main site.',
+      );
       return;
     }
     await signIn(account.personaId);
@@ -108,7 +104,11 @@ export function LoginForm({ realm }: LoginFormProps) {
             {...register('password')}
           />
           <div className={styles.actions}>
-            <Button type="submit" renderIcon={ArrowRight} disabled={isSubmitting || login.isPending}>
+            <Button
+              type="submit"
+              renderIcon={ArrowRight}
+              disabled={isSubmitting || login.isPending}
+            >
               Log in
             </Button>
             {realm === 'app' ? <Link href="/sign-up">Create an account</Link> : null}
@@ -124,14 +124,15 @@ export function LoginForm({ realm }: LoginFormProps) {
         <ul className={styles.demoList}>
           {accounts.map((account) => (
             <li key={account.personaId}>
-              <ClickableTile
-                className={styles.tile}
+              <Button
+                kind="tertiary"
+                className={styles.account}
                 onClick={() => void signIn(account.personaId)}
                 disabled={login.isPending}
               >
                 <span className={styles.tileName}>{account.name}</span>
                 <span className={styles.tileSummary}>{account.summary}</span>
-              </ClickableTile>
+              </Button>
             </li>
           ))}
         </ul>

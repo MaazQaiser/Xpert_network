@@ -2,7 +2,15 @@
 
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { Header, HeaderGlobalBar, HeaderName, HeaderNavigation, HeaderMenuItem, SkipToContent, Theme } from '@carbon/react';
+import {
+  Header,
+  HeaderGlobalBar,
+  HeaderName,
+  HeaderNavigation,
+  HeaderMenuItem,
+  SkipToContent,
+  Theme,
+} from '@carbon/react';
 import { ThemeToggle } from '@/providers/ThemeToggle';
 import styles from './PublicShell.module.scss';
 

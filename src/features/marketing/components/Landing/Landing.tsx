@@ -32,8 +32,8 @@ export function Landing() {
           <p className={styles.eyebrow}>Expert-backed research library</p>
           <h1 className={styles.title}>Decide with answers from people who have done it.</h1>
           <p className={styles.lead}>
-            Proptyop helps investors and growing businesses get answers from industry experts —
-            from our library in minutes, or as custom research in days.
+            Proptyop helps investors and growing businesses get answers from industry experts — from
+            our library in minutes, or as custom research in days.
           </p>
           <div className={styles.actions}>
             <Button as={Link} href="/sign-up" renderIcon={ArrowRight}>
@@ -60,8 +60,8 @@ export function Landing() {
         <Column sm={4} md={8} lg={10}>
           <h2 className={styles.sectionTitle}>Are you an industry expert?</h2>
           <p className={styles.tileBody}>
-            Answer open calls on topics you know and get paid for each accepted interview. Speak
-            or type with our AI interviewer, at a time that suits you.
+            Answer open calls on topics you know and get paid for each accepted interview. Speak or
+            type with our AI interviewer, at a time that suits you.
           </p>
           <Button as={Link} href="/sign-up" kind="ghost" renderIcon={ArrowRight}>
             Join as an expert

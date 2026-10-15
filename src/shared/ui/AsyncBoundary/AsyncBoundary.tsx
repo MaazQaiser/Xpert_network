@@ -33,8 +33,10 @@ export function AsyncBoundary<T>({
   errorTitle,
   children,
 }: AsyncBoundaryProps<T>) {
-  if (query.isPending) return <>{loading}</>;
-  if (query.isError || query.data === undefined) {
+  // Once data has loaded, keep showing it even if a background refetch fails
+  // (UX_PRINCIPLES: "Partial — show what loaded").
+  if (query.data === undefined && query.isPending) return <>{loading}</>;
+  if (query.data === undefined) {
     return (
       <ErrorState
         {...(errorTitle ? { title: errorTitle } : {})}

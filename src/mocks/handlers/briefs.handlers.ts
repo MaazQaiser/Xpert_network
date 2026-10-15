@@ -12,6 +12,7 @@ import { createId } from '@/shared/lib/id';
 import { computeCoverage } from '../ai/goalChat/coverage';
 import { runTurn, toMessage, TurnRejected } from '../ai/goalChat/engine';
 import { getControls } from '../controls';
+import { ALL_SUBJECTS } from '../fixtures/entities';
 import { LIBRARY_ITEMS } from '../fixtures/library';
 import { db } from '../store/db';
 import {
@@ -112,7 +113,11 @@ export const briefsHandlers = [
     if (!brief) return notFound();
     const parsed = briefPatchSchema.safeParse(await request.json());
     if (!parsed.success) {
-      return errorResponse(422, 'invalid_input', parsed.error.issues[0]?.message ?? 'Check the highlighted fields.');
+      return errorResponse(
+        422,
+        'invalid_input',
+        parsed.error.issues[0]?.message ?? 'Check the highlighted fields.',
+      );
     }
     const { revertToAi, ...patch } = parsed.data;
     const next: ResearchBrief =
@@ -131,7 +136,12 @@ export const briefsHandlers = [
             status: 'draft',
             currentStep: 'summary',
             chosenOption: null,
-            stepStatus: { ...next.stepStatus, summary: 'active', options: 'todo', checkout: 'todo' },
+            stepStatus: {
+              ...next.stepStatus,
+              summary: 'active',
+              options: 'todo',
+              checkout: 'todo',
+            },
           }
         : next;
     const saved = { ...reopened, updatedAt: new Date().toISOString() };
@@ -148,8 +158,12 @@ export const briefsHandlers = [
     const brief = ownBrief(params.briefId, user);
     if (!brief) return notFound();
     db.update((draft) => {
-      draft.briefs = Object.fromEntries(Object.entries(draft.briefs).filter(([id]) => id !== brief.id));
-      draft.messages = Object.fromEntries(Object.entries(draft.messages).filter(([id]) => id !== brief.id));
+      draft.briefs = Object.fromEntries(
+        Object.entries(draft.briefs).filter(([id]) => id !== brief.id),
+      );
+      draft.messages = Object.fromEntries(
+        Object.entries(draft.messages).filter(([id]) => id !== brief.id),
+      );
     });
     return new HttpResponse(null, { status: 204 });
   }),
@@ -161,7 +175,8 @@ export const briefsHandlers = [
     const brief = ownBrief(params.briefId, user);
     if (!brief) return notFound();
     const parsed = turnInputSchema.safeParse(await request.json());
-    if (!parsed.success) return errorResponse(422, 'invalid_input', 'That answer couldn’t be read. Try again.');
+    if (!parsed.success)
+      return errorResponse(422, 'invalid_input', 'That answer couldn’t be read. Try again.');
     const { turnId, action } = parsed.data;
 
     const previous = db.get().turns[turnId];
@@ -177,17 +192,29 @@ export const briefsHandlers = [
           user,
           now,
           getCoverage: (b) => coverageFor(b, user.id),
+          lastWidget:
+            (db.get().messages[brief.id] ?? []).filter((m) => m.role === 'assistant').at(-1)
+              ?.widget ?? null,
         });
       } catch (error) {
-        if (error instanceof TurnRejected) return errorResponse(422, 'invalid_input', error.message);
+        if (error instanceof TurnRejected)
+          return errorResponse(422, 'invalid_input', error.message);
         throw error;
       }
       steps = engineResult.steps;
       const step = engineResult.brief.currentStep;
       outcome = {
         brief: engineResult.brief,
-        userMessage: engineResult.userText ? toMessage('user', engineResult.userText, step, null, now) : null,
-        assistantMessage: toMessage('assistant', engineResult.reply, step, engineResult.widget, now),
+        userMessage: engineResult.userText
+          ? toMessage('user', engineResult.userText, step, null, now)
+          : null,
+        assistantMessage: toMessage(
+          'assistant',
+          engineResult.reply,
+          step,
+          engineResult.widget,
+          now,
+        ),
       };
     }
 
@@ -207,7 +234,8 @@ export const briefsHandlers = [
         send({
           type: 'error',
           code: 'stream_interrupted',
-          message: 'The connection dropped while we were replying. Your answer is safe — try again.',
+          message:
+            'The connection dropped while we were replying. Your answer is safe — try again.',
         });
         return;
       }
@@ -246,11 +274,14 @@ export const briefsHandlers = [
     const brief = ownBrief(params.briefId, user);
     if (!brief) return notFound();
     const parsed = checkoutInputSchema.safeParse(await request.json());
-    if (!parsed.success) return errorResponse(422, 'invalid_input', 'Choose what to buy or request.');
+    if (!parsed.success)
+      return errorResponse(422, 'invalid_input', 'Choose what to buy or request.');
     const { option, reportIds } = parsed.data;
 
     const owned = db.get().ownedReports[user.id] ?? [];
-    const toBuy = LIBRARY_ITEMS.filter((item) => reportIds.includes(item.id) && !owned.includes(item.id));
+    const toBuy = LIBRARY_ITEMS.filter(
+      (item) => reportIds.includes(item.id) && !owned.includes(item.id),
+    );
     const total = toBuy.reduce((sum, item) => sum + item.priceCredits, 0);
     const wallet = effectiveWallet(user.id);
     if (option !== 'custom' && total > wallet.balance) {
@@ -269,18 +300,28 @@ export const briefsHandlers = [
 
     const parts: string[] = [];
     if (purchasedReportIds.length) {
-      parts.push(`You now own ${purchasedReportIds.length} ${purchasedReportIds.length === 1 ? 'report' : 'reports'}. ${total} credits were taken from your wallet.`);
+      parts.push(
+        `You now own ${purchasedReportIds.length} ${purchasedReportIds.length === 1 ? 'report' : 'reports'}. ${total} credits were taken from your wallet.`,
+      );
     }
     if (requestId) {
-      parts.push('Your quote request is in. Expect a quote within 24 hours — we’ll notify you, and you can track it in Requests.');
+      parts.push(
+        'Your quote request is in. Expect a quote within 24 hours — we’ll notify you, and you can track it in Requests.',
+      );
     }
     parts.push('This brief is saved in your workspace.');
-    const assistantMessage = toMessage('assistant', parts.join(' '), 'checkout', {
-      kind: 'done',
-      option,
-      purchasedReportIds,
-      requestId,
-    }, now);
+    const assistantMessage = toMessage(
+      'assistant',
+      parts.join(' '),
+      'checkout',
+      {
+        kind: 'done',
+        option,
+        purchasedReportIds,
+        requestId,
+      },
+      now,
+    );
 
     const submitted: ResearchBrief = {
       ...brief,
@@ -321,5 +362,12 @@ export const briefsHandlers = [
     });
 
     return HttpResponse.json({ brief: submitted, assistantMessage, purchasedReportIds, requestId });
+  }),
+];
+
+export const subjectsHandlers = [
+  http.get('/api/subjects', async () => {
+    await simulateNetwork();
+    return HttpResponse.json(ALL_SUBJECTS);
   }),
 ];

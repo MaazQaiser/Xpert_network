@@ -1,10 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, InlineNotification, RadioButton, RadioButtonGroup, SkeletonText, Stack } from '@carbon/react';
+import {
+  Button,
+  InlineNotification,
+  RadioButton,
+  RadioButtonGroup,
+  SkeletonText,
+  Stack,
+} from '@carbon/react';
 import { formatCreditsWithCurrency } from '@/shared/lib/credits';
 import { toUserMessage } from '@/shared/api';
 import { useCreditPacks, useTopUp } from '../../api/useWallet';
+import styles from './TopUpPanel.module.scss';
 
 type TopUpPanelProps = {
   /** Credits still needed; the smallest pack that covers it is preselected. */
@@ -22,7 +30,15 @@ export function TopUpPanel({ shortfall = 0, onToppedUp }: TopUpPanelProps) {
 
   if (packs.isPending) return <SkeletonText paragraph lineCount={3} />;
   if (packs.isError) {
-    return <InlineNotification kind="error" title="Credit packs didn’t load" subtitle={toUserMessage(packs.error)} lowContrast hideCloseButton />;
+    return (
+      <InlineNotification
+        kind="error"
+        title="Credit packs didn’t load"
+        subtitle={toUserMessage(packs.error)}
+        lowContrast
+        hideCloseButton
+      />
+    );
   }
 
   return (
@@ -44,7 +60,13 @@ export function TopUpPanel({ shortfall = 0, onToppedUp }: TopUpPanelProps) {
         ))}
       </RadioButtonGroup>
       {topUp.isError ? (
-        <InlineNotification kind="error" title="Top-up failed" subtitle={toUserMessage(topUp.error)} lowContrast hideCloseButton />
+        <InlineNotification
+          kind="error"
+          title="Top-up failed"
+          subtitle={toUserMessage(topUp.error)}
+          lowContrast
+          hideCloseButton
+        />
       ) : null}
       <div>
         <Button
@@ -59,7 +81,7 @@ export function TopUpPanel({ shortfall = 0, onToppedUp }: TopUpPanelProps) {
           {topUp.isPending ? 'Adding credits…' : 'Buy credits'}
         </Button>
       </div>
-      <p>Prototype: no payment is taken.</p>
+      <p className={styles.note}>Prototype: no payment is taken.</p>
     </Stack>
   );
 }

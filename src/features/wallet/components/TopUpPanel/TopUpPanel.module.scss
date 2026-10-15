@@ -1,0 +1,8 @@
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.note {
+  @include type-style('helper-text-01');
+
+  color: $text-helper;
+}

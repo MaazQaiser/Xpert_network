@@ -1,7 +1,13 @@
 import type { PersonaId, Role } from './session.schema';
 
 /** Demo accounts shown on the login screens (prototype only). */
-export const DEMO_ACCOUNTS: { personaId: PersonaId; role: Role; name: string; email: string; summary: string }[] = [
+export const DEMO_ACCOUNTS: {
+  personaId: PersonaId;
+  role: Role;
+  name: string;
+  email: string;
+  summary: string;
+}[] = [
   {
     personaId: 'ayesha',
     role: 'client',

@@ -6,3 +6,8 @@ public
 coverage
 playwright-report
 test-results
+
+# Hand-written product docs keep their own formatting
+CLAUDE.md
+AGENTS.md
+docs/*.md

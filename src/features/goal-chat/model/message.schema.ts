@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { goalTypeSchema, researchOptionSchema, subjectSchema, questionSchema } from './brief.schema';
+import {
+  goalTypeSchema,
+  researchOptionSchema,
+  subjectSchema,
+  questionSchema,
+} from './brief.schema';
 import { coverageResultSchema } from './coverage.schema';
 import { stepIdSchema } from './steps';
 

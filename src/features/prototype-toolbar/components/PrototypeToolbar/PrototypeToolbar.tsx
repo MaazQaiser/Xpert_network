@@ -65,7 +65,11 @@ export function PrototypeToolbar() {
   return (
     <Theme theme="g90" className={styles.root}>
       {isOpen ? (
-        <section id="prototype-toolbar" className={styles.panel} aria-labelledby="prototype-toolbar-title">
+        <section
+          id="prototype-toolbar"
+          className={styles.panel}
+          aria-labelledby="prototype-toolbar-title"
+        >
           <div className={styles.header}>
             <h2 id="prototype-toolbar-title" className={styles.title}>
               Prototype controls
@@ -87,8 +91,12 @@ export function PrototypeToolbar() {
               label="Not logged in"
               items={PERSONA_IDS}
               selectedItem={currentPersona}
-              itemToString={(id: PersonaId | null) => (id ? `${USERS[id].name} (${USERS[id].role})` : '')}
-              helperText={currentPersona ? PERSONA_SUMMARY[currentPersona] : 'Pick a persona to log in'}
+              itemToString={(id: PersonaId | null) =>
+                id ? `${USERS[id].name} (${USERS[id].role})` : ''
+              }
+              helperText={
+                currentPersona ? PERSONA_SUMMARY[currentPersona] : 'Pick a persona to log in'
+              }
               onChange={({ selectedItem }: { selectedItem: PersonaId | null }) => {
                 if (selectedItem) switchPersona(selectedItem);
               }}
@@ -138,14 +146,15 @@ export function PrototypeToolbar() {
       <Button
         kind="secondary"
         size="md"
+        hasIconOnly
         renderIcon={Debug}
+        iconDescription={isOpen ? 'Hide prototype controls' : 'Prototype controls'}
+        tooltipPosition="left"
         aria-expanded={isOpen}
         aria-controls="prototype-toolbar"
         onClick={() => setIsOpen((open) => !open)}
         className={styles.trigger}
-      >
-        Prototype
-      </Button>
+      />
     </Theme>
   );
 }

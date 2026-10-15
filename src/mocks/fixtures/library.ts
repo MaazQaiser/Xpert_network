@@ -21,9 +21,17 @@ export const LIBRARY_ITEMS: LibraryItem[] = [
     ],
     toc: [
       { id: 's1', title: 'Market size and growth by country', topics: ['market-size'] },
-      { id: 's2', title: 'Competitive landscape and share shifts', topics: ['competition', 'local-competition'] },
+      {
+        id: 's2',
+        title: 'Competitive landscape and share shifts',
+        topics: ['competition', 'local-competition'],
+      },
       { id: 's3', title: 'Pricing ladders and average ticket', topics: ['pricing'] },
-      { id: 's4', title: 'Customer perception of leading brands', topics: ['brand-perception', 'consumer-trends'] },
+      {
+        id: 's4',
+        title: 'Customer perception of leading brands',
+        topics: ['brand-perception', 'consumer-trends'],
+      },
     ],
     publishedAt: '2026-08-12',
     provenance: PROVENANCE,
@@ -45,7 +53,11 @@ export const LIBRARY_ITEMS: LibraryItem[] = [
     ],
     toc: [
       { id: 's1', title: 'Store-level sales trajectory 2023–2026', topics: ['sales-trend'] },
-      { id: 's2', title: 'Unit economics: ticket, footfall, margin ranges', topics: ['unit-economics'] },
+      {
+        id: 's2',
+        title: 'Unit economics: ticket, footfall, margin ranges',
+        topics: ['unit-economics'],
+      },
       { id: 's3', title: 'New stores vs. like-for-like growth', topics: ['growth-drivers'] },
       { id: 's4', title: 'Operational and supplier risks', topics: ['operational-risk'] },
     ],
@@ -92,7 +104,11 @@ export const LIBRARY_ITEMS: LibraryItem[] = [
     ],
     toc: [
       { id: 's1', title: 'Licence and permit checklist', topics: ['licensing'] },
-      { id: 's2', title: 'Typical approval timelines by city', topics: ['licensing', 'lead-times'] },
+      {
+        id: 's2',
+        title: 'Typical approval timelines by city',
+        topics: ['licensing', 'lead-times'],
+      },
       { id: 's3', title: 'Recent regulatory changes', topics: ['regulation'] },
     ],
     publishedAt: '2026-07-18',
@@ -101,7 +117,8 @@ export const LIBRARY_ITEMS: LibraryItem[] = [
   {
     id: 'lib_dubai_rents',
     title: 'Dubai high-street and mall rents for F&B, 2026',
-    summary: 'Rent ranges, fit-out contributions and lease terms for F&B units across Dubai locations.',
+    summary:
+      'Rent ranges, fit-out contributions and lease terms for F&B units across Dubai locations.',
     category: { industry: 'Real estate', subIndustry: 'Retail leasing' },
     regionIds: ['rg_dubai'],
     companyIds: [],
@@ -131,7 +148,11 @@ export const LIBRARY_ITEMS: LibraryItem[] = [
     ],
     toc: [
       { id: 's1', title: 'Fee and royalty benchmarks', topics: ['franchise-fees'] },
-      { id: 's2', title: 'Central procurement and approved suppliers', topics: ['procurement-model', 'suppliers'] },
+      {
+        id: 's2',
+        title: 'Central procurement and approved suppliers',
+        topics: ['procurement-model', 'suppliers'],
+      },
       { id: 's3', title: 'Unit growth playbooks', topics: ['growth-drivers'] },
     ],
     publishedAt: '2026-04-09',
@@ -157,7 +178,8 @@ export const LIBRARY_ITEMS: LibraryItem[] = [
   {
     id: 'lib_ksa_grocery',
     title: 'Saudi grocery retail: share shifts and private label, 2024–2026',
-    summary: 'Which grocers are gaining share, how private label is changing margins, and what suppliers expect next.',
+    summary:
+      'Which grocers are gaining share, how private label is changing margins, and what suppliers expect next.',
     category: { industry: 'Consumer retail', subIndustry: 'Grocery' },
     regionIds: ['rg_ksa'],
     companyIds: ['co_sahm_grocers'],
@@ -175,7 +197,8 @@ export const LIBRARY_ITEMS: LibraryItem[] = [
   {
     id: 'lib_ksa_cold_chain',
     title: 'Cold-chain logistics for dairy and fresh food in KSA',
-    summary: 'Providers, lead times and failure points in chilled distribution for cafés and grocers.',
+    summary:
+      'Providers, lead times and failure points in chilled distribution for cafés and grocers.',
     category: { industry: 'Logistics', subIndustry: 'Cold chain' },
     regionIds: ['rg_ksa'],
     companyIds: [],
@@ -193,7 +216,8 @@ export const LIBRARY_ITEMS: LibraryItem[] = [
   {
     id: 'lib_uae_retail',
     title: 'UAE consumer retail: footfall and spending, 2026',
-    summary: 'Footfall, basket size and category trends across UAE malls, with a view on Darb Retail Group.',
+    summary:
+      'Footfall, basket size and category trends across UAE malls, with a view on Darb Retail Group.',
     category: { industry: 'Consumer retail', subIndustry: 'Fashion & home' },
     regionIds: ['rg_uae'],
     companyIds: ['co_darb_retail'],
@@ -202,7 +226,11 @@ export const LIBRARY_ITEMS: LibraryItem[] = [
     experts: [{ role: 'Former merchandising head', years: 12, region: 'UAE' }],
     toc: [
       { id: 's1', title: 'Footfall and spend trends', topics: ['consumer-trends'] },
-      { id: 's2', title: 'Darb Retail Group: trading update', topics: ['sales-trend', 'competition'] },
+      {
+        id: 's2',
+        title: 'Darb Retail Group: trading update',
+        topics: ['sales-trend', 'competition'],
+      },
     ],
     publishedAt: '2026-09-20',
     provenance: PROVENANCE,

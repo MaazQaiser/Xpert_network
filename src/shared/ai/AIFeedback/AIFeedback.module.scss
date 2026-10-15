@@ -1,0 +1,16 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  display: flex;
+  align-items: center;
+  gap: $spacing-01;
+}
+
+.thanks {
+  @include type-style('helper-text-01');
+
+  color: $text-helper;
+  margin-inline-start: $spacing-03;
+}

@@ -64,7 +64,6 @@
     "stylelint-plugin-carbon-tokens": "^5.0.6",
     "typescript": "^5",
     "typescript-eslint": "^8.71.2",
-    "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^5.0.4",
     "vitest-axe": "^0.1.0"
   },

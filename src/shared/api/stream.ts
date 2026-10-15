@@ -13,7 +13,8 @@ export async function* streamEvents<TSchema extends z.ZodType>(
   signal?: AbortSignal,
 ): AsyncGenerator<z.infer<TSchema>> {
   const response = await send(path, { method: 'POST', body, ...(signal ? { signal } : {}) });
-  if (!response.body) throw new ApiError(500, 'invalid_response', fallbackMessage('invalid_response'));
+  if (!response.body)
+    throw new ApiError(500, 'invalid_response', fallbackMessage('invalid_response'));
 
   const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
   let buffer = '';

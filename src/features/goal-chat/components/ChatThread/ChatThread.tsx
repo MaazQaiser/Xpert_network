@@ -1,0 +1,142 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
+import { Button } from '@carbon/react';
+import { Renew, StopFilledAlt } from '@carbon/icons-react';
+import { AIExplainLabel, AIFeedback, AIStepIndicator, StreamingText } from '@/shared/ai';
+import { ErrorState } from '@/shared/ui';
+import { formatDateTime, formatRelative } from '@/shared/lib/dates';
+import type { ResearchBrief } from '../../model/brief.schema';
+import type { ChatMessage } from '../../model/message.schema';
+import type { TurnController } from '../../hooks/useTurn';
+import { WidgetView } from './MessageView';
+import styles from './ChatThread.module.scss';
+
+type ChatThreadProps = {
+  brief: ResearchBrief;
+  messages: ChatMessage[];
+  turn: TurnController;
+};
+
+function AssistantHeader({ at }: { at?: string }) {
+  return (
+    <div className={styles.meta}>
+      <span className={styles.author}>Proptyop assistant</span>
+      <AIExplainLabel
+        size="mini"
+        aria-label="About this reply"
+        summary="Written by Proptyop’s research assistant to scope your brief. It doesn’t give investment advice."
+        basis="Your answers in this chat and the Proptyop library catalogue"
+      />
+      {at ? (
+        <time dateTime={at} title={formatDateTime(at)} className={styles.time}>
+          {formatRelative(at)}
+        </time>
+      ) : null}
+    </div>
+  );
+}
+
+export function ChatThread({ brief, messages, turn }: ChatThreadProps) {
+  const endRef = useRef<HTMLDivElement>(null);
+  const lastAssistantId = messages.filter((m) => m.role === 'assistant').at(-1)?.id;
+  const isSubmitted = brief.status === 'submitted';
+  const showPending = turn.pending !== null && turn.status !== 'done';
+
+  // Follow the conversation only if the user is already near the bottom (AI_NATIVE §4.2).
+  useEffect(() => {
+    const nearBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight - 240;
+    if (nearBottom) endRef.current?.scrollIntoView({ block: 'end' });
+  }, [messages.length, turn.text.length, turn.status]);
+
+  return (
+    <section className={styles.root} aria-label="Conversation">
+      <ol className={styles.list}>
+        {messages.map((message) => {
+          if (message.role === 'user') {
+            return (
+              <li key={message.id} className={styles.userRow}>
+                <p className={styles.userBubble}>
+                  <span className={styles.srOnly}>You said: </span>
+                  {message.text}
+                </p>
+              </li>
+            );
+          }
+          const isLatest = message.id === lastAssistantId;
+          const showWidget = isLatest || message.widget?.kind === 'done';
+          return (
+            <li key={message.id} className={styles.assistantRow}>
+              <AssistantHeader at={message.createdAt} />
+              <p className={styles.text}>{message.text}</p>
+              {showWidget ? (
+                <div className={styles.widget}>
+                  <WidgetView
+                    message={message}
+                    brief={brief}
+                    isInteractive={isLatest && !showPending && !isSubmitted}
+                    turn={turn}
+                  />
+                </div>
+              ) : null}
+              {isLatest && !showPending ? <AIFeedback responseId={message.id} /> : null}
+            </li>
+          );
+        })}
+
+        {showPending && turn.pending?.userText ? (
+          <li className={styles.userRow}>
+            <p className={styles.userBubble}>
+              <span className={styles.srOnly}>You said: </span>
+              {turn.pending.userText}
+            </p>
+          </li>
+        ) : null}
+
+        {showPending ? (
+          <li className={styles.assistantRow} aria-busy={turn.status === 'streaming'}>
+            <AssistantHeader />
+            <AIStepIndicator
+              steps={turn.steps}
+              isActive={turn.status === 'streaming' && !turn.text}
+            />
+            {turn.text ? (
+              <StreamingText text={turn.text} isStreaming={turn.status === 'streaming'} />
+            ) : null}
+            {turn.status === 'streaming' ? (
+              <div>
+                <Button kind="ghost" size="sm" renderIcon={StopFilledAlt} onClick={turn.stop}>
+                  Stop
+                </Button>
+              </div>
+            ) : null}
+            {turn.status === 'stopped' ? (
+              <div className={styles.actions}>
+                <p className={styles.notice}>Response stopped.</p>
+                <Button kind="tertiary" size="sm" renderIcon={Renew} onClick={turn.retry}>
+                  Regenerate
+                </Button>
+                <Button kind="ghost" size="sm" onClick={turn.dismiss}>
+                  Answer differently
+                </Button>
+              </div>
+            ) : null}
+            {turn.status === 'error' ? (
+              <div className={styles.actions}>
+                <ErrorState
+                  title="Reply interrupted"
+                  message={turn.errorMessage ?? 'Something went wrong. Try again.'}
+                  onRetry={turn.retry}
+                />
+                <Button kind="ghost" size="sm" onClick={turn.dismiss}>
+                  Answer differently
+                </Button>
+              </div>
+            ) : null}
+          </li>
+        ) : null}
+      </ol>
+      <div ref={endRef} />
+    </section>
+  );
+}

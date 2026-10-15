@@ -1,0 +1,64 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+
+.root {
+  padding: $spacing-05;
+  background: $layer-01;
+
+  @include breakpoint(lg) {
+    position: sticky;
+    inset-block-start: $spacing-11;
+    max-block-size: calc(100vh - $spacing-12);
+    overflow-y: auto;
+  }
+}
+
+.heading {
+  @include type-style('heading-compact-02');
+}
+
+.hint {
+  @include type-style('helper-text-01');
+
+  color: $text-helper;
+  margin-block: $spacing-02 $spacing-05;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+
+  dt {
+    @include type-style('label-01');
+
+    color: $text-secondary;
+    margin-block-end: $spacing-02;
+  }
+
+  dd {
+    @include type-style('body-compact-01');
+  }
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-02;
+}
+
+.questions {
+  padding-inline-start: $spacing-05;
+  list-style: decimal;
+
+  li + li {
+    margin-block-start: $spacing-02;
+  }
+}

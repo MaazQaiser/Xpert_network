@@ -25,7 +25,11 @@ export function UserPanel({ user }: { user: User }) {
       >
         <UserAvatar size={20} />
       </HeaderGlobalAction>
-      <HeaderPanel expanded={isOpen} aria-label="Account" onHeaderPanelFocus={() => setIsOpen(false)}>
+      <HeaderPanel
+        expanded={isOpen}
+        aria-label="Account"
+        onHeaderPanelFocus={() => setIsOpen(false)}
+      >
         <div className={styles.panel}>
           <p className={styles.name}>{user.name}</p>
           <p className={styles.meta}>{user.title}</p>

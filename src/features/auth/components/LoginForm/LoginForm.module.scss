@@ -39,18 +39,25 @@
   margin-block-start: $spacing-04;
 }
 
-.tile {
-  display: flex;
+.account {
   flex-direction: column;
-  gap: $spacing-02;
+  align-items: flex-start;
+  inline-size: 100%;
+  max-inline-size: none;
+  block-size: auto;
+  padding-block: $spacing-04;
 }
 
 .tileName {
   @include type-style('heading-compact-01');
+
+  display: block;
 }
 
 .tileSummary {
   @include type-style('body-compact-01');
 
+  display: block;
+  margin-block-start: $spacing-02;
   color: $text-secondary;
 }

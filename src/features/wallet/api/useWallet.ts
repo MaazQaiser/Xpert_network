@@ -16,7 +16,8 @@ export function useWallet() {
 export function useCreditPacks() {
   return useQuery({
     queryKey: walletKeys.packs(),
-    queryFn: ({ signal }) => apiRequest('/wallet/packs', { schema: z.array(creditPackSchema), signal }),
+    queryFn: ({ signal }) =>
+      apiRequest('/wallet/packs', { schema: z.array(creditPackSchema), signal }),
     staleTime: Infinity, // Static catalogue.
   });
 }

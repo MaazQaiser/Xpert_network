@@ -25,6 +25,7 @@ export function LowBalanceBanner() {
         onActionButtonClick={() => router.push('/wallet')}
         onCloseButtonClick={() => setIsDismissed(true)}
         inline
+        hasFocus={false}
         lowContrast
       />
     </div>

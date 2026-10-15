@@ -11,7 +11,10 @@ import styles from './RoleSelect.module.scss';
 
 type Choice = 'client' | 'expert';
 
-const CHOICES: Record<Choice, { title: string; description: string; personaId: 'ayesha' | 'sara' }> = {
+const CHOICES: Record<
+  Choice,
+  { title: string; description: string; personaId: 'ayesha' | 'sara' }
+> = {
   client: {
     title: 'I need research',
     description: 'Describe a goal, buy expert-backed reports, or request custom research.',
@@ -43,7 +46,9 @@ export function RoleSelect() {
 
   return (
     <Stack gap={6}>
-      {error ? <InlineNotification kind="error" title="Couldn’t continue" subtitle={error} lowContrast /> : null}
+      {error ? (
+        <InlineNotification kind="error" title="Couldn’t continue" subtitle={error} lowContrast />
+      ) : null}
       <TileGroup
         legend="How will you use Proptyop?"
         name="role"
@@ -58,7 +63,11 @@ export function RoleSelect() {
         ))}
       </TileGroup>
       <div>
-        <Button renderIcon={ArrowRight} onClick={() => void handleContinue()} disabled={login.isPending}>
+        <Button
+          renderIcon={ArrowRight}
+          onClick={() => void handleContinue()}
+          disabled={login.isPending}
+        >
           Continue
         </Button>
       </div>

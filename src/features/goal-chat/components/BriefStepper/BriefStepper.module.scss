@@ -1,0 +1,13 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+
+.root {
+  overflow-x: auto;
+  padding-block-end: $spacing-03;
+
+  @include breakpoint(lg) {
+    overflow-x: visible;
+    position: sticky;
+    inset-block-start: $spacing-11;
+  }
+}

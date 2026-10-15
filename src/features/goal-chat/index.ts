@@ -3,3 +3,8 @@ export * from './model/brief.schema';
 export * from './model/coverage.schema';
 export * from './model/message.schema';
 export * from './model/turn.schema';
+export { briefKeys } from './api/keys';
+export { useBriefs } from './api/queries';
+export { GoalChat } from './components/GoalChat/GoalChat';
+export { StartBrief } from './components/StartBrief/StartBrief';
+export { ClientHome } from './components/ClientHome/ClientHome';
