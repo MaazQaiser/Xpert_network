@@ -12,5 +12,15 @@
     "declaration-no-important": true,
     "selector-class-pattern": "^[a-z][a-zA-Z0-9]*$",
     "scss/dollar-variable-pattern": null
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/styles/_themes.scss", "src/styles/_fonts.scss"],
+      "rules": {
+        "color-no-hex": null,
+        "carbon/theme-use": null,
+        "carbon/type-use": null
+      }
+    }
+  ]
 }

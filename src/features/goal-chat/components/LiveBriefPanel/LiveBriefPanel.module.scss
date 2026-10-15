@@ -2,10 +2,12 @@
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
 @use '@carbon/react/scss/breakpoint' as *;
+@use '../../../../styles/mixins' as mx;
 
 .root {
+  @include mx.surface-card;
+
   padding: $spacing-05;
-  background: $layer-01;
 
   @include breakpoint(lg) {
     position: sticky;

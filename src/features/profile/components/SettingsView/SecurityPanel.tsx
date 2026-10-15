@@ -357,14 +357,15 @@ function SessionsSection({ security }: { security: Security }) {
       {others.length === 0 ? (
         <p className={styles.help}>No other active sessions.</p>
       ) : (
-        <div>
+        <div className={styles.actions}>
           <Button
             kind="danger--tertiary"
             renderIcon={Logout}
+            className={styles.wrappingButton}
             disabled={signOutOthers.isPending}
             onClick={() => signOutOthers.mutate()}
           >
-            Sign out of all other sessions
+            <span className={styles.wrappingLabel}>Sign out of all other sessions</span>
           </Button>
         </div>
       )}

@@ -3,12 +3,15 @@
 @use '@carbon/react/scss/type' as *;
 
 .buttons {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   gap: $spacing-03;
 }
 
+// flex-basis sets the width (Carbon sizes buttons to content): side by side, or stacked on phones.
 .provider {
-  inline-size: 100%;
+  flex: 1 1 12rem;
+  min-inline-size: 0;
   max-inline-size: none;
 }
 

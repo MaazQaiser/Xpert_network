@@ -6,6 +6,7 @@ import {
   Button,
   Form,
   InlineNotification,
+  Layer,
   ProgressIndicator,
   ProgressIndicatorSkeleton,
   ProgressStep,
@@ -154,44 +155,46 @@ function ExpertOnboardingView({ profile }: { profile: ExpertOnboarding }) {
           />
         ) : null}
 
-        {step === 'basics' ? (
-          <BasicsStep
-            profile={profile}
-            isBusy={isBusy}
-            onSubmit={(data) => saveStep({ step: 'basics', data })}
-          />
-        ) : step === 'work' ? (
-          <WorkStep
-            profile={profile}
-            isBusy={isBusy}
-            onBack={back('basics')}
-            onSubmit={(data) => saveStep({ step: 'work', data })}
-          />
-        ) : step === 'expertise' ? (
-          <ExpertiseStep
-            profile={profile}
-            isBusy={isBusy}
-            onBack={back('work')}
-            onSubmit={(data) => saveStep({ step: 'expertise', data })}
-          />
-        ) : step === 'compliance' ? (
-          <ComplianceStep
-            profile={profile}
-            isBusy={isBusy}
-            onBack={back('expertise')}
-            onSubmit={(data) => saveStep({ step: 'compliance', data })}
-          />
-        ) : (
-          <ReviewStep
-            profile={profile}
-            isBusy={isBusy}
-            onBack={back('compliance')}
-            onEdit={(target) => goTo.mutate(target)}
-            onSubmit={() =>
-              submit.mutate(undefined, { onSuccess: () => router.push(routes.expert.pending) })
-            }
-          />
-        )}
+        <Layer className={styles.card}>
+          {step === 'basics' ? (
+            <BasicsStep
+              profile={profile}
+              isBusy={isBusy}
+              onSubmit={(data) => saveStep({ step: 'basics', data })}
+            />
+          ) : step === 'work' ? (
+            <WorkStep
+              profile={profile}
+              isBusy={isBusy}
+              onBack={back('basics')}
+              onSubmit={(data) => saveStep({ step: 'work', data })}
+            />
+          ) : step === 'expertise' ? (
+            <ExpertiseStep
+              profile={profile}
+              isBusy={isBusy}
+              onBack={back('work')}
+              onSubmit={(data) => saveStep({ step: 'expertise', data })}
+            />
+          ) : step === 'compliance' ? (
+            <ComplianceStep
+              profile={profile}
+              isBusy={isBusy}
+              onBack={back('expertise')}
+              onSubmit={(data) => saveStep({ step: 'compliance', data })}
+            />
+          ) : (
+            <ReviewStep
+              profile={profile}
+              isBusy={isBusy}
+              onBack={back('compliance')}
+              onEdit={(target) => goTo.mutate(target)}
+              onSubmit={() =>
+                submit.mutate(undefined, { onSuccess: () => router.push(routes.expert.pending) })
+              }
+            />
+          )}
+        </Layer>
       </Stack>
     </div>
   );

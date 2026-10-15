@@ -1,27 +1,49 @@
 // Carbon config must be set once, before anything else uses it.
-// Plex is copied into /public/fonts by scripts/copy-fonts.mjs (see ADR 0007).
+// Fonts are copied into /public/fonts by scripts/copy-fonts.mjs (ADR 0007, ADR 0009).
+@use 'sass:string';
 @use '@carbon/react/scss/config' with (
   $font-path: '/fonts/plex',
   $use-per-family-plex: true
 );
-@use '@carbon/react/scss/fonts' with (
-  $fonts: (
-    IBM-Plex-Serif: false,
+
+// Inter for UI text, Instrument Serif for display headings, Plex Mono for code (ADR 0009).
+@use '@carbon/react/scss/type' with (
+  $font-families: (
+    'sans': string.unquote(
+        "'Inter Variable', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+      ),
+    'serif': string.unquote("'Instrument Serif', Georgia, 'Times New Roman', serif"),
+    'mono': string.unquote(
+        "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+      ),
   )
 );
+@use '@carbon/react/scss/fonts' with (
+  $fonts: (
+    IBM-Plex-Sans: false,
+    IBM-Plex-Serif: false,
+    IBM-Plex-Mono: true,
+  )
+);
+@use 'fonts' as proptyop-fonts;
 @use '@carbon/react';
 @use '@carbon/react/scss/theme';
-@use '@carbon/react/scss/themes';
+@use '@carbon/react/scss/type' as carbon-type;
 @use '@carbon/react/scss/motion' as *;
+@use 'themes' as proptyop;
 
-// Global theme: white by default, g100 when the user (or the system) prefers dark.
-// ThemeProvider writes data-carbon-theme on <html>.
+// Global theme: warm stone light by default, warm dark when the user (or the system)
+// prefers dark. ThemeProvider writes data-carbon-theme on <html> (`white` / `g100`).
 :root {
-  @include theme.theme(themes.$white);
+  @include proptyop.proptyop-theme(light);
+
+  // CSS modules compile without the font config above, so they read the display font
+  // through this property (see mixins.display-heading).
+  --pt-font-display: #{carbon-type.font-family('serif')};
 }
 
 :root[data-carbon-theme='g100'] {
-  @include theme.theme(themes.$g100);
+  @include proptyop.proptyop-theme(dark);
 
   color-scheme: dark;
 }
@@ -29,6 +51,7 @@
 body {
   background: theme.$background;
   color: theme.$text-primary;
+  -webkit-font-smoothing: antialiased;
 }
 
 @media (prefers-reduced-motion: reduce) {

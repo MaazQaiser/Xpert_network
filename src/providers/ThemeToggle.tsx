@@ -5,13 +5,14 @@ import { Asleep, Light } from '@carbon/icons-react';
 import { useThemePreference } from './ThemeProvider';
 
 /** Header action that flips between light (white) and dark (g100). */
-export function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setPreference } = useThemePreference();
   const isDark = theme === 'g100';
   return (
     <HeaderGlobalAction
       aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
       tooltipAlignment="end"
+      className={className}
       onClick={() => setPreference(isDark ? 'light' : 'dark')}
     >
       {isDark ? <Light size={20} /> : <Asleep size={20} />}

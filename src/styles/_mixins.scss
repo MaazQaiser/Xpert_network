@@ -1,5 +1,8 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/theme';
+@use '@carbon/react/scss/type';
 
 /// Comfortable reading width for long-form content (~70ch).
 @mixin reading-width {
@@ -14,4 +17,27 @@
   @include breakpoint(md) {
     padding-inline: $spacing-07;
   }
+}
+
+// ——— Proptyop look (ADR 0009) ————————————————————————————————————————————
+
+/// Serif display heading. Only for page titles, hero and marketing headings; section and
+/// component headings stay in the sans (Inter) for scanning.
+@mixin display-heading($token: 'heading-05') {
+  @include type.type-style($token, true);
+  @include type.font-weight('regular');
+
+  // The display font is Carbon's 'serif' family, exposed by globals.scss (ADR 0009).
+  // stylelint-disable-next-line carbon/type-use
+  font-family: var(--pt-font-display);
+  letter-spacing: 0;
+}
+
+/// Soft card for our own surfaces (heroes, panels, auth forms, chat bubbles). Carbon
+/// buttons and inputs keep their square shape.
+@mixin surface-card($radius: radius.$border-radius-16) {
+  border: 1px solid theme.$border-subtle-01;
+  border-radius: $radius;
+  background: theme.$layer-01;
+  box-shadow: 0 $spacing-01 $spacing-03 theme.$shadow;
 }

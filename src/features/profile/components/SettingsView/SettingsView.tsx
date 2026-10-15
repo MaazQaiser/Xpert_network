@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@carbon/react';
+import { Layer, Tab, TabList, TabPanel, TabPanels, Tabs } from '@carbon/react';
 import type { Role } from '@/features/auth';
 import { PageHeader } from '@/shared/ui';
 import { AppearancePanel } from './AppearancePanel';
@@ -84,8 +84,10 @@ function SettingsTabs({ role }: SettingsViewProps) {
         </TabList>
         <TabPanels>
           {tabs.map((tab, index) => (
-            <TabPanel key={tab.id} className={styles.panel}>
-              {index === selectedIndex ? panel(tab.id) : null}
+            <TabPanel key={tab.id} className={styles.tabPanel}>
+              {index === selectedIndex ? (
+                <Layer className={styles.panel}>{panel(tab.id)}</Layer>
+              ) : null}
             </TabPanel>
           ))}
         </TabPanels>

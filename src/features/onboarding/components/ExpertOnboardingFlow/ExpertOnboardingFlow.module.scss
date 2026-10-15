@@ -2,6 +2,7 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
+@use '../../../../styles/mixins' as mx;
 
 .root {
   display: flex;
@@ -146,4 +147,11 @@
   grid-template-columns: minmax(12rem, 16rem) 1fr;
   gap: $spacing-09;
   align-items: start;
+}
+
+.card {
+  @include mx.surface-card;
+
+  min-inline-size: 0;
+  padding: $spacing-07 $spacing-06;
 }

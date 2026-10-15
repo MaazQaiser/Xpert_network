@@ -1,7 +1,9 @@
+@use '@carbon/react/scss/breakpoint' as *;
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/utilities/visually-hidden' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
+@use '../../../../styles/mixins' as mx;
 
 .root {
   display: flex;
@@ -10,11 +12,17 @@
   max-inline-size: 56rem;
 }
 
+.tabPanel {
+  padding-block: $spacing-06 0;
+}
+
 .panel {
+  @include mx.surface-card;
+
   display: flex;
   flex-direction: column;
   gap: $spacing-09;
-  padding-block: $spacing-07;
+  padding: $spacing-07 $spacing-06;
 }
 
 .section {
@@ -107,4 +115,21 @@
 
 .visuallyHidden {
   @include visually-hidden;
+}
+
+// Long labels wrap on phones instead of pushing the page wider.
+.wrappingButton {
+  // flex-basis decides the width here, so Carbon's own button sizing can't push it wider.
+  flex: 1 1 0;
+  min-inline-size: 0;
+  block-size: auto;
+
+  @include breakpoint(md) {
+    flex: 0 0 auto;
+  }
+}
+
+.wrappingLabel {
+  white-space: normal;
+  text-align: start;
 }

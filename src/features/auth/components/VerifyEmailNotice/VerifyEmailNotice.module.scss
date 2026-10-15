@@ -1,3 +1,4 @@
+@use '@carbon/react/scss/breakpoint' as *;
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
@@ -30,4 +31,25 @@
   display: flex;
   flex-wrap: wrap;
   gap: $spacing-04;
+}
+
+.stack {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+// Long labels wrap on phones instead of pushing the page wider.
+.wrappingButton {
+  // flex-basis decides the width here, so Carbon's own button sizing can't push it wider.
+  flex: 1 1 0;
+  min-inline-size: 0;
+  block-size: auto;
+
+  @include breakpoint(md) {
+    flex: 0 0 auto;
+  }
+}
+
+.wrappingLabel {
+  white-space: normal;
+  text-align: start;
 }

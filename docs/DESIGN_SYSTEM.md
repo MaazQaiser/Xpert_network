@@ -26,20 +26,14 @@ pnpm add @carbon/react @carbon/icons-react @carbon/pictograms-react @carbon/char
 
 `src/styles/globals.scss`
 
-```scss
-@use '@carbon/react/scss/config' with (
-  $font-path: '@ibm/plex' // or self-host Plex via next/font
-);
-@use '@carbon/react';
-@use './tokens' as *; // Proptyop extension tokens (section 4)
-```
+See `src/styles/globals.scss`: Carbon config → `$font-families` (Inter / Instrument Serif / Plex Mono) → `@font-face` (`_fonts.scss`) → `@carbon/react` → Proptyop themes (`_themes.scss`). Details and reasons in ADR 0009.
 
 Next.js notes:
 
 - Import `globals.scss` once in `app/layout.tsx`.
 - Carbon interactive components need `'use client'`. Put them in `src/shared/ui/*` client wrappers or in feature `components/` that are client components; keep pages/layouts as Server Components.
 - Wrap the app in a client `<ThemeProvider>` that renders Carbon's `<Theme theme="...">`.
-- Load IBM Plex Sans / Mono through `next/font` (or `@ibm/plex`) to avoid layout shift.
+- Fonts are self-hosted from `/public/fonts` (copied on `postinstall`); `next/font` can't be used because Carbon's type styles reference literal family names (ADR 0007, 0009).
 
 ---
 
@@ -47,13 +41,14 @@ Next.js notes:
 
 | Area | Carbon theme | Why |
 |---|---|---|
-| App (default, light) | `white` | Max legibility for long-form reading |
+| App (default, light) | `white` + Proptyop warm overrides | Warm stone page, paper cards, burnt-orange accent (ADR 0009) |
 | App alt surfaces (side panels, filters) | `g10` layer | Subtle separation |
-| Dark mode | `g100` | User preference / system setting |
-| UI Shell header | `g100` | Carbon convention, strong anchor |
+| Dark mode | `g100` + Proptyop warm overrides | User preference / system setting |
+| UI Shell header + side nav | App theme (light or dark) | Calm, Notion-like frame; accent bar marks the active item |
+| Admin header | `g100` (Carbon) | Separate realm must look different |
 
 - Theme follows `prefers-color-scheme`, overridable in user settings (persisted server-side).
-- Never hard-code a colour that only works in one theme. Test every screen in `white` and `g100`.
+- Never hard-code a colour. Raw values live only in `src/styles/_themes.scss`; add a token there (light and dark, AA-checked) rather than in a component. Test every screen in both themes.
 - Use **layering tokens** (`$layer-01/02/03`, `$layer-accent-*`, `$border-subtle-*`) and Carbon's `<Layer>` component to nest surfaces — don't pick background colours manually.
 
 ---
@@ -99,7 +94,15 @@ Rules of thumb:
 - Between related groups: `$spacing-06`–`$spacing-07`.
 - Between page sections: `$spacing-09`+.
 
-### 4.4 Typography — IBM Plex Sans / Mono
+### 4.4 Typography — Inter, Instrument Serif, Plex Mono
+
+- UI and body: **Inter** (Carbon `sans`). Display headings: **Instrument Serif** (Carbon `serif`), only via `@include mx.display-heading('heading-06')` for page titles, hero and marketing headings. Code: **IBM Plex Mono**.
+- Section, card and component headings stay in Inter so dense screens scan quickly.
+
+### 4.4.1 Surfaces
+
+- Our own containers (hero tiles, panels, auth card, onboarding/settings cards, chat bubbles) use `@include mx.surface-card` — `$border-radius-16`, `$border-subtle-01` border, soft `$shadow`. Put form content inside Carbon `<Layer>` so fields use the right contextual tokens.
+- Carbon buttons, inputs, tags and modals keep Carbon's shapes — don't restyle their internals.
 
 Use `@include type-style('<token>')`. Productive set for the app:
 

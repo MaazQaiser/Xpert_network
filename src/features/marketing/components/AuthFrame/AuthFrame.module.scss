@@ -1,13 +1,15 @@
+@use '@carbon/react/scss/breakpoint' as *;
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
+@use '../../../../styles/mixins' as mx;
 
 .root {
   padding-block: $spacing-10;
 }
 
 .title {
-  @include type-style('heading-05');
+  @include mx.display-heading('heading-06');
 }
 
 .description {
@@ -18,5 +20,12 @@
 }
 
 .body {
+  @include mx.surface-card;
+
   margin-block-start: $spacing-08;
+  padding: $spacing-06 $spacing-05;
+
+  @include breakpoint(md) {
+    padding: $spacing-07 $spacing-06;
+  }
 }

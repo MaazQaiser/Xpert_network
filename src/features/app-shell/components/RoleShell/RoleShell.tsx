@@ -35,11 +35,13 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
             <AppShell
               {...(SUFFIX[role] ? { productSuffix: SUFFIX[role] } : {})}
               homeHref={ROLE_HOME[role]}
+              {...(role === 'admin' ? { chromeTheme: 'g100' as const } : {})}
               navItems={isFocused ? [] : NAVIGATION[role]}
               headerActions={
                 <>
                   {role === 'client' && !isFocused ? <BalanceBadge /> : null}
-                  <ThemeToggle />
+                  {/* Phones: theme lives in Settings → Appearance, so the header fits. */}
+                  <ThemeToggle className={styles.hideOnPhone} />
                   <NotificationCentre
                     {...(SETTINGS[role] && !isFocused
                       ? { settingsHref: `${SETTINGS[role]}?tab=notifications` }

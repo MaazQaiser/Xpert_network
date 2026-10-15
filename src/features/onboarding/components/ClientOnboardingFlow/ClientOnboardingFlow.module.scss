@@ -1,6 +1,7 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
+@use '../../../../styles/mixins' as mx;
 
 .root {
   display: flex;
@@ -65,4 +66,11 @@
   display: block;
   margin-block-start: $spacing-02;
   color: $text-secondary;
+}
+
+.card {
+  @include mx.surface-card;
+
+  min-inline-size: 0;
+  padding: $spacing-07 $spacing-06;
 }

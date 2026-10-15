@@ -1,6 +1,6 @@
 # 0007 — Serve IBM Plex from /public via Carbon's font-face
 
-- Status: Accepted · 2026-10-15
+- Status: Accepted · 2026-10-15 · Amended by ADR 0009 (UI font is now Inter; Plex Mono only)
 
 ## Context
 

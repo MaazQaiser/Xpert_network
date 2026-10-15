@@ -1,6 +1,7 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
+@use '../../../styles/mixins' as mx;
 
 .root {
   display: flex;
@@ -22,7 +23,7 @@
 }
 
 .title {
-  @include type-style('heading-05');
+  @include mx.display-heading('heading-06');
 }
 
 .subtitle {

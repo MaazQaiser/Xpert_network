@@ -1,3 +1,4 @@
+@use '@carbon/react/scss/breakpoint' as *;
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
@@ -8,12 +9,16 @@
   align-items: center;
   gap: $spacing-03;
   block-size: 100%;
-  padding-inline: $spacing-05;
+  padding-inline: $spacing-03;
   color: $text-primary;
   text-decoration: none;
 
   &:hover {
     background: $background-hover;
+  }
+
+  @include breakpoint(md) {
+    padding-inline: $spacing-05;
   }
 
   &:focus {
@@ -23,4 +28,11 @@
 
 .amount {
   @include type-style('body-compact-01');
+
+  // Phones show the icon only; the link's label still reads the balance.
+  display: none;
+
+  @include breakpoint(md) {
+    display: inline;
+  }
 }

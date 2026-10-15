@@ -1,0 +1,236 @@
+// Proptyop themes (ADR 0009): Carbon's white / g100 token sets with a warm stone palette
+// and a burnt-orange accent. This is the ONLY place raw colour values may appear; every
+// component uses Carbon tokens. All text pairs meet WCAG 2.2 AA (checked 2026-10-15).
+@use '@carbon/react/scss/theme';
+@use '@carbon/react/scss/themes';
+@use '@carbon/react/scss/utilities/custom-property';
+
+// ——— Palette ——————————————————————————————————————————————————————————
+$stone-10: #faf8f5; // paper: cards, fields
+$stone-20: #f4f1ec;
+$stone-30: #efebe6; // page background
+$stone-40: #e6e1da;
+$stone-50: #e2ddd6; // subtle borders
+$stone-60: #d6d0c8;
+$stone-70: #cfc8bf;
+$stone-80: #8a847c; // strong borders, placeholders
+$stone-90: #5e5851; // secondary text (≥ 4.59:1 on every stone surface)
+$ink: #2b2824; // primary text (12.4:1)
+
+$night-10: #1c1a17; // dark page background
+$night-20: #262320;
+$night-30: #2f2b27;
+$night-40: #302c28;
+$night-50: #3a3631;
+$night-60: #45403a;
+$night-70: #524c45;
+$sand: #ece7e0; // dark primary text (14.1:1)
+$sand-muted: #b8b1a7; // dark secondary text (≥ 4.83:1 up to night-60)
+
+$orange-40: #f0a777;
+$orange-50: #e8925a; // links/focus on dark (7.2:1)
+$orange-60: #b4561f; // primary buttons, white text 4.9:1
+$orange-70: #9a4a1b; // links on light (5.3:1), hover
+$orange-80: #833f17; // active
+$orange-90: #7e3c15;
+$orange-tint: #f6e3d6;
+$orange-shade: #4a2e1c;
+
+// ——— Light ———————————————————————————————————————————————————————————
+$light-overrides: (
+  background: $stone-30,
+  background-hover: rgba($ink, 0.07),
+  background-active: rgba($ink, 0.14),
+  background-selected: rgba($ink, 0.1),
+  background-selected-hover: rgba($ink, 0.14),
+  background-brand: $orange-60,
+  background-inverse: $ink,
+  layer-01: $stone-10,
+  layer-hover-01: $stone-20,
+  layer-active-01: $stone-50,
+  layer-selected-01: $stone-40,
+  layer-selected-hover-01: $stone-50,
+  layer-02: $stone-20,
+  layer-hover-02: $stone-40,
+  layer-active-02: $stone-60,
+  layer-selected-02: $stone-40,
+  layer-selected-hover-02: $stone-50,
+  layer-03: $stone-10,
+  layer-hover-03: $stone-20,
+  layer-active-03: $stone-50,
+  layer-selected-03: $stone-40,
+  layer-selected-hover-03: $stone-50,
+  layer-accent-01: $stone-50,
+  layer-accent-hover-01: $stone-60,
+  layer-accent-active-01: $stone-70,
+  layer-accent-02: $stone-50,
+  layer-accent-hover-02: $stone-60,
+  layer-accent-active-02: $stone-70,
+  layer-accent-03: $stone-50,
+  layer-accent-hover-03: $stone-60,
+  layer-accent-active-03: $stone-70,
+  field-01: $stone-10,
+  field-hover-01: $stone-20,
+  field-02: $stone-20,
+  field-hover-02: $stone-40,
+  field-03: $stone-10,
+  field-hover-03: $stone-20,
+  border-subtle-00: $stone-50,
+  border-subtle-01: $stone-50,
+  border-subtle-02: $stone-60,
+  border-subtle-03: $stone-50,
+  border-subtle-selected-01: $stone-70,
+  border-subtle-selected-02: $stone-70,
+  border-subtle-selected-03: $stone-70,
+  border-strong-01: $stone-80,
+  border-strong-02: $stone-80,
+  border-strong-03: $stone-80,
+  border-tile-01: $stone-70,
+  border-tile-02: $stone-70,
+  border-tile-03: $stone-70,
+  border-inverse: $ink,
+  border-interactive: $orange-60,
+  text-primary: $ink,
+  text-secondary: $stone-90,
+  text-placeholder: $stone-80,
+  text-helper: $stone-90,
+  text-on-color: #fff,
+  text-inverse: $stone-10,
+  text-disabled: rgba($ink, 0.3),
+  link-primary: $orange-70,
+  link-primary-hover: $orange-90,
+  link-secondary: $orange-90,
+  link-visited: $orange-80,
+  link-inverse: $orange-50,
+  icon-primary: $ink,
+  icon-secondary: $stone-90,
+  icon-inverse: $stone-10,
+  icon-disabled: rgba($ink, 0.3),
+  interactive: $orange-60,
+  focus: $orange-60,
+  focus-inset: #fff,
+  focus-inverse: $orange-50,
+  highlight: $orange-tint,
+  overlay: rgba($ink, 0.5),
+  toggle-off: $stone-80,
+  shadow: rgba($ink, 0.18),
+  skeleton-background: $stone-40,
+  skeleton-element: $stone-60,
+);
+
+// ——— Dark ————————————————————————————————————————————————————————————
+$dark-overrides: (
+  background: $night-10,
+  background-hover: rgba($sand, 0.08),
+  background-active: rgba($sand, 0.16),
+  background-selected: rgba($sand, 0.12),
+  background-selected-hover: rgba($sand, 0.16),
+  background-brand: $orange-60,
+  background-inverse: $sand,
+  layer-01: $night-20,
+  layer-hover-01: $night-30,
+  layer-active-01: $night-50,
+  layer-selected-01: $night-50,
+  layer-selected-hover-01: $night-60,
+  layer-02: $night-40,
+  layer-hover-02: $night-50,
+  layer-active-02: $night-60,
+  layer-selected-02: $night-50,
+  layer-selected-hover-02: $night-60,
+  layer-03: $night-50,
+  layer-hover-03: $night-60,
+  layer-active-03: $night-70,
+  layer-selected-03: $night-60,
+  layer-selected-hover-03: $night-70,
+  layer-accent-01: $night-50,
+  layer-accent-hover-01: $night-60,
+  layer-accent-active-01: $night-70,
+  layer-accent-02: $night-60,
+  layer-accent-hover-02: $night-70,
+  layer-accent-active-02: $stone-90,
+  layer-accent-03: $night-70,
+  layer-accent-hover-03: $stone-90,
+  layer-accent-active-03: $stone-80,
+  field-01: $night-20,
+  field-hover-01: $night-30,
+  field-02: $night-40,
+  field-hover-02: $night-50,
+  field-03: $night-50,
+  field-hover-03: $night-60,
+  border-subtle-00: $night-50,
+  border-subtle-01: $night-50,
+  border-subtle-02: $night-60,
+  border-subtle-03: $night-60,
+  border-subtle-selected-01: $night-70,
+  border-subtle-selected-02: $night-70,
+  border-subtle-selected-03: $night-70,
+  border-strong-01: $stone-80,
+  border-strong-02: $stone-80,
+  border-strong-03: $stone-80,
+  border-tile-01: $night-70,
+  border-tile-02: $night-70,
+  border-tile-03: $night-70,
+  border-inverse: $sand,
+  border-interactive: $orange-50,
+  text-primary: $sand,
+  text-secondary: $sand-muted,
+  text-placeholder: $stone-80,
+  text-helper: $sand-muted,
+  text-on-color: #fff,
+  text-inverse: $ink,
+  text-disabled: rgba($sand, 0.25),
+  link-primary: $orange-50,
+  link-primary-hover: $orange-40,
+  link-secondary: $orange-40,
+  link-visited: $orange-40,
+  link-inverse: $orange-70,
+  icon-primary: $sand,
+  icon-secondary: $sand-muted,
+  icon-inverse: $ink,
+  icon-disabled: rgba($sand, 0.25),
+  interactive: $orange-50,
+  focus: $orange-50,
+  focus-inset: $night-10,
+  focus-inverse: $orange-70,
+  highlight: $orange-shade,
+  overlay: rgba(#000, 0.6),
+  toggle-off: $stone-80,
+  shadow: rgba(#000, 0.6),
+  skeleton-background: $night-30,
+  skeleton-element: $night-60,
+);
+
+/// Emits a full Proptyop theme. Carbon's own white/g100 theme comes first so its component
+/// tokens (notifications, tags, …) keep their per-theme values — Carbon only resolves them
+/// for its built-in theme maps. Our overrides and button tokens then replace the base tokens.
+@mixin proptyop-theme($mode) {
+  @include theme.theme(if($mode == light, themes.$white, themes.$g100));
+
+  @each $token, $value in if($mode == light, $light-overrides, $dark-overrides) {
+    @include custom-property.declaration($token, $value);
+  }
+
+  @include -button-tokens($mode);
+}
+
+@mixin -button-tokens($mode) {
+  --cds-button-primary: #{$orange-60};
+  --cds-button-primary-hover: #{$orange-70};
+  --cds-button-primary-active: #{$orange-80};
+
+  @if $mode == light {
+    --cds-button-secondary: #{$ink};
+    --cds-button-secondary-hover: #{$night-50};
+    --cds-button-secondary-active: #{$night-70};
+    --cds-button-tertiary: #{$orange-70};
+    --cds-button-tertiary-hover: #{$orange-70};
+    --cds-button-tertiary-active: #{$orange-80};
+  } @else {
+    --cds-button-secondary: #{$night-60};
+    --cds-button-secondary-hover: #{$night-70};
+    --cds-button-secondary-active: #{$stone-90};
+    --cds-button-tertiary: #{$orange-50};
+    --cds-button-tertiary-hover: #{$orange-50};
+    --cds-button-tertiary-active: #{$orange-40};
+  }
+}

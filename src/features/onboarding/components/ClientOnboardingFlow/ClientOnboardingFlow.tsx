@@ -8,6 +8,7 @@ import {
   Button,
   Form,
   InlineNotification,
+  Layer,
   ProgressIndicator,
   ProgressIndicatorSkeleton,
   ProgressStep,
@@ -123,34 +124,38 @@ function ClientOnboardingView({ data }: { data: ClientOnboardingData }) {
         />
       ) : null}
 
-      {step === 'about' ? (
-        <AboutStep
-          data={data}
-          isBusy={update.isPending}
-          onSubmit={(about) =>
-            save({ about, currentStep: 'interests' }, () => setStep('interests'))
-          }
-        />
-      ) : step === 'interests' ? (
-        <InterestsStep
-          data={data}
-          isBusy={update.isPending}
-          onBack={() => goTo('about')}
-          onSubmit={(interests) => save({ interests, currentStep: 'goal' }, () => setStep('goal'))}
-        />
-      ) : (
-        <GoalStep
-          data={data}
-          isBusy={update.isPending}
-          onBack={() => goTo('interests')}
-          onStart={(goal) =>
-            save({ firstGoal: goal, status: 'complete' }, () =>
-              router.push(`${routes.client.ask}?goal=${goal}`),
-            )
-          }
-          onHome={() => save({ status: 'complete' }, () => router.push(routes.client.home))}
-        />
-      )}
+      <Layer className={styles.card}>
+        {step === 'about' ? (
+          <AboutStep
+            data={data}
+            isBusy={update.isPending}
+            onSubmit={(about) =>
+              save({ about, currentStep: 'interests' }, () => setStep('interests'))
+            }
+          />
+        ) : step === 'interests' ? (
+          <InterestsStep
+            data={data}
+            isBusy={update.isPending}
+            onBack={() => goTo('about')}
+            onSubmit={(interests) =>
+              save({ interests, currentStep: 'goal' }, () => setStep('goal'))
+            }
+          />
+        ) : (
+          <GoalStep
+            data={data}
+            isBusy={update.isPending}
+            onBack={() => goTo('interests')}
+            onStart={(goal) =>
+              save({ firstGoal: goal, status: 'complete' }, () =>
+                router.push(`${routes.client.ask}?goal=${goal}`),
+              )
+            }
+            onHome={() => save({ status: 'complete' }, () => router.push(routes.client.home))}
+          />
+        )}
+      </Layer>
     </Stack>
   );
 }

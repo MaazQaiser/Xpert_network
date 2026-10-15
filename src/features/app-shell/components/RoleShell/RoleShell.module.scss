@@ -9,3 +9,11 @@
     padding-inline: $spacing-07;
   }
 }
+
+.hideOnPhone {
+  display: none;
+
+  @include breakpoint(md) {
+    display: inline-flex;
+  }
+}

@@ -22,27 +22,38 @@ type PublicShellProps = {
 
 /** Header for public and login pages; no side nav. */
 export function PublicShell({ children, variant = 'public' }: PublicShellProps) {
+  const chrome = (
+    <>
+      <SkipToContent href="#main-content" />
+      <HeaderName as={Link} href="/" prefix="">
+        Proptyop{variant === 'admin' ? <span className={styles.suffix}>&nbsp;Admin</span> : null}
+      </HeaderName>
+      {variant === 'public' ? (
+        <HeaderNavigation aria-label="Proptyop">
+          <HeaderMenuItem as={Link} href="/login">
+            Log in
+          </HeaderMenuItem>
+          <HeaderMenuItem as={Link} href="/sign-up">
+            Sign up
+          </HeaderMenuItem>
+        </HeaderNavigation>
+      ) : null}
+      <HeaderGlobalBar>
+        <ThemeToggle />
+      </HeaderGlobalBar>
+    </>
+  );
+
   return (
     <>
-      <Theme as={Header} theme="g100" aria-label="Proptyop">
-        <SkipToContent href="#main-content" />
-        <HeaderName as={Link} href="/" prefix="">
-          Proptyop{variant === 'admin' ? <span className={styles.suffix}>&nbsp;Admin</span> : null}
-        </HeaderName>
-        {variant === 'public' ? (
-          <HeaderNavigation aria-label="Proptyop">
-            <HeaderMenuItem as={Link} href="/login">
-              Log in
-            </HeaderMenuItem>
-            <HeaderMenuItem as={Link} href="/sign-up">
-              Sign up
-            </HeaderMenuItem>
-          </HeaderNavigation>
-        ) : null}
-        <HeaderGlobalBar>
-          <ThemeToggle />
-        </HeaderGlobalBar>
-      </Theme>
+      {/* The admin realm keeps a dark header so staff always know where they are (F0, F11). */}
+      {variant === 'admin' ? (
+        <Theme as={Header} theme="g100" aria-label="Proptyop">
+          {chrome}
+        </Theme>
+      ) : (
+        <Header aria-label="Proptyop">{chrome}</Header>
+      )}
       <main id="main-content" className={styles.main}>
         {children}
       </main>

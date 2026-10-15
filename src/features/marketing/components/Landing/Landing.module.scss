@@ -1,6 +1,7 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
+@use '../../../../styles/mixins' as mx;
 
 .root {
   padding-block-end: $spacing-12;
@@ -18,7 +19,7 @@
 }
 
 .title {
-  @include type-style('fluid-display-01', true);
+  @include mx.display-heading('fluid-display-02');
 
   margin-block-end: $spacing-06;
 }
@@ -42,6 +43,8 @@
 }
 
 .tile {
+  @include mx.surface-card;
+
   display: flex;
   flex-direction: column;
   gap: $spacing-04;
@@ -69,7 +72,7 @@
 }
 
 .sectionTitle {
-  @include type-style('heading-04');
+  @include mx.display-heading('heading-05');
 
   margin-block-end: $spacing-04;
 }

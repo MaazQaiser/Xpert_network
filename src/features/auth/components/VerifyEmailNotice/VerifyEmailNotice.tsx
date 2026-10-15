@@ -81,7 +81,7 @@ function Pending({ user }: { user: User }) {
   return (
     <div className={styles.root}>
       <MailVerse className={styles.pictogram} aria-hidden="true" />
-      <Stack gap={5}>
+      <Stack gap={5} className={styles.stack}>
         <p className={styles.body}>
           We sent a link to <strong>{user.email}</strong>. Open it to confirm your email, then we’ll
           help you set up your account. The link works for 24 hours.
@@ -110,12 +110,13 @@ function Pending({ user }: { user: User }) {
         <div className={styles.actions}>
           <Button
             renderIcon={ArrowRight}
+            className={styles.wrappingButton}
             disabled={verify.isPending}
             onClick={() =>
               verify.mutate(undefined, { onSuccess: ({ user: u }) => router.push(nextRoute(u)) })
             }
           >
-            Open the email link (prototype)
+            <span className={styles.wrappingLabel}>Open the email link (prototype)</span>
           </Button>
           <Button
             kind="tertiary"

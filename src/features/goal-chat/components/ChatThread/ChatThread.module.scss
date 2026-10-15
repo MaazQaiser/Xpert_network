@@ -1,6 +1,7 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/border-radius' as radius;
 
 .root {
   min-block-size: 50vh;
@@ -28,6 +29,8 @@
 
   max-inline-size: 80%;
   padding: $spacing-04 $spacing-05;
+  border-radius: radius.$border-radius-16 radius.$border-radius-16 radius.$border-radius-04
+    radius.$border-radius-16;
   background: $layer-accent-01;
   color: $text-primary;
 }
