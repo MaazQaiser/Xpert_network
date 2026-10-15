@@ -13,7 +13,7 @@ import {
   SEED_PROFILE_EXTRAS,
   type ProfileExtras,
 } from '../fixtures/profile';
-import { SEED_OWNED_REPORTS, SEED_PURCHASED_AT, seedWallet } from '../fixtures/wallet';
+import { SEED_OWNED_REPORTS, SEED_PURCHASES, seedWallet } from '../fixtures/wallet';
 
 /** A custom research request created from a brief (F4 builds on this). */
 export type MockRequest = {
@@ -83,9 +83,7 @@ function seed(): DemoState {
     reportPurchases: Object.fromEntries(
       clientIds.map((id) => [
         id,
-        Object.fromEntries(
-          (SEED_OWNED_REPORTS[id] ?? []).map((itemId) => [itemId, SEED_PURCHASED_AT]),
-        ),
+        Object.fromEntries((SEED_PURCHASES[id] ?? []).map((p) => [p.itemId, p.at])),
       ]),
     ),
     reportUpdates: {},

@@ -33,3 +33,21 @@ export type TopUpInput = z.infer<typeof topUpInputSchema>;
 
 /** Below this the app shows the low-balance banner (F6). */
 export const LOW_BALANCE_THRESHOLD = 50;
+
+export type TransactionType = z.infer<typeof transactionTypeSchema>;
+
+export const TRANSACTION_LABELS: Record<TransactionType, string> = {
+  top_up: 'Top-up',
+  purchase: 'Report purchase',
+  hold: 'Held for a quote',
+  spent: 'Spent on research',
+  refund: 'Refund',
+};
+
+/** Credits spent (purchases and research) since the start of the month of `now`. */
+export function spentThisMonth(transactions: Transaction[], now = new Date()): number {
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  return transactions
+    .filter((t) => (t.type === 'purchase' || t.type === 'spent') && t.at >= monthStart)
+    .reduce((sum, t) => sum - t.amount, 0);
+}

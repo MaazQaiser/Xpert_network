@@ -1,4 +1,4 @@
-import type { CreditPack, Wallet } from '@/features/wallet';
+import type { CreditPack, Transaction, Wallet } from '@/features/wallet';
 import { LIBRARY_ITEMS } from './library';
 
 export const CREDIT_PACKS: CreditPack[] = [
@@ -7,38 +7,69 @@ export const CREDIT_PACKS: CreditPack[] = [
   { id: 'pack_1500', credits: 1500, label: 'Research desk', isPopular: false },
 ];
 
-/** When the seeded reports were bought (matches the seeded purchase transactions). */
+/** Fallback purchase time for an owned report with no recorded purchase. */
 export const SEED_PURCHASED_AT = '2026-10-02T14:40:00.000Z';
 
-/** Each client starts with a recent top-up and one owned report. */
-export const SEED_OWNED_REPORTS: Record<string, string[]> = {
-  usr_ayesha: ['lib_uae_retail'],
-  usr_bilal: ['lib_dubai_rents'],
+/** Reports each demo client already owns, and when they bought them. */
+export const SEED_PURCHASES: Record<string, { itemId: string; at: string }[]> = {
+  usr_ayesha: [
+    { itemId: 'lib_gcc_coffee_2026', at: '2026-08-18T10:05:00.000Z' },
+    { itemId: 'lib_uae_retail', at: SEED_PURCHASED_AT },
+  ],
+  usr_bilal: [{ itemId: 'lib_dubai_rents', at: SEED_PURCHASED_AT }],
 };
 
+export const SEED_OWNED_REPORTS: Record<string, string[]> = Object.fromEntries(
+  Object.entries(SEED_PURCHASES).map(([userId, purchases]) => [
+    userId,
+    purchases.map((p) => p.itemId),
+  ]),
+);
+
+const SEED_TOP_UPS: Record<string, { packId: string; at: string }[]> = {
+  usr_ayesha: [
+    { packId: 'pack_200', at: '2026-08-15T08:30:00.000Z' },
+    { packId: 'pack_500', at: '2026-09-28T09:12:00.000Z' },
+  ],
+  usr_bilal: [{ packId: 'pack_500', at: '2026-09-28T09:12:00.000Z' }],
+};
+
+/** A client's wallet as the sum of their seeded top-ups and purchases (newest first). */
 export function seedWallet(userId: string): Wallet {
-  const owned = (SEED_OWNED_REPORTS[userId] ?? [])
-    .map((id) => LIBRARY_ITEMS.find((item) => item.id === id))
-    .filter((item) => item !== undefined);
-  const spent = owned.reduce((sum, item) => sum + item.priceCredits, 0);
+  const topUps: Transaction[] = (SEED_TOP_UPS[userId] ?? []).flatMap(({ packId, at }, index) => {
+    const pack = CREDIT_PACKS.find((p) => p.id === packId);
+    return pack
+      ? [
+          {
+            id: `txn_seed_topup_${index}`,
+            type: 'top_up' as const,
+            amount: pack.credits,
+            description: `${pack.label} pack · ${pack.credits} credits`,
+            at,
+          },
+        ]
+      : [];
+  });
+  const purchases: Transaction[] = (SEED_PURCHASES[userId] ?? []).flatMap(
+    ({ itemId, at }, index) => {
+      const item = LIBRARY_ITEMS.find((i) => i.id === itemId);
+      return item
+        ? [
+            {
+              id: `txn_seed_purchase_${index}`,
+              type: 'purchase' as const,
+              amount: -item.priceCredits,
+              description: item.title,
+              at,
+            },
+          ]
+        : [];
+    },
+  );
+  const transactions = [...topUps, ...purchases].sort((a, b) => b.at.localeCompare(a.at));
   return {
-    balance: 500 - spent,
+    balance: transactions.reduce((sum, t) => sum + t.amount, 0),
     held: 0,
-    transactions: [
-      {
-        id: 'txn_seed_topup',
-        type: 'top_up',
-        amount: 500,
-        description: 'Team pack · 500 credits',
-        at: '2026-09-28T09:12:00.000Z',
-      },
-      ...owned.map((item, index) => ({
-        id: `txn_seed_${index}`,
-        type: 'purchase' as const,
-        amount: -item.priceCredits,
-        description: item.title,
-        at: SEED_PURCHASED_AT,
-      })),
-    ],
+    transactions,
   };
 }

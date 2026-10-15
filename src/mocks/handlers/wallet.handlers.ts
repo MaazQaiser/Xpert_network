@@ -21,7 +21,11 @@ export const walletHandlers = [
     await simulateNetwork();
     const user = currentUser();
     if (!user) return unauthorized();
-    return injectedError() ?? HttpResponse.json(effectiveWallet(user.id));
+    const failure = injectedError();
+    if (failure) return failure;
+    const wallet = effectiveWallet(user.id);
+    // "Empty data" shows a brand-new wallet's history.
+    return HttpResponse.json(getControls().emptyData ? { ...wallet, transactions: [] } : wallet);
   }),
 
   http.get('/api/wallet/packs', async () => {

@@ -21,3 +21,8 @@ export function formatCurrencyEquivalent(credits: number): string {
 export function formatCreditsWithCurrency(credits: number): string {
   return `${formatCredits(credits)} (${formatCurrencyEquivalent(credits)})`;
 }
+
+/** "$2,500" for the price of N credits. */
+export function formatCreditPrice(credits: number): string {
+  return usd.format(credits * CREDIT_VALUE_USD);
+}
