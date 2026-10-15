@@ -21,6 +21,13 @@
         "carbon/theme-use": null,
         "carbon/type-use": null
       }
+    },
+    {
+      "files": ["src/styles/_carbon-shape.scss"],
+      "rules": {
+        "selector-class-pattern": null,
+        "selector-no-qualifying-type": null
+      }
     }
   ]
 }

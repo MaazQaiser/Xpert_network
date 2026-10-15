@@ -231,8 +231,9 @@ $dark-overrides: (
 }
 
 @mixin -button-tokens($mode) {
-  // Carbon's own button-radius hook: every Carbon button gets 4px corners.
-  --cds-button-radius: #{radius.$border-radius-04};
+  // Carbon's own button-radius hook: every Carbon button gets 8px corners (fields match,
+  // see _carbon-shape.scss).
+  --cds-button-radius: #{radius.$border-radius-08};
 
   @if $mode == light {
     --cds-button-primary: #{$black-60};

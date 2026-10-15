@@ -103,8 +103,8 @@ Rules of thumb:
 
 - Our own containers (hero tiles, panels, auth card, onboarding/settings cards, status pages) use `@include mx.surface-card` (translucent glass, no blur). Fixed shell parts that content scrolls under use `@include mx.glass-chrome`. Never put `backdrop-filter` directly on an element that contains a Carbon modal or header panel.
 - Cards are `$border-radius-16` with a bright hairline border and soft shadow. Put form content inside Carbon `<Layer>` so fields use the right contextual tokens.
-- Primary buttons are black with 4px corners (`--cds-button-radius`, set in `_themes.scss`); orange is reserved for links, focus, the active nav item and unread dots.
-- Carbon inputs, tags and modals keep Carbon's shapes — don't restyle their internals. Button corners come only from the `--cds-button-radius` token.
+- Primary buttons are black with 8px corners (`--cds-button-radius`, set in `_themes.scss`); orange is reserved for links, focus, the active nav item and unread dots.
+- Form fields have 8px corners and a full `$border-strong` border, set only in `src/styles/_carbon-shape.scss` (ADR 0010). Tags and modals keep Carbon's shapes — don't restyle Carbon internals anywhere else. Button corners come only from the `--cds-button-radius` token.
 
 Use `@include type-style('<token>')`. Productive set for the app:
 

@@ -1,0 +1,44 @@
+// Proptyop field shape (ADR 0010). Carbon v11 has a radius hook for buttons
+// (`--cds-button-radius`, set in _themes.scss) but none for form fields, so this file is the
+// ONE sanctioned place where Carbon's internal classes are restyled. Keep it to shape only:
+// corner radius and a full 1px border (rounded fields need a whole outline to keep a 3:1
+// visible boundary, WCAG 1.4.11). Colours stay Carbon tokens. Re-check on Carbon upgrades.
+@use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/theme' as *;
+
+$pt-field-radius: radius.$border-radius-08;
+
+// Text input, password input, text area, select, date picker, number input, and the list box
+// behind Dropdown / ComboBox / (Filterable)MultiSelect.
+.cds--text-input,
+.cds--text-area,
+.cds--select-input,
+.cds--date-picker__input,
+.cds--number input[type='number'],
+.cds--list-box {
+  border: 1px solid $border-strong;
+  border-radius: $pt-field-radius;
+}
+
+// The number input's +/- controls sit inside the field's right edge.
+.cds--number__controls {
+  overflow: hidden;
+  border-end-end-radius: $pt-field-radius;
+  border-start-end-radius: $pt-field-radius;
+}
+
+// An open list box joins its menu: square the shared edge, round the menu's bottom.
+.cds--list-box--expanded {
+  border-end-end-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.cds--list-box__menu {
+  border-end-end-radius: $pt-field-radius;
+  border-end-start-radius: $pt-field-radius;
+}
+
+// Read-only text inputs: Carbon marks them with a subtle edge; keep that on all sides.
+.cds--text-input-wrapper--readonly .cds--text-input {
+  border-color: $border-subtle;
+}
