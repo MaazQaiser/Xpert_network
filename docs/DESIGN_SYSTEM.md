@@ -41,7 +41,7 @@ Next.js notes:
 
 | Area | Carbon theme | Why |
 |---|---|---|
-| App (default, light) | `white` + Proptyop overrides | White page, `#f7f6f3` floating panels, burnt-orange accent (ADR 0009) |
+| App (default, light) | `white` + Proptyop overrides | Gradient page (orange glow → white), glass panels, black buttons, orange accent for links/focus/active (ADR 0009) |
 | App alt surfaces (side panels, filters) | `g10` layer | Subtle separation |
 | Dark mode | `g100` + Proptyop overrides | User preference / system setting |
 | UI Shell header + side nav | App theme (light or dark) | Borderless header; side nav floats as a rounded panel at `lg+`; accent bar marks the active item |
@@ -101,7 +101,9 @@ Rules of thumb:
 
 ### 4.4.1 Surfaces
 
-- Our own containers (hero tiles, panels, auth card, onboarding/settings cards, chat bubbles) use `@include mx.surface-card` — `$border-radius-16`, `$border-subtle-01` border, soft `$shadow`. Put form content inside Carbon `<Layer>` so fields use the right contextual tokens.
+- Our own containers (hero tiles, panels, auth card, onboarding/settings cards, status pages) use `@include mx.surface-card` (translucent glass, no blur). Fixed shell parts that content scrolls under use `@include mx.glass-chrome`. Never put `backdrop-filter` directly on an element that contains a Carbon modal or header panel.
+- Cards are `$border-radius-16` with a bright hairline border and soft shadow. Put form content inside Carbon `<Layer>` so fields use the right contextual tokens.
+- Primary buttons are black; orange is reserved for links, focus, the active nav item and unread dots.
 - Carbon buttons, inputs, tags and modals keep Carbon's shapes — don't restyle their internals.
 
 Use `@include type-style('<token>')`. Productive set for the app:

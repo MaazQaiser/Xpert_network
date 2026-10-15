@@ -128,9 +128,10 @@ function Rejected({ profile }: { profile: ExpertOnboarding }) {
           approved after one round of changes.
         </p>
       </div>
-      <Stack gap={5}>
+      <Stack gap={5} className={styles.stack}>
         {profile.decisionNote ? (
           <InlineNotification
+            className={styles.notice}
             kind="warning"
             title="What to change"
             subtitle={profile.decisionNote}
@@ -140,6 +141,7 @@ function Rejected({ profile }: { profile: ExpertOnboarding }) {
         ) : null}
         {reopen.isError ? (
           <InlineNotification
+            className={styles.notice}
             kind="error"
             title="Couldn’t reopen your profile"
             subtitle={toUserMessage(reopen.error)}

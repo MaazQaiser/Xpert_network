@@ -63,7 +63,7 @@ describe('SettingsView (F17)', () => {
     await waitFor(() => expect(screen.queryByText('Safari on iPhone')).not.toBeInTheDocument());
     await expectNoAxeViolations(container);
 
-    await userEvent.click(screen.getByRole('switch', { name: /Two-step verification/ }));
+    await userEvent.click(screen.getByRole('switch', { name: /Require a code at log in/ }));
     const dialog = await screen.findByRole('dialog');
     await userEvent.type(within(dialog).getByLabelText('6-digit code'), '482913');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Turn on' }));

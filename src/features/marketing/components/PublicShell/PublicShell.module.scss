@@ -1,5 +1,6 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '../../../../styles/tokens' as *;
+@use '../../../../styles/mixins' as mx;
 @use '@carbon/react/scss/theme' as *;
 
 .suffix {
@@ -8,4 +9,15 @@
 
 .main {
   margin-block-start: $pt-shell-header-height;
+}
+
+// Glass header over the page gradient (ADR 0009); doubled class outranks Carbon's root rule.
+.header.header {
+  @include mx.glass-chrome;
+
+  // Header items paint $background; let the glass show through instead.
+  --cds-background: transparent;
+
+  border-block-end-color: transparent;
+  box-shadow: none;
 }

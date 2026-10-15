@@ -4,53 +4,29 @@
 
 .buttons {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: $spacing-03;
 }
 
-// flex-basis sets the width (Carbon sizes buttons to content): side by side, or stacked on phones.
-.provider {
-  flex: 1 1 12rem;
-  min-inline-size: 0;
+// Full width, one line each. The doubled class outranks Carbon's 20rem button cap
+// (root element only).
+.provider.provider {
+  inline-size: 100%;
   max-inline-size: none;
+  padding-inline-end: $spacing-05;
+}
+
+.providerContent {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-04;
 }
 
 .help {
   @include type-style('body-01');
 
-  color: $text-secondary;
-}
-
-.accounts {
-  display: grid;
-  gap: $spacing-02;
-}
-
-.account {
-  inline-size: 100%;
-  max-inline-size: none;
-  block-size: auto;
-  padding-block: $spacing-03;
-}
-
-.avatar {
-  flex-shrink: 0;
-  margin-inline-end: $spacing-04;
-}
-
-.identity {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: start;
-}
-
-.name {
-  @include type-style('heading-compact-01');
-}
-
-.email {
-  @include type-style('body-compact-01');
-
+  align-items: center;
+  gap: $spacing-03;
   color: $text-secondary;
 }

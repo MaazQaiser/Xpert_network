@@ -219,7 +219,7 @@ function TwoFactorSection({ security }: { security: Security }) {
       </div>
       <Toggle
         id="security-two-factor"
-        labelText="Two-step verification"
+        labelText="Require a code at log in"
         labelA="Off"
         labelB="On"
         toggled={security.twoFactorEnabled}

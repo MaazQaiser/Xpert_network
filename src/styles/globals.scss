@@ -45,6 +45,8 @@
 
 body {
   background: theme.$background;
+  background-attachment: fixed;
+  background-image: var(--pt-page-gradient);
   color: theme.$text-primary;
   -webkit-font-smoothing: antialiased;
 }

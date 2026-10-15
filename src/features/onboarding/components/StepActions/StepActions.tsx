@@ -18,7 +18,7 @@ export function StepActions({ onBack, primaryLabel, isBusy, children }: StepActi
   return (
     <div className={styles.root}>
       {onBack ? (
-        <Button kind="secondary" renderIcon={ArrowLeft} onClick={onBack} disabled={isBusy}>
+        <Button kind="tertiary" renderIcon={ArrowLeft} onClick={onBack} disabled={isBusy}>
           Back
         </Button>
       ) : null}

@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, ButtonSkeleton, InlineNotification, Modal, Stack } from '@carbon/react';
-import { ArrowRight, UserAvatar } from '@carbon/icons-react';
+import { Button, InlineNotification, Modal, SkeletonText, Stack } from '@carbon/react';
 import { toUserMessage } from '@/shared/api';
 import { ErrorState } from '@/shared/ui';
 import { useOAuthAccounts, useOAuthSignIn } from '../../api/mutations';
 import type { OAuthProvider, OAuthResult, SignUpRole } from '../../model/session.schema';
+import { AccountList } from '../AccountList/AccountList';
+import { BrandLogo } from '../BrandLogo/BrandLogo';
 import styles from './OAuthButtons.module.scss';
 
 const PROVIDERS: { id: OAuthProvider; label: string }[] = [
@@ -45,7 +46,10 @@ export function OAuthButtons({ role, onSuccess }: OAuthButtonsProps) {
             className={styles.provider}
             onClick={() => setProvider(p.id)}
           >
-            Continue with {p.label}
+            <span className={styles.providerContent}>
+              <BrandLogo provider={p.id} />
+              Continue with {p.label}
+            </span>
           </Button>
         ))}
       </div>
@@ -59,7 +63,10 @@ export function OAuthButtons({ role, onSuccess }: OAuthButtonsProps) {
       >
         <Stack gap={5}>
           <p className={styles.help}>
-            to continue to Proptyop. In the real product this is {providerLabel}’s own screen.
+            {provider ? <BrandLogo provider={provider} size={16} /> : null}
+            <span>
+              Continue to Proptyop. In the real product this is {providerLabel}’s own screen.
+            </span>
           </p>
           {signIn.isError ? (
             <InlineNotification
@@ -71,41 +78,25 @@ export function OAuthButtons({ role, onSuccess }: OAuthButtonsProps) {
             />
           ) : null}
           {accounts.isPending ? (
-            <>
-              <ButtonSkeleton className={styles.account} />
-              <ButtonSkeleton className={styles.account} />
-            </>
+            <SkeletonText paragraph lineCount={4} />
           ) : accounts.isError ? (
             <ErrorState
               message={toUserMessage(accounts.error)}
               onRetry={() => void accounts.refetch()}
             />
           ) : (
-            <ul className={styles.accounts} aria-label={`${providerLabel} accounts`}>
-              {accounts.data.map((account) => (
-                <li key={account.email}>
-                  <Button
-                    kind="ghost"
-                    className={styles.account}
-                    renderIcon={signIn.isPending ? undefined : ArrowRight}
-                    disabled={signIn.isPending}
-                    onClick={() =>
-                      provider &&
-                      signIn.mutate(
-                        { provider, accountEmail: account.email, role },
-                        { onSuccess: (result) => onSuccess(result) },
-                      )
-                    }
-                  >
-                    <UserAvatar size={20} aria-hidden="true" className={styles.avatar} />
-                    <span className={styles.identity}>
-                      <span className={styles.name}>{account.name}</span>
-                      <span className={styles.email}>{account.email}</span>
-                    </span>
-                  </Button>
-                </li>
-              ))}
-            </ul>
+            <AccountList
+              label={`${providerLabel} accounts`}
+              items={accounts.data.map((a) => ({ id: a.email, name: a.name, detail: a.email }))}
+              disabled={signIn.isPending}
+              onSelect={(email) =>
+                provider &&
+                signIn.mutate(
+                  { provider, accountEmail: email, role },
+                  { onSuccess: (result) => onSuccess(result) },
+                )
+              }
+            />
           )}
         </Stack>
       </Modal>

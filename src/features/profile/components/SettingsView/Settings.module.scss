@@ -12,8 +12,10 @@
   max-inline-size: 56rem;
 }
 
-.tabPanel {
+// Carbon pads tab panels inline; ours line up with the tabs and page title instead.
+.tabPanel.tabPanel {
   padding-block: $spacing-06 0;
+  padding-inline: 0;
 }
 
 .panel {

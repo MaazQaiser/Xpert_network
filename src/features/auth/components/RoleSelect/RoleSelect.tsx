@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, RadioTile, Stack, TileGroup } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
+import { ArrowRight, ChartLineData, Microphone } from '@carbon/icons-react';
 import { routes } from '@/shared/config/routes';
 import type { SignUpRole } from '../../model/session.schema';
 import styles from './RoleSelect.module.scss';
+
+const ROLE_ICONS = { client: ChartLineData, expert: Microphone } as const;
 
 export const ROLE_CHOICES: Record<SignUpRole, { title: string; description: string }> = {
   client: {
@@ -32,12 +34,22 @@ export function RoleSelect({ initialRole = 'client' }: { initialRole?: SignUpRol
         valueSelected={choice}
         onChange={(value) => setChoice(value as SignUpRole)}
       >
-        {(Object.keys(ROLE_CHOICES) as SignUpRole[]).map((key) => (
-          <RadioTile key={key} id={`role-${key}`} value={key} className={styles.tile}>
-            <span className={styles.title}>{ROLE_CHOICES[key].title}</span>
-            <span className={styles.description}>{ROLE_CHOICES[key].description}</span>
-          </RadioTile>
-        ))}
+        {(Object.keys(ROLE_CHOICES) as SignUpRole[]).map((key) => {
+          const Icon = ROLE_ICONS[key];
+          return (
+            <RadioTile key={key} id={`role-${key}`} value={key} className={styles.tile}>
+              <span className={styles.content}>
+                <span className={styles.icon} aria-hidden="true">
+                  <Icon size={20} />
+                </span>
+                <span>
+                  <span className={styles.title}>{ROLE_CHOICES[key].title}</span>
+                  <span className={styles.description}>{ROLE_CHOICES[key].description}</span>
+                </span>
+              </span>
+            </RadioTile>
+          );
+        })}
       </TileGroup>
       <div>
         <Button renderIcon={ArrowRight} onClick={() => router.push(routes.signUpAs(choice))}>

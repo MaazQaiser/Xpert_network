@@ -34,43 +34,12 @@
 }
 
 .demoList {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: $spacing-03;
   margin-block-start: $spacing-04;
 }
 
-.demoList > li {
-  display: flex;
-}
-
-.account {
-  // Carbon buttons size to content; let the list item decide the width instead.
-  flex: 1 1 0;
-  min-inline-size: 0;
-  white-space: normal;
-  flex-direction: column;
-  align-items: flex-start;
-  inline-size: 100%;
-  max-inline-size: none;
-  block-size: auto;
-  padding-block: $spacing-04;
-}
-
-.tileName {
-  @include type-style('heading-compact-01');
-
-  display: block;
-}
-
-.tileSummary {
-  @include type-style('body-compact-01');
-
-  display: block;
-  margin-block-start: $spacing-02;
-  color: $text-secondary;
-}
-
 .forgot {
-  align-self: flex-start;
+  @include type-style('helper-text-01');
+
+  justify-self: end;
+  margin-block-start: calc(-1 * #{$spacing-04});
 }

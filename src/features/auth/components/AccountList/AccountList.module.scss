@@ -1,0 +1,78 @@
+@use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/utilities/focus-outline' as *;
+
+.list {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid $border-subtle-01;
+  border-radius: radius.$border-radius-08;
+}
+
+.list > li + li {
+  border-block-start: 1px solid $border-subtle-01;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: $spacing-04;
+  inline-size: 100%;
+  padding: $spacing-04 $spacing-05;
+  border: 0;
+  background: $layer-02;
+  color: $text-primary;
+  cursor: pointer;
+  text-align: start;
+
+  &:hover {
+    background: $layer-hover-02;
+  }
+
+  &:focus {
+    @include focus-outline('outline');
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.avatar {
+  @include type-style('label-02');
+  @include font-weight('semibold');
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: $spacing-08;
+  block-size: $spacing-08;
+  border-radius: radius.$border-radius-max;
+  background: $layer-accent-01;
+  color: $text-primary;
+}
+
+.text {
+  display: grid;
+  gap: $spacing-01;
+  min-inline-size: 0;
+}
+
+.name {
+  @include type-style('heading-compact-01');
+}
+
+.detail {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+  overflow-wrap: anywhere;
+}
+
+.chevron {
+  fill: $icon-secondary;
+}

@@ -52,7 +52,9 @@ export function PublicShell({ children, variant = 'public' }: PublicShellProps) 
           {chrome}
         </Theme>
       ) : (
-        <Header aria-label="Proptyop">{chrome}</Header>
+        <Header aria-label="Proptyop" className={styles.header}>
+          {chrome}
+        </Header>
       )}
       <main id="main-content" className={styles.main}>
         {children}

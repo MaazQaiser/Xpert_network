@@ -13,6 +13,7 @@ import { useLogin } from '../../api/useLogin';
 import { loginFormSchema, type LoginFormValues } from '../../model/credentials';
 import { DEMO_ACCOUNTS } from '../../model/personas';
 import { ROLE_HOME, type LoginInput, type OAuthResult } from '../../model/session.schema';
+import { AccountList } from '../AccountList/AccountList';
 import { OAuthButtons } from '../OAuthButtons/OAuthButtons';
 import styles from './LoginForm.module.scss';
 
@@ -113,21 +114,17 @@ export function LoginForm({ realm }: LoginFormProps) {
           Demo accounts
         </h2>
         <p className={styles.demoHelp}>Skip the form and continue as a test persona.</p>
-        <ul className={styles.demoList}>
-          {accounts.map((account) => (
-            <li key={account.personaId}>
-              <Button
-                kind="tertiary"
-                className={styles.account}
-                onClick={() => void signIn({ personaId: account.personaId })}
-                disabled={login.isPending}
-              >
-                <span className={styles.tileName}>{account.name}</span>
-                <span className={styles.tileSummary}>{account.summary}</span>
-              </Button>
-            </li>
-          ))}
-        </ul>
+        <div className={styles.demoList}>
+          <AccountList
+            label="Demo accounts"
+            items={accounts.map((a) => ({ id: a.personaId, name: a.name, detail: a.summary }))}
+            disabled={login.isPending}
+            onSelect={(id) => {
+              const account = accounts.find((a) => a.personaId === id);
+              if (account) void signIn({ personaId: account.personaId });
+            }}
+          />
+        </div>
       </section>
     </div>
   );

@@ -20,7 +20,7 @@ Full plan: [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md) — flows F0–F17, sc
 | Concern | Choice |
 |---|---|
 | Framework | Next.js (App Router, latest stable), React, TypeScript `strict` |
-| Design system | Carbon v11 — `@carbon/react`, `@carbon/icons-react`, `@carbon/pictograms-react`, `@carbon/charts-react` — with the Proptyop Notion-like themes, burnt-orange accent, Inter, floating panels (ADR 0009) |
+| Design system | Carbon v11 — `@carbon/react`, `@carbon/icons-react`, `@carbon/pictograms-react`, `@carbon/charts-react` — with the Proptyop Notion-like themes: gradient page, glass panels, black buttons, orange accent, Inter (ADR 0009) |
 | Styling | Sass (`.module.scss`) using Carbon tokens only. No Tailwind, no CSS-in-JS |
 | Server state | TanStack Query |
 | Client state | React state → URL search params → Zustand (only if truly global) |

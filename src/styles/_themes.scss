@@ -1,5 +1,6 @@
 // Proptyop themes (ADR 0009): Carbon's white / g100 token sets with a Notion-like neutral
-// palette (white page, soft grey panels) and a burnt-orange accent. This is the ONLY place
+// palette (white page fading from a soft orange glow, glass panels, black buttons) and a
+// burnt-orange accent for links, focus and the active nav item. This is the ONLY place
 // raw colour values may appear; every component uses Carbon tokens.
 // All text pairs meet WCAG 2.2 AA (checked 2026-10-15).
 @use '@carbon/react/scss/theme';
@@ -32,7 +33,15 @@ $night-stone: #7a7975;
 $night-muted: #adacaa; // secondary text (≥ 4.57:1 up to night-50)
 $chalk: #e3e2e0; // primary text (13.6:1)
 
-// ——— Accent ——————————————————————————————————————————————————————————
+// ——— Buttons: black, not orange ————————————————————————————————————————————
+$black-60: #1f1e1b; // primary on light (white text 16.7:1)
+$black-50: #37352f;
+$black-40: #4a4843;
+$charcoal-60: #3a3936; // primary on dark (white text 11.6:1)
+$charcoal-50: #45433e;
+$charcoal-40: #504e48;
+
+// ——— Accent (links, focus, active nav, glow) ——————————————————————————————
 $orange-40: #f0a777;
 $orange-50: #e8925a; // links/focus on dark (≥ 4.9:1)
 $orange-60: #b4561f; // primary buttons, white text 4.9:1
@@ -217,26 +226,54 @@ $dark-overrides: (
   }
 
   @include -button-tokens($mode);
+  @include -surface-tokens($mode);
 }
 
 @mixin -button-tokens($mode) {
-  --cds-button-primary: #{$orange-60};
-  --cds-button-primary-hover: #{$orange-70};
-  --cds-button-primary-active: #{$orange-80};
-
   @if $mode == light {
-    --cds-button-secondary: #{$ink};
-    --cds-button-secondary-hover: #{$night-40};
-    --cds-button-secondary-active: #{$night-60};
-    --cds-button-tertiary: #{$orange-70};
-    --cds-button-tertiary-hover: #{$orange-70};
-    --cds-button-tertiary-active: #{$orange-80};
+    --cds-button-primary: #{$black-60};
+    --cds-button-primary-hover: #{$black-50};
+    --cds-button-primary-active: #{$black-40};
+    --cds-button-secondary: #{$muted};
+    --cds-button-secondary-hover: #{$black-40};
+    --cds-button-secondary-active: #{$black-50};
+    --cds-button-tertiary: #{$ink};
+    --cds-button-tertiary-hover: #{$ink};
+    --cds-button-tertiary-active: #{$black-60};
   } @else {
-    --cds-button-secondary: #{$night-40};
-    --cds-button-secondary-hover: #{$night-50};
-    --cds-button-secondary-active: #{$night-60};
-    --cds-button-tertiary: #{$orange-50};
-    --cds-button-tertiary-hover: #{$orange-50};
-    --cds-button-tertiary-active: #{$orange-40};
+    --cds-button-primary: #{$charcoal-60};
+    --cds-button-primary-hover: #{$charcoal-50};
+    --cds-button-primary-active: #{$charcoal-40};
+    --cds-button-secondary: #{$night-50};
+    --cds-button-secondary-hover: #{$night-60};
+    --cds-button-secondary-active: #{$charcoal-40};
+    --cds-button-tertiary: #{$chalk};
+    --cds-button-tertiary-hover: #{$chalk};
+    --cds-button-tertiary-active: #{$night-muted};
   }
+}
+
+/// Page gradient and glass surfaces (`mixins.glass-fill`, `glass-chrome`, `surface-card`).
+/// The orange glow is mirrored in opposite corners and fades to white; at its peak,
+/// secondary text still has 4.6:1 (light) and 6.6:1 (dark).
+@mixin -surface-tokens($mode) {
+  @if $mode == light {
+    --pt-page-gradient:
+      radial-gradient(60rem 40rem at 0% 0%, #{rgba($orange-50, 0.16)}, transparent 70%),
+      radial-gradient(50rem 36rem at 100% 100%, #{rgba($orange-50, 0.1)}, transparent 70%),
+      linear-gradient(180deg, #fdf6f0 0%, #{$paper} 55%);
+    --pt-glass-bg: #{rgba($paper, 0.62)};
+    --pt-glass-border: #{rgba($paper, 0.8)};
+    --pt-glass-shadow: 0 0 0 1px #{rgba($ink, 0.06)}, 0 0.5rem 1.5rem #{rgba($ink, 0.08)};
+  } @else {
+    --pt-page-gradient:
+      radial-gradient(60rem 40rem at 0% 0%, #{rgba($orange-50, 0.1)}, transparent 70%),
+      radial-gradient(50rem 36rem at 100% 100%, #{rgba($orange-50, 0.06)}, transparent 70%),
+      linear-gradient(180deg, #{$night} 0%, #{$night} 100%);
+    --pt-glass-bg: #{rgba($night-10, 0.62)};
+    --pt-glass-border: #{rgba($chalk, 0.08)};
+    --pt-glass-shadow: 0 0 0 1px #{rgba(#000, 0.3)}, 0 0.5rem 1.5rem #{rgba(#000, 0.4)};
+  }
+
+  --pt-glass-filter: blur(1.25rem) saturate(140%);
 }

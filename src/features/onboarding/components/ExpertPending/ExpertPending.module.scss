@@ -1,18 +1,28 @@
+@use '@carbon/react/scss/breakpoint' as *;
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
 @use '../../../../styles/mixins' as mx;
 
 .root {
+  @include mx.surface-card;
+
   display: flex;
   flex-direction: column;
   gap: $spacing-07;
   max-inline-size: 44rem;
+  margin-inline: auto;
+  margin-block-start: $spacing-07;
+  padding: $spacing-06 $spacing-05;
+
+  @include breakpoint(md) {
+    padding: $spacing-09 $spacing-08;
+  }
 }
 
 .pictogram {
-  inline-size: $spacing-11;
-  block-size: $spacing-11;
+  inline-size: $spacing-10;
+  block-size: $spacing-10;
   fill: $icon-primary;
 }
 
@@ -54,4 +64,14 @@
   display: flex;
   flex-wrap: wrap;
   gap: $spacing-04;
+}
+
+.stack {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+// Carbon inline notifications have an 18rem minimum; let them fit the card on phones.
+.notice.notice {
+  min-inline-size: 0;
+  max-inline-size: none;
 }

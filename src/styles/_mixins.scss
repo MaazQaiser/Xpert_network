@@ -27,11 +27,42 @@
   @include type.font-weight('semibold');
 }
 
-/// Soft card for our own surfaces (heroes, panels, auth forms, chat bubbles). Carbon
+/// Translucent glass fill over the page gradient (cards). No backdrop-filter here: it would
+/// make the card the containing block for fixed descendants such as Carbon modals.
+/// Values are Proptyop custom properties from _themes.scss (ADR 0009).
+@mixin glass-fill {
+  /* stylelint-disable carbon/theme-use -- Proptyop glass tokens (ADR 0009) */
+  background: var(--pt-glass-bg);
+  box-shadow: var(--pt-glass-shadow);
+  /* stylelint-enable carbon/theme-use */
+}
+
+/// Frosted glass for fixed shell parts (header, side nav) that content scrolls under. The
+/// blur sits on a pseudo-element so header panels inside stay positioned to the viewport.
+/// The element must already be positioned and have a z-index (Carbon's shell parts do).
+@mixin glass-chrome {
+  background: transparent;
+
+  &::before {
+    position: absolute;
+    z-index: -1;
+    border-radius: inherit;
+    backdrop-filter: var(--pt-glass-filter);
+    content: '';
+    inset: 0;
+    pointer-events: none;
+
+    /* stylelint-disable-next-line carbon/theme-use -- Proptyop glass token (ADR 0009) */
+    background: var(--pt-glass-bg);
+  }
+}
+
+/// Glass card for our own surfaces (heroes, panels, auth forms, status pages). Carbon
 /// buttons and inputs keep their square shape.
 @mixin surface-card($radius: radius.$border-radius-16) {
-  border: 1px solid theme.$border-subtle-01;
+  @include glass-fill;
+
+  /* stylelint-disable-next-line carbon/theme-use -- Proptyop glass token (ADR 0009) */
+  border: 1px solid var(--pt-glass-border);
   border-radius: $radius;
-  background: theme.$layer-01;
-  box-shadow: 0 $spacing-01 $spacing-03 theme.$shadow;
 }

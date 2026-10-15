@@ -1,3 +1,4 @@
+@use '@carbon/react/scss/breakpoint' as *;
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
@@ -25,8 +26,9 @@
   block-size: $spacing-05;
 }
 
-// Only while open: the collapsed panel relies on Carbon's zero width.
-.panelOpen {
+// Only while open: the collapsed panel relies on Carbon's zero width. Doubled class
+// outranks Carbon's 16rem width on the panel root.
+.panelOpen.panelOpen {
   inline-size: 22rem;
   max-inline-size: 100vw;
 }
@@ -131,9 +133,23 @@
   position: fixed;
   z-index: 8000;
 
-  // Just below the 3rem UI Shell header.
+  // Just below the 3rem UI Shell header; full width on phones.
   inset-block-start: $spacing-10;
-  inset-inline-end: $spacing-05;
+  inset-inline: $spacing-05;
+
+  @include breakpoint(md) {
+    inset-inline-start: auto;
+  }
+}
+
+// Carbon toasts are a fixed 18rem; let them shrink on phones (root element only).
+.toast.toast {
+  inline-size: 100%;
+  max-inline-size: 100%;
+
+  @include breakpoint(md) {
+    inline-size: auto;
+  }
 }
 
 .visuallyHidden {

@@ -121,6 +121,7 @@ export function NotificationCentre({ settingsHref }: NotificationCentreProps) {
       {toast ? (
         <div className={styles.toasts}>
           <ToastNotification
+            className={styles.toast}
             kind="info"
             role="status"
             title={toast.title}

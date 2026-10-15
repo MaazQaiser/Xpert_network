@@ -10,7 +10,7 @@ type AuthFrameProps = { title: string; description?: string; children: ReactNode
 export function AuthFrame({ title, description, children }: AuthFrameProps) {
   return (
     <Grid className={styles.root}>
-      <Column sm={4} md={6} lg={7}>
+      <Column sm={4} md={{ span: 6, offset: 1 }} lg={{ span: 6, offset: 5 }}>
         <h1 className={styles.title}>{title}</h1>
         {description ? <p className={styles.description}>{description}</p> : null}
         <div className={styles.body}>{children}</div>
