@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   Button,
@@ -12,7 +13,7 @@ import {
 import { Renew } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
 import { formatDate, formatDateTime } from '@/shared/lib/dates';
-import { AsyncBoundary, PageHeader, StatusTag } from '@/shared/ui';
+import { AsyncBoundary, NotFoundState, PageHeader, StatusTag } from '@/shared/ui';
 import { useRequest, useRequote } from '../../api/queries';
 import {
   STATUS_LABELS,
@@ -35,6 +36,14 @@ export function RequestDetail({ requestId }: { requestId: string }) {
     <AsyncBoundary
       query={request}
       errorTitle="This request didn’t load"
+      notFound={
+        <NotFoundState
+          title="We couldn’t find that request"
+          message="It may have been withdrawn, or the link is incomplete."
+          backHref="/requests"
+          backLabel="Back to Requests"
+        />
+      }
       loading={
         <div aria-busy="true" aria-label="Loading request">
           <SkeletonText heading width="50%" />
@@ -48,8 +57,25 @@ export function RequestDetail({ requestId }: { requestId: string }) {
   );
 }
 
+/** True while the element is wider than its box, so it can be made keyboard-scrollable. */
+function useOverflows<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const [overflows, setOverflows] = useState(false);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const measure = () => setOverflows(element.scrollWidth > element.clientWidth + 1);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  return [ref, overflows] as const;
+}
+
 function DetailView({ request }: { request: CustomRequest }) {
   const current = trackerIndex(request);
+  const [trackerRef, trackerScrolls] = useOverflows<HTMLElement>();
   const offTrack = ['declined', 'expired', 'cancelled'].includes(request.status);
 
   return (
@@ -73,7 +99,13 @@ function DetailView({ request }: { request: CustomRequest }) {
         }
       />
 
-      <nav aria-label="Request progress" className={styles.tracker}>
+      {/* Narrow screens scroll the tracker sideways; focusable then so keys can scroll it. */}
+      <nav
+        ref={trackerRef}
+        aria-label="Request progress"
+        className={styles.tracker}
+        tabIndex={trackerScrolls ? 0 : undefined}
+      >
         <ProgressIndicator currentIndex={current} spaceEqually className={styles.indicator}>
           {TRACKER_STEPS.map((step, index) => (
             <ProgressStep

@@ -9,7 +9,7 @@ import { Lock_01 as LockPictogram } from '@carbon/pictograms-react';
 import { isApiError } from '@/shared/api';
 import { formatDate } from '@/shared/lib/dates';
 import { useBreakpointUp } from '@/shared/hooks/useMediaQuery';
-import { AsyncBoundary, EmptyState, PageHeader } from '@/shared/ui';
+import { AsyncBoundary, EmptyState, NotFoundState, PageHeader } from '@/shared/ui';
 import { useReport } from '../../api/queries';
 import type { Report, ReportSection } from '../../model/report.schema';
 import { AskReportPanel } from '../AskReportPanel/AskReportPanel';
@@ -49,6 +49,14 @@ function Viewer({ itemId }: { itemId: string }) {
     <AsyncBoundary
       query={report}
       errorTitle="This report didn’t load"
+      notFound={
+        <NotFoundState
+          title="We couldn’t find that report"
+          message="It may have been withdrawn, or the link is incomplete. Reports you own are in your workspace."
+          backHref="/workspace"
+          backLabel="Go to your workspace"
+        />
+      }
       loading={
         <div className={styles.layout} aria-busy="true" aria-label="Loading report">
           <SkeletonText paragraph lineCount={5} />

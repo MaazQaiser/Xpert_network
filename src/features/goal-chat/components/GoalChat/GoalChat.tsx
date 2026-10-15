@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { ProgressBar, SkeletonPlaceholder, SkeletonText } from '@carbon/react';
-import { AsyncBoundary, PageHeader, StatusTag } from '@/shared/ui';
+import { AsyncBoundary, NotFoundState, PageHeader, StatusTag } from '@/shared/ui';
 import { useBreakpointUp } from '@/shared/hooks/useMediaQuery';
 import { formatDateTime, formatRelative } from '@/shared/lib/dates';
 import { routes } from '@/shared/config/routes';
@@ -128,6 +128,14 @@ export function GoalChat({
       query={conversation}
       loading={<GoalChatSkeleton />}
       errorTitle="Your brief didn’t load"
+      notFound={
+        <NotFoundState
+          title="We couldn’t find that brief"
+          message="It may have been deleted, or the link is incomplete. You can start a new goal any time."
+          backHref="/ask"
+          backLabel="Start a new goal"
+        />
+      }
     >
       {(data) => <GoalChatView data={data} briefId={briefId} initialGoal={initialGoal} />}
     </AsyncBoundary>

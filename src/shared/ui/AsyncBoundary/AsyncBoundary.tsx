@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { toUserMessage } from '../../api';
+import { isApiError, toUserMessage } from '../../api';
 import { ErrorState } from '../ErrorState/ErrorState';
 
 /** The subset of a TanStack Query result this boundary needs. */
@@ -21,6 +21,8 @@ export type AsyncBoundaryProps<T> = {
   isEmpty?: (data: T) => boolean;
   empty?: ReactNode;
   errorTitle?: string;
+  /** Shown instead of the error when the record doesn't exist (404); retrying wouldn't help. */
+  notFound?: ReactNode;
   children: (data: T) => ReactNode;
 };
 
@@ -31,12 +33,14 @@ export function AsyncBoundary<T>({
   isEmpty,
   empty,
   errorTitle,
+  notFound,
   children,
 }: AsyncBoundaryProps<T>) {
   // Once data has loaded, keep showing it even if a background refetch fails
   // (UX_PRINCIPLES: "Partial — show what loaded").
   if (query.data === undefined && query.isPending) return <>{loading}</>;
   if (query.data === undefined) {
+    if (notFound && isApiError(query.error) && query.error.status === 404) return <>{notFound}</>;
     return (
       <ErrorState
         {...(errorTitle ? { title: errorTitle } : {})}

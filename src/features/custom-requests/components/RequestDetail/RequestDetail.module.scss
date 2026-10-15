@@ -9,6 +9,11 @@
   min-inline-size: 0;
   margin-block-end: $spacing-07;
   overflow-x: auto;
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
 }
 
 .indicator {

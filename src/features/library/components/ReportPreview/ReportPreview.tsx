@@ -22,7 +22,7 @@ import {
   formatCurrencyEquivalent,
 } from '@/shared/lib/credits';
 import { formatDate } from '@/shared/lib/dates';
-import { AsyncBoundary, PageHeader } from '@/shared/ui';
+import { AsyncBoundary, NotFoundState, PageHeader } from '@/shared/ui';
 import { useLibraryEntry, usePurchaseReport } from '../../api/queries';
 import type { LibraryEntry } from '../../model/report.schema';
 import { ReportChart } from '../ReportChart/ReportChart';
@@ -35,6 +35,14 @@ export function ReportPreview({ itemId }: { itemId: string }) {
     <AsyncBoundary
       query={entry}
       errorTitle="This report didn’t load"
+      notFound={
+        <NotFoundState
+          title="We couldn’t find that report"
+          message="It may have been withdrawn, or the link is incomplete."
+          backHref="/library"
+          backLabel="Back to the library"
+        />
+      }
       loading={
         <div className={styles.layout} aria-busy="true" aria-label="Loading report">
           <div className={styles.main}>

@@ -1,0 +1,28 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-04;
+  max-inline-size: 40ch;
+  padding-block: $spacing-09;
+}
+
+.pictogram {
+  color: $icon-secondary;
+  margin-block-end: $spacing-03;
+}
+
+.title {
+  @include type-style('heading-04');
+}
+
+.message {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+  margin-block-end: $spacing-03;
+}

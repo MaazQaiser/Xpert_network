@@ -56,4 +56,20 @@ describe('AsyncBoundary', () => {
     renderBoundary(query({ data: ['Riyadh'], isError: true, error: new Error('boom') }));
     expect(screen.getByText('Riyadh')).toBeInTheDocument();
   });
+
+  it('shows the not-found state instead of a retry when the record doesn’t exist', () => {
+    render(
+      <AsyncBoundary
+        query={query<string[]>({ isError: true, error: new ApiError(404, 'not_found', 'Gone.') })}
+        loading={<p>Loading skeleton</p>}
+        notFound={<h1>We couldn’t find that request</h1>}
+      >
+        {(data) => <p>{data.join(', ')}</p>}
+      </AsyncBoundary>,
+    );
+    expect(
+      screen.getByRole('heading', { name: 'We couldn’t find that request' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /try again/i })).not.toBeInTheDocument();
+  });
 });

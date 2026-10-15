@@ -5,6 +5,8 @@ export type { AsyncBoundaryProps, AsyncQueryState } from './AsyncBoundary/AsyncB
 export { EmptyState } from './EmptyState/EmptyState';
 export type { EmptyStateProps } from './EmptyState/EmptyState';
 export { ErrorState } from './ErrorState/ErrorState';
+export { NotFoundState } from './NotFoundState/NotFoundState';
+export type { NotFoundStateProps } from './NotFoundState/NotFoundState';
 export { PageHeader } from './PageHeader/PageHeader';
 export type { Crumb, PageHeaderProps } from './PageHeader/PageHeader';
 export { StatusTag } from './StatusTag/StatusTag';
