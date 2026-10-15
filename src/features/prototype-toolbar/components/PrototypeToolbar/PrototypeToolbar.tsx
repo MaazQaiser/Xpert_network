@@ -162,6 +162,14 @@ export function PrototypeToolbar() {
                 >
                   Reject expert
                 </Button>
+                <Button
+                  kind="tertiary"
+                  size="sm"
+                  disabled={currentRole === null}
+                  onClick={() => runScenario(scenarios.pushNotification)}
+                >
+                  Push notification
+                </Button>
               </div>
             </fieldset>
             <Button

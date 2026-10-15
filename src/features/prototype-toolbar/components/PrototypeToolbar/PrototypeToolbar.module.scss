@@ -18,7 +18,9 @@
 
 .panel {
   inline-size: min(22rem, calc(100vw - #{$spacing-07}));
-  max-block-size: 75vh;
+
+  // Opens from 40vh down, so it must fit in the remaining 60vh and scroll inside.
+  max-block-size: calc(60vh - #{$spacing-05});
   overflow-y: auto;
   padding: $spacing-05;
   background: $layer-01;

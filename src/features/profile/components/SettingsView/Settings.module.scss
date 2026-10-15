@@ -1,0 +1,110 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/utilities/visually-hidden' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  max-inline-size: 56rem;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-09;
+  padding-block: $spacing-07;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+}
+
+.sectionTitle {
+  @include type-style('heading-03');
+}
+
+.help {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+  max-inline-size: 60ch;
+}
+
+.field {
+  max-inline-size: 28rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-04;
+}
+
+.events {
+  display: grid;
+}
+
+.event {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: $spacing-03 $spacing-07;
+  align-items: center;
+  padding-block: $spacing-05;
+  border-block-end: 1px solid $border-subtle-01;
+}
+
+.eventLabel {
+  @include type-style('heading-compact-01');
+}
+
+.eventDetail {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.channels {
+  display: flex;
+  gap: $spacing-06;
+}
+
+.sessions {
+  display: grid;
+}
+
+.session {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+  padding-block: $spacing-04;
+  border-block-end: 1px solid $border-subtle-01;
+}
+
+.sessionDevice {
+  @include type-style('heading-compact-01');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.sessionMeta {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.readOnly {
+  @include type-style('body-01');
+}
+
+.visuallyHidden {
+  @include visually-hidden;
+}

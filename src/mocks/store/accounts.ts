@@ -1,6 +1,8 @@
 import type { AuthProvider, SignUpRole, User } from '@/features/auth';
 import { createId } from '@/shared/lib/id';
+import { welcomeNotification } from '../fixtures/notifications';
 import { newClientOnboarding, newExpertOnboarding } from '../fixtures/onboarding';
+import { DEFAULT_PROFILE_EXTRAS, defaultPreferences, defaultSecurity } from '../fixtures/profile';
 import { db, type DemoState } from './db';
 
 type NewAccount = {
@@ -26,6 +28,12 @@ const initialisers: ((draft: DemoState, user: User) => void)[] = [
   (draft, user) => {
     if (user.role === 'client') draft.clientOnboarding[user.id] = newClientOnboarding();
     if (user.role === 'expert') draft.expertOnboarding[user.id] = newExpertOnboarding();
+  },
+  (draft, user) => {
+    draft.profiles[user.id] = { ...DEFAULT_PROFILE_EXTRAS };
+    draft.preferences[user.id] = defaultPreferences(user.role);
+    draft.security[user.id] = defaultSecurity(new Date(), false);
+    draft.notifications[user.id] = [welcomeNotification(user.role)];
   },
 ];
 

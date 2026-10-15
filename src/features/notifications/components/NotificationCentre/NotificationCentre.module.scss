@@ -1,0 +1,141 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/utilities/focus-outline' as *;
+@use '@carbon/react/scss/utilities/visually-hidden' as *;
+
+.trigger {
+  position: relative;
+}
+
+.badge {
+  @include type-style('label-01');
+
+  position: absolute;
+  inset-block-start: $spacing-02;
+  inset-inline-end: $spacing-02;
+  min-inline-size: $spacing-05;
+  padding-inline: $spacing-01;
+  border-radius: $spacing-03;
+  background: $support-error;
+  color: $text-on-color;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  block-size: $spacing-05;
+}
+
+// Only while open: the collapsed panel relies on Carbon's zero width.
+.panelOpen {
+  inline-size: 22rem;
+  max-inline-size: 100vw;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03;
+  padding: $spacing-05;
+  border-block-end: 1px solid $border-subtle-01;
+}
+
+.title {
+  @include type-style('heading-02');
+}
+
+.inlineError {
+  @include type-style('helper-text-01');
+
+  padding: $spacing-03 $spacing-05;
+  color: $text-error;
+}
+
+.body {
+  padding: $spacing-05;
+}
+
+.list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.item {
+  border-block-end: 1px solid $border-subtle-01;
+}
+
+.unread {
+  background: $layer-02;
+}
+
+.itemButton {
+  display: grid;
+  gap: $spacing-02;
+  inline-size: 100%;
+  padding: $spacing-04 $spacing-05;
+  border: 0;
+  background: transparent;
+  color: $text-primary;
+  cursor: pointer;
+  text-align: start;
+
+  &:hover {
+    background: $layer-hover-02;
+  }
+
+  &:focus {
+    @include focus-outline('outline');
+  }
+}
+
+.itemTitle {
+  @include type-style('heading-compact-01');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.dot {
+  flex-shrink: 0;
+  inline-size: $spacing-03;
+  block-size: $spacing-03;
+  border-radius: 50%;
+  background: $support-info;
+}
+
+.itemBody {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.itemTime {
+  @include type-style('helper-text-01');
+
+  color: $text-helper;
+}
+
+.footer {
+  padding: $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
+}
+
+.toasts {
+  position: fixed;
+  z-index: 8000;
+
+  // Just below the 3rem UI Shell header.
+  inset-block-start: $spacing-10;
+  inset-inline-end: $spacing-05;
+}
+
+.visuallyHidden {
+  @include visually-hidden;
+}

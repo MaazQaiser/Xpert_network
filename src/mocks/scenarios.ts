@@ -1,9 +1,18 @@
+import type { Notification } from '@/features/notifications';
+import { createId } from '@/shared/lib/id';
+import { demoNotification } from './fixtures/notifications';
 import {
   DEMO_REJECTION_NOTE,
   newClientOnboarding,
   newExpertOnboarding,
 } from './fixtures/onboarding';
 import { db } from './store/db';
+
+function notify(userId: string, notification: Notification) {
+  db.update((draft) => {
+    draft.notifications[userId] = [notification, ...(draft.notifications[userId] ?? [])];
+  });
+}
 
 /**
  * Scenario engine (PRODUCT_PLAN §8): toolbar actions that move time-based states forward
@@ -36,6 +45,28 @@ export const scenarios = {
         updatedAt: new Date().toISOString(),
       };
     });
+    notify(id, {
+      id: createId('ntf'),
+      event: 'vetting_update',
+      title:
+        decision === 'approved' ? 'You’re approved as an expert' : 'Changes needed on your profile',
+      body:
+        decision === 'approved'
+          ? 'Open calls that match your expertise now appear on your home page.'
+          : 'See what to change, then resubmit. Most profiles are approved after one round.',
+      href: decision === 'approved' ? '/expert/home' : '/expert/pending',
+      read: false,
+      createdAt: new Date().toISOString(),
+    });
+    return true;
+  },
+
+  /** F17: a new notification arrives for the logged-in user (panel badge + toast). */
+  pushNotification(): boolean {
+    const id = db.get().sessionUserId;
+    const user = id ? db.get().users[id] : undefined;
+    if (!user) return false;
+    notify(user.id, demoNotification(user.role));
     return true;
   },
 };

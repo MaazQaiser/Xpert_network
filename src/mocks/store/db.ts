@@ -1,9 +1,18 @@
 import type { ChatMessage, ResearchBrief, TurnResult } from '@/features/goal-chat';
 import type { User } from '@/features/auth';
+import type { Notification } from '@/features/notifications';
 import type { ClientOnboarding, ExpertOnboarding } from '@/features/onboarding';
+import type { NotificationPreferences, Security } from '@/features/profile';
 import type { Wallet } from '@/features/wallet';
 import { USERS } from '../fixtures/users';
+import { seedNotifications } from '../fixtures/notifications';
 import { SEED_CLIENT_ONBOARDING, SEED_EXPERT_ONBOARDING } from '../fixtures/onboarding';
+import {
+  defaultPreferences,
+  defaultSecurity,
+  SEED_PROFILE_EXTRAS,
+  type ProfileExtras,
+} from '../fixtures/profile';
 import { SEED_OWNED_REPORTS, seedWallet } from '../fixtures/wallet';
 
 /** A custom research request created from a brief (F4 builds on this). */
@@ -26,6 +35,11 @@ export type DemoState = {
   verificationSentAt: Record<string, string>;
   clientOnboarding: Record<string, ClientOnboarding>;
   expertOnboarding: Record<string, ExpertOnboarding>;
+  /** F17: profile fields that aren't on the user record. */
+  profiles: Record<string, ProfileExtras>;
+  preferences: Record<string, NotificationPreferences>;
+  security: Record<string, Security>;
+  notifications: Record<string, Notification[]>;
   briefs: Record<string, ResearchBrief>;
   messages: Record<string, ChatMessage[]>;
   /** Completed turns by turnId, so retried turns are idempotent. */
@@ -48,6 +62,14 @@ function seed(): DemoState {
     verificationSentAt: {},
     clientOnboarding: structuredClone(SEED_CLIENT_ONBOARDING),
     expertOnboarding: structuredClone(SEED_EXPERT_ONBOARDING),
+    profiles: structuredClone(SEED_PROFILE_EXTRAS),
+    preferences: Object.fromEntries(
+      Object.values(USERS).map((user) => [user.id, defaultPreferences(user.role)]),
+    ),
+    security: Object.fromEntries(Object.values(USERS).map((user) => [user.id, defaultSecurity()])),
+    notifications: Object.fromEntries(
+      Object.values(USERS).map((user) => [user.id, seedNotifications(user.id)]),
+    ),
     briefs: {},
     messages: {},
     turns: {},

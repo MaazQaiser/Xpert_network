@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { RequireRole, ROLE_HOME, type Role } from '@/features/auth';
+import { NotificationCentre } from '@/features/notifications';
 import { OnboardingGate } from '@/features/onboarding';
 import { BalanceBadge } from '@/features/wallet';
 import { ThemeToggle } from '@/providers/ThemeToggle';
@@ -10,6 +11,13 @@ import { NAVIGATION } from '../../navigation';
 import { LowBalanceBanner } from '../LowBalanceBanner/LowBalanceBanner';
 import { UserPanel } from '../UserPanel/UserPanel';
 import styles from './RoleShell.module.scss';
+
+/** F17 settings per role; admins have none yet. */
+const SETTINGS: Record<Role, string | undefined> = {
+  client: '/settings',
+  expert: '/expert/profile',
+  admin: undefined,
+};
 
 const SUFFIX: Record<Role, string | undefined> = {
   client: undefined,
@@ -32,7 +40,15 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
                 <>
                   {role === 'client' && !isFocused ? <BalanceBadge /> : null}
                   <ThemeToggle />
-                  <UserPanel user={user} />
+                  <NotificationCentre
+                    {...(SETTINGS[role] && !isFocused
+                      ? { settingsHref: `${SETTINGS[role]}?tab=notifications` }
+                      : {})}
+                  />
+                  <UserPanel
+                    user={user}
+                    {...(SETTINGS[role] && !isFocused ? { settingsHref: SETTINGS[role] } : {})}
+                  />
                 </>
               }
             >

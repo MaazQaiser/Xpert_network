@@ -211,19 +211,7 @@ export function WorkStep({ profile, isBusy, onBack, onSubmit }: StepProps<WorkHi
           const label = `Role ${index + 1}`;
           return (
             <fieldset key={field.key} className={styles.position}>
-              <div className={styles.positionHeader}>
-                <legend className={styles.positionTitle}>{label}</legend>
-                {fields.length > 1 ? (
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    renderIcon={TrashCan}
-                    onClick={() => remove(index)}
-                  >
-                    Remove {label.toLowerCase()}
-                  </Button>
-                ) : null}
-              </div>
+              <legend className={styles.positionTitle}>{label}</legend>
               <TextInput
                 id={`work-${index}-company`}
                 labelText="Company"
@@ -264,6 +252,18 @@ export function WorkStep({ profile, isBusy, onBack, onSubmit }: StepProps<WorkHi
                   ))}
                 </Select>
               </div>
+              {fields.length > 1 ? (
+                <div>
+                  <Button
+                    kind="ghost"
+                    size="sm"
+                    renderIcon={TrashCan}
+                    onClick={() => remove(index)}
+                  >
+                    Remove {label.toLowerCase()}
+                  </Button>
+                </div>
+              ) : null}
             </fieldset>
           );
         })}

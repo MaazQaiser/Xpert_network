@@ -40,15 +40,10 @@
   border: 1px solid $border-subtle-01;
 }
 
-.positionHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: $spacing-04;
-}
-
 .positionTitle {
   @include type-style('heading-compact-01');
+
+  margin-block-end: $spacing-03;
 }
 
 .years {
