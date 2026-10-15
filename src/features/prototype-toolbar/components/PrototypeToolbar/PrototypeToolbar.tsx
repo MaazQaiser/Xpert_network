@@ -178,6 +178,24 @@ export function PrototypeToolbar() {
                 >
                   Update owned report
                 </Button>
+                {(
+                  [
+                    ['Advance request', scenarios.advanceRequest],
+                    ['Revise quote', scenarios.reviseQuote],
+                    ['Expire quote', scenarios.expireQuote],
+                    ['Deliver partially', scenarios.deliverPartially],
+                  ] as const
+                ).map(([label, action]) => (
+                  <Button
+                    key={label}
+                    kind="tertiary"
+                    size="sm"
+                    disabled={currentRole !== 'client'}
+                    onClick={() => runScenario(action)}
+                  >
+                    {label}
+                  </Button>
+                ))}
               </div>
             </fieldset>
             <Button

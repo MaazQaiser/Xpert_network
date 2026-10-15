@@ -6,6 +6,9 @@ import type { NotificationPreferences, Security } from '@/features/profile';
 import type { Wallet } from '@/features/wallet';
 import { USERS } from '../fixtures/users';
 import { seedNotifications } from '../fixtures/notifications';
+import type { LibraryItem } from '@/features/library';
+import type { MockReport } from '../fixtures/reportContent';
+import { seedRequests, type StoredRequest } from '../fixtures/requests';
 import { SEED_CLIENT_ONBOARDING, SEED_EXPERT_ONBOARDING } from '../fixtures/onboarding';
 import {
   defaultPreferences,
@@ -14,17 +17,6 @@ import {
   type ProfileExtras,
 } from '../fixtures/profile';
 import { SEED_OWNED_REPORTS, SEED_PURCHASES, seedWallet } from '../fixtures/wallet';
-
-/** A custom research request created from a brief (F4 builds on this). */
-export type MockRequest = {
-  id: string;
-  briefId: string;
-  ownerId: string;
-  title: string;
-  questionIds: string[];
-  status: 'quote_requested';
-  createdAt: string;
-};
 
 export type DemoState = {
   version: 2;
@@ -50,7 +42,9 @@ export type DemoState = {
   reportPurchases: Record<string, Record<string, string>>;
   /** Report updates pushed by the toolbar scenario, by library item id. */
   reportUpdates: Record<string, { updatedAt: string; note: string }>;
-  requests: Record<string, MockRequest>;
+  requests: Record<string, StoredRequest>;
+  /** Delivered custom reports, readable in the F3 viewer by their owner. */
+  customReports: Record<string, { ownerId: string; item: LibraryItem; content: MockReport }>;
 };
 
 // Key keeps the product's former name so testers' saved demo data survives the rename.
@@ -87,7 +81,8 @@ function seed(): DemoState {
       ]),
     ),
     reportUpdates: {},
-    requests: {},
+    requests: seedRequests(),
+    customReports: {},
   };
 }
 

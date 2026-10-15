@@ -1,0 +1,266 @@
+@use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '../../../../styles/mixins' as mx;
+
+.tracker {
+  min-inline-size: 0;
+  margin-block-end: $spacing-07;
+  overflow-x: auto;
+}
+
+.indicator {
+  min-inline-size: 40rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: $spacing-06;
+  align-items: start;
+
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem);
+  }
+}
+
+.main,
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  min-inline-size: 0;
+}
+
+.card {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  min-inline-size: 0;
+  padding: $spacing-06 $spacing-05;
+
+  @include breakpoint(md) {
+    padding: $spacing-06;
+  }
+}
+
+.cardTitle {
+  @include type-style('heading-03');
+}
+
+.subTitle {
+  @include type-style('heading-compact-01');
+
+  margin-block-end: $spacing-03;
+}
+
+.help {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+.notice.notice {
+  min-inline-size: 0;
+  max-inline-size: none;
+}
+
+.quoteHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-04;
+}
+
+.price {
+  display: grid;
+  justify-items: end;
+}
+
+.priceValue {
+  @include type-style('heading-05');
+}
+
+.facts {
+  @include type-style('body-compact-01');
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: $spacing-04;
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  dt {
+    @include type-style('label-01');
+
+    color: $text-secondary;
+  }
+}
+
+.scope {
+  display: grid;
+  gap: $spacing-05;
+}
+
+.checkList {
+  display: grid;
+  gap: $spacing-03;
+
+  li {
+    @include type-style('body-01');
+
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: $spacing-03;
+  }
+}
+
+.inIcon {
+  fill: $support-success;
+}
+
+.reason {
+  @include type-style('helper-text-01');
+
+  display: block;
+  color: $text-secondary;
+}
+
+.bullets {
+  @include type-style('body-01');
+
+  display: grid;
+  gap: $spacing-02;
+  padding-inline-start: $spacing-05;
+  list-style: disc;
+}
+
+.explainer {
+  padding: $spacing-05;
+  border-radius: radius.$border-radius-08;
+  background: $layer-02;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-04;
+}
+
+.summary {
+  @include type-style('body-compact-01');
+
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: $spacing-03 $spacing-06;
+
+  dt {
+    color: $text-secondary;
+  }
+}
+
+.experts {
+  display: grid;
+  gap: $spacing-04;
+}
+
+.expert {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: $spacing-03;
+}
+
+.expertRole {
+  @include type-style('heading-compact-01');
+
+  display: block;
+}
+
+.questions {
+  @include type-style('body-01');
+
+  display: grid;
+  gap: $spacing-03;
+  padding-inline-start: $spacing-05;
+  list-style: decimal;
+}
+
+.question {
+  padding-inline-start: $spacing-02;
+}
+
+.outTag {
+  color: $text-secondary;
+}
+
+.activity {
+  display: grid;
+  gap: $spacing-04;
+}
+
+.activityItem {
+  display: grid;
+  gap: $spacing-01;
+  padding-inline-start: $spacing-04;
+  border-inline-start: $spacing-01 solid $border-subtle-01;
+}
+
+.activityLabel {
+  @include type-style('heading-compact-01');
+}
+
+.activityNote {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.activityTime {
+  @include type-style('helper-text-01');
+
+  color: $text-helper;
+}
+
+.messages {
+  display: grid;
+  gap: $spacing-04;
+}
+
+.messageClient,
+.messageTeam {
+  @include type-style('body-01');
+
+  display: grid;
+  gap: $spacing-02;
+  padding: $spacing-04;
+  border-radius: radius.$border-radius-08;
+}
+
+.messageClient {
+  margin-inline-start: $spacing-07;
+  background: $layer-accent-01;
+}
+
+.messageTeam {
+  margin-inline-end: $spacing-07;
+  border: 1px solid $border-subtle-01;
+}
+
+.messageAuthor {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.messageForm {
+  display: grid;
+  gap: $spacing-03;
+}

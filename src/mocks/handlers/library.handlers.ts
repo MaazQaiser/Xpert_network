@@ -30,7 +30,7 @@ import { effectiveWallet } from './wallet.handlers';
 const answers = new Map<string, ReportAnswer>();
 
 function contentFor(item: LibraryItem): MockReport {
-  const content = REPORT_CONTENT[item.id];
+  const content = REPORT_CONTENT[item.id] ?? db.get().customReports[item.id]?.content;
   if (!content) throw new Error(`No report content for ${item.id}`);
   return content;
 }
@@ -99,8 +99,10 @@ async function guardClient() {
   return { user } as const;
 }
 
+/** Public library items, plus delivered custom reports (readable only by their owner). */
 function findItem(id: unknown): LibraryItem | null {
-  return LIBRARY_ITEMS.find((item) => item.id === id) ?? null;
+  if (typeof id !== 'string') return null;
+  return LIBRARY_ITEMS.find((item) => item.id === id) ?? db.get().customReports[id]?.item ?? null;
 }
 
 const notFound = () =>

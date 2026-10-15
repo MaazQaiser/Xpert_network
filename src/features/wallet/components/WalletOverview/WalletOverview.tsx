@@ -381,6 +381,9 @@ function History() {
                       <TableCell className={styles.numeric}>
                         {t.amount > 0 ? '+' : '−'}
                         {formatCredits(Math.abs(t.amount))}
+                        {t.type === 'spent' ? (
+                          <span className={styles.fromHeld}>from held credits</span>
+                        ) : null}
                       </TableCell>
                     </TableRow>
                   ))}

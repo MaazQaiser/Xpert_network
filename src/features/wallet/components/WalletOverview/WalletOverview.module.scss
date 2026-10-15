@@ -164,6 +164,13 @@
   white-space: nowrap;
 }
 
+.fromHeld {
+  @include type-style('helper-text-01');
+
+  display: block;
+  color: $text-secondary;
+}
+
 .skeletonCard {
   inline-size: 100%;
   block-size: $spacing-12;

@@ -3,6 +3,7 @@ import { libraryHandlers } from './library.handlers';
 import { notificationsHandlers } from './notifications.handlers';
 import { onboardingHandlers } from './onboarding.handlers';
 import { profileHandlers } from './profile.handlers';
+import { requestsHandlers } from './requests.handlers';
 import { authHandlers, sessionHandlers } from './session.handlers';
 import { walletHandlers } from './wallet.handlers';
 
@@ -13,6 +14,7 @@ export const handlers = [
   ...profileHandlers,
   ...notificationsHandlers,
   ...libraryHandlers,
+  ...requestsHandlers,
   ...walletHandlers,
   ...briefsHandlers,
   ...subjectsHandlers,

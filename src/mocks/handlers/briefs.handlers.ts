@@ -14,6 +14,7 @@ import { runTurn, toMessage, TurnRejected } from '../ai/goalChat/engine';
 import { getControls } from '../controls';
 import { ALL_SUBJECTS } from '../fixtures/entities';
 import { LIBRARY_ITEMS } from '../fixtures/library';
+import { newRequest } from '../fixtures/requests';
 import { db } from '../store/db';
 import {
   currentUser,
@@ -351,15 +352,18 @@ export const briefsHandlers = [
         }
       }
       if (requestId) {
-        draft.requests[requestId] = {
+        const questionIds = option === 'mix' ? gapIds : brief.questions.map((q) => q.id);
+        draft.requests[requestId] = newRequest({
           id: requestId,
-          briefId: brief.id,
           ownerId: user.id,
+          briefId: brief.id,
           title: brief.title,
-          questionIds: option === 'mix' ? gapIds : brief.questions.map((q) => q.id),
-          status: 'quote_requested',
-          createdAt: now.toISOString(),
-        };
+          objective: brief.objective,
+          questions: brief.questions
+            .filter((q) => questionIds.includes(q.id))
+            .map(({ id, text, topic }) => ({ id, text, topic })),
+          now,
+        });
       }
     });
 

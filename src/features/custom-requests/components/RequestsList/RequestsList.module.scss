@@ -1,0 +1,96 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/utilities/focus-outline' as *;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-07;
+  max-inline-size: 64rem;
+  min-inline-size: 0;
+}
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-08;
+}
+
+.group {
+  display: grid;
+  gap: $spacing-04;
+}
+
+.groupTitle {
+  @include type-style('heading-03');
+}
+
+.count {
+  color: $text-secondary;
+}
+
+.list {
+  display: grid;
+  gap: $spacing-04;
+}
+
+.card {
+  @include mx.surface-card;
+
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+  padding: $spacing-05 $spacing-06;
+
+  &:hover {
+    border-color: $border-strong-01;
+  }
+}
+
+.cardMain {
+  display: grid;
+  flex: 1 1 18rem;
+  gap: $spacing-02;
+  min-inline-size: 0;
+}
+
+.cardTitle {
+  @include type-style('heading-compact-02');
+}
+
+// The whole card is clickable through the title link (one tab stop).
+.link {
+  color: $text-primary;
+  text-decoration: none;
+
+  &::after {
+    position: absolute;
+    border-radius: inherit;
+    content: '';
+    inset: 0;
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus::after {
+    @include focus-outline('outline');
+  }
+}
+
+.summary {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.skeleton {
+  inline-size: 100%;
+  block-size: $spacing-10;
+}
