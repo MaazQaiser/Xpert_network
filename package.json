@@ -23,7 +23,6 @@
     "@carbon/pictograms-react": "^11.112.0",
     "@carbon/react": "^1.118.0",
     "@fontsource-variable/inter": "5.2.8",
-    "@fontsource/instrument-serif": "5.2.8",
     "@hookform/resolvers": "^5.9.1",
     "@ibm/plex-mono": "^2.5.0",
     "@tanstack/react-query": "^5.104.3",

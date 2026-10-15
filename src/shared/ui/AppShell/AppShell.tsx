@@ -69,6 +69,7 @@ export function AppShell({
       <HeaderGlobalBar>{headerActions}</HeaderGlobalBar>
       {hasNav ? (
         <SideNav
+          className={chromeTheme ? undefined : styles.sideNav}
           aria-label="Main navigation"
           expanded={isNavOpen}
           onOverlayClick={() => setIsNavOpen(false)}
@@ -104,10 +105,17 @@ export function AppShell({
           {chrome}
         </Theme>
       ) : (
-        <Header aria-label="Proptyop">{chrome}</Header>
+        <Header aria-label="Proptyop" className={styles.header}>
+          {chrome}
+        </Header>
       )}
       {headerExtras}
-      <main id="main-content" className={hasNav ? styles.content : styles.contentFull}>
+      <main
+        id="main-content"
+        className={
+          !hasNav ? styles.contentFull : chromeTheme ? styles.content : styles.contentFloating
+        }
+      >
         {children}
       </main>
     </>

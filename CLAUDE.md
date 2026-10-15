@@ -20,7 +20,7 @@ Full plan: [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md) — flows F0–F17, sc
 | Concern | Choice |
 |---|---|
 | Framework | Next.js (App Router, latest stable), React, TypeScript `strict` |
-| Design system | Carbon v11 — `@carbon/react`, `@carbon/icons-react`, `@carbon/pictograms-react`, `@carbon/charts-react` — with the Proptyop warm themes, burnt-orange accent, Inter + Instrument Serif (ADR 0009) |
+| Design system | Carbon v11 — `@carbon/react`, `@carbon/icons-react`, `@carbon/pictograms-react`, `@carbon/charts-react` — with the Proptyop Notion-like themes, burnt-orange accent, Inter, floating panels (ADR 0009) |
 | Styling | Sass (`.module.scss`) using Carbon tokens only. No Tailwind, no CSS-in-JS |
 | Server state | TanStack Query |
 | Client state | React state → URL search params → Zustand (only if truly global) |
@@ -47,7 +47,7 @@ Full plan: [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md) — flows F0–F17, sc
 ## Non-negotiables
 
 1. **Carbon first.** Use a Carbon component before building one. Never restyle Carbon internals with deep selectors; compose or wrap.
-2. **Tokens only.** No hex colours, no raw `px` spacing, no custom font stacks. Use `$spacing-*`, colour tokens (`$text-primary`, `$layer-01`…), and type sets (`@include type-style('body-01')`). Raw colours exist only in `src/styles/_themes.scss`; serif display headings and soft cards come from `src/styles/_mixins.scss` (`display-heading`, `surface-card`).
+2. **Tokens only.** No hex colours, no raw `px` spacing, no custom font stacks. Use `$spacing-*`, colour tokens (`$text-primary`, `$layer-01`…), and type sets (`@include type-style('body-01')`). Raw colours exist only in `src/styles/_themes.scss`; page titles and soft cards come from `src/styles/_mixins.scss` (`display-heading`, `surface-card`).
 3. **Accessible by default.** WCAG 2.2 AA. Every interactive element is keyboard-reachable, labelled, and has visible focus. Run axe in tests.
 4. **Feature-sliced.** Code lives in `src/features/<feature>`. Features never import each other's internals — only their `index.ts` public API.
 5. **Server Components by default.** Add `'use client'` only at the leaf that needs interactivity. Carbon interactive components are client components — wrap them.

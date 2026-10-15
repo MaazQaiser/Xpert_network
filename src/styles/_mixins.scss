@@ -21,16 +21,10 @@
 
 // ——— Proptyop look (ADR 0009) ————————————————————————————————————————————
 
-/// Serif display heading. Only for page titles, hero and marketing headings; section and
-/// component headings stay in the sans (Inter) for scanning.
+/// Page and hero titles: a Carbon type token in Inter semibold, like Notion's page titles.
 @mixin display-heading($token: 'heading-05') {
   @include type.type-style($token, true);
-  @include type.font-weight('regular');
-
-  // The display font is Carbon's 'serif' family, exposed by globals.scss (ADR 0009).
-  // stylelint-disable-next-line carbon/type-use
-  font-family: var(--pt-font-display);
-  letter-spacing: 0;
+  @include type.font-weight('semibold');
 }
 
 /// Soft card for our own surfaces (heroes, panels, auth forms, chat bubbles). Carbon

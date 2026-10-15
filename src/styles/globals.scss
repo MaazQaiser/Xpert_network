@@ -6,13 +6,13 @@
   $use-per-family-plex: true
 );
 
-// Inter for UI text, Instrument Serif for display headings, Plex Mono for code (ADR 0009).
+// Inter for all text, Plex Mono for code (ADR 0009). `serif` is only a system fallback.
 @use '@carbon/react/scss/type' with (
   $font-families: (
     'sans': string.unquote(
         "'Inter Variable', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
       ),
-    'serif': string.unquote("'Instrument Serif', Georgia, 'Times New Roman', serif"),
+    'serif': string.unquote("Georgia, 'Times New Roman', serif"),
     'mono': string.unquote(
         "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
       ),
@@ -28,7 +28,6 @@
 @use 'fonts' as proptyop-fonts;
 @use '@carbon/react';
 @use '@carbon/react/scss/theme';
-@use '@carbon/react/scss/type' as carbon-type;
 @use '@carbon/react/scss/motion' as *;
 @use 'themes' as proptyop;
 
@@ -36,10 +35,6 @@
 // prefers dark. ThemeProvider writes data-carbon-theme on <html> (`white` / `g100`).
 :root {
   @include proptyop.proptyop-theme(light);
-
-  // CSS modules compile without the font config above, so they read the display font
-  // through this property (see mixins.display-heading).
-  --pt-font-display: #{carbon-type.font-family('serif')};
 }
 
 :root[data-carbon-theme='g100'] {

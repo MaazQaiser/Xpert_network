@@ -1,5 +1,6 @@
 // Proptyop extension tokens (DESIGN_SYSTEM.md §4.2).
 // Only add a token here when Carbon has no semantic equivalent.
+@use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 
 $pt-request-open: $support-info;
@@ -12,3 +13,8 @@ $pt-confidence-low: $support-warning;
 // Carbon exposes these only inside its shell styles, so we mirror them here.
 $pt-shell-header-height: 3rem; // mini-units(6)
 $pt-shell-side-nav-width: 16rem; // mini-units(32)
+
+// Floating side nav (ADR 0009): an inset panel, so content starts after nav + both gutters.
+$pt-floating-nav-gutter: $spacing-05;
+$pt-floating-nav-offset: $pt-shell-side-nav-width + 2 * $pt-floating-nav-gutter;
+$pt-floating-nav-top: $pt-shell-header-height + $pt-floating-nav-gutter;

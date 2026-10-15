@@ -1,3 +1,4 @@
+@use '@carbon/react/scss/border-radius' as radius;
 @use '@carbon/react/scss/spacing' as *;
 @use '../../../styles/tokens' as *;
 @use '@carbon/react/scss/breakpoint' as *;
@@ -19,4 +20,34 @@
 .contentFull {
   margin-block-start: $pt-shell-header-height;
   min-block-size: calc(100vh - $pt-shell-header-height);
+}
+
+// ——— Floating chrome (ADR 0009) ——————————————————————————————————————————
+// Doubled class names outrank Carbon's single-class root rules for these two shell parts
+// regardless of stylesheet order; only the root element is styled, never Carbon internals.
+
+.header.header {
+  border-block-end-color: transparent;
+}
+
+.sideNav.sideNav {
+  background-color: $layer-01;
+
+  @include breakpoint(lg) {
+    block-size: auto;
+    border: 1px solid $border-subtle-01;
+    border-radius: radius.$border-radius-16;
+    box-shadow: 0 $spacing-01 $spacing-03 $shadow;
+    inset-block: $pt-floating-nav-top $pt-floating-nav-gutter;
+    inset-inline-start: $pt-floating-nav-gutter;
+  }
+}
+
+.contentFloating {
+  margin-block-start: $pt-shell-header-height;
+  min-block-size: calc(100vh - $pt-shell-header-height);
+
+  @include breakpoint(lg) {
+    margin-inline-start: $pt-floating-nav-offset;
+  }
 }

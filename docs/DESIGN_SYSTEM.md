@@ -26,7 +26,7 @@ pnpm add @carbon/react @carbon/icons-react @carbon/pictograms-react @carbon/char
 
 `src/styles/globals.scss`
 
-See `src/styles/globals.scss`: Carbon config → `$font-families` (Inter / Instrument Serif / Plex Mono) → `@font-face` (`_fonts.scss`) → `@carbon/react` → Proptyop themes (`_themes.scss`). Details and reasons in ADR 0009.
+See `src/styles/globals.scss`: Carbon config → `$font-families` (Inter / Plex Mono) → `@font-face` (`_fonts.scss`) → `@carbon/react` → Proptyop themes (`_themes.scss`). Details and reasons in ADR 0009.
 
 Next.js notes:
 
@@ -41,10 +41,10 @@ Next.js notes:
 
 | Area | Carbon theme | Why |
 |---|---|---|
-| App (default, light) | `white` + Proptyop warm overrides | Warm stone page, paper cards, burnt-orange accent (ADR 0009) |
+| App (default, light) | `white` + Proptyop overrides | White page, `#f7f6f3` floating panels, burnt-orange accent (ADR 0009) |
 | App alt surfaces (side panels, filters) | `g10` layer | Subtle separation |
-| Dark mode | `g100` + Proptyop warm overrides | User preference / system setting |
-| UI Shell header + side nav | App theme (light or dark) | Calm, Notion-like frame; accent bar marks the active item |
+| Dark mode | `g100` + Proptyop overrides | User preference / system setting |
+| UI Shell header + side nav | App theme (light or dark) | Borderless header; side nav floats as a rounded panel at `lg+`; accent bar marks the active item |
 | Admin header | `g100` (Carbon) | Separate realm must look different |
 
 - Theme follows `prefers-color-scheme`, overridable in user settings (persisted server-side).
@@ -94,10 +94,10 @@ Rules of thumb:
 - Between related groups: `$spacing-06`–`$spacing-07`.
 - Between page sections: `$spacing-09`+.
 
-### 4.4 Typography — Inter, Instrument Serif, Plex Mono
+### 4.4 Typography — Inter, Plex Mono
 
-- UI and body: **Inter** (Carbon `sans`). Display headings: **Instrument Serif** (Carbon `serif`), only via `@include mx.display-heading('heading-06')` for page titles, hero and marketing headings. Code: **IBM Plex Mono**.
-- Section, card and component headings stay in Inter so dense screens scan quickly.
+- All text: **Inter** (Carbon `sans`). Code: **IBM Plex Mono**. No serif.
+- Page and hero titles: `@include mx.display-heading('heading-06')` (Carbon type token, semibold).
 
 ### 4.4.1 Surfaces
 
