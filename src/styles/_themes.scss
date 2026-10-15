@@ -3,6 +3,7 @@
 // burnt-orange accent for links, focus and the active nav item. This is the ONLY place
 // raw colour values may appear; every component uses Carbon tokens.
 // All text pairs meet WCAG 2.2 AA (checked 2026-10-15).
+@use '@carbon/react/scss/border-radius' as radius;
 @use '@carbon/react/scss/theme';
 @use '@carbon/react/scss/themes';
 @use '@carbon/react/scss/utilities/custom-property';
@@ -230,6 +231,9 @@ $dark-overrides: (
 }
 
 @mixin -button-tokens($mode) {
+  // Carbon's own button-radius hook: every Carbon button gets 4px corners.
+  --cds-button-radius: #{radius.$border-radius-04};
+
   @if $mode == light {
     --cds-button-primary: #{$black-60};
     --cds-button-primary-hover: #{$black-50};
