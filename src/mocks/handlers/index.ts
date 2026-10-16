@@ -1,4 +1,7 @@
 import { briefsHandlers, subjectsHandlers } from './briefs.handlers';
+import { callsHandlers } from './calls.handlers';
+import { earningsHandlers } from './earnings.handlers';
+import { interviewsHandlers } from './interviews.handlers';
 import { libraryHandlers } from './library.handlers';
 import { notificationsHandlers } from './notifications.handlers';
 import { onboardingHandlers } from './onboarding.handlers';
@@ -18,6 +21,9 @@ export const handlers = [
   ...requestsHandlers,
   ...walletHandlers,
   ...workspaceHandlers,
+  ...callsHandlers,
+  ...interviewsHandlers,
+  ...earningsHandlers,
   ...briefsHandlers,
   ...subjectsHandlers,
 ];

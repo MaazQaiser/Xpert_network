@@ -18,6 +18,9 @@ import {
 } from '../fixtures/profile';
 import { SEED_OWNED_REPORTS, SEED_PURCHASES, seedWallet } from '../fixtures/wallet';
 import { SEED_WORKSPACES, type StoredWorkspace } from '../fixtures/workspace';
+import { SEED_APPLICATIONS } from '../fixtures/calls';
+import { SEED_EARNINGS, type StoredEarnings } from '../fixtures/earnings';
+import type { StoredInterview } from '../ai/interviewer/engine';
 
 export type DemoState = {
   version: 2;
@@ -48,6 +51,20 @@ export type DemoState = {
   customReports: Record<string, { ownerId: string; item: LibraryItem; content: MockReport }>;
   /** F5: each client's folders, labels and per-item organisation. */
   workspaces: Record<string, StoredWorkspace>;
+  /** F8: each expert's applications by call id, with their screening answers. */
+  applications: Record<string, Record<string, StoredApplication>>;
+  /** F9: interviews by id. */
+  interviews: Record<string, StoredInterview>;
+  /** F10: each expert's earnings, payouts and payout method. */
+  earnings: Record<string, StoredEarnings>;
+};
+
+export type StoredApplication = {
+  status: 'applied' | 'approved' | 'not_eligible';
+  at: string;
+  note: string | null;
+  interviewId: string | null;
+  answers: Record<string, string>;
 };
 
 // Key keeps the product's former name so testers' saved demo data survives the rename.
@@ -87,6 +104,9 @@ function seed(): DemoState {
     requests: seedRequests(),
     customReports: {},
     workspaces: structuredClone(SEED_WORKSPACES),
+    applications: structuredClone(SEED_APPLICATIONS),
+    interviews: {},
+    earnings: structuredClone(SEED_EARNINGS),
   };
 }
 

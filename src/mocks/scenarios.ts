@@ -7,6 +7,13 @@ import {
   newClientOnboarding,
   newExpertOnboarding,
 } from './fixtures/onboarding';
+import { approveOldestApplication } from './handlers/calls.handlers';
+import { payOldestPayout } from './handlers/earnings.handlers';
+import {
+  decideOldestInterview,
+  dropNextInterviewTurn,
+  pauseLongAgo,
+} from './handlers/interviews.handlers';
 import { withStatus } from './handlers/requests.handlers';
 import {
   buildCustomReport,
@@ -281,4 +288,40 @@ export const scenarios = {
     notify(user.id, demoNotification(user.role));
     return true;
   },
+
+  /** F8: an analyst approves the expert's oldest application under review. */
+  approveApplication(): boolean {
+    const id = expertId();
+    return id ? approveOldestApplication(id) : false;
+  },
+
+  /** F9: the next interviewer reply is cut off, as if the connection dropped. */
+  dropConnection(): boolean {
+    if (!expertId()) return false;
+    dropNextInterviewTurn();
+    return true;
+  },
+
+  /** F9: the running interview has been paused for 15 minutes. */
+  pauseLong(): boolean {
+    const id = expertId();
+    return id ? pauseLongAgo(id) : false;
+  },
+
+  /** F9 / F10: QA accepts or rejects the oldest submitted interview. */
+  decideInterview(decision: 'accepted' | 'rejected'): boolean {
+    const id = expertId();
+    return id ? decideOldestInterview(id, decision) : false;
+  },
+
+  /** F10: the oldest requested payout is sent. */
+  payoutPaid(): boolean {
+    const id = expertId();
+    return id ? payOldestPayout(id) : false;
+  },
 };
+
+function expertId(): string | null {
+  const id = db.get().sessionUserId;
+  return id && db.get().users[id]?.role === 'expert' ? id : null;
+}

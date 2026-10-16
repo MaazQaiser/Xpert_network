@@ -1,0 +1,153 @@
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/utilities/focus-outline' as *;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  min-inline-size: 0;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: $spacing-05;
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include breakpoint(lg) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.resultsBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+}
+
+.count {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: $spacing-05;
+
+  @include breakpoint(xlg) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.list > li {
+  min-inline-size: 0;
+}
+
+.card {
+  @include mx.surface-card;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  block-size: 100%;
+  min-inline-size: 0;
+  padding: $spacing-06 $spacing-05;
+
+  @include breakpoint(md) {
+    padding: $spacing-06;
+  }
+
+  &:hover {
+    border-color: $border-strong-01;
+  }
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-02;
+}
+
+.tags > * {
+  margin: 0;
+}
+
+.title {
+  @include type-style('heading-03');
+
+  overflow-wrap: anywhere;
+}
+
+// The whole card is clickable through the title link (one tab stop).
+.link {
+  color: $text-primary;
+  text-decoration: none;
+
+  &::after {
+    position: absolute;
+    border-radius: inherit;
+    content: '';
+    inset: 0;
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus::after {
+    @include focus-outline('outline');
+  }
+}
+
+.brief {
+  @include type-style('body-01');
+
+  display: -webkit-box;
+  overflow: hidden;
+  color: $text-secondary;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.reason {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.meta {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03 $spacing-05;
+  margin-block-start: auto;
+  padding-block-start: $spacing-03;
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-02;
+  }
+
+  svg {
+    fill: $icon-secondary;
+  }
+}
+
+.skeletonMeta.skeletonMeta {
+  inline-size: 60%;
+  block-size: $spacing-05;
+}

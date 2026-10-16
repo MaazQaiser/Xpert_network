@@ -196,6 +196,26 @@ export function PrototypeToolbar() {
                     {label}
                   </Button>
                 ))}
+                {(
+                  [
+                    ['Approve application', scenarios.approveApplication],
+                    ['Drop connection', scenarios.dropConnection],
+                    ['Pause 15 minutes', scenarios.pauseLong],
+                    ['Accept interview', () => scenarios.decideInterview('accepted')],
+                    ['Reject interview', () => scenarios.decideInterview('rejected')],
+                    ['Payout paid', scenarios.payoutPaid],
+                  ] as const
+                ).map(([label, action]) => (
+                  <Button
+                    key={label}
+                    kind="tertiary"
+                    size="sm"
+                    disabled={currentRole !== 'expert'}
+                    onClick={() => runScenario(action)}
+                  >
+                    {label}
+                  </Button>
+                ))}
               </div>
             </fieldset>
             <Button

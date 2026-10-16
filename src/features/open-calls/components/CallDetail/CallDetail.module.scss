@@ -1,0 +1,147 @@
+@use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '../../../../styles/mixins' as mx;
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: $spacing-06;
+  align-items: start;
+
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
+  }
+}
+
+.main {
+  @include breakpoint(lg) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  min-inline-size: 0;
+}
+
+.card,
+.outcome,
+.notEligible {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  min-inline-size: 0;
+  padding: $spacing-06 $spacing-05;
+
+  @include breakpoint(md) {
+    padding: $spacing-06;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.outcome {
+  border-inline-start: $spacing-02 solid $support-success;
+}
+
+.notEligible {
+  border-inline-start: $spacing-02 solid $border-strong-01;
+}
+
+.cardTitle {
+  @include type-style('heading-03');
+}
+
+.subTitle {
+  @include type-style('heading-compact-01');
+
+  margin-block-end: $spacing-03;
+}
+
+.body {
+  @include type-style('body-01');
+}
+
+.help {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.sections {
+  @include type-style('body-01');
+
+  display: grid;
+  gap: $spacing-02;
+  padding-inline-start: $spacing-05;
+  list-style: decimal;
+}
+
+.reasons {
+  @include type-style('body-01');
+
+  display: grid;
+  gap: $spacing-03;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-03;
+  }
+}
+
+.reasonIcon {
+  flex: none;
+  margin-block-start: $spacing-01;
+  fill: $support-success;
+}
+
+.aside {
+  @include mx.surface-card;
+
+  display: grid;
+  gap: $spacing-06;
+  padding: $spacing-06 $spacing-05;
+
+  @include breakpoint(lg) {
+    position: sticky;
+    inset-block-start: $spacing-09;
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+.facts {
+  @include type-style('body-compact-01');
+
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: $spacing-04;
+
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  dt {
+    @include type-style('label-01');
+
+    color: $text-secondary;
+  }
+}
+
+.fee {
+  @include type-style('heading-05');
+}
+
+.form {
+  display: grid;
+  gap: $spacing-06;
+}

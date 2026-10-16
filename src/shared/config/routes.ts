@@ -25,6 +25,8 @@ export const routes = {
   expert: {
     home: '/expert/home',
     calls: '/expert/calls',
+    call: (callId: string) => `/expert/calls/${callId}`,
+    interview: (interviewId: string) => `/expert/interviews/${interviewId}`,
     earnings: '/expert/earnings',
     profile: '/expert/profile',
     onboarding: '/expert/onboarding',
