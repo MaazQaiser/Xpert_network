@@ -1,0 +1,45 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '../../../../styles/mixins' as mx;
+
+.list {
+  display: grid;
+  gap: $spacing-03;
+}
+
+.row {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03 $spacing-05;
+  padding: $spacing-05;
+}
+
+.text {
+  display: grid;
+  gap: $spacing-02;
+  min-inline-size: 0;
+}
+
+.link {
+  @include type-style('heading-compact-02');
+
+  color: $text-primary;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.empty {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}

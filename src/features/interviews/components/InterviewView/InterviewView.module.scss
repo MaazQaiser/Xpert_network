@@ -1,0 +1,443 @@
+@use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/motion' as *;
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/utilities/visually-hidden' as *;
+@use '../../../../styles/mixins' as mx;
+
+.visuallyHidden {
+  @include visually-hidden;
+}
+
+.card,
+.paused {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  min-inline-size: 0;
+  padding: $spacing-06 $spacing-05;
+
+  @include breakpoint(md) {
+    padding: $spacing-06;
+  }
+}
+
+.cardTitle {
+  @include type-style('heading-03');
+}
+
+.subTitle {
+  @include type-style('heading-compact-02');
+}
+
+.body {
+  @include type-style('body-01');
+}
+
+.help {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.notice.notice {
+  min-inline-size: 0;
+  max-inline-size: none;
+}
+
+// ——— Pre-flight ———————————————————————————————————————————————————————
+.preflight {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: $spacing-06;
+  align-items: start;
+
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  }
+}
+
+.facts {
+  @include type-style('body-compact-01');
+
+  display: grid;
+  gap: $spacing-04;
+
+  dt {
+    @include type-style('label-01');
+
+    color: $text-secondary;
+  }
+}
+
+.form {
+  display: grid;
+  gap: $spacing-06;
+}
+
+.micCheck {
+  display: grid;
+  gap: $spacing-03;
+}
+
+.micOk {
+  @include type-style('body-compact-01');
+
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-03;
+  color: $support-success;
+
+  svg {
+    fill: $support-success;
+  }
+}
+
+.language {
+  max-inline-size: 20rem;
+}
+
+.compliance {
+  display: grid;
+  gap: $spacing-04;
+  padding: $spacing-05;
+  border-radius: radius.$border-radius-08;
+  background: $layer-02;
+}
+
+// ——— Room —————————————————————————————————————————————————————————————
+.room {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  min-inline-size: 0;
+}
+
+.roomHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: $spacing-05;
+}
+
+.roomTitleGroup {
+  min-inline-size: 0;
+}
+
+.eyebrow {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.roomTitle {
+  @include type-style('heading-04');
+
+  overflow-wrap: anywhere;
+}
+
+.roomStatus {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-05;
+  inline-size: 100%;
+
+  @include breakpoint(md) {
+    inline-size: auto;
+  }
+}
+
+.overall {
+  flex: 1 1 12rem;
+  min-inline-size: 0;
+}
+
+.elapsed {
+  @include type-style('heading-compact-02');
+}
+
+.estimate {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.roomLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: $spacing-06;
+  align-items: start;
+
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr);
+  }
+}
+
+// The vertical stepper sits beside the conversation on wide screens; the progress bar
+// above says where you are on narrow ones.
+.sectionNav {
+  @include mx.surface-card;
+
+  display: none;
+  padding: $spacing-05;
+
+  @include breakpoint(lg) {
+    position: sticky;
+    inset-block-start: $spacing-09;
+    display: block;
+  }
+}
+
+.sectionList {
+  display: grid;
+  gap: $spacing-02;
+}
+
+.sectionItem,
+.sectionActive {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-03;
+  padding: $spacing-03;
+  border-radius: radius.$border-radius-08;
+}
+
+.sectionActive {
+  background: $layer-selected-01;
+}
+
+.sectionText {
+  display: grid;
+  gap: $spacing-01;
+  min-inline-size: 0;
+}
+
+.sectionName {
+  @include type-style('body-compact-01');
+
+  .sectionActive & {
+    @include type-style('heading-compact-01');
+  }
+}
+
+.sectionCount {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.activeIcon {
+  flex: none;
+  fill: $interactive;
+}
+
+.todoIcon {
+  flex: none;
+  fill: $icon-secondary;
+}
+
+.conversation {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  min-inline-size: 0;
+  padding: $spacing-05;
+
+  @include breakpoint(md) {
+    padding: $spacing-06;
+  }
+}
+
+.transcript {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+}
+
+.aiMessage,
+.expertMessage,
+.expertNote,
+.reminder {
+  @include type-style('body-01');
+
+  display: grid;
+  gap: $spacing-02;
+  max-inline-size: 46rem;
+  padding: $spacing-04 $spacing-05;
+  border-radius: radius.$border-radius-08;
+  overflow-wrap: anywhere;
+}
+
+.aiMessage {
+  align-self: flex-start;
+  border: 1px solid $border-subtle-01;
+}
+
+.reminder {
+  align-self: flex-start;
+  border: 1px solid $support-info;
+  background: $layer-02;
+}
+
+.expertMessage {
+  align-self: flex-end;
+  background: $layer-accent-01;
+}
+
+.expertNote {
+  @include type-style('body-compact-01');
+
+  align-self: flex-end;
+  color: $text-secondary;
+}
+
+.speaker {
+  @include type-style('label-01');
+
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-02;
+  color: $text-secondary;
+
+  svg {
+    fill: $support-info;
+  }
+}
+
+.sectionDone {
+  @include type-style('label-01');
+
+  display: flex;
+  align-items: center;
+  align-self: center;
+  gap: $spacing-03;
+  color: $text-secondary;
+  text-align: center;
+}
+
+.doneIcon {
+  flex: none;
+  fill: $support-success;
+}
+
+.lost {
+  display: grid;
+  gap: $spacing-04;
+}
+
+.composer {
+  display: grid;
+  gap: $spacing-04;
+}
+
+.composerActions,
+.secondaryControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.secondaryControls {
+  justify-content: space-between;
+  padding-block-start: $spacing-04;
+  border-block-start: 1px solid $border-subtle-01;
+}
+
+.voiceBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+  padding: $spacing-04 $spacing-05;
+  border-radius: radius.$border-radius-08;
+  background: $layer-02;
+}
+
+.voiceState {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+  min-inline-size: 0;
+}
+
+.voiceActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.idleDot,
+.speakingDot {
+  flex: none;
+  inline-size: $spacing-03;
+  block-size: $spacing-03;
+  border-radius: 50%;
+  background: $icon-disabled;
+}
+
+.speakingDot {
+  background: $support-success;
+  animation: pulse $duration-slow-02 motion(standard, productive) infinite alternate;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.paused {
+  border-inline-start: $spacing-02 solid $support-warning;
+}
+
+// ——— Review ———————————————————————————————————————————————————————————
+.review {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  max-inline-size: 52rem;
+}
+
+.summaries {
+  display: grid;
+  gap: $spacing-05;
+}
+
+.summary {
+  @include mx.surface-card;
+
+  display: grid;
+  gap: $spacing-04;
+  padding: $spacing-05;
+
+  @include breakpoint(md) {
+    padding: $spacing-06;
+  }
+}
+
+.summaryHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.summaryEdit {
+  display: grid;
+  gap: $spacing-04;
+}

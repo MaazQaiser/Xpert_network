@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Button, SkeletonText, Tile } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 import { useSession } from '@/features/auth';
+import { InterviewsList } from '@/features/interviews';
 import { routes } from '@/shared/config/routes';
 import { formatDate } from '@/shared/lib/dates';
 import { AsyncBoundary, PageHeader, StatusTag } from '@/shared/ui';
@@ -33,6 +34,15 @@ export function ExpertHome() {
           Browse open calls
         </Button>
       </Tile>
+      <section aria-labelledby="interviews-heading" className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h2 id="interviews-heading" className={styles.heroTitle}>
+            Your interviews
+          </h2>
+          <Link href={routes.expert.earnings}>View earnings</Link>
+        </div>
+        <InterviewsList />
+      </section>
       <section aria-labelledby="expertise-heading" className={styles.section}>
         <div className={styles.sectionHeader}>
           <h2 id="expertise-heading" className={styles.heroTitle}>
