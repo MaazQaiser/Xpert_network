@@ -1,0 +1,148 @@
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  min-inline-size: 0;
+}
+
+.totals {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: $spacing-05;
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.total,
+.card {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  min-inline-size: 0;
+  padding: $spacing-06 $spacing-05;
+
+  @include breakpoint(md) {
+    padding: $spacing-06;
+  }
+}
+
+.card {
+  gap: $spacing-05;
+}
+
+.totalLabel {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.totalValue {
+  @include type-style('heading-05');
+}
+
+.totalNote {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+  margin-block-end: $spacing-03;
+}
+
+.skeleton.skeleton {
+  inline-size: 100%;
+  block-size: $spacing-12;
+}
+
+.notice.notice {
+  min-inline-size: 0;
+  max-inline-size: none;
+}
+
+.cardHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
+
+.cardTitle {
+  @include type-style('heading-03');
+}
+
+.body {
+  @include type-style('body-01');
+}
+
+.items {
+  display: grid;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: $spacing-03 $spacing-05;
+  padding-block: $spacing-04;
+  border-block-end: 1px solid $border-subtle-01;
+
+  @include breakpoint(md) {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+}
+
+.itemText {
+  display: grid;
+  gap: $spacing-01;
+  grid-column: 1 / -1;
+  min-inline-size: 0;
+
+  @include breakpoint(md) {
+    grid-column: auto;
+  }
+}
+
+.itemTitle {
+  @include type-style('heading-compact-01');
+
+  overflow-wrap: anywhere;
+}
+
+.itemFee {
+  @include type-style('heading-compact-02');
+}
+
+.note {
+  @include type-style('helper-text-01');
+
+  display: block;
+  color: $text-secondary;
+}
+
+.payouts {
+  display: grid;
+  gap: $spacing-04;
+}
+
+.payout {
+  @include type-style('body-compact-01');
+
+  display: grid;
+  gap: $spacing-01;
+  padding-block-end: $spacing-04;
+  border-block-end: 1px solid $border-subtle-01;
+}
+
+.dialogBody {
+  display: grid;
+  gap: $spacing-05;
+}
