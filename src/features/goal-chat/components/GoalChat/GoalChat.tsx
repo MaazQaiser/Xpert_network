@@ -3,17 +3,23 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Add } from '@carbon/icons-react';
-import { Button, ProgressBar, SkeletonPlaceholder, SkeletonText } from '@carbon/react';
+import {
+  Accordion,
+  AccordionItem,
+  Button,
+  ProgressBar,
+  SkeletonPlaceholder,
+  SkeletonText,
+} from '@carbon/react';
 import { AsyncBoundary, NotFoundState, PageHeader, StatusTag } from '@/shared/ui';
 import { useBreakpointUp } from '@/shared/hooks/useMediaQuery';
 import { formatDateTime, formatRelative } from '@/shared/lib/dates';
 import { routes } from '@/shared/config/routes';
 import { useConversation } from '../../api/queries';
 import { useTurn } from '../../hooks/useTurn';
-import { STEP_IDS, progressPercent, type StepId } from '../../model/steps';
+import { STEP_IDS, STEP_LABELS, progressPercent, type StepId } from '../../model/steps';
 import type { GoalType } from '../../model/brief.schema';
 import type { Conversation } from '../../model/turn.schema';
-import { BriefStepper } from '../BriefStepper/BriefStepper';
 import { ChatThread } from '../ChatThread/ChatThread';
 import { FloatingComposer } from '../FloatingComposer/FloatingComposer';
 import { takePendingPrompt } from '../../model/pendingPrompt';
@@ -35,12 +41,12 @@ const STATUS = {
 function GoalChatSkeleton() {
   return (
     <div className={styles.layout} aria-busy="true" aria-label="Loading your brief">
-      <SkeletonText paragraph lineCount={7} />
       <div className={styles.chat}>
         <SkeletonText heading width="40%" />
         <SkeletonText paragraph lineCount={3} />
         <SkeletonPlaceholder className={styles.skeletonBlock} />
       </div>
+      <SkeletonText paragraph lineCount={7} />
     </div>
   );
 }
@@ -49,7 +55,7 @@ type GoalChatViewProps = { data: Conversation; briefId: string; initialGoal: Goa
 
 function GoalChatView({ data, briefId, initialGoal }: GoalChatViewProps) {
   const turn = useTurn(briefId);
-  const isWide = useBreakpointUp('xlg');
+  const isWide = useBreakpointUp('lg');
   const { brief, messages } = data;
 
   // A new brief opens with the assistant's first question. Deferred a tick so React's
@@ -84,36 +90,52 @@ function GoalChatView({ data, briefId, initialGoal }: GoalChatViewProps) {
   ).length;
   const status = STATUS[brief.status];
 
+  const progressText = `${doneCount} of ${STEP_IDS.length} steps complete${
+    brief.status === 'submitted' ? '' : ` · now: ${STEP_LABELS[brief.currentStep].label}`
+  }`;
+  const panel = (
+    <LiveBriefPanel
+      brief={brief}
+      isBusy={turn.isBusy}
+      onRevisit={(step) => turn.send({ kind: 'revisit', step })}
+    />
+  );
+
   return (
     <>
+      {/* Thin filling bar pinned under the header; the brief panel is the detailed check. */}
+      <div className={styles.progress}>
+        <ProgressBar
+          label="Brief progress"
+          hideLabel
+          value={percent}
+          max={100}
+          size="small"
+          {...(brief.status === 'submitted' ? { status: 'finished' as const } : {})}
+        />
+      </div>
       <PageHeader
         title={brief.title === 'Untitled brief' ? 'New research brief' : brief.title}
         breadcrumbs={[{ label: 'Home', href: routes.client.home }]}
         subtitle={
           <>
-            Saved automatically ·{' '}
+            {progressText} · Saved automatically ·{' '}
             <time dateTime={brief.updatedAt} title={formatDateTime(brief.updatedAt)}>
               updated {formatRelative(brief.updatedAt)}
             </time>
           </>
         }
         actions={<StatusTag tone={status.tone} label={status.label} />}
-      >
-        <ProgressBar
-          label="Brief progress"
-          value={percent}
-          max={100}
-          helperText={`${doneCount} of ${STEP_IDS.length} steps complete`}
-          size="small"
-        />
-      </PageHeader>
+      />
       <div className={styles.layout}>
-        <BriefStepper
-          brief={brief}
-          isBusy={turn.isBusy}
-          onRevisit={(step) => turn.send({ kind: 'revisit', step })}
-        />
         <div className={styles.chat}>
+          {isWide ? null : (
+            <Accordion className={styles.briefAccordion}>
+              <AccordionItem title={`Research brief · ${doneCount} of ${STEP_IDS.length} done`}>
+                {panel}
+              </AccordionItem>
+            </Accordion>
+          )}
           <ChatThread brief={brief} messages={messages} turn={turn} />
           <FloatingComposer
             label="Message the research assistant"
@@ -136,7 +158,7 @@ function GoalChatView({ data, briefId, initialGoal }: GoalChatViewProps) {
             onSend={(text) => turn.send({ kind: 'text', text }, text)}
           />
         </div>
-        {isWide ? <LiveBriefPanel brief={brief} /> : null}
+        {isWide ? panel : null}
       </div>
     </>
   );

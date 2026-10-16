@@ -29,7 +29,10 @@ describe('GoalChat (F2)', () => {
     expect(
       screen.getByRole('heading', { name: 'New research brief', level: 1 }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('navigation', { name: 'Brief steps' })).toBeInTheDocument();
+    expect(screen.getByRole('progressbar', { name: 'Brief progress' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /Research brief · 0 of 7 done/ }),
+    ).toBeInTheDocument();
     await expectNoAxeViolations(container);
 
     await userEvent.click(screen.getByRole('button', { name: 'Expand to a new region' }));

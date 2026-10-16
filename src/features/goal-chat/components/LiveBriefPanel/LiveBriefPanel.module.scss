@@ -3,6 +3,7 @@
 @use '@carbon/react/scss/type' as *;
 @use '@carbon/react/scss/breakpoint' as *;
 @use '../../../../styles/mixins' as mx;
+@use '../../../../styles/tokens' as *;
 
 .root {
   @include mx.surface-card;
@@ -11,14 +12,27 @@
 
   @include breakpoint(lg) {
     position: sticky;
-    inset-block-start: $spacing-11;
-    max-block-size: calc(100vh - $spacing-12);
+    inset-block-start: $pt-floating-nav-top;
+    max-block-size: calc(100vh - $pt-shell-header-height - $spacing-09);
     overflow-y: auto;
   }
 }
 
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
+
 .heading {
   @include type-style('heading-compact-02');
+}
+
+.count {
+  @include type-style('label-01');
+
+  color: $text-secondary;
 }
 
 .hint {
@@ -28,26 +42,79 @@
   margin-block: $spacing-02 $spacing-05;
 }
 
-.list {
+.steps {
   display: flex;
   flex-direction: column;
   gap: $spacing-05;
+}
 
-  dt {
-    @include type-style('label-01');
+.step {
+  display: flex;
+  gap: $spacing-03;
 
-    color: $text-secondary;
-    margin-block-end: $spacing-02;
-  }
-
-  dd {
-    @include type-style('body-compact-01');
+  &[aria-current='step'] .title {
+    color: $link-primary;
   }
 }
 
-.row {
+.icon {
+  flex-shrink: 0;
+  margin-block-start: $spacing-01;
+  fill: $icon-secondary;
+
+  [data-status='done'] > & {
+    fill: $support-success;
+  }
+
+  [data-status='active'] > & {
+    fill: $interactive;
+  }
+
+  [data-status='attention'] > & {
+    fill: $support-warning;
+  }
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $spacing-02;
+  min-inline-size: 0;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+  min-block-size: $spacing-06;
+}
+
+.title {
+  @include type-style('heading-compact-01');
+}
+
+.status {
+  @include type-style('helper-text-01');
+
+  color: $text-helper;
+}
+
+.edit {
+  margin-inline-start: auto;
+}
+
+.value {
+  @include type-style('body-compact-01');
+
   display: flex;
   flex-direction: column;
+  gap: $spacing-02;
+  color: $text-secondary;
+}
+
+.strong {
+  color: $text-primary;
 }
 
 .tags {

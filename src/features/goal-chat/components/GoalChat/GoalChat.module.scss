@@ -8,12 +8,8 @@
   gap: $spacing-07;
 
   @include breakpoint(lg) {
-    grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
     align-items: start;
-  }
-
-  @include breakpoint(xlg) {
-    grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr) minmax(16rem, 20rem);
   }
 }
 
@@ -31,4 +27,21 @@
 .skeletonBlock {
   inline-size: 100%;
   block-size: $spacing-13;
+}
+
+// Full-bleed filling bar pinned right under the header (cancels the page's padding).
+.progress {
+  position: sticky;
+  z-index: 3;
+  inset-block-start: $pt-shell-header-height;
+  margin-block: calc(-1 * $spacing-07) $spacing-05;
+  margin-inline: calc(-1 * $spacing-05);
+
+  @include breakpoint(md) {
+    margin-inline: calc(-1 * $spacing-07);
+  }
+}
+
+.briefAccordion {
+  margin-block-end: $spacing-03;
 }
