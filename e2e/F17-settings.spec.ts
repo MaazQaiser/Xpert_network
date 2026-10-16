@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { expectNoAxeViolations } from './support/axe';
+import { loginAs } from './support/login';
 
 /** F17 happy path: notification centre, then profile, notifications, security and theme. */
 test('F17: notification centre → settings tabs → dark theme', async ({ page }) => {
-  await page.goto('/login');
-  await page.getByRole('button', { name: /Bilal Haddad/ }).click();
+  await loginAs(page, /Bilal Haddad/);
   await expect(page.getByRole('heading', { name: 'Welcome back, Bilal' })).toBeVisible();
 
   // Notification centre (HeaderPanel)

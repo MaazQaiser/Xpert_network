@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { expectNoAxeViolations } from './support/axe';
+import { loginAs } from './support/login';
 
 /** F5 happy path: Ayesha makes a folder, files two items in it, labels one, archives and restores. */
 test('F5: new folder → bulk move → label → archive → restore', async ({ page }) => {
-  await page.goto('/login');
-  await page.getByRole('button', { name: /Ayesha Rahman/ }).click();
+  await loginAs(page, /Ayesha Rahman/);
   await expect(page.getByRole('heading', { name: 'Welcome back, Ayesha' })).toBeVisible();
 
   await page.getByRole('link', { name: 'Workspace', exact: true }).click();

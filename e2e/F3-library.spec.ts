@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { expectNoAxeViolations } from './support/axe';
+import { loginAs } from './support/login';
 
 /** F3 ★ happy path: Bilal finds a report, buys it with credits, reads it and asks it questions. */
 test('F3: library → preview → buy → read → ask this report', async ({ page }) => {
-  await page.goto('/login');
-  await page.getByRole('button', { name: /Bilal Haddad/ }).click();
+  await loginAs(page, /Bilal Haddad/);
   await expect(page.getByRole('heading', { name: 'Welcome back, Bilal' })).toBeVisible();
 
   // Library

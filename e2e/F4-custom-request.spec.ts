@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { expectNoAxeViolations } from './support/axe';
+import { loginAs } from './support/login';
 
 async function runScenario(page: Page, name: string, times = 1) {
   await page.getByRole('button', { name: 'Prototype controls' }).click();
@@ -9,8 +10,7 @@ async function runScenario(page: Page, name: string, times = 1) {
 
 /** F4 ★ happy path: Ayesha asks about her quote, accepts it, follows progress, reads the result. */
 test('F4: quote → question → accept (hold) → progress → delivered report', async ({ page }) => {
-  await page.goto('/login');
-  await page.getByRole('button', { name: /Ayesha Rahman/ }).click();
+  await loginAs(page, /Ayesha Rahman/);
   await expect(page.getByRole('heading', { name: 'Welcome back, Ayesha' })).toBeVisible();
 
   await page.getByRole('link', { name: 'Requests', exact: true }).click();

@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { expectNoAxeViolations } from './support/axe';
+import { loginAs } from './support/login';
 
 /** F6 happy path: Ayesha reviews her wallet, buys a credit pack and checks the history. */
 test('F6: wallet → buy credits (mock checkout) → history', async ({ page }) => {
-  await page.goto('/login');
-  await page.getByRole('button', { name: /Ayesha Rahman/ }).click();
+  await loginAs(page, /Ayesha Rahman/);
   await expect(page.getByRole('heading', { name: 'Welcome back, Ayesha' })).toBeVisible();
 
   await page.getByRole('link', { name: 'Wallet: 390 credits' }).click();
