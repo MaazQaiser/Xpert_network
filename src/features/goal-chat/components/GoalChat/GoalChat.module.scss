@@ -1,5 +1,6 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/breakpoint' as *;
+@use '../../../../styles/tokens' as *;
 
 .layout {
   display: grid;
@@ -20,7 +21,11 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-05;
+  inline-size: 100%;
+  max-inline-size: 46rem;
   min-inline-size: 0;
+  min-block-size: calc(100vh - #{$pt-shell-header-height} - #{$spacing-13});
+  margin-inline: auto;
 }
 
 .skeletonBlock {

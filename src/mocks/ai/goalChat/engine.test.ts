@@ -43,6 +43,18 @@ describe('goal chat engine', () => {
     expect(result.widget?.kind).not.toBe('goal-types');
   });
 
+  it('answers a goal typed on Home as the first message', () => {
+    const result = runTurn(
+      makeBrief(),
+      { kind: 'start', text: 'Decide whether to open 3 cafés in Riyadh next year' },
+      ctx,
+    );
+    expect(result.userText).toBe('Decide whether to open 3 cafés in Riyadh next year');
+    expect(result.reply).toMatch(/^Hi Bilal\./);
+    expect(result.brief.goalType).toBe('expand');
+    expect(result.brief.currentStep).toBe('subject');
+  });
+
   it('completes the goal step once there is a goal type and a one-line objective', () => {
     const brief = play([{ kind: 'goal-type', goalType: 'expand' }]);
     expect(brief.stepStatus.goal).toBe('active');

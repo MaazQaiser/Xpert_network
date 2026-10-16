@@ -58,3 +58,7 @@ A question's topic is matched to report sections. Grade by scope: company or reg
 
 - Screenshots for this spec (light + dark).
 - Requests (F4) and Library (F3) pages that the done panel links to are placeholders.
+
+## Entry from Home (2026-10-16)
+
+Home has the same floating pill composer at the bottom centre, plus a **Start new research** card. Typing a goal there creates a brief and opens its chat with that text as the first message (answered as the goal step). The text is handed over in memory (`model/pendingPrompt.ts`), not in the URL.

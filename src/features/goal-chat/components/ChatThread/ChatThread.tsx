@@ -5,7 +5,7 @@ import { Button } from '@carbon/react';
 import { Renew, StopFilledAlt } from '@carbon/icons-react';
 import { AIExplainLabel, AIFeedback, AIStepIndicator, StreamingText } from '@/shared/ai';
 import { ErrorState } from '@/shared/ui';
-import { formatDateTime, formatRelative } from '@/shared/lib/dates';
+import { formatDate, formatDateTime, formatRelative } from '@/shared/lib/dates';
 import type { ResearchBrief } from '../../model/brief.schema';
 import type { ChatMessage } from '../../model/message.schema';
 import type { TurnController } from '../../hooks/useTurn';
@@ -18,22 +18,37 @@ type ChatThreadProps = {
   turn: TurnController;
 };
 
-function AssistantHeader({ at }: { at?: string }) {
+function AssistantFooter({ at, messageId }: { at: string; messageId?: string }) {
   return (
-    <div className={styles.meta}>
-      <span className={styles.author}>Xpert Network assistant</span>
+    <div className={styles.footer}>
       <AIExplainLabel
         size="mini"
         aria-label="About this reply"
         summary="Written by Xpert Network’s research assistant to scope your brief. It doesn’t give investment advice."
         basis="Your answers in this chat and the Xpert Network library catalogue"
       />
-      {at ? (
-        <time dateTime={at} title={formatDateTime(at)} className={styles.time}>
-          {formatRelative(at)}
-        </time>
-      ) : null}
+      <time dateTime={at} title={formatDateTime(at)} className={styles.time}>
+        {formatRelative(at)}
+      </time>
+      {messageId ? <AIFeedback responseId={messageId} /> : null}
     </div>
+  );
+}
+
+function dayLabel(iso: string, now: Date = new Date()): string {
+  const day = new Date(iso);
+  const startOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const diff = Math.round((startOf(now) - startOf(day)) / 86_400_000);
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Yesterday';
+  return formatDate(iso);
+}
+
+function DayDivider({ label }: { label: string }) {
+  return (
+    <li className={styles.divider}>
+      <span className={styles.dividerLabel}>{label}</span>
+    </li>
   );
 }
 
@@ -52,22 +67,30 @@ export function ChatThread({ brief, messages, turn }: ChatThreadProps) {
   return (
     <section className={styles.root} aria-label="Conversation">
       <ol className={styles.list}>
-        {messages.map((message) => {
+        {messages.length === 0 && showPending ? <DayDivider label="Today" /> : null}
+        {messages.map((message, index) => {
+          const previous = messages[index - 1];
+          const label = dayLabel(message.createdAt);
+          const divider =
+            !previous || dayLabel(previous.createdAt) !== label ? (
+              <DayDivider key={`day-${message.id}`} label={label} />
+            ) : null;
           if (message.role === 'user') {
-            return (
+            return [
+              divider,
               <li key={message.id} className={styles.userRow}>
                 <p className={styles.userBubble}>
                   <span className={styles.srOnly}>You said: </span>
                   {message.text}
                 </p>
-              </li>
-            );
+              </li>,
+            ];
           }
           const isLatest = message.id === lastAssistantId;
           const showWidget = isLatest || message.widget?.kind === 'done';
-          return (
+          return [
+            divider,
             <li key={message.id} className={styles.assistantRow}>
-              <AssistantHeader at={message.createdAt} />
               <p className={styles.text}>{message.text}</p>
               {showWidget ? (
                 <div className={styles.widget}>
@@ -79,9 +102,12 @@ export function ChatThread({ brief, messages, turn }: ChatThreadProps) {
                   />
                 </div>
               ) : null}
-              {isLatest && !showPending ? <AIFeedback responseId={message.id} /> : null}
-            </li>
-          );
+              <AssistantFooter
+                at={message.createdAt}
+                {...(isLatest && !showPending ? { messageId: message.id } : {})}
+              />
+            </li>,
+          ];
         })}
 
         {showPending && turn.pending?.userText ? (
@@ -95,7 +121,6 @@ export function ChatThread({ brief, messages, turn }: ChatThreadProps) {
 
         {showPending ? (
           <li className={styles.assistantRow} aria-busy={turn.status === 'streaming'}>
-            <AssistantHeader />
             <AIStepIndicator
               steps={turn.steps}
               isActive={turn.status === 'streaming' && !turn.text}

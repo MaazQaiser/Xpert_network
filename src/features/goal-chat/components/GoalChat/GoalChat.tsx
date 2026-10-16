@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
-import { ProgressBar, SkeletonPlaceholder, SkeletonText } from '@carbon/react';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { Add } from '@carbon/icons-react';
+import { Button, ProgressBar, SkeletonPlaceholder, SkeletonText } from '@carbon/react';
 import { AsyncBoundary, NotFoundState, PageHeader, StatusTag } from '@/shared/ui';
 import { useBreakpointUp } from '@/shared/hooks/useMediaQuery';
 import { formatDateTime, formatRelative } from '@/shared/lib/dates';
@@ -13,7 +15,8 @@ import type { GoalType } from '../../model/brief.schema';
 import type { Conversation } from '../../model/turn.schema';
 import { BriefStepper } from '../BriefStepper/BriefStepper';
 import { ChatThread } from '../ChatThread/ChatThread';
-import { Composer } from '../Composer/Composer';
+import { FloatingComposer } from '../FloatingComposer/FloatingComposer';
+import { takePendingPrompt } from '../../model/pendingPrompt';
 import { LiveBriefPanel } from '../LiveBriefPanel/LiveBriefPanel';
 import styles from './GoalChat.module.scss';
 
@@ -52,10 +55,22 @@ function GoalChatView({ data, briefId, initialGoal }: GoalChatViewProps) {
   // A new brief opens with the assistant's first question. Deferred a tick so React's
   // strict-mode double mount doesn't start (and abort) two streams.
   const { send } = turn;
+  // A goal typed on Home becomes the first message (read once, on first render).
+  const [initialPrompt] = useState(() =>
+    messages.length === 0 ? takePendingPrompt(briefId) : null,
+  );
   useEffect(() => {
     if (messages.length > 0) return;
     const timer = window.setTimeout(
-      () => send(initialGoal ? { kind: 'start', goalType: initialGoal } : { kind: 'start' }),
+      () =>
+        send(
+          {
+            kind: 'start',
+            ...(initialGoal ? { goalType: initialGoal } : {}),
+            ...(initialPrompt ? { text: initialPrompt } : {}),
+          },
+          initialPrompt,
+        ),
       0,
     );
     return () => window.clearTimeout(timer);
@@ -100,10 +115,24 @@ function GoalChatView({ data, briefId, initialGoal }: GoalChatViewProps) {
         />
         <div className={styles.chat}>
           <ChatThread brief={brief} messages={messages} turn={turn} />
-          <Composer
+          <FloatingComposer
+            label="Message the research assistant"
             placeholder={PLACEHOLDERS[brief.currentStep] ?? 'Type a message…'}
             isBusy={turn.isBusy}
             isDisabled={brief.status === 'submitted'}
+            disabledHint="This brief is submitted. Start a new brief to research something else."
+            leading={
+              <Button
+                kind="ghost"
+                size="sm"
+                hasIconOnly
+                renderIcon={Add}
+                iconDescription="New research brief"
+                tooltipPosition="top"
+                as={Link}
+                href={routes.client.ask}
+              />
+            }
             onSend={(text) => turn.send({ kind: 'text', text }, text)}
           />
         </div>

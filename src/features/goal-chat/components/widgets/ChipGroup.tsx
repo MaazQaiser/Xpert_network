@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@carbon/react';
-import styles from './widgets.module.scss';
+import styles from './ChipGroup.module.scss';
 
 type ChipGroupProps = {
   label: string;
@@ -10,7 +10,10 @@ type ChipGroupProps = {
   onPick: (chip: { id: string; label: string }) => void;
 };
 
-/** Quick replies: starter chips that reduce the articulation barrier (AI_NATIVE §5). */
+/**
+ * Quick replies: right-aligned suggestion pills that reduce the articulation barrier
+ * (AI_NATIVE §5).
+ */
 export function ChipGroup({ label, chips, isDisabled, onPick }: ChipGroupProps) {
   return (
     <div role="group" aria-label={label} className={styles.chips}>
@@ -19,6 +22,7 @@ export function ChipGroup({ label, chips, isDisabled, onPick }: ChipGroupProps) 
           key={chip.id}
           kind="tertiary"
           size="sm"
+          className={styles.chip}
           disabled={isDisabled}
           onClick={() => onPick(chip)}
         >

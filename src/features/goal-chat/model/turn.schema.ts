@@ -13,7 +13,12 @@ import { stepIdSchema } from './steps';
 /** What the client sends for one conversational turn. */
 export const turnActionSchema = z.discriminatedUnion('kind', [
   /** First turn; `goalType` is set when onboarding (F1) already asked for the goal. */
-  z.object({ kind: z.literal('start'), goalType: goalTypeSchema.optional() }),
+  z.object({
+    kind: z.literal('start'),
+    goalType: goalTypeSchema.optional(),
+    /** The first message typed into the home composer, answered as the goal step. */
+    text: z.string().min(1).max(500).optional(),
+  }),
   z.object({ kind: z.literal('text'), text: z.string().min(1) }),
   z.object({ kind: z.literal('goal-type'), goalType: goalTypeSchema }),
   z.object({ kind: z.literal('subject-add'), subject: subjectSchema }),

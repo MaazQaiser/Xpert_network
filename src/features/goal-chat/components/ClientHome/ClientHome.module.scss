@@ -2,11 +2,26 @@
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
 @use '../../../../styles/mixins' as mx;
+@use '../../../../styles/tokens' as *;
 
 .root {
   display: flex;
   flex-direction: column;
   gap: $spacing-09;
+  min-block-size: calc(100vh - #{$pt-shell-header-height} - #{$spacing-10});
+}
+
+// The composer floats at the bottom centre, matching the goal chat.
+.composer {
+  position: sticky;
+  inset-block-end: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  inline-size: 100%;
+  max-inline-size: 46rem;
+  margin-block-start: auto;
+  margin-inline: auto;
 }
 
 .hero {

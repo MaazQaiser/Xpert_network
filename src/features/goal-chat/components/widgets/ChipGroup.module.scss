@@ -1,0 +1,22 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/border-radius' as radius;
+
+.chips {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $spacing-03;
+}
+
+.chip.chip {
+  // Doubled class outranks Carbon's tertiary-button root rule; only the root is styled.
+  max-inline-size: 100%;
+  border-color: $border-subtle-01;
+  border-radius: radius.$border-radius-24;
+  background: $layer-01;
+  box-shadow: 0 $spacing-01 $spacing-03 $shadow;
+  color: $text-primary;
+  text-align: end;
+  white-space: normal;
+}

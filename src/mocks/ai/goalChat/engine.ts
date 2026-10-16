@@ -226,6 +226,11 @@ export function runTurn(
 
   switch (action.kind) {
     case 'start': {
+      if (action.text) {
+        const seeded = action.goalType ? { ...brief, goalType: action.goalType } : brief;
+        const reply = handleText(withStep(seeded, 'goal'), action.text.trim(), ctx);
+        return { ...reply, reply: `Hi ${firstName}. ${reply.reply}` };
+      }
       if (!action.goalType) return askGoal(brief, null, firstName);
       const next = { ...brief, goalType: action.goalType };
       return result(
