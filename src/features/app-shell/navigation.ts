@@ -1,7 +1,6 @@
 import {
   Catalog,
   ChartLineData,
-  Chat,
   CheckmarkOutline,
   Dashboard,
   Folders,
@@ -20,8 +19,8 @@ import { routes } from '@/shared/config/routes';
 
 export const NAVIGATION: Record<Role, NavItem[]> = {
   client: [
-    { href: routes.client.home, label: 'Home', icon: Home },
-    { href: routes.client.ask, label: 'Ask', icon: Chat },
+    // Home is where research starts and continues: the goal chats under /ask belong to it.
+    { href: routes.client.home, label: 'Home', icon: Home, activeFor: [routes.client.ask] },
     { href: routes.client.library, label: 'Library', icon: Catalog },
     { href: routes.client.requests, label: 'Requests', icon: RequestQuote },
     { href: routes.client.workspace, label: 'Workspace', icon: Folders },

@@ -54,6 +54,8 @@ export type NavItem = {
   href: string;
   label: string;
   icon: ComponentType;
+  /** Other path prefixes that belong to this item, e.g. Home owns the goal chats under /ask. */
+  activeFor?: string[];
 };
 
 export type AppShellProps = {
@@ -130,7 +132,9 @@ export function AppShell({
         >
           <SideNavItems>
             {navItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const isActive = [item.href, ...(item.activeFor ?? [])].some(
+                (path) => pathname === path || pathname.startsWith(`${path}/`),
+              );
               return (
                 <SideNavLink
                   key={item.href}
