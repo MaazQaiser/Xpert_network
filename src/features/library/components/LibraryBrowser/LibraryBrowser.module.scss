@@ -3,6 +3,7 @@
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
 @use '../../../../styles/mixins' as mx;
+@use '@carbon/react/scss/border-radius' as radius;
 
 .root {
   display: flex;
@@ -17,23 +18,33 @@
   min-inline-size: 0;
 }
 
-.filters {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: end;
-  gap: $spacing-05;
-
-  @include breakpoint(md) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  @include breakpoint(lg) {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
-  }
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
 }
 
+.searchCell {
+  flex: 2 1 18rem;
+  min-inline-size: 0;
+}
+
+.filterCell {
+  flex: 1 1 10rem;
+  min-inline-size: 0;
+}
+
+// The checkbox sits in a field-shaped box so the row reads as one set of controls.
 .owned {
-  padding-block-end: $spacing-03;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  block-size: $spacing-08;
+  padding-inline: $spacing-04;
+  border: 1px solid $border-strong-01;
+  border-radius: radius.$border-radius-08;
+  background: $field-01;
 }
 
 .resultsBar {
@@ -61,7 +72,7 @@
 
 .viewSwitch {
   flex: 0 0 auto;
-  inline-size: $spacing-13;
+  inline-size: auto;
 }
 
 .shelves {

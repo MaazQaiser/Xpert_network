@@ -15,6 +15,7 @@ $pt-field-radius: radius.$border-radius-08;
 .cds--select-input,
 .cds--date-picker__input,
 .cds--number input[type='number'],
+.cds--search-input,
 .cds--list-box {
   border: 1px solid $border-strong;
   border-radius: $pt-field-radius;
@@ -41,4 +42,15 @@ $pt-field-radius: radius.$border-radius-08;
 // Read-only text inputs: Carbon marks them with a subtle edge; keep that on all sides.
 .cds--text-input-wrapper--readonly .cds--text-input {
   border-color: $border-subtle;
+}
+
+// Content switcher: one rounded outline around the group; the selected segment follows it.
+.cds--content-switcher {
+  overflow: hidden;
+  border: 1px solid $border-strong;
+  border-radius: $pt-field-radius;
+}
+
+.cds--content-switcher-btn {
+  border: 0;
 }

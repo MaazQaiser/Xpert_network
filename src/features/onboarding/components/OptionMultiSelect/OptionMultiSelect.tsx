@@ -14,6 +14,8 @@ type OptionMultiSelectProps = {
   onChange: (ids: string[]) => void;
   onBlur?: () => void;
   invalidText?: string;
+  /** Visually hide the label (it stays available to screen readers). */
+  hideLabel?: boolean;
 };
 
 /** Filterable multi-select over taxonomy options, controlled by ids (RHF-friendly). */
@@ -27,12 +29,14 @@ export function OptionMultiSelect({
   onChange,
   onBlur,
   invalidText,
+  hideLabel = false,
 }: OptionMultiSelectProps) {
   const selected = options.filter((option) => value.includes(option.id));
   return (
     <FilterableMultiSelect<Option>
       id={id}
       titleText={titleText}
+      hideLabel={hideLabel}
       helperText={helperText}
       placeholder={placeholder}
       items={options}

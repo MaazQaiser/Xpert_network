@@ -11,7 +11,7 @@ import {
   Dropdown,
   Search,
   SkeletonPlaceholder,
-  Switch,
+  IconSwitch,
   Table,
   TableBody,
   TableCell,
@@ -21,7 +21,7 @@ import {
   TableRow,
   Tag,
 } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
+import { ArrowRight, Grid as GridIcon, List as ListIcon } from '@carbon/icons-react';
 import { Magnify } from '@carbon/pictograms-react';
 import { OptionMultiSelect } from '@/features/onboarding';
 import { formatCredits } from '@/shared/lib/credits';
@@ -94,53 +94,68 @@ function Browser() {
       />
 
       <section className={styles.toolbar} aria-label="Search and filter reports">
-        <Search
-          size="lg"
-          labelText="Search the library"
-          placeholder="Search by company, region or topic"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          closeButtonLabelText="Clear search"
-        />
-        <div className={styles.filters}>
-          <Dropdown
-            id="library-industry"
-            titleText="Industry"
-            label={ALL_INDUSTRIES}
-            items={[ALL_INDUSTRIES, ...(facets?.industries ?? [])]}
-            selectedItem={filters.industry ?? ALL_INDUSTRIES}
-            onChange={({ selectedItem }: { selectedItem: string | null }) =>
-              navigate({
-                ...filters,
-                industry: selectedItem && selectedItem !== ALL_INDUSTRIES ? selectedItem : null,
-              })
-            }
-            disabled={!facets}
-          />
-          <OptionMultiSelect
-            id="library-regions"
-            titleText="Regions"
-            placeholder="Any region"
-            options={facets?.regions ?? []}
-            value={filters.regionIds}
-            onChange={(regionIds) => navigate({ ...filters, regionIds })}
-          />
-          <Dropdown
-            id="library-price"
-            titleText="Price"
-            label={ANY_PRICE}
-            items={[ANY_PRICE, ...PRICE_CAPS.map(String)]}
-            itemToString={(item: string | null) =>
-              !item || item === ANY_PRICE ? ANY_PRICE : `Up to ${formatCredits(Number(item))}`
-            }
-            selectedItem={filters.maxPrice ? String(filters.maxPrice) : ANY_PRICE}
-            onChange={({ selectedItem }: { selectedItem: string | null }) =>
-              navigate({
-                ...filters,
-                maxPrice: selectedItem && selectedItem !== ANY_PRICE ? Number(selectedItem) : null,
-              })
-            }
-          />
+        {/* One row: search, filters and the view switch share height and corners. */}
+        <div className={styles.filterRow}>
+          <div className={styles.searchCell}>
+            <Search
+              size="md"
+              labelText="Search the library"
+              placeholder="Search by company, region or topic"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              closeButtonLabelText="Clear search"
+            />
+          </div>
+          <div className={styles.filterCell}>
+            <Dropdown
+              id="library-industry"
+              titleText="Industry"
+              hideLabel
+              size="md"
+              label={ALL_INDUSTRIES}
+              items={[ALL_INDUSTRIES, ...(facets?.industries ?? [])]}
+              selectedItem={filters.industry ?? ALL_INDUSTRIES}
+              onChange={({ selectedItem }: { selectedItem: string | null }) =>
+                navigate({
+                  ...filters,
+                  industry: selectedItem && selectedItem !== ALL_INDUSTRIES ? selectedItem : null,
+                })
+              }
+              disabled={!facets}
+            />
+          </div>
+          <div className={styles.filterCell}>
+            <OptionMultiSelect
+              id="library-regions"
+              titleText="Regions"
+              hideLabel
+              placeholder="Any region"
+              options={facets?.regions ?? []}
+              value={filters.regionIds}
+              onChange={(regionIds) => navigate({ ...filters, regionIds })}
+            />
+          </div>
+          <div className={styles.filterCell}>
+            <Dropdown
+              id="library-price"
+              titleText="Price"
+              hideLabel
+              size="md"
+              label={ANY_PRICE}
+              items={[ANY_PRICE, ...PRICE_CAPS.map(String)]}
+              itemToString={(item: string | null) =>
+                !item || item === ANY_PRICE ? ANY_PRICE : `Up to ${formatCredits(Number(item))}`
+              }
+              selectedItem={filters.maxPrice ? String(filters.maxPrice) : ANY_PRICE}
+              onChange={({ selectedItem }: { selectedItem: string | null }) =>
+                navigate({
+                  ...filters,
+                  maxPrice:
+                    selectedItem && selectedItem !== ANY_PRICE ? Number(selectedItem) : null,
+                })
+              }
+            />
+          </div>
           <div className={styles.owned}>
             <Checkbox
               id="library-owned"
@@ -149,6 +164,19 @@ function Browser() {
               onChange={(_, { checked }) => navigate({ ...filters, ownedOnly: checked })}
             />
           </div>
+          <ContentSwitcher
+            size="md"
+            selectedIndex={view === 'table' ? 1 : 0}
+            onChange={({ name }) => navigate(filters, name === 'table' ? 'table' : 'cards')}
+            className={styles.viewSwitch}
+          >
+            <IconSwitch name="cards" text="Cards">
+              <GridIcon />
+            </IconSwitch>
+            <IconSwitch name="table" text="Table">
+              <ListIcon />
+            </IconSwitch>
+          </ContentSwitcher>
         </div>
 
         <div className={styles.resultsBar}>
@@ -208,15 +236,6 @@ function Browser() {
               </Button>
             ) : null}
           </div>
-          <ContentSwitcher
-            size="sm"
-            selectedIndex={view === 'table' ? 1 : 0}
-            onChange={({ name }) => navigate(filters, name === 'table' ? 'table' : 'cards')}
-            className={styles.viewSwitch}
-          >
-            <Switch name="cards" text="Cards" />
-            <Switch name="table" text="Table" />
-          </ContentSwitcher>
         </div>
       </section>
 

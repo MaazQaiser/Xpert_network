@@ -23,3 +23,7 @@ The Xpert Network look (ADR 0009) uses soft, rounded surfaces. Stakeholders aske
 
 - Turn on `enable-v12-release`: brings unreleased v12 changes app-wide and only gives 4px.
 - Keep fields square with rounded buttons: rejected by stakeholders.
+
+## Revision 2026-10-16
+
+Search inputs and the content switcher now get the same 8px radius and 1px `$border-strong` outline as other fields, so filter rows read as one set of controls (`_carbon-shape.scss`). Focus rings are slate, not orange (ADR 0009).

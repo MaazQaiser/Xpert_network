@@ -1,6 +1,6 @@
 // Xpert Network themes (ADR 0009): Carbon's white / g100 token sets with a Notion-like neutral
 // palette (white page fading from a soft orange glow, glass panels, black buttons) and a
-// burnt-orange accent for links, focus and the active nav item. This is the ONLY place
+// burnt-orange accent for links and the active nav item; focus rings are slate. This is the ONLY place
 // raw colour values may appear; every component uses Carbon tokens.
 // All text pairs meet WCAG 2.2 AA (checked 2026-10-15).
 @use '@carbon/react/scss/border-radius' as radius;
@@ -50,6 +50,12 @@ $orange-70: #9a4a1b; // links on light (≥ 5.5:1)
 $orange-80: #833f17;
 $orange-90: #7e3c15;
 $orange-tint: #fbeee5;
+
+// ——— Focus: slate, not orange (revised 2026-10-16) ————————————————————————————
+// A calm neutral ring; orange stays for links, the active nav item and the glow.
+$slate-30: #cbd5e1; // focus on dark inverse surfaces
+$slate-40: #94a3b8; // focus on dark (≥ 7.4:1 on #191919)
+$slate-60: #475569; // focus on light (≥ 7.2:1 on white and mist)
 $orange-shade: #4a2e1c;
 
 // ——— Light ———————————————————————————————————————————————————————————
@@ -124,9 +130,9 @@ $light-overrides: (
   icon-inverse: $mist-10,
   icon-disabled: rgba($ink, 0.3),
   interactive: $orange-60,
-  focus: $orange-60,
+  focus: $slate-60,
   focus-inset: #fff,
-  focus-inverse: $orange-50,
+  focus-inverse: $slate-30,
   highlight: $orange-tint,
   overlay: rgba(#0f0f0f, 0.4),
   toggle-off: $stone,
@@ -206,9 +212,9 @@ $dark-overrides: (
   icon-inverse: $ink,
   icon-disabled: rgba($chalk, 0.25),
   interactive: $orange-50,
-  focus: $orange-50,
+  focus: $slate-40,
   focus-inset: $night,
-  focus-inverse: $orange-70,
+  focus-inverse: $slate-60,
   highlight: $orange-shade,
   overlay: rgba(#000, 0.6),
   toggle-off: $night-stone,

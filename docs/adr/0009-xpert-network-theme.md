@@ -31,3 +31,7 @@ Stakeholders want a calm, Notion-like feel — white page, soft grey panels, hai
 
 - Warm stone background with Instrument Serif headings — built first, replaced after review (felt heavier than the Notion reference).
 - Round every Carbon component — rejected for now: needs global overrides of Carbon internals and more upkeep on upgrades.
+
+## Revision 2026-10-16 — slate focus
+
+The focus ring is slate (`#475569` light, `#94a3b8` dark; ≥ 7:1 on page and panels), not burnt orange: an orange outline on every click read as an error state. Orange stays for links, the active nav item, the page glow and the composer glow.
