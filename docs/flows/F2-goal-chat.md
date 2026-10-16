@@ -7,12 +7,12 @@
 
 ## Layout
 
-| Area        | Breakpoint                                 | What                                                                                                                            |
-| ----------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| Page header | all                                        | Title (brief title once known), "Saved automatically · updated …", status tag, progress bar ("n of 7 steps complete")           |
-| Stepper     | `lg+` vertical, below horizontal (scrolls) | Carbon `ProgressIndicator`; status per step; completed steps clickable to revisit                                               |
-| Chat        | all                                        | Assistant messages (AI label + timestamp + feedback), user bubbles, one interactive widget on the latest reply, sticky composer |
-| Live brief  | `xlg+`                                     | Brief fields filling in as the chat progresses                                                                                  |
+| Area                 | Breakpoint                                                 | What                                                                                                                                                                           |
+| -------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Progress bar         | all                                                        | Thin filling bar pinned directly under the app header                                                                                                                          |
+| Page header          | all                                                        | Title (brief title once known), "n of 7 steps complete · now: <step> · Saved automatically · updated …", status tag                                                            |
+| Chat                 | all                                                        | Assistant messages (AI label + timestamp + feedback), user bubbles, one interactive widget on the latest reply, sticky composer                                                |
+| Research brief panel | `lg+` beside the chat; below `lg` in an accordion above it | The progress check: each step with its status icon (complete / in progress / needs attention / not started) and its answer so far; finished steps have **Edit** to reopen them |
 
 ## Steps
 
