@@ -55,5 +55,7 @@ test('F0: log in with Google (mocked account chooser)', async ({ page }) => {
     .getByRole('dialog')
     .getByRole('button', { name: /Ayesha Rahman/ })
     .click();
-  await expect(page.getByRole('heading', { name: 'Welcome back, Ayesha' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'What are you researching today?' }),
+  ).toBeVisible();
 });

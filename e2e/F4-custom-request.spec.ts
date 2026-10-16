@@ -11,7 +11,9 @@ async function runScenario(page: Page, name: string, times = 1) {
 /** F4 ★ happy path: Ayesha asks about her quote, accepts it, follows progress, reads the result. */
 test('F4: quote → question → accept (hold) → progress → delivered report', async ({ page }) => {
   await loginAs(page, /Ayesha Rahman/);
-  await expect(page.getByRole('heading', { name: 'Welcome back, Ayesha' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'What are you researching today?' }),
+  ).toBeVisible();
 
   await page.getByRole('link', { name: 'Requests', exact: true }).click();
   await expect(page.getByRole('heading', { name: /In progress/ })).toBeVisible();

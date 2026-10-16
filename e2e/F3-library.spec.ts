@@ -5,7 +5,9 @@ import { loginAs } from './support/login';
 /** F3 ★ happy path: Bilal finds a report, buys it with credits, reads it and asks it questions. */
 test('F3: library → preview → buy → read → ask this report', async ({ page }) => {
   await loginAs(page, /Bilal Haddad/);
-  await expect(page.getByRole('heading', { name: 'Welcome back, Bilal' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'What are you researching today?' }),
+  ).toBeVisible();
 
   // Library
   await page.getByRole('link', { name: 'Library', exact: true }).click();

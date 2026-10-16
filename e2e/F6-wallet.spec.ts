@@ -5,7 +5,9 @@ import { loginAs } from './support/login';
 /** F6 happy path: Ayesha reviews her wallet, buys a credit pack and checks the history. */
 test('F6: wallet → buy credits (mock checkout) → history', async ({ page }) => {
   await loginAs(page, /Ayesha Rahman/);
-  await expect(page.getByRole('heading', { name: 'Welcome back, Ayesha' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'What are you researching today?' }),
+  ).toBeVisible();
 
   await page.getByRole('link', { name: 'Wallet: 390 credits' }).click();
   await expect(page.getByRole('heading', { name: 'Wallet', level: 1 })).toBeVisible();

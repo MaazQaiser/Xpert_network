@@ -1,46 +1,58 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/border-radius' as radius;
 @use '../../../../styles/mixins' as mx;
 @use '../../../../styles/tokens' as *;
 
+// Centre the start column in the viewport, a little above the middle.
 .root {
   display: flex;
-  flex-direction: column;
-  gap: $spacing-09;
+  justify-content: center;
   min-block-size: calc(100vh - #{$pt-shell-header-height} - #{$spacing-10});
+  padding-block: 12vh $spacing-09;
 }
 
-// The composer floats at the bottom centre, matching the goal chat.
-.composer {
-  position: sticky;
-  inset-block-end: 0;
+.column {
   display: flex;
   flex-direction: column;
-  gap: $spacing-03;
+  gap: $spacing-07;
   inline-size: 100%;
   max-inline-size: 46rem;
-  margin-block-start: auto;
-  margin-inline: auto;
 }
 
-.hero {
-  @include mx.surface-card;
-
+.intro {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: $spacing-05;
-  padding: $spacing-07;
+  align-items: center;
+  gap: $spacing-03;
+  text-align: center;
 }
 
-.heroTitle {
-  @include mx.display-heading('heading-05');
-}
-
-.heroBody {
+.greeting {
   @include type-style('body-02');
 
   color: $text-secondary;
-  max-inline-size: 60ch;
+}
+
+.title {
+  @include mx.display-heading('heading-05');
+}
+
+.quickStarts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: $spacing-03;
+  margin-block-start: calc(-1 * $spacing-03);
+}
+
+// Doubled class outranks Carbon's tertiary-button root rule; only the root is styled.
+.quickStart.quickStart {
+  @include mx.glass-fill;
+
+  border-color: $border-subtle-01;
+  padding-inline: $spacing-05;
+  border-radius: radius.$border-radius-24;
+  color: $text-primary;
 }

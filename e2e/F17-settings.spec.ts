@@ -5,7 +5,9 @@ import { loginAs } from './support/login';
 /** F17 happy path: notification centre, then profile, notifications, security and theme. */
 test('F17: notification centre → settings tabs → dark theme', async ({ page }) => {
   await loginAs(page, /Bilal Haddad/);
-  await expect(page.getByRole('heading', { name: 'Welcome back, Bilal' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'What are you researching today?' }),
+  ).toBeVisible();
 
   // Notification centre (HeaderPanel)
   await page.getByRole('button', { name: 'Notifications, 1 unread' }).click();

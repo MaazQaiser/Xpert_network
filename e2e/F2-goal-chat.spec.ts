@@ -11,7 +11,9 @@ async function loginAsBilal(page: Page) {
   await expect(persona.or(opener).first()).toBeVisible();
   if (!(await persona.isVisible())) await opener.click();
   await persona.click();
-  await expect(page.getByRole('heading', { name: 'Welcome back, Bilal' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'What are you researching today?' }),
+  ).toBeVisible();
 }
 
 async function expectNoAxeViolations(page: Page) {
@@ -24,7 +26,8 @@ async function expectNoAxeViolations(page: Page) {
 test('F2: goal chat → needs summary → options → checkout', async ({ page }) => {
   await loginAsBilal(page);
 
-  await page.getByRole('link', { name: 'Start new research' }).click();
+  // Home's quick starts preset a goal; the full flow starts from a blank brief.
+  await page.goto('/ask');
   await expect(page.getByText(/Hi Bilal\. Let’s scope your research/)).toBeVisible();
   await expectNoAxeViolations(page);
 

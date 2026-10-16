@@ -1,0 +1,96 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/motion' as *;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+  inline-size: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-inline: $spacing-03;
+}
+
+.heading {
+  @include type-style('label-02');
+
+  color: $text-secondary;
+}
+
+.viewAll {
+  @include type-style('label-02');
+
+  color: $link-primary;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+// Each brief is a glass row; the whole row is the link.
+.row {
+  @include mx.surface-card(radius.$border-radius-16);
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-04;
+  padding: $spacing-04 $spacing-05;
+  color: $text-primary;
+  text-decoration: none;
+  transition:
+    transform $duration-fast-02 motion(standard, productive),
+    background-color $duration-fast-02 motion(standard, productive);
+
+  &:hover {
+    background-color: $layer-hover-01;
+    transform: translateY(calc(-1 * $spacing-01));
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $spacing-01;
+  min-inline-size: 0;
+}
+
+.title {
+  @include type-style('body-compact-02');
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.chevron {
+  flex-shrink: 0;
+  fill: $icon-secondary;
+}

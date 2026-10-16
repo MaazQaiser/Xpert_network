@@ -5,7 +5,9 @@ import { loginAs } from './support/login';
 /** F5 happy path: Ayesha makes a folder, files two items in it, labels one, archives and restores. */
 test('F5: new folder → bulk move → label → archive → restore', async ({ page }) => {
   await loginAs(page, /Ayesha Rahman/);
-  await expect(page.getByRole('heading', { name: 'Welcome back, Ayesha' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'What are you researching today?' }),
+  ).toBeVisible();
 
   await page.getByRole('link', { name: 'Workspace', exact: true }).click();
   const table = page.getByRole('table', { name: 'All items' });
