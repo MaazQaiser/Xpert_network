@@ -41,12 +41,10 @@
   background-color: $layer-01;
 
   @include breakpoint(lg) {
-    @include mx.surface-card;
     @include mx.glass-chrome;
 
-    block-size: auto;
-    inset-block: $pt-floating-nav-top $pt-floating-nav-gutter;
-    inset-inline-start: $pt-floating-nav-gutter;
+    // Docked: flush to the left edge and directly under the header, square corners.
+    border-inline-end: 1px solid $border-subtle-01;
   }
 }
 
@@ -55,7 +53,7 @@
   min-block-size: calc(100vh - $pt-shell-header-height);
 
   @include breakpoint(lg) {
-    margin-inline-start: $pt-floating-nav-offset;
+    margin-inline-start: $pt-shell-side-nav-width;
   }
 }
 
