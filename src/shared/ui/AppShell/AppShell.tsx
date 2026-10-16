@@ -1,6 +1,12 @@
 'use client';
 
-import { useState, type ComponentType, type ReactNode } from 'react';
+import {
+  useCallback,
+  useState,
+  useSyncExternalStore,
+  type ComponentType,
+  type ReactNode,
+} from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -14,7 +20,35 @@ import {
   SkipToContent,
   Theme,
 } from '@carbon/react';
+import { Menu } from '@carbon/icons-react';
+import { useBreakpointUp } from '../../hooks/useMediaQuery';
 import styles from './AppShell.module.scss';
+
+// Desktop nav collapse is a per-viewer convenience, remembered in this browser.
+const NAV_COLLAPSED_KEY = 'xn.sideNavCollapsed';
+const navListeners = new Set<() => void>();
+
+function readNavCollapsed(): boolean {
+  try {
+    return window.localStorage.getItem(NAV_COLLAPSED_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function subscribeNavCollapsed(listener: () => void) {
+  navListeners.add(listener);
+  return () => navListeners.delete(listener);
+}
+
+function writeNavCollapsed(value: boolean) {
+  try {
+    window.localStorage.setItem(NAV_COLLAPSED_KEY, String(value));
+  } catch {
+    // Storage unavailable (private mode): the state just won't persist.
+  }
+  navListeners.forEach((listener) => listener());
+}
 
 export type NavItem = {
   href: string;
@@ -48,18 +82,31 @@ export function AppShell({
   children,
 }: AppShellProps) {
   const pathname = usePathname();
+  // Below lg the nav is an overlay; at lg+ it's docked and the same button collapses it.
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const isDesktop = useBreakpointUp('lg');
+  const isCollapsed = useSyncExternalStore(subscribeNavCollapsed, readNavCollapsed, () => false);
   const hasNav = navItems.length > 0;
+  const isNavShown = isDesktop ? !isCollapsed : isNavOpen;
+  const toggleNav = useCallback(() => {
+    if (isDesktop) writeNavCollapsed(!isCollapsed);
+    else setIsNavOpen((open) => !open);
+  }, [isDesktop, isCollapsed]);
 
   const chrome = (
     <>
       <SkipToContent href="#main-content" className={styles.skipLink} />
       {hasNav ? (
         <HeaderMenuButton
-          aria-label={isNavOpen ? 'Close menu' : 'Open menu'}
-          isActive={isNavOpen}
-          aria-expanded={isNavOpen}
-          onClick={() => setIsNavOpen((open) => !open)}
+          className={styles.menuButton}
+          aria-label={isNavShown ? 'Hide navigation' : 'Show navigation'}
+          aria-controls="main-navigation"
+          isActive={isNavShown}
+          isCollapsible
+          // Docked nav: a hamburger toggle in both states (the X is for the mobile overlay).
+          {...(isDesktop ? { renderCloseIcon: <Menu size={20} /> } : {})}
+          aria-expanded={isNavShown}
+          onClick={toggleNav}
         />
       ) : null}
       <HeaderName as={Link} href={homeHref} prefix="">
@@ -69,7 +116,13 @@ export function AppShell({
       <HeaderGlobalBar>{headerActions}</HeaderGlobalBar>
       {hasNav ? (
         <SideNav
-          className={chromeTheme ? undefined : styles.sideNav}
+          id="main-navigation"
+          className={[
+            chromeTheme ? undefined : styles.sideNav,
+            isDesktop && isCollapsed ? styles.sideNavCollapsed : undefined,
+          ]
+            .filter(Boolean)
+            .join(' ')}
           aria-label="Main navigation"
           expanded={isNavOpen}
           onOverlayClick={() => setIsNavOpen(false)}
@@ -113,7 +166,11 @@ export function AppShell({
       <main
         id="main-content"
         className={
-          !hasNav ? styles.contentFull : chromeTheme ? styles.content : styles.contentFloating
+          !hasNav || (isDesktop && isCollapsed)
+            ? styles.contentFull
+            : chromeTheme
+              ? styles.content
+              : styles.contentFloating
         }
       >
         {children}

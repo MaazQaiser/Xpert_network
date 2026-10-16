@@ -57,6 +57,28 @@
   }
 }
 
+// Collapsed on desktop: the docked nav is removed and content takes the full width.
+.sideNavCollapsed.sideNavCollapsed {
+  @include breakpoint(lg) {
+    display: none;
+  }
+}
+
+// Room between the menu button and the product name.
+.menuButton.menuButton {
+  margin-inline-end: $spacing-03;
+}
+
+// Carbon's header buttons draw their focus border on :focus, so a mouse click leaves a
+// rectangle. Keep the ring for keyboard users (:focus-visible) only. This touches only the
+// focus border of the header's own buttons, not their layout.
+.header.header button:focus:not(:focus-visible),
+.menuButton.menuButton:focus:not(:focus-visible) {
+  border-color: transparent;
+  outline: none;
+  box-shadow: none;
+}
+
 // The header's transparent --cds-background would leave the skip link see-through over the
 // product name; give it an opaque surface while it's shown.
 .skipLink.skipLink:focus {
