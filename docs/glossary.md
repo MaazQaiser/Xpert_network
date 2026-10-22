@@ -19,3 +19,13 @@ Use these terms in copy, routes and code (UX_PRINCIPLES §2).
 | Interview      | An expert's voice or text session with the AI interviewer                                |
 | Expert         | A vetted person who gives interviews; anonymous to clients (role, years, region)         |
 | Workspace      | A client's folders and labels for briefs, reports and requests                           |
+| Project manager | The internal user who runs projects in the admin console (persona: Paltu Kerison)       |
+| Project        | A client brief turned into a tracked job (`PRJ-1042`), from draft to booked calls        |
+| Project file   | The AI-drafted brief, key facts, expert profile and client questions, with page sources  |
+| Shortlist      | The AI-ranked experts chosen from the matches, each with "why picked"                    |
+| 15 questions   | The expert form: the client's questions plus screening questions                         |
+| Pick page      | The client's private, expiring link for choosing up to 2 experts and times               |
+| Outreach hiring | Recruiting new experts with a hiring poster when the network has no match               |
+| Secure link    | A private page for a client, expert or applicant; no login, expires after 48 h           |
+| Team member    | An internal staff account in the admin console; every member has the same permissions    |
+| Audit log      | The read-only record of every AI action, send and admin change: who, what, when          |

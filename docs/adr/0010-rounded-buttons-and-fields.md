@@ -27,3 +27,5 @@ The Xpert Network look (ADR 0009) uses soft, rounded surfaces. Stakeholders aske
 ## Revision 2026-10-16
 
 Search inputs and the content switcher now get the same 8px radius and 1px `$border-strong` outline as other fields, so filter rows read as one set of controls (`_carbon-shape.scss`). Focus rings are slate, not orange (ADR 0009).
+
+One colour exception lives here too: checkboxes and radios remap `--cds-icon-primary` to the slate `--pt-control-edge` so their edge matches the slate field outlines (ADR 0009). It changes a token inside the component, not its shape or structure.

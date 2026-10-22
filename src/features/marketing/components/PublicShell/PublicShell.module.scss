@@ -1,14 +1,40 @@
+@use '@carbon/react/scss/breakpoint' as *;
 @use '@carbon/react/scss/spacing' as *;
 @use '../../../../styles/tokens' as *;
 @use '../../../../styles/mixins' as mx;
 @use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
 
 .suffix {
   color: $text-secondary;
 }
 
+// Keeps the footer at the bottom on short pages.
+.frame {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100dvh;
+}
+
+// A flex column so a page (e.g. AuthFrame) can fill the space and centre itself.
 .main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   margin-block-start: $pt-shell-header-height;
+}
+
+.footer {
+  @include type-style('helper-text-01');
+
+  padding: $spacing-06 $spacing-05;
+  color: $text-secondary;
+  text-align: center;
+
+  // On narrow screens, clear the fixed bottom-right corner (login's demo accounts button).
+  @include breakpoint-down(md) {
+    padding-block-end: $spacing-11;
+  }
 }
 
 // Glass header over the page gradient (ADR 0009); doubled class outranks Carbon's root rule.

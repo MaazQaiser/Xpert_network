@@ -14,7 +14,7 @@ import { createAccount, findUserByEmail } from '../store/accounts';
 import { db } from '../store/db';
 import { currentUser, errorResponse, injectedError, simulateNetwork, unauthorized } from './utils';
 
-const PROVIDER_LABEL = { google: 'Google', linkedin: 'LinkedIn' } as const;
+const PROVIDER_LABEL = { google: 'Google', apple: 'Apple' } as const;
 
 function logIn(user: User) {
   db.update((draft) => {

@@ -32,6 +32,7 @@
 @use 'themes' as app-themes;
 @use 'carbon-shape';
 @use 'carbon-reflow';
+@use 'carbon-side-nav';
 
 // Global theme: warm stone light by default, warm dark when the user (or the system)
 // prefers dark. ThemeProvider writes data-carbon-theme on <html> (`white` / `g100`).

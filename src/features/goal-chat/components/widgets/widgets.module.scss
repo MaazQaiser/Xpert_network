@@ -3,6 +3,8 @@
 @use '@carbon/react/scss/type' as *;
 @use '@carbon/react/scss/breakpoint' as *;
 @use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/motion' as *;
+@use '../../../../styles/mixins' as mx;
 
 .stack {
   display: flex;
@@ -226,4 +228,155 @@
 .doneIcon {
   flex-shrink: 0;
   fill: $support-success;
+}
+
+// Inline cards left in the thread (library report, custom-research close).
+.storyCard {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-03;
+  padding: $spacing-05;
+  color: $text-primary;
+  text-decoration: none;
+
+  &:hover {
+    background-color: $layer-hover-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+}
+
+.searchList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.searchDone,
+.searchPending {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.searchDone {
+  color: $text-primary;
+
+  svg {
+    fill: $support-success;
+  }
+}
+
+.searchPending {
+  color: $text-secondary;
+}
+
+.searchSpin {
+  animation: search-spin $duration-moderate-02 motion(standard, productive) infinite;
+}
+
+.artifact {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+  padding: $spacing-05;
+  animation: card-in $duration-slow-01 motion(entrance, productive) both;
+}
+
+.artifactHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-04;
+
+  svg {
+    flex-shrink: 0;
+    fill: $icon-primary;
+  }
+}
+
+.sources {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sourceLabel {
+  @include type-style('helper-text-01');
+
+  display: flex;
+  justify-content: space-between;
+  gap: $spacing-03;
+  margin-block-end: $spacing-02;
+  color: $text-secondary;
+}
+
+.track {
+  display: block;
+  overflow: hidden;
+  block-size: $spacing-02;
+  border-radius: radius.$border-radius-24;
+  background: $layer-02;
+}
+
+.bar {
+  display: block;
+  block-size: 100%;
+  border-radius: inherit;
+  background: $interactive;
+  transition: inline-size $duration-slow-02 motion(entrance, productive);
+
+  &[data-source='1'] {
+    background: $support-info;
+  }
+
+  &[data-source='2'] {
+    background: $support-success;
+  }
+
+  &[data-source='3'] {
+    background: $border-strong-01;
+  }
+}
+
+@keyframes search-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY($spacing-04);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .searchSpin,
+  .artifact,
+  .bar {
+    animation: none;
+    transition: none;
+  }
 }

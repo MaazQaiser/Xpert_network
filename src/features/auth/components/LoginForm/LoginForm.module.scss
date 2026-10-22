@@ -10,17 +10,38 @@
 
 .actions {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: $spacing-06;
+  flex-direction: column;
+  gap: $spacing-05;
 }
 
-.demo {
+// Full width. The doubled class outranks Carbon's 20rem button cap (root element only).
+.submit.submit {
+  justify-content: center;
+  inline-size: 100%;
+  max-inline-size: none;
+  padding-inline-end: $spacing-05;
+}
+
+.signUp {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+  text-align: center;
+}
+
+.demoCorner {
+  position: fixed;
+  z-index: 8000;
+  inset-block-end: $spacing-05;
+  inset-inline-end: $spacing-05;
+}
+
+.demoPanel {
   display: flex;
   flex-direction: column;
   gap: $spacing-03;
-  padding-block-start: $spacing-07;
-  border-block-start: 1px solid $border-subtle-01;
+  inline-size: min(24rem, calc(100vw - #{$spacing-07}));
+  padding: $spacing-05;
 }
 
 .demoHeading {

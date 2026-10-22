@@ -29,13 +29,13 @@ import styles from './CallsBrowser.module.scss';
 
 const ANY = 'any';
 
-/** F8: open calls matched to the expert, strongest first, with filters in the URL. */
+/** F8: interview requests, grouped by industry, strongest match first. */
 export function CallsBrowser() {
   return (
     <div className={styles.root}>
       <PageHeader
-        title="Open calls"
-        subtitle="Interviews clients need now, matched to your expertise. Each one is paid once it’s accepted."
+        title="Interview requests"
+        subtitle="Each request shows its industry and category. Open one to join a one-to-one interview."
       />
       <Suspense>
         <Browser />
@@ -59,14 +59,14 @@ function Browser() {
   return (
     <AsyncBoundary
       query={calls}
-      errorTitle="Open calls didn’t load"
+      errorTitle="Interview requests didn’t load"
       loading={<CallsSkeleton />}
       isEmpty={(data) => data.length === 0}
       empty={
         <EmptyState
           pictogram={<MicrophonePictogram aria-hidden="true" />}
-          title="No open calls right now"
-          description="New calls are published most weekdays. Topics and regions on your profile decide which ones you see first."
+          title="No interview requests right now"
+          description="New requests are published most weekdays. Topics and regions on your profile decide which ones you see first."
           action={
             <Button as={Link} href={routes.expert.profile} kind="tertiary">
               Review your expertise
@@ -82,7 +82,7 @@ function Browser() {
 
 function CallsSkeleton() {
   return (
-    <div aria-busy="true" aria-label="Loading open calls" className={styles.list}>
+    <div aria-busy="true" aria-label="Loading interview requests" className={styles.list}>
       {[0, 1, 2].map((i) => (
         <div key={i} className={styles.card}>
           <SkeletonText width="30%" />
@@ -109,12 +109,13 @@ function CallsList({
     ...new Map(calls.flatMap((c) => c.regions.map((r) => [r.id, r.label] as const))).entries(),
   ];
   const visible = sortCalls(calls.filter((call) => matchesCallFilters(call, filters)));
+  const groups = groupByIndustry(visible);
   const isFiltered = hasCallFilters(filters);
   const clear = () => onFilter({ industry: null, region: null, minFee: null, maxMinutes: null });
 
   return (
     <>
-      <section className={styles.filters} aria-label="Filter open calls">
+      <section className={styles.filters} aria-label="Filter interview requests">
         <Dropdown
           id="calls-industry"
           titleText="Industry"
@@ -183,7 +184,9 @@ function CallsList({
 
       <div className={styles.resultsBar}>
         <p className={styles.count} role="status">
-          {isFiltered ? `${visible.length} of ${calls.length} calls` : `${calls.length} calls`}
+          {isFiltered
+            ? `${visible.length} of ${calls.length} requests`
+            : `${calls.length} requests`}
         </p>
         {isFiltered ? (
           <Button kind="ghost" size="sm" onClick={clear}>
@@ -196,8 +199,8 @@ function CallsList({
         <EmptyState
           headingLevel={2}
           pictogram={<Magnify aria-hidden="true" />}
-          title="No calls match these filters"
-          description="Try a wider fee or time range, or clear the filters to see every call."
+          title="No requests match these filters"
+          description="Try a wider fee or time range, or clear the filters to see every request."
           action={
             <Button kind="tertiary" onClick={clear}>
               Clear filters
@@ -205,13 +208,22 @@ function CallsList({
           }
         />
       ) : (
-        <ul className={styles.list} aria-label="Open calls">
-          {visible.map((call) => (
-            <li key={call.id}>
-              <CallCard call={call} />
-            </li>
+        <div className={styles.groups}>
+          {groups.map((group) => (
+            <section key={group.industry} className={styles.group} aria-labelledby={group.id}>
+              <h2 id={group.id} className={styles.groupTitle}>
+                {group.industry}
+              </h2>
+              <ul className={styles.list} aria-label={`${group.industry} requests`}>
+                {group.calls.map((call) => (
+                  <li key={call.id}>
+                    <CallCard call={call} />
+                  </li>
+                ))}
+              </ul>
+            </section>
           ))}
-        </ul>
+        </div>
       )}
     </>
   );
@@ -232,8 +244,12 @@ function CallCard({ call }: { call: OpenCall }) {
         ) : null}
         {application ? <StatusTag tone={application.tone} label={application.label} /> : null}
       </div>
+      <p className={styles.facets}>
+        <span>Industry {call.industry.label}</span>
+        <span>Category {call.topics.join(' · ')}</span>
+      </p>
       <h2 className={styles.title}>
-        <Link href={routes.expert.call(call.id)} className={styles.link}>
+        <Link href={routes.expert.session(call.id)} className={styles.link}>
           {call.title}
         </Link>
       </h2>
@@ -254,6 +270,25 @@ function CallCard({ call }: { call: OpenCall }) {
         </li>
         <li>{call.deadline ? `Closes ${formatDate(call.deadline)}` : 'No deadline'}</li>
       </ul>
+      <Link href={routes.expert.call(call.id)} className={styles.details}>
+        Details
+      </Link>
     </article>
   );
+}
+
+/** Industries in the order their strongest request appears. */
+function groupByIndustry(calls: OpenCall[]): { id: string; industry: string; calls: OpenCall[] }[] {
+  const groups: { id: string; industry: string; calls: OpenCall[] }[] = [];
+  for (const call of calls) {
+    const existing = groups.find((group) => group.industry === call.industry.label);
+    if (existing) existing.calls.push(call);
+    else
+      groups.push({
+        id: `industry-${call.industry.id}`,
+        industry: call.industry.label,
+        calls: [call],
+      });
+  }
+  return groups;
 }

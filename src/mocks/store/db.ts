@@ -1,4 +1,9 @@
-import type { ChatMessage, ResearchBrief, TurnResult } from '@/features/goal-chat';
+import {
+  seedHomeStories,
+  type ChatMessage,
+  type ResearchBrief,
+  type TurnResult,
+} from '@/features/goal-chat';
 import type { User } from '@/features/auth';
 import type { Notification } from '@/features/notifications';
 import type { ClientOnboarding, ExpertOnboarding } from '@/features/onboarding';
@@ -8,7 +13,7 @@ import { USERS } from '../fixtures/users';
 import { seedNotifications } from '../fixtures/notifications';
 import type { LibraryItem } from '@/features/library';
 import type { MockReport } from '../fixtures/reportContent';
-import { seedRequests, type StoredRequest } from '../fixtures/requests';
+import { seedCustomReports, seedRequests, type StoredRequest } from '../fixtures/requests';
 import { SEED_CLIENT_ONBOARDING, SEED_EXPERT_ONBOARDING } from '../fixtures/onboarding';
 import {
   defaultPreferences,
@@ -21,6 +26,8 @@ import { SEED_WORKSPACES, type StoredWorkspace } from '../fixtures/workspace';
 import { SEED_APPLICATIONS } from '../fixtures/calls';
 import { SEED_EARNINGS, type StoredEarnings } from '../fixtures/earnings';
 import type { StoredInterview } from '../ai/interviewer/engine';
+import type { InboxRequest, MatchResult, Project, Shortlist } from '@/features/admin';
+import { seedInbox, seedProjects, type SentMail } from '../fixtures/admin/seed';
 
 export type DemoState = {
   version: 2;
@@ -57,6 +64,16 @@ export type DemoState = {
   interviews: Record<string, StoredInterview>;
   /** F10: each expert's earnings, payouts and payout method. */
   earnings: Record<string, StoredEarnings>;
+  /** F12: client emails in the connected projects inbox, by id. */
+  adminInbox: Record<string, InboxRequest>;
+  /** F12+: projects by id (PRJ-1042). */
+  adminProjects: Record<string, Project>;
+  /** Email sandbox: everything the PM "sent". Nothing leaves the browser. */
+  adminMail: SentMail[];
+  /** F13: matched experts per project, filled when the brief is approved. */
+  adminMatches: Record<string, MatchResult>;
+  /** F13: AI shortlist per project, filled when the PM generates one. */
+  adminShortlists: Record<string, Shortlist>;
 };
 
 export type StoredApplication = {
@@ -70,11 +87,26 @@ export type StoredApplication = {
 // Key keeps the product's former name so testers' saved demo data survives the rename.
 const STORAGE_KEY = 'proptyop.demo.v2';
 
+/** Seeded delivered reports belong to the client who commissioned them. */
+function withCustomReports(
+  state: Pick<DemoState, 'ownedReports' | 'reportPurchases'>,
+  reports: DemoState['customReports'],
+) {
+  for (const [id, { ownerId, content }] of Object.entries(reports)) {
+    const owned = (state.ownedReports[ownerId] ??= []);
+    if (!owned.includes(id)) owned.push(id);
+    (state.reportPurchases[ownerId] ??= {})[id] ??= content.updatedAt;
+  }
+}
+
 function seed(): DemoState {
   const clientIds = Object.values(USERS)
     .filter((user) => user.role === 'client')
     .map((user) => user.id);
-  return {
+  const requests = seedRequests();
+  const customReports = seedCustomReports(requests);
+  const homeStories = seedHomeStories();
+  const state: DemoState = {
     version: 2,
     sessionUserId: null,
     users: Object.fromEntries(Object.values(USERS).map((user) => [user.id, user])),
@@ -89,8 +121,8 @@ function seed(): DemoState {
     notifications: Object.fromEntries(
       Object.values(USERS).map((user) => [user.id, seedNotifications(user.id)]),
     ),
-    briefs: {},
-    messages: {},
+    briefs: homeStories.briefs,
+    messages: homeStories.messages,
     turns: {},
     wallets: Object.fromEntries(clientIds.map((id) => [id, seedWallet(id)])),
     ownedReports: Object.fromEntries(clientIds.map((id) => [id, SEED_OWNED_REPORTS[id] ?? []])),
@@ -101,13 +133,73 @@ function seed(): DemoState {
       ]),
     ),
     reportUpdates: {},
-    requests: seedRequests(),
-    customReports: {},
+    requests,
+    customReports,
     workspaces: structuredClone(SEED_WORKSPACES),
     applications: structuredClone(SEED_APPLICATIONS),
     interviews: {},
     earnings: structuredClone(SEED_EARNINGS),
+    adminInbox: seedInbox(),
+    adminProjects: seedProjects(),
+    adminMail: [],
+    adminMatches: {},
+    adminShortlists: {},
   };
+  withCustomReports(state, customReports);
+  return state;
+}
+
+/** Persona names and emails follow the fixtures, so a renamed persona shows up in saved demos. */
+function withPersonaIdentity(saved: DemoState['users'] | undefined): DemoState['users'] {
+  const users = { ...(saved ?? {}) };
+  for (const persona of Object.values(USERS)) {
+    const user = users[persona.id];
+    users[persona.id] = user
+      ? { ...user, name: persona.name, title: persona.title, email: persona.email }
+      : persona;
+  }
+  return users;
+}
+
+/** Adds seeded requests and refreshes home-story chats a tester's saved data predates. */
+function withNewSeeds(saved: DemoState, fresh: DemoState): DemoState {
+  const missingRequests = Object.values(fresh.requests).filter((r) => !saved.requests?.[r.id]);
+  const storyBriefs = Object.values(fresh.briefs).filter((brief) => {
+    const savedCount = saved.messages?.[brief.id]?.length ?? 0;
+    const freshCount = fresh.messages[brief.id]?.length ?? 0;
+    return !saved.briefs?.[brief.id] || savedCount < freshCount;
+  });
+  const needsAdminSlices = !saved.adminMatches || !saved.adminShortlists;
+  if (missingRequests.length === 0 && storyBriefs.length === 0 && !needsAdminSlices) {
+    return saved;
+  }
+  const reports = Object.fromEntries(
+    Object.entries(fresh.customReports).filter(([, report]) =>
+      missingRequests.some((r) => r.delivery?.reportId === report.item.id),
+    ),
+  );
+  const merged: DemoState = {
+    ...saved,
+    adminMatches: saved.adminMatches ?? {},
+    adminShortlists: saved.adminShortlists ?? {},
+    requests: {
+      ...saved.requests,
+      ...Object.fromEntries(missingRequests.map((r) => [r.id, r])),
+    },
+    briefs: {
+      ...(saved.briefs ?? {}),
+      ...Object.fromEntries(storyBriefs.map((b) => [b.id, b])),
+    },
+    messages: {
+      ...(saved.messages ?? {}),
+      ...Object.fromEntries(storyBriefs.map((b) => [b.id, fresh.messages[b.id] ?? []])),
+    },
+    customReports: { ...saved.customReports, ...reports },
+    ownedReports: structuredClone(saved.ownedReports ?? {}),
+    reportPurchases: structuredClone(saved.reportPurchases ?? {}),
+  };
+  withCustomReports(merged, reports);
+  return merged;
 }
 
 function load(): DemoState {
@@ -117,7 +209,9 @@ function load(): DemoState {
     if (!raw) return seed();
     const parsed = JSON.parse(raw) as DemoState;
     // Slices added after a tester's data was saved fall back to the seed.
-    return parsed.version === 2 ? { ...seed(), ...parsed } : seed();
+    if (parsed.version !== 2) return seed();
+    const fresh = seed();
+    return withNewSeeds({ ...fresh, ...parsed, users: withPersonaIdentity(parsed.users) }, fresh);
   } catch {
     return seed();
   }

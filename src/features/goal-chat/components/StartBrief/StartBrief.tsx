@@ -2,8 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { InlineLoading } from '@carbon/react';
-import { ErrorState } from '@/shared/ui';
+import { ErrorState, PageLoading } from '@/shared/ui';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
 import { useCreateBrief } from '../../api/queries';
@@ -37,5 +36,5 @@ export function StartBrief({ goal = null }: { goal?: GoalType | null }) {
       />
     );
   }
-  return <InlineLoading status="active" description="Starting a new research brief…" />;
+  return <PageLoading description="Starting a new research brief…" inShell />;
 }

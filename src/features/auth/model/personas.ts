@@ -32,8 +32,8 @@ export const DEMO_ACCOUNTS: {
   {
     personaId: 'ops',
     role: 'admin',
-    name: 'Omar Siddiqui',
-    email: 'omar@xpertnetwork.example',
-    summary: 'Research operations admin',
+    name: 'Paltu Kerison',
+    email: 'paltu@xpertnetwork.example',
+    summary: 'Project manager',
   },
 ];

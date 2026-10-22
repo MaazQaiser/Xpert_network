@@ -10,6 +10,8 @@ export type PrototypeControls = {
   emptyData: boolean;
   lowCredits: boolean;
   micDenied: boolean;
+  /** Presenter mode: home can start the seeded chat so a demo shows how a conversation is built. */
+  demoAutoplay: boolean;
   coverage: CoverageScenario;
 };
 
@@ -19,6 +21,7 @@ export const DEFAULT_CONTROLS: PrototypeControls = {
   emptyData: false,
   lowCredits: false,
   micDenied: false,
+  demoAutoplay: false,
   coverage: 'auto',
 };
 

@@ -16,6 +16,12 @@ type ChatThreadProps = {
   brief: ResearchBrief;
   messages: ChatMessage[];
   turn: TurnController;
+  /** Seeded story: messages arrive one at a time, with a typing row and streamed reply. */
+  playback?: {
+    streamingId: string | null;
+    showTyping: boolean;
+    follow: 'smooth' | 'auto';
+  };
 };
 
 function AssistantFooter({ at, messageId }: { at: string; messageId?: string }) {
@@ -52,17 +58,38 @@ function DayDivider({ label }: { label: string }) {
   );
 }
 
-export function ChatThread({ brief, messages, turn }: ChatThreadProps) {
+export function ChatThread({ brief, messages, turn, playback }: ChatThreadProps) {
   const endRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLLIElement>(null);
   const lastAssistantId = messages.filter((m) => m.role === 'assistant').at(-1)?.id;
   const isSubmitted = brief.status === 'submitted';
-  const showPending = turn.pending !== null && turn.status !== 'done';
+  const showPending = !playback && turn.pending !== null && turn.status !== 'done';
+  const lastText = messages.at(-1)?.text.length ?? 0;
+  const follow = playback?.follow;
+  const searching = Boolean(playback) && messages.at(-1)?.widget?.kind === 'library-search';
 
   // Follow the conversation only if the user is already near the bottom (AI_NATIVE §4.2).
+  // A playing story always follows. The library search holds the middle of the screen.
   useEffect(() => {
+    if (follow && searching) {
+      searchRef.current?.scrollIntoView({ block: 'center', behavior: follow });
+      return;
+    }
+    if (follow) {
+      endRef.current?.scrollIntoView({ block: 'end', behavior: follow });
+      return;
+    }
     const nearBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight - 240;
     if (nearBottom) endRef.current?.scrollIntoView({ block: 'end' });
-  }, [messages.length, turn.text.length, turn.status]);
+  }, [
+    messages.length,
+    lastText,
+    turn.text.length,
+    turn.status,
+    follow,
+    playback?.showTyping,
+    searching,
+  ]);
 
   return (
     <section className={styles.root} aria-label="Conversation">
@@ -78,7 +105,10 @@ export function ChatThread({ brief, messages, turn }: ChatThreadProps) {
           if (message.role === 'user') {
             return [
               divider,
-              <li key={message.id} className={styles.userRow}>
+              <li
+                key={message.id}
+                className={playback ? `${styles.userRow} ${styles.enterUser}` : styles.userRow}
+              >
                 <p className={styles.userBubble}>
                   <span className={styles.srOnly}>You said: </span>
                   {message.text}
@@ -87,28 +117,65 @@ export function ChatThread({ brief, messages, turn }: ChatThreadProps) {
             ];
           }
           const isLatest = message.id === lastAssistantId;
-          const showWidget = isLatest || message.widget?.kind === 'done';
+          const isStreaming = playback?.streamingId === message.id;
+          const kind = message.widget?.kind;
+          const showWidget =
+            isLatest ||
+            kind === 'done' ||
+            kind === 'library-report' ||
+            kind === 'library-search' ||
+            kind === 'report-artifact' ||
+            kind === 'custom-request';
+          const isSearchStage = searching && message.id === messages.at(-1)?.id;
           return [
             divider,
-            <li key={message.id} className={styles.assistantRow}>
-              <p className={styles.text}>{message.text}</p>
+            <li
+              key={message.id}
+              ref={isSearchStage ? searchRef : undefined}
+              className={[
+                styles.assistantRow,
+                playback ? styles.enterAssistant : '',
+                isSearchStage ? styles.searchStage : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              {isStreaming ? (
+                <StreamingText text={message.text} isStreaming />
+              ) : (
+                <p className={styles.text}>{message.text}</p>
+              )}
               {showWidget ? (
-                <div className={styles.widget}>
+                <div className={playback ? `${styles.widget} ${styles.enterCard}` : styles.widget}>
                   <WidgetView
                     message={message}
                     brief={brief}
                     isInteractive={isLatest && !showPending && !isSubmitted}
+                    craft={Boolean(playback)}
                     turn={turn}
                   />
                 </div>
               ) : null}
               <AssistantFooter
                 at={message.createdAt}
-                {...(isLatest && !showPending ? { messageId: message.id } : {})}
+                {...(isLatest && !showPending && !isStreaming ? { messageId: message.id } : {})}
               />
             </li>,
           ];
         })}
+
+        {playback?.showTyping ? (
+          <li className={styles.typingRow}>
+            <span className={styles.srOnly} role="status">
+              Assistant is writing
+            </span>
+            <span className={styles.typing} aria-hidden="true">
+              <span className={styles.typingDot} />
+              <span className={styles.typingDot} />
+              <span className={styles.typingDot} />
+            </span>
+          </li>
+        ) : null}
 
         {showPending && turn.pending?.userText ? (
           <li className={styles.userRow}>

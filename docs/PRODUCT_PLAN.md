@@ -60,13 +60,18 @@ Each flow has an ID used in specs, stories, routes and E2E tests. ★ marks the 
 | F8 | Open calls: browse → detail → screening → apply | Expert | Must |
 | **F9 ★** | **Interview room: voice or text, sectioned stepper, progress, review, submit** | Expert | Must |
 | F10 | Expert earnings & payout request | Expert | Should |
-| F11 | Admin login → dashboard | Admin | Must |
-| F12 | Admin: approve experts | Admin | Should |
-| **F13 ★** | **Admin: brief → AI-drafted quote → send** | Admin | Must |
-| F14 | Admin: create and publish an open call from an accepted request | Admin | Should |
-| F15 | Admin: interview check (transcript, flags, redact, accept/reject) | Admin | Should |
-| F16 | Admin: report publish (to client, then to library) | Admin | Could |
+| F11 | PM: home — summary, AI tip, chat (screen 01) | Admin | Must |
+| **F12 ★** | **PM: inbox → client project file / AI brief (02–03)** | Admin | Must |
+| **F13 ★** | **PM: matched experts → AI shortlist (04–05)** | Admin | Must |
+| **F14 ★** | **PM: pitch → expert answers 15 questions → responses (06–08)** | Admin + expert link | Must |
+| **F15 ★** | **PM: availability → client picks → sync → project locked (09–15)** | Admin + client link | Must |
+| F16 | PM: call workspace (16) | Admin | Should |
 | F17 | Profile, settings, notifications (all roles) | All | Must |
+| F18 | PM: team, assignment, audit log (beyond the PRD) | Admin | Should |
+| F19 | PM: no-match outreach hiring (17–23) | Admin + applicant link | Must |
+| F20 | PM: CRUD for projects, experts, clients + trash (24–28) | Admin | Must |
+
+Admin flows follow the ExpertNet PRD (2026-10-22) and are specified in [`ADMIN_PLAN.md`](ADMIN_PLAN.md). The client app above stays as it is; the expert app gains invitations, the 15-question form, availability, upcoming calls and onboarding steps (`ADMIN_PLAN.md` §3a).
 
 ---
 
@@ -92,7 +97,7 @@ Behaviour:
 
 - Sections show *not started / in progress / complete / needs attention*. Click a completed step to jump back.
 - AI won't advance until the step's done condition is met. A **Skip** option exists where it's safe.
-- Autosaves as a **draft brief** (appears in the workspace). "Resume where you left off" on the home page.
+- Autosaves as a **draft brief** (appears in the workspace). Home opens with a short persona story, the ask field, and a card for the library report, that brief, and a request follow-up.
 - Starter chips at each step, e.g. for P1b: *"Top suppliers in region"*, *"Typical lead times"*.
 - *States:* first-time empty chat, AI thinking/streaming, AI can't resolve the company, user types something off-topic, network error mid-stream, all questions covered (no custom needed), nothing covered (custom only), insufficient credits.
 - ⚑ Does the stepper feel guiding or restrictive? Do users understand the coverage map? Is the needs summary trusted?
@@ -136,14 +141,11 @@ Behaviour:
 *States:* mic permission denied → offer text, connection lost → resume at the same section, paused for > 10 min, ended early (partial), expert ineligible (conflict).
 ⚑ Is voice comfortable with an AI? Does the section stepper reduce anxiety about length? Does the compliance moment feel respectful?
 
-### F13 ★ Admin: brief → quote (super admin)
+### Admin (project manager) flows
 
-1. **Admin dashboard**: queues with counts: *Experts to approve · Briefs awaiting quote · Interviews to check · Payout requests*.
-2. **Brief detail**: client's confirmed brief, coverage map, chat transcript (read-only).
-3. **Quote builder**: **AI-drafted** quote (labelled with `AILabel`): experts needed, profile mix, ETA, credits (from pricing rules). Admin edits any field → preview as the client will see it → **Send**.
-4. Sent → status updates in the client's F4 (via the prototype scenario engine).
+Screen by screen in [`ADMIN_PLAN.md`](ADMIN_PLAN.md) §3: an emailed brief becomes a reviewed project file, matched and shortlisted experts, screened answers, client picks and locked calls, with outreach hiring when nothing matches.
 
-⚑ Can an admin produce a quote in < 3 minutes? Is the AI draft trusted and easy to correct?
+⚑ How long from client email to approved brief, and to first call booked? Do PMs trust the AI brief and shortlist?
 
 ---
 
@@ -173,7 +175,8 @@ Behaviour:
 | Public | Landing, How it works, For experts, Pricing, Log in, Sign up, Forgot password, Verify email, Role select |
 | Client | Onboarding, Home, Ask (goal chat), Library, Category shelf, Report preview, Report viewer, Requests list, Request detail / quote, Workspace, Wallet, Settings |
 | Expert | Onboarding, Pending approval, Home, Open calls, Call detail + apply, Interview pre-flight, Interview room, Interview review, Earnings, Profile |
-| Admin | Login, Dashboard, Experts queue, Brief detail + quote builder, Requests, Open calls + call builder, Interview check, Reports, Library manager, Finance (credits view), Users |
+| Admin | Login + the 28 PRD screens (`ADMIN_PLAN.md` §3), Team + activity log, Settings (connected inboxes), Email sandbox |
+| Link pages (no login) | Client pick page, expert 15-question form, applicant onboarding, link expired |
 | Shared | Notification panel, 404, error page, global search / command palette |
 
 Routes follow the structure in `ARCHITECTURE.md` (route groups `(marketing)`, `(auth)`, `(client)`, `(expert)`, `(admin)`).
@@ -231,7 +234,7 @@ Interview { id, callId, mode: 'voice'|'text', sections[{id,title,status}], trans
 | Coverage map | F2 | Per-question coverage with "why" (matched report sections) |
 | Report Q&A | F3 | Citations into sections, "not in this report" response + "Request research" CTA |
 | AI interviewer | F9 | Section progress, follow-ups, compliance deflection, editable summary |
-| Quote drafter | F13 | `AILabel`, editable fields, revert-to-AI |
+| Brief drafter, matcher, ranker, email drafters, reply parser, poster drafter, CV screening | F12–F16, F19 | `AILabel`, sources and "why picked", editable, reset to AI pick, never sent without a click (`ADMIN_PLAN.md` §6) |
 | Expert fit score | F12 | Reasons, not just a number |
 | Call/guide writer, report writer | F14, F16 | Draft → edit → publish with clear AI marking |
 
@@ -247,7 +250,7 @@ Interview { id, callId, mode: 'voice'|'text', sections[{id,title,status}], trans
 | 3 | Library + report viewer + Q&A + wallet | **F3**, F6 |
 | 4 | Custom requests + quotes + workspace | **F4**, F5 |
 | 5 | Open calls + **interview room** (text, then voice) + earnings | F8, **F9**, F10 |
-| 6 | Admin console | F11, F12, **F13**, F14, F15, F16 |
+| 6 | Admin console (order in `ADMIN_PLAN.md` §9) | **F12**, **F13**, **F14**, **F15**, F11, F20, F19, F16, F18 |
 | 7 | Polish: all states, a11y audit, dark theme, responsive, usability test round 1 | All |
 
 ---
@@ -287,7 +290,7 @@ Measures: task success, time on task, errors, SEQ (single ease question) per tas
 1. ~~Are experts **anonymous** to clients (role + years + region) or named?~~ **Decided 2026-10-15: anonymous** (role + years + region).
 2. Should the goal chat allow **free-form chat** after step 7, or end the session and start a new one?
 3. ~~Credit price display: credits only, or credits + currency equivalent?~~ **Decided 2026-10-15: credits + currency**, e.g. "120 credits (≈ $600)".
-4. Can clients **message** admins on a quote, or only accept/decline?
+4. ~~Can clients **message** admins on a quote, or only accept/decline?~~ **Superseded 2026-10-22 by the ExpertNet PRD: clients reply by email and on a private pick page** (`ADMIN_PLAN.md`).
 5. Voice interview: push-to-talk or always listening?
-6. Admin as `/admin` in the same app (recommended for the prototype) vs. a separate subdomain later?
+6. ~~Admin as `/admin` in the same app vs. a separate subdomain later?~~ **Decided: `/admin` in the same app for the prototype.**
 7. Launch content: which **industries and regions** should fixtures use? (Defaults: F&B franchising in the Gulf; consumer retail companies for investors.)

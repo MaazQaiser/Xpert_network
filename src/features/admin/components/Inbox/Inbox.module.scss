@@ -1,0 +1,347 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/motion' as *;
+@use '../../../../styles/mixins' as mx;
+
+// Phones show the list or the open email; from lg both panes sit side by side.
+.layout {
+  display: grid;
+  gap: $spacing-05;
+  grid-template-columns: 1fr;
+
+  @include breakpoint(lg) {
+    align-items: start;
+    grid-template-columns: minmax(18rem, 2fr) 3fr;
+  }
+}
+
+.readingPane {
+  display: none;
+
+  @include breakpoint(lg) {
+    display: block;
+  }
+}
+
+.hasSelection {
+  .listPane {
+    display: none;
+
+    @include breakpoint(lg) {
+      display: flex;
+    }
+  }
+
+  .readingPane {
+    display: block;
+  }
+}
+
+.listPane {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+}
+
+.listHeader {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+}
+
+.title {
+  @include mx.display-heading('heading-04');
+}
+
+.subtitle,
+.agent {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.agent {
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.liveDot {
+  flex: none;
+  border-radius: 50%;
+  background: $support-success;
+  block-size: $spacing-03;
+  inline-size: $spacing-03;
+}
+
+.views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-02;
+}
+
+.view.view {
+  // Doubled class outranks Carbon's tertiary-button root rule; matches the Home prompt pills.
+  max-inline-size: 100%;
+  padding-inline: $spacing-04;
+  border-color: $border-subtle-01;
+  border-radius: radius.$border-radius-24;
+  background: $layer-01;
+  color: $text-primary;
+
+  &:hover {
+    background: $layer-hover-01;
+    color: $text-primary;
+  }
+}
+
+.viewActive.viewActive,
+.viewActive.viewActive:hover {
+  border-color: $layer-selected-inverse;
+  background: $layer-selected-inverse;
+  color: $text-inverse;
+}
+
+.count {
+  margin-inline-start: $spacing-02;
+}
+
+.rowStatus {
+  flex: none;
+}
+
+.noResults {
+  @include type-style('body-01');
+
+  padding: $spacing-05;
+  color: $text-secondary;
+}
+
+.list {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  li + li {
+    border-block-start: 1px solid $border-subtle-01;
+  }
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-04;
+  color: $text-primary;
+  gap: $spacing-02;
+  text-decoration: none;
+  transition: background-color $duration-fast-02 motion(standard, productive);
+
+  &:hover {
+    background: $layer-hover-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: -2px;
+  }
+}
+
+// Selection is a tinted fill, never a side stripe (PRD UX principles).
+.rowSelected {
+  background: $layer-selected-01;
+}
+
+.rowTop,
+.rowBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
+
+.sender {
+  @include type-style('heading-compact-01');
+}
+
+.company {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.time {
+  @include type-style('label-01');
+
+  flex: none;
+  color: $text-secondary;
+}
+
+.subject {
+  @include type-style('body-compact-01');
+}
+
+.file {
+  @include type-style('label-01');
+
+  overflow: hidden;
+  min-inline-size: 0;
+  color: $text-secondary;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reading {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+}
+
+.back {
+  @include type-style('body-compact-01');
+
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-02;
+
+  @include breakpoint(lg) {
+    display: none;
+  }
+}
+
+.readingHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: $spacing-04;
+}
+
+.avatar {
+  @include type-style('heading-compact-01');
+
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: $layer-02;
+  block-size: $spacing-09;
+  inline-size: $spacing-09;
+}
+
+.readingTitle {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $spacing-02;
+  min-inline-size: 12rem;
+}
+
+.subjectLarge {
+  @include type-style('heading-03');
+}
+
+.from {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+  overflow-wrap: anywhere;
+}
+
+.readingActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.body {
+  @include type-style('body-02');
+}
+
+.panel {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-05;
+  gap: $spacing-04;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.panelTitle {
+  @include type-style('heading-compact-01');
+
+  flex: 1;
+}
+
+.panelMeta {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.autoReply {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+
+  li {
+    @include type-style('body-compact-01');
+
+    display: flex;
+    align-items: center;
+    gap: $spacing-03;
+  }
+}
+
+.stepIcon {
+  flex: none;
+}
+
+.stepDone .stepIcon {
+  fill: $icon-primary;
+}
+
+.stepPending {
+  @include type-style('heading-compact-01');
+
+  .stepIcon {
+    fill: $icon-secondary;
+  }
+}
+
+.stepLabel {
+  flex: 1;
+}
+
+.stepTime {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.fileRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-04;
+}
+
+.fileName {
+  @include type-style('heading-compact-01');
+}

@@ -1,0 +1,271 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/border-radius' as radius;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.metaText {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+// Brief on the left; source document and checks follow it on the right from lg.
+.layout {
+  display: grid;
+  gap: $spacing-05;
+  grid-template-columns: 1fr;
+
+  @include breakpoint(lg) {
+    align-items: start;
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+.main,
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  min-inline-size: 0;
+}
+
+.card {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-05;
+  gap: $spacing-04;
+}
+
+.cardHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.cardTitle {
+  @include type-style('heading-02');
+
+  flex: 1;
+}
+
+.cardMeta {
+  @include type-style('helper-text-01');
+
+  color: $text-helper;
+}
+
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-02;
+}
+
+.briefText {
+  @include type-style('body-02');
+  @include mx.reading-width;
+}
+
+.editor {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.editorActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-03;
+}
+
+.facts {
+  display: grid;
+  gap: $spacing-04 $spacing-05;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+// Label and its page link share the top row, so every source link sits in the same place.
+.fact {
+  display: grid;
+  align-content: start;
+  gap: $spacing-02;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.factLabel {
+  @include type-style('label-01');
+
+  align-self: center;
+  color: $text-secondary;
+  grid-column: 1;
+  grid-row: 1;
+  text-transform: uppercase;
+}
+
+.factSource {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.factValue {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-02;
+  grid-column: 1 / -1;
+}
+
+.pageRef {
+  @include type-style('code-01');
+
+  min-block-size: auto;
+  padding-inline: $spacing-02;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-02;
+}
+
+.inlineForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: $spacing-03;
+
+  > :first-child {
+    flex: 1;
+    min-inline-size: 12rem;
+  }
+}
+
+.questions {
+  display: flex;
+  flex-direction: column;
+}
+
+.question {
+  display: flex;
+  align-items: flex-start;
+  padding-block: $spacing-03;
+  gap: $spacing-03;
+
+  & + & {
+    border-block-start: 1px solid $border-subtle-01;
+  }
+}
+
+.questionNumber {
+  @include type-style('label-01');
+
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid $border-strong-01;
+  border-radius: radius.$border-radius-04;
+  block-size: $spacing-06;
+  inline-size: $spacing-06;
+}
+
+.questionText {
+  @include type-style('body-01');
+
+  flex: 1;
+}
+
+.questionActions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: $spacing-01;
+}
+
+.confirmations {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.confirmation {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03;
+
+  > :first-child {
+    flex: 1;
+    min-inline-size: 0;
+  }
+
+  > :last-child {
+    flex: none;
+  }
+}
+
+.activity {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+
+  li {
+    @include type-style('label-01');
+
+    color: $text-secondary;
+  }
+}
+
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+}
+
+.aiNote {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  align-items: center;
+  color: $text-secondary;
+  gap: $spacing-03;
+}
+
+.modalText {
+  @include type-style('body-01');
+
+  margin-block-end: $spacing-04;
+}
+
+.modalList {
+  @include type-style('body-01');
+
+  padding-inline-start: $spacing-05;
+  list-style: disc;
+}

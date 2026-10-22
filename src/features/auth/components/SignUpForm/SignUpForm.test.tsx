@@ -54,9 +54,9 @@ describe('SignUpForm (F0)', () => {
     expect(push).not.toHaveBeenCalled();
   });
 
-  it('signs up with a new LinkedIn identity and goes straight to onboarding', async () => {
+  it('signs up with a new Apple identity and goes straight to onboarding', async () => {
     renderWithProviders(<SignUpForm role="expert" />);
-    await userEvent.click(screen.getByRole('button', { name: 'Continue with LinkedIn' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Continue with Apple' }));
     await userEvent.click(await screen.findByRole('button', { name: /Karim Aziz/ }));
 
     await waitFor(() => expect(push).toHaveBeenCalledWith('/expert/onboarding'));

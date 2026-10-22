@@ -57,4 +57,19 @@ describe('GoalChat (F2)', () => {
       await screen.findByRole('button', { name: /take a stake in Qahwa House/ }),
     ).toBeInTheDocument();
   });
+
+  it('opens a home brief empty and reveals the first line only after play', async () => {
+    renderWithProviders(<GoalChat briefId="brf_ayesha_qahwa" />, { persona: 'ayesha' });
+
+    expect(
+      await screen.findByRole('heading', { name: 'Play this conversation' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Is that enough to decide the round?')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Play conversation' }));
+    expect(
+      await screen.findByText('Should we join Qahwa House’s next funding round?'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Is that enough to decide the round?')).not.toBeInTheDocument();
+  });
 });

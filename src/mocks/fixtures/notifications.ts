@@ -73,17 +73,17 @@ const SEEDS: Record<string, Seed[]> = {
   usr_ops: [
     {
       event: 'brief_submitted',
-      title: 'Brief waiting for a quote',
-      body: 'Bilal Haddad · Riyadh café expansion · 3 questions not covered by the library.',
-      href: '/admin/briefs',
+      title: 'Project file ready for review',
+      body: 'Sarah Lin · Helix Capital Partners · EV battery recycling, Europe. 2 things need confirming.',
+      href: '/admin/projects/PRJ-1042/brief',
       read: false,
       hoursAgo: 1,
     },
     {
       event: 'expert_applied',
-      title: '2 expert profiles to review',
-      body: 'Both submitted in the last 24 hours.',
-      href: '/admin/experts',
+      title: '4 expert answers to review',
+      body: 'PRJ-1040 · Cold-chain logistics in the GCC.',
+      href: '/admin/projects',
       read: false,
       hoursAgo: 9,
     },

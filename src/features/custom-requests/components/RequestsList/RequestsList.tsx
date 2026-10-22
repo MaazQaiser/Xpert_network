@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button, SkeletonPlaceholder } from '@carbon/react';
-import { Add, ArrowRight } from '@carbon/icons-react';
+import { Add } from '@carbon/icons-react';
 import { Report } from '@carbon/pictograms-react';
 import { formatCredits } from '@/shared/lib/credits';
 import { formatDate } from '@/shared/lib/dates';
@@ -51,7 +51,8 @@ export function RequestsList() {
         title="Requests"
         subtitle="Custom research we’re quoting, running or have delivered for you."
         actions={
-          <Button as={Link} href="/ask" renderIcon={Add}>
+          <Button as={Link} href="/ask" className={styles.newRequest}>
+            <Add aria-hidden="true" />
             New request
           </Button>
         }
@@ -71,12 +72,7 @@ export function RequestsList() {
           <EmptyState
             pictogram={<Report aria-hidden="true" />}
             title="No custom research yet"
-            description="Describe a goal and we’ll check the library first, then quote expert research for anything it doesn’t answer."
-            action={
-              <Button as={Link} href="/ask" renderIcon={ArrowRight}>
-                Describe a goal
-              </Button>
-            }
+            description="Start a new request and we’ll check the library first, then quote expert research for anything it doesn’t answer."
           />
         }
       >

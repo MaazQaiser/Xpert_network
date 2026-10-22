@@ -15,6 +15,7 @@ const call = (overrides: Partial<OpenCall>): OpenCall => ({
   industry: { id: 'in_specialty_coffee', label: 'Specialty coffee' },
   regions: [{ id: 'rg_ksa', label: 'Saudi Arabia' }],
   topics: [],
+  questions: [],
   companiesInScope: [],
   feeUsd: 300,
   estMinutes: 45,

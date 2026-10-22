@@ -66,7 +66,7 @@ export function EarningsView() {
             description="Each interview you complete shows here: under review first, then approved, then paid."
             action={
               <Button as={Link} href={routes.expert.calls}>
-                Browse open calls
+                Browse interview requests
               </Button>
             }
           />

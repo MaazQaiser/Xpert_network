@@ -1,0 +1,63 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/motion' as *;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+.list {
+  @include mx.surface-card;
+
+  overflow: hidden;
+
+  li + li {
+    border-block-start: 1px solid $border-subtle-01;
+  }
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: $spacing-04 $spacing-05;
+  color: $text-primary;
+  gap: $spacing-04;
+  text-decoration: none;
+  transition: background-color $duration-fast-02 motion(standard, productive);
+
+  &:hover {
+    background: $layer-hover-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: -2px;
+  }
+}
+
+.id {
+  @include type-style('code-01');
+
+  flex: none;
+}
+
+.name {
+  @include type-style('heading-compact-01');
+
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $spacing-02;
+  min-inline-size: 12rem;
+}
+
+.client {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}

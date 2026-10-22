@@ -30,7 +30,7 @@ import { PasswordRules } from '../PasswordRules/PasswordRules';
 import { ROLE_CHOICES } from '../RoleSelect/RoleSelect';
 import styles from './SignUpForm.module.scss';
 
-/** F0 sign-up, step 2: Google / LinkedIn (mocked) or email + password for the chosen role. */
+/** F0 sign-up, step 2: Google / Apple (mocked) or email + password for the chosen role. */
 export function SignUpForm({ role }: { role: SignUpRole }) {
   const router = useRouter();
   const signUp = useSignUp();

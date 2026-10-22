@@ -66,5 +66,5 @@ Quote ready and delivery also arrive as notifications (F17).
 
 ## Open / next
 
-- Admin side of quoting (F13) will replace the scripted quote and replies.
+- The admin console follows the ExpertNet PRD (`docs/ADMIN_PLAN.md`) and starts from client emails; this client flow stays separate and unchanged. The quote and the scripted replies are still toolbar-driven.
 - Custom reports appear in the workspace (F5).

@@ -1,0 +1,72 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/border-radius' as radius;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  @include mx.surface-card(radius.$border-radius-16);
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  block-size: 100%;
+  min-inline-size: 0;
+  padding: $spacing-05;
+  overflow: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
+
+.kicker {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+}
+
+.title {
+  @include mx.display-heading('heading-03');
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-02;
+}
+
+.summary {
+  @include type-style('body-02');
+}
+
+.meta {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.sectionsLabel {
+  @include type-style('heading-compact-01');
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  margin: 0;
+  padding-inline-start: $spacing-05;
+
+  li {
+    @include type-style('body-compact-01');
+  }
+}

@@ -1,0 +1,214 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/motion' as *;
+@use '../../../../styles/mixins' as mx;
+@use '../../../../styles/tokens' as *;
+
+// Greeting, summary and the conversation sit in the middle; the ask field docks below.
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-07;
+  min-block-size: calc(100vh - #{$pt-shell-header-height} - #{$spacing-10});
+}
+
+.column,
+.ask {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  inline-size: 100%;
+  max-inline-size: 46rem;
+  margin-inline: auto;
+}
+
+.column {
+  flex: 1;
+  justify-content: center;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.greeting {
+  @include mx.display-heading('heading-05');
+}
+
+.lede {
+  @include type-style('body-02');
+
+  color: $text-secondary;
+}
+
+.cards {
+  display: grid;
+  gap: $spacing-04;
+  grid-template-columns: 1fr;
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.cardSkeleton {
+  border-radius: radius.$border-radius-16;
+  block-size: $spacing-12;
+  inline-size: 100%;
+}
+
+.card {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  padding: $spacing-05;
+  color: $text-primary;
+  text-decoration: none;
+  transition: background-color $duration-fast-02 motion(standard, productive);
+
+  &:hover {
+    background-color: $layer-hover-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardLabel {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.cardIcon {
+  fill: $icon-secondary;
+}
+
+.cardValue {
+  @include type-style('heading-05');
+}
+
+.cardAction {
+  @include type-style('heading-compact-01');
+
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-02;
+}
+
+.tip {
+  @include mx.surface-card;
+
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-03;
+  padding: $spacing-04 $spacing-05;
+
+  p {
+    @include type-style('body-01');
+  }
+}
+
+.tipLead {
+  @include type-style('heading-compact-01');
+
+  color: $text-primary;
+}
+
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+}
+
+.turn {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.question {
+  @include type-style('body-01');
+
+  align-self: flex-end;
+  max-inline-size: 80%;
+  padding: $spacing-03 $spacing-04;
+  border: 1px solid $border-subtle-01;
+  border-radius: radius.$border-radius-16;
+  background: $layer-01;
+}
+
+.answer {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-03;
+
+  p {
+    @include type-style('body-01');
+  }
+}
+
+.answerError {
+  @include type-style('body-01');
+
+  color: $text-error;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  margin-block-start: $spacing-03;
+  gap: $spacing-04;
+}
+
+.ask {
+  gap: $spacing-04;
+}
+
+.prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.prompt.prompt {
+  // Doubled class outranks Carbon's tertiary-button root rule; matches the client ChipGroup pills.
+  max-inline-size: 100%;
+  padding-inline: $spacing-05;
+  border-color: $border-subtle-01;
+  border-radius: radius.$border-radius-24;
+  background: $layer-01;
+  color: $text-primary;
+
+  &:hover {
+    background: $layer-hover-01;
+    color: $text-primary;
+  }
+}
+
+.eyebrow {
+  align-self: flex-start;
+  margin: 0;
+}
+
+.disclaimer {
+  @include type-style('helper-text-01');
+
+  color: $text-helper;
+  text-align: center;
+}

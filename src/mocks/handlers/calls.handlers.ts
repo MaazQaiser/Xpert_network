@@ -73,6 +73,13 @@ function toOpenCall(call: CallFixture, userId: string): OpenCall {
     industry: { id: call.industryId, label: label(INDUSTRIES, call.industryId) },
     regions: call.regionIds.map((id) => ({ id, label: label(REGIONS, id) })),
     topics: call.topicIds.map((id) => label(TAXONOMY.topics, id)),
+    questions: call.guide.flatMap((section) =>
+      section.questions.map((question) => ({
+        id: question.id,
+        section: section.title,
+        text: question.text,
+      })),
+    ),
     companiesInScope: call.companiesInScope,
     feeUsd: call.feeUsd,
     estMinutes: call.estMinutes,

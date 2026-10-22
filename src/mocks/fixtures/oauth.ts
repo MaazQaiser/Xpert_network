@@ -3,7 +3,7 @@ import type { OAuthProvider } from '@/features/auth';
 export type OAuthIdentity = { name: string; email: string; title: string; organisation: string };
 
 /**
- * Accounts the mocked Google / LinkedIn account chooser offers. Some match demo personas
+ * Accounts the mocked Google / Apple account chooser offers. Some match demo personas
  * (log in), others are new (sign up). Names are fictional.
  */
 export const OAUTH_IDENTITIES: Record<OAuthProvider, OAuthIdentity[]> = {
@@ -21,7 +21,7 @@ export const OAUTH_IDENTITIES: Record<OAuthProvider, OAuthIdentity[]> = {
       organisation: '',
     },
   ],
-  linkedin: [
+  apple: [
     {
       name: 'Sara Al-Mansouri',
       email: 'sara.almansouri@mail.example',

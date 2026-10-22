@@ -64,5 +64,11 @@
 
   /* stylelint-disable-next-line carbon/theme-use -- Xpert Network glass token (ADR 0009) */
   border: 1px solid var(--pt-glass-border);
-  border-radius: $radius;
+
+  // The standard card corner is overridable from the design system page (ADR 0013).
+  @if $radius == radius.$border-radius-16 {
+    border-radius: var(--pt-card-radius, #{$radius});
+  } @else {
+    border-radius: $radius;
+  }
 }

@@ -12,7 +12,15 @@ import {
   Theme,
   Toggle,
 } from '@carbon/react';
-import { Close, Debug, Reset } from '@carbon/icons-react';
+import {
+  Close,
+  ColorPalette,
+  Debug,
+  PauseFilled,
+  PlayFilledAlt,
+  Renew,
+  Reset,
+} from '@carbon/icons-react';
 import { ROLE_HOME, useLogin, useSession, type PersonaId } from '@/features/auth';
 import {
   DEFAULT_CONTROLS,
@@ -26,6 +34,14 @@ import {
   type CoverageScenario,
   type PrototypeControls,
 } from '@/mocks';
+import { routes } from '@/shared/config/routes';
+import {
+  getDemoChat,
+  getDemoChatServerSnapshot,
+  requestDemoChat,
+  subscribeDemoChat,
+  type DemoChatStatus,
+} from '../../model/demoChat';
 import styles from './PrototypeToolbar.module.scss';
 
 type ToggleKey = 'slowNetwork' | 'apiError' | 'emptyData' | 'lowCredits' | 'micDenied';
@@ -40,6 +56,14 @@ const TOGGLES: { key: ToggleKey; label: string; helper: string }[] = [
 
 const PERSONA_IDS = Object.keys(USERS) as PersonaId[];
 
+const CHAT_STATUS: Record<DemoChatStatus, string> = {
+  away: 'Open a home brief to control its chat.',
+  ready: 'The brief is empty. Play starts it one message at a time.',
+  playing: 'The chat is playing.',
+  paused: 'The chat is paused on the messages already on screen.',
+  done: 'The chat has finished. Replay runs it again.',
+};
+
 /** Floating prototype controls (PRODUCT_PLAN §8). Only rendered when NEXT_PUBLIC_PROTOTYPE=true. */
 export function PrototypeToolbar() {
   const router = useRouter();
@@ -48,6 +72,14 @@ export function PrototypeToolbar() {
   const login = useLogin();
   const [isOpen, setIsOpen] = useState(false);
   const controls = useSyncExternalStore(subscribeControls, getControls, () => DEFAULT_CONTROLS);
+  const demoChat = useSyncExternalStore(subscribeDemoChat, getDemoChat, getDemoChatServerSnapshot);
+  const chatOpen = demoChat.status !== 'away';
+  const chatTransport =
+    demoChat.status === 'playing'
+      ? { label: 'Pause', icon: PauseFilled, action: 'pause' as const }
+      : demoChat.status === 'paused'
+        ? { label: 'Resume', icon: PlayFilledAlt, action: 'play' as const }
+        : { label: 'Play', icon: PlayFilledAlt, action: 'play' as const };
 
   const update = (patch: Partial<PrototypeControls>) => {
     setControls(patch);
@@ -109,6 +141,56 @@ export function PrototypeToolbar() {
               }}
               size="sm"
             />
+            <Button
+              kind="tertiary"
+              size="sm"
+              renderIcon={ColorPalette}
+              onClick={() => router.push(routes.designSystem)}
+            >
+              Design system
+            </Button>
+            <Toggle
+              id="prototype-demo-autoplay"
+              size="sm"
+              labelText="Play on open"
+              labelA="Off — the brief waits until you press Play"
+              labelB="On — the brief types itself when opened"
+              toggled={controls.demoAutoplay}
+              onToggle={(checked: boolean) => update({ demoAutoplay: checked })}
+            />
+            <fieldset className={styles.fieldset}>
+              <legend className={styles.legend}>Demo chat</legend>
+              <p className={styles.hint}>{CHAT_STATUS[demoChat.status]}</p>
+              <div className={styles.scenarios}>
+                <Button
+                  kind="tertiary"
+                  size="sm"
+                  renderIcon={chatTransport.icon}
+                  disabled={!chatOpen || demoChat.status === 'done'}
+                  onClick={() => requestDemoChat(chatTransport.action)}
+                >
+                  {chatTransport.label}
+                </Button>
+                <Button
+                  kind="tertiary"
+                  size="sm"
+                  renderIcon={Renew}
+                  disabled={!chatOpen}
+                  onClick={() => requestDemoChat('replay')}
+                >
+                  Replay
+                </Button>
+                <Button
+                  kind="tertiary"
+                  size="sm"
+                  renderIcon={Reset}
+                  disabled={!chatOpen || demoChat.status === 'ready'}
+                  onClick={() => requestDemoChat('reset')}
+                >
+                  Reset chat
+                </Button>
+              </div>
+            </fieldset>
             <fieldset className={styles.fieldset}>
               <legend className={styles.legend}>States</legend>
               {TOGGLES.map((toggle) => (

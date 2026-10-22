@@ -281,7 +281,12 @@ function Browser() {
             <ul className={styles.grid} aria-label="Matching reports">
               {data.items.map((entry) => (
                 <li key={entry.id}>
-                  <LibraryCard entry={entry} regionLabel={regionLabel} headingLevel={2} />
+                  <LibraryCard
+                    entry={entry}
+                    regionLabel={regionLabel}
+                    headingLevel={2}
+                    showIndustry
+                  />
                 </li>
               ))}
             </ul>

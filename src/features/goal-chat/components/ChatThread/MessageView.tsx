@@ -12,6 +12,10 @@ import { BriefSummaryCard } from '../widgets/BriefSummaryCard';
 import { OptionsPanel } from '../widgets/OptionsPanel';
 import { CheckoutPanel } from '../widgets/CheckoutPanel';
 import { DonePanel } from '../widgets/DonePanel';
+import { LibraryReportWidget } from '../widgets/LibraryReportWidget';
+import { LibrarySearch } from '../widgets/LibrarySearch';
+import { CustomRequestBox } from '../widgets/CustomRequestBox';
+import { ReportArtifact } from '../widgets/ReportArtifact';
 
 const OPTION_LABELS = {
   library: 'Buy library reports',
@@ -24,11 +28,19 @@ type WidgetViewProps = {
   brief: ResearchBrief;
   /** Latest message and nothing in flight: the widget accepts input. */
   isInteractive: boolean;
+  /** Demo playback: search steps and the report bars animate in. */
+  craft?: boolean;
   turn: TurnController;
 };
 
 /** Renders the structured UI attached to an assistant message. */
-export function WidgetView({ message, brief, isInteractive, turn }: WidgetViewProps) {
+export function WidgetView({
+  message,
+  brief,
+  isInteractive,
+  craft = false,
+  turn,
+}: WidgetViewProps) {
   const { widget } = message;
   if (!widget) return null;
   const isDisabled = !isInteractive;
@@ -135,5 +147,21 @@ export function WidgetView({ message, brief, isInteractive, turn }: WidgetViewPr
           requestId={widget.requestId}
         />
       );
+    case 'library-report':
+      return <LibraryReportWidget reportId={widget.reportId} />;
+    case 'library-search':
+      return <LibrarySearch steps={widget.steps} live={craft} />;
+    case 'report-artifact':
+      return (
+        <ReportArtifact
+          reportId={widget.reportId}
+          title={widget.title}
+          finding={widget.finding}
+          sources={widget.sources}
+          live={craft}
+        />
+      );
+    case 'custom-request':
+      return <CustomRequestBox requestId={widget.requestId} gap={widget.gap} />;
   }
 }

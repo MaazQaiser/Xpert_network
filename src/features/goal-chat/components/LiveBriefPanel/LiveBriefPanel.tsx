@@ -109,13 +109,20 @@ type LiveBriefPanelProps = {
   brief: ResearchBrief;
   isBusy: boolean;
   onRevisit: (step: StepId) => void;
+  /** Seeded story: the checklist stays readable, and Edit does not reopen the stepper. */
+  readOnly?: boolean;
 };
 
 /**
  * The research brief as a progress checklist: each step's status and answer, filling in as
  * the chat goes. Finished steps can be reopened with Edit (PRODUCT_PLAN F2 behaviour).
  */
-export function LiveBriefPanel({ brief, isBusy, onRevisit }: LiveBriefPanelProps) {
+export function LiveBriefPanel({
+  brief,
+  isBusy,
+  onRevisit,
+  readOnly = false,
+}: LiveBriefPanelProps) {
   const isSubmitted = brief.status === 'submitted';
   const doneCount = STEP_IDS.filter(
     (id) => brief.stepStatus[id] === 'done' || brief.stepStatus[id] === 'attention',
@@ -150,7 +157,7 @@ export function LiveBriefPanel({ brief, isBusy, onRevisit }: LiveBriefPanelProps
                 <div className={styles.titleRow}>
                   <h3 className={styles.title}>{STEP_LABELS[step].label}</h3>
                   <span className={styles.status}>{STATUS_TEXT[status]}</span>
-                  {isEditable ? (
+                  {isEditable && !readOnly ? (
                     <Button
                       kind="ghost"
                       size="sm"

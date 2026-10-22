@@ -1,0 +1,46 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  position: sticky;
+  inset-block-end: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+  margin-block-start: $spacing-06;
+  padding-block: $spacing-04;
+  padding-inline: $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
+  background: $layer-01;
+}
+
+.summary {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  flex: 1 1 16rem;
+  flex-direction: column;
+  gap: $spacing-01;
+  margin: 0;
+  color: $text-primary;
+}
+
+.count {
+  @include type-style('heading-compact-01');
+}
+
+.hint {
+  color: $text-secondary;
+}
+
+.actions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+  align-items: center;
+}

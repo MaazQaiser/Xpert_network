@@ -105,7 +105,7 @@ function Approved({ profile }: { profile: ExpertOnboarding }) {
       </div>
       <div className={styles.actions}>
         <Button as={Link} href={routes.expert.calls} renderIcon={ArrowRight}>
-          Browse open calls
+          Browse interview requests
         </Button>
         <Button as={Link} href={routes.expert.home} kind="tertiary">
           Go to expert home

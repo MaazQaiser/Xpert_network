@@ -1,0 +1,18 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '../../../styles/tokens' as *;
+
+.root,
+.inShell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+}
+
+.root {
+  min-block-size: 100vh;
+}
+
+.inShell {
+  min-block-size: calc(100vh - #{$pt-shell-header-height} - #{$spacing-10});
+}

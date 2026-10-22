@@ -54,6 +54,14 @@ export const applicationSchema = z.object({
 });
 export type Application = z.infer<typeof applicationSchema>;
 
+export const callQuestionSchema = z.object({
+  id: z.string(),
+  /** Section the question belongs to, shown above it in the one-to-one session. */
+  section: z.string(),
+  text: z.string(),
+});
+export type CallQuestion = z.infer<typeof callQuestionSchema>;
+
 export const openCallSchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -62,6 +70,8 @@ export const openCallSchema = z.object({
   industry: z.object({ id: z.string(), label: z.string() }),
   regions: z.array(z.object({ id: z.string(), label: z.string() })),
   topics: z.array(z.string()),
+  /** Guide questions, one at a time in the one-to-one session. */
+  questions: z.array(callQuestionSchema),
   /** Companies the interview covers; used for conflict checks. */
   companiesInScope: z.array(z.string()),
   feeUsd: z.number().int().positive(),

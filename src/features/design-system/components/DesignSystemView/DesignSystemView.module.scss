@@ -1,0 +1,436 @@
+@use 'sass:map';
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/border-radius' as radius;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  @include mx.page-padding;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-07;
+  max-inline-size: 80rem;
+  margin-inline: auto;
+}
+
+// ——— Header ————————————————————————————————————————————————————————————
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+}
+
+.back {
+  @include type-style('label-01');
+
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: $spacing-02;
+  color: $link-primary;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+}
+
+.headerRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: $spacing-05;
+}
+
+.title {
+  @include mx.display-heading('heading-05');
+}
+
+.subtitle {
+  @include type-style('body-01');
+
+  margin-block-start: $spacing-03;
+  color: $text-secondary;
+  max-inline-size: 60ch;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.themeSwitch {
+  inline-size: 18rem;
+}
+
+.panel {
+  padding: $spacing-06 0 0;
+}
+
+.modalText {
+  @include type-style('body-01');
+
+  margin-block-end: $spacing-05;
+}
+
+// ——— Sections ——————————————————————————————————————————————————————————
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+.section {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+  padding: $spacing-06;
+  min-inline-size: 0;
+}
+
+.sectionTitle {
+  @include type-style('heading-03');
+}
+
+.sectionText {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+.specimenHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
+
+.specimen {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  padding-block-start: $spacing-03;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.fieldGrid {
+  display: grid;
+  gap: $spacing-06;
+  grid-template-columns: 1fr;
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.fieldWide {
+  grid-column: 1 / -1;
+}
+
+.skeleton {
+  inline-size: 100%;
+  block-size: $spacing-10;
+}
+
+.cardPreview {
+  @include mx.surface-card;
+
+  inline-size: $spacing-09;
+  block-size: $spacing-09;
+  flex-shrink: 0;
+}
+
+.cardPreviewSurface {
+  @include mx.surface-card;
+
+  padding: $spacing-05;
+  min-inline-size: 0;
+}
+
+.borderPreview {
+  inline-size: $spacing-09;
+  block-size: $spacing-09;
+  flex-shrink: 0;
+  border: 1px solid $border-strong-01;
+  border-radius: radius.$border-radius-08;
+  background: $field-01;
+}
+
+.controlPanel,
+.controlPanelCompact {
+  padding-block: $spacing-04;
+  border-block: 1px solid $border-subtle-01;
+}
+
+.controlPanelTitle {
+  @include type-style('heading-compact-02');
+
+  margin-block-end: $spacing-03;
+}
+
+.controlPanelCompact {
+  .colorRow {
+    padding-block: $spacing-03;
+  }
+
+  .tokenUsage {
+    display: none;
+  }
+
+  .colorValue {
+    inline-size: 10rem;
+  }
+}
+
+// ——— Token rows ————————————————————————————————————————————————————————
+
+.tokenList {
+  display: flex;
+  flex-direction: column;
+}
+
+.colorRow,
+.typeRow {
+  display: grid;
+  align-items: center;
+  gap: $spacing-04;
+  padding-block: $spacing-04;
+  border-block-start: 1px solid $border-subtle-01;
+}
+
+.colorRow {
+  grid-template-columns: $spacing-09 minmax(0, 1fr);
+
+  @include breakpoint(lg) {
+    grid-template-columns: $spacing-09 minmax(0, 1fr) auto;
+  }
+}
+
+.typeRow {
+  grid-template-columns: 1fr;
+
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  }
+}
+
+.swatch,
+.radiusPreview {
+  inline-size: $spacing-09;
+  block-size: $spacing-09;
+  border: 1px solid $border-subtle-01;
+}
+
+.swatch {
+  border-radius: radius.$border-radius-08;
+}
+
+.radiusPreview {
+  background: $layer-accent-01;
+  border-color: $border-strong-01;
+}
+
+.tokenMeta {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-01;
+  min-inline-size: 0;
+}
+
+.tokenLabel {
+  @include type-style('heading-compact-01');
+}
+
+.tokenName {
+  @include type-style('code-01');
+
+  color: $text-secondary;
+  overflow-wrap: anywhere;
+}
+
+.tokenUsage {
+  @include type-style('helper-text-01');
+
+  color: $text-helper;
+}
+
+.tokenControls,
+.typeControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+  grid-column: 1 / -1;
+
+  @include breakpoint(lg) {
+    grid-column: auto;
+    justify-content: flex-end;
+  }
+}
+
+.typeControls {
+  align-items: flex-end;
+
+  > * {
+    inline-size: 8rem;
+  }
+}
+
+.colorPicker {
+  flex-shrink: 0;
+  inline-size: $spacing-07;
+  block-size: $spacing-07;
+  padding: 0;
+  border: 1px solid $border-strong-01;
+  border-radius: radius.$border-radius-08;
+  background: transparent;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+
+  &::-webkit-color-swatch-wrapper {
+    padding: $spacing-01;
+  }
+
+  &::-webkit-color-swatch {
+    border: 0;
+    border-radius: radius.$border-radius-04;
+  }
+}
+
+.colorValue {
+  inline-size: 13rem;
+}
+
+// ——— Typography ————————————————————————————————————————————————————————
+
+.families {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-05;
+}
+
+.family {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  min-inline-size: 12rem;
+  padding: $spacing-05;
+  border: 1px solid $border-subtle-01;
+  border-radius: radius.$border-radius-08;
+}
+
+.familySample {
+  @include type-style('heading-06');
+}
+
+.familyMono {
+  @include font-family('mono');
+}
+
+.typeSpecimen {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+$type-specimens: (
+  'typeHeading07': 'heading-07',
+  'typeHeading06': 'heading-06',
+  'typeHeading05': 'heading-05',
+  'typeHeading04': 'heading-04',
+  'typeHeading03': 'heading-03',
+  'typeHeading02': 'heading-02',
+  'typeHeading01': 'heading-01',
+  'typeBody02': 'body-02',
+  'typeBody01': 'body-01',
+  'typeBodyCompact01': 'body-compact-01',
+  'typeLabel01': 'label-01',
+  'typeHelperText01': 'helper-text-01',
+  'typeCode02': 'code-02',
+  'typeCode01': 'code-01',
+);
+
+@each $class, $token in $type-specimens {
+  .#{$class} {
+    @include type-style($token);
+  }
+}
+
+.typeCode02,
+.typeCode01 {
+  @include font-family('mono');
+}
+
+// ——— Spacing ———————————————————————————————————————————————————————————
+
+.spacingList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.spacingRow {
+  display: grid;
+  align-items: center;
+  gap: $spacing-04;
+  grid-template-columns: 7rem 3rem minmax(0, 1fr);
+}
+
+.spacingBar {
+  block-size: $spacing-04;
+  border-radius: radius.$border-radius-02;
+  background: $interactive;
+}
+
+$spacing-steps: (
+  '01': $spacing-01,
+  '02': $spacing-02,
+  '03': $spacing-03,
+  '04': $spacing-04,
+  '05': $spacing-05,
+  '06': $spacing-06,
+  '07': $spacing-07,
+  '08': $spacing-08,
+  '09': $spacing-09,
+  '10': $spacing-10,
+  '11': $spacing-11,
+  '12': $spacing-12,
+  '13': $spacing-13,
+);
+
+@each $step, $size in $spacing-steps {
+  .space#{$step} {
+    inline-size: $size;
+  }
+}

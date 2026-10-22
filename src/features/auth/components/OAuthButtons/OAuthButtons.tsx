@@ -12,7 +12,7 @@ import styles from './OAuthButtons.module.scss';
 
 const PROVIDERS: { id: OAuthProvider; label: string }[] = [
   { id: 'google', label: 'Google' },
-  { id: 'linkedin', label: 'LinkedIn' },
+  { id: 'apple', label: 'Apple' },
 ];
 
 type OAuthButtonsProps = {
@@ -22,7 +22,7 @@ type OAuthButtonsProps = {
 };
 
 /**
- * "Continue with Google / LinkedIn" (mocked, F0). Opens a stand-in for the provider's
+ * "Continue with Google / Apple" (mocked, F0). Opens a stand-in for the provider's
  * account chooser so testers can pick an existing or a brand-new identity.
  */
 export function OAuthButtons({ role, onSuccess }: OAuthButtonsProps) {
@@ -43,11 +43,12 @@ export function OAuthButtons({ role, onSuccess }: OAuthButtonsProps) {
           <Button
             key={p.id}
             kind="tertiary"
+            size="md"
             className={styles.provider}
             onClick={() => setProvider(p.id)}
           >
             <span className={styles.providerContent}>
-              <BrandLogo provider={p.id} />
+              <BrandLogo provider={p.id} size={16} />
               Continue with {p.label}
             </span>
           </Button>

@@ -21,6 +21,13 @@ $pt-composer-breathe: 6s;
   padding-block-start: $spacing-05;
 }
 
+.inline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-02;
+}
+
 .pill {
   position: relative;
   isolation: isolate;
@@ -66,9 +73,10 @@ $pt-composer-breathe: 6s;
     animation: composer-orbit $pt-composer-orbit linear infinite;
   }
 
+  // Focus is a soft accent rim plus a brighter rim light: clearly visible, never a dark box.
   &:focus-within {
-    outline: 2px solid $focus;
-    outline-offset: 2px;
+    outline: 1px solid color-mix(in srgb, $interactive 55%, transparent);
+    outline-offset: 0;
 
     &::before {
       opacity: 0.9;
@@ -146,9 +154,16 @@ $pt-composer-breathe: 6s;
   }
 }
 
-.send {
+// Round 40px buttons. With the pill's 4px padding they sit the same distance from the top,
+// bottom and right edge, concentric with its rounded end. Carbon's own radius hook, no
+// internals touched.
+.actions {
+  --cds-button-radius: 50%;
+
+  display: flex;
   flex-shrink: 0;
-  border-radius: radius.$border-radius-16;
+  align-items: center;
+  gap: $spacing-02;
 }
 
 .hint {

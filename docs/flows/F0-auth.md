@@ -41,7 +41,7 @@
 | Field validation                 | Submit an empty sign-up / log-in form                   |
 | Email already registered         | Sign up with `sara.almansouri@mail.example`             |
 | Account not found                | Log in with an unknown email, or Google → Layla Nasser  |
-| Wrong realm                      | Log in on `/login` with `omar@xpertnetwork.example`     |
+| Wrong realm                      | Log in on `/login` with `paltu@xpertnetwork.example`    |
 | Server error on submit / chooser | Toolbar _API error_ on, then submit or open the chooser |
 | Slow submit / chooser skeleton   | Toolbar _Slow network_                                  |
 | Unverified account redirected    | Sign up with email, then open `/home` directly          |

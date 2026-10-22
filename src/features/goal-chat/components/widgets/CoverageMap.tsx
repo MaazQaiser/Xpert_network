@@ -1,7 +1,9 @@
 'use client';
 
+import { Button } from '@carbon/react';
 import { AIExplainLabel } from '@/shared/ai';
 import { StatusTag, type StatusTone } from '@/shared/ui';
+import { useOpenReportReview } from '../ReportReview/reportReviewContext';
 import {
   COVERAGE_LABELS,
   summariseCoverage,
@@ -22,6 +24,7 @@ type CoverageMapProps = { coverage: CoverageResult; questions: Question[] };
 /** Per question: Covered / Partly / Not covered, with the "why" (PRODUCT_PLAN §10). */
 export function CoverageMap({ coverage, questions }: CoverageMapProps) {
   const counts = summariseCoverage(coverage.items);
+  const openReport = useOpenReportReview();
   return (
     <section className={styles.stack} aria-labelledby="coverage-heading">
       <div className={styles.labelRow}>
@@ -39,6 +42,7 @@ export function CoverageMap({ coverage, questions }: CoverageMapProps) {
       <ul className={styles.coverageList}>
         {coverage.items.map((item) => {
           const question = questions.find((q) => q.id === item.questionId);
+          const source = item.matches[0];
           return (
             <li key={item.questionId} className={styles.coverageRow}>
               <p className={styles.coverageQuestion}>{question?.text ?? 'Question'}</p>
@@ -50,8 +54,13 @@ export function CoverageMap({ coverage, questions }: CoverageMapProps) {
                 />
                 <p className={styles.muted}>
                   {item.reason}
-                  {item.matches[0] ? <> Source: {item.matches[0].reportTitle}.</> : null}
+                  {source ? <> Source: {source.reportTitle}.</> : null}
                 </p>
+                {openReport && source ? (
+                  <Button kind="ghost" size="sm" onClick={() => openReport(source.libraryItemId)}>
+                    View report
+                  </Button>
+                ) : null}
               </div>
             </li>
           );

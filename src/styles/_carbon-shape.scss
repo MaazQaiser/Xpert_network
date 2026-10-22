@@ -2,11 +2,14 @@
 // (`--cds-button-radius`, set in _themes.scss) but none for form fields, so this file is the
 // ONE sanctioned place where Carbon's internal classes are restyled. Keep it to shape only:
 // corner radius and a full 1px border (rounded fields need a whole outline to keep a 3:1
-// visible boundary, WCAG 1.4.11). Colours stay Carbon tokens. Re-check on Carbon upgrades.
+// visible boundary, WCAG 1.4.11). Colours stay Carbon tokens; the one colour remap is the
+// checkbox/radio edge below. Re-check on Carbon upgrades.
 @use '@carbon/react/scss/border-radius' as radius;
 @use '@carbon/react/scss/theme' as *;
 
-$pt-field-radius: radius.$border-radius-08;
+// Overridable at runtime from the design system page (ADR 0013).
+$pt-field-radius: var(--pt-field-radius, #{radius.$border-radius-08});
+$pt-field-border-width: var(--pt-field-border-width, 1px);
 
 // Text input, password input, text area, select, date picker, number input, and the list box
 // behind Dropdown / ComboBox / (Filterable)MultiSelect.
@@ -17,7 +20,7 @@ $pt-field-radius: radius.$border-radius-08;
 .cds--number input[type='number'],
 .cds--search-input,
 .cds--list-box {
-  border: 1px solid $border-strong;
+  border: $pt-field-border-width solid $border-strong;
   border-radius: $pt-field-radius;
 }
 
@@ -44,10 +47,19 @@ $pt-field-radius: radius.$border-radius-08;
   border-color: $border-subtle;
 }
 
+// Checkboxes and radios: Carbon draws their box and checked fill with $icon-primary (near
+// black). Point that token at slate inside them only, so every control edge matches
+// (ADR 0009 slate outlines). --pt-control-edge keeps the tick ≥ 3:1 in both themes.
+.cds--checkbox-wrapper,
+.cds--radio-button-wrapper {
+  /* stylelint-disable-next-line carbon/theme-use -- Xpert Network control token (ADR 0009) */
+  --cds-icon-primary: var(--pt-control-edge);
+}
+
 // Content switcher: one rounded outline around the group; the selected segment follows it.
 .cds--content-switcher {
   overflow: hidden;
-  border: 1px solid $border-strong;
+  border: $pt-field-border-width solid $border-strong;
   border-radius: $pt-field-radius;
 }
 

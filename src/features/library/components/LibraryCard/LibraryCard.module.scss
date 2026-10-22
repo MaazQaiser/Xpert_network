@@ -1,8 +1,11 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/motion' as *;
 @use '@carbon/react/scss/utilities/focus-outline' as *;
 @use '../../../../styles/mixins' as mx;
+
+$ease: motion(standard, productive);
 
 .root {
   @include mx.surface-card;
@@ -10,24 +13,55 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: $spacing-03;
+  gap: $spacing-05;
   block-size: 100%;
   min-inline-size: 0;
   padding: $spacing-06;
+  transition:
+    transform $duration-fast-02 $ease,
+    background-color $duration-fast-02 $ease,
+    border-color $duration-fast-02 $ease;
 
   &:hover {
     border-color: $border-strong-01;
+    background-color: $layer-hover-01;
+    transform: translateY(calc(-1 * $spacing-01));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
   }
 }
 
-.eyebrow {
-  @include type-style('label-01');
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
 
-  color: $text-secondary;
+.status {
+  display: flex;
+  gap: $spacing-02;
+}
+
+.body {
+  display: grid;
+  gap: $spacing-03;
 }
 
 .title {
-  @include type-style('heading-03');
+  @include type-style('heading-02');
+
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 // The whole card is clickable through the title link (one tab stop).
@@ -37,6 +71,7 @@
 
   &::after {
     position: absolute;
+    z-index: 1;
     border-radius: inherit;
     content: '';
     inset: 0;
@@ -58,31 +93,81 @@
   overflow: hidden;
   color: $text-secondary;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
 }
 
 .meta {
   @include type-style('helper-text-01');
 
   display: flex;
-  align-items: center;
-  gap: $spacing-02;
+  flex-wrap: wrap;
+  gap: $spacing-03 $spacing-05;
   color: $text-secondary;
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-02;
+  }
+
+  svg {
+    fill: $icon-secondary;
+  }
 }
 
 .footer {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: $spacing-03;
   margin-block-start: auto;
-  padding-block-start: $spacing-03;
+  padding-block-start: $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
 }
 
-.price {
+.format {
   @include type-style('body-compact-01');
+
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-03;
+  color: $text-secondary;
 }
 
-.currency {
+.pdf {
+  fill: $icon-primary;
+}
+
+.cta {
+  @include type-style('body-compact-01');
+
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-02;
   color: $text-secondary;
+  transition: color $duration-fast-02 $ease;
+
+  .root:hover &,
+  .root:focus-within & {
+    color: $link-primary;
+  }
+}
+
+.arrow {
+  transition: transform $duration-fast-02 $ease;
+
+  .root:hover &,
+  .root:focus-within & {
+    transform: translateX($spacing-02);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    .root:hover &,
+    .root:focus-within & {
+      transform: none;
+    }
+  }
 }

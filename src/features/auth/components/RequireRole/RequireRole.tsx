@@ -2,7 +2,7 @@
 
 import { useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loading } from '@carbon/react';
+import { PageLoading } from '@/shared/ui';
 import { useSession } from '../../api/useSession';
 import { routes } from '@/shared/config/routes';
 import { ROLE_HOME, ROLE_LOGIN, type Role, type User } from '../../model/session.schema';
@@ -36,7 +36,7 @@ export function RequireRole({ role, children }: RequireRoleProps) {
   }, [redirectTo, router]);
 
   if (!user || user.role !== role || !user.emailVerified) {
-    return <Loading description="Checking your session" withOverlay={false} />;
+    return <PageLoading description="Checking your session" />;
   }
   return <>{children(user)}</>;
 }

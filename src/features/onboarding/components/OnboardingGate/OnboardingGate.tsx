@@ -2,7 +2,7 @@
 
 import { useEffect, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Loading } from '@carbon/react';
+import { PageLoading } from '@/shared/ui';
 import type { Role } from '@/features/auth';
 import { useClientOnboarding, useExpertOnboarding } from '../../api/queries';
 import { isFocusedPage, onboardingRedirect, type OnboardingState } from '../../model/gate';
@@ -38,7 +38,7 @@ export function OnboardingGate({ role, children }: OnboardingGateProps) {
   }, [redirectTo, router]);
 
   if (isPending || redirectTo) {
-    return <Loading description="Loading your account" withOverlay={false} />;
+    return <PageLoading description="Loading your account" />;
   }
   // If the status can't load, fail open: each page has its own error state.
   return <>{children(state ? isFocusedPage(state, pathname) : false)}</>;

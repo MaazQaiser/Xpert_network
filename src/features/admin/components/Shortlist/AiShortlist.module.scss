@@ -1,0 +1,205 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  padding-block-end: $spacing-09;
+}
+
+.headerRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-04;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.eyebrow {
+  @include type-style('label-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+  align-items: center;
+  margin: 0;
+  color: $text-secondary;
+}
+
+.heading {
+  @include type-style('heading-03');
+
+  margin: 0;
+}
+
+.weights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+  align-items: center;
+}
+
+.weightActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.layout {
+  display: grid;
+  gap: $spacing-05;
+  grid-template-columns: 1fr;
+
+  @include breakpoint(lg) {
+    align-items: start;
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  min-inline-size: 0;
+}
+
+.cards {
+  display: grid;
+  gap: $spacing-05;
+  grid-template-columns: 1fr;
+
+  @include breakpoint(md) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.card {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+  padding: $spacing-05;
+}
+
+.cardHeader {
+  display: flex;
+  gap: $spacing-03;
+  align-items: flex-start;
+}
+
+.cardMain {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $spacing-02;
+  min-inline-size: 0;
+}
+
+.cardTitle {
+  @include type-style('heading-compact-01');
+
+  margin: 0;
+}
+
+.cardRole {
+  @include type-style('body-compact-01');
+
+  margin: 0;
+  color: $text-secondary;
+}
+
+.matchScore {
+  @include type-style('heading-03');
+
+  flex: none;
+  margin: 0;
+  color: $text-primary;
+}
+
+.matchUnit {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.why {
+  margin: 0;
+  padding-inline-start: $spacing-05;
+
+  @include type-style('body-compact-01');
+}
+
+.whyTitle {
+  @include type-style('label-01');
+
+  margin: 0;
+  color: $text-secondary;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.rate {
+  @include type-style('body-compact-01');
+
+  margin: 0;
+}
+
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.side {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  padding: $spacing-05;
+}
+
+.sideTitle {
+  @include type-style('heading-compact-02');
+
+  margin: 0;
+}
+
+.coverageList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.coverageItem {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+}
+
+.coverageLabel {
+  @include type-style('label-01');
+
+  display: flex;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
+
+.gap {
+  @include type-style('body-compact-01');
+
+  margin: 0;
+  color: $text-secondary;
+}

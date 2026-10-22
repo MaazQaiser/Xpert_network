@@ -1,0 +1,220 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/border-radius' as radius;
+@use '../../../../styles/mixins' as mx;
+@use '../../../../styles/tokens' as *;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  min-inline-size: 0;
+  min-block-size: calc(100vh - #{$pt-shell-header-height} - #{$spacing-10});
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-05;
+}
+
+.heading {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $spacing-02;
+  min-inline-size: 0;
+}
+
+.modeDock {
+  display: flex;
+  justify-content: flex-end;
+  margin-block-start: auto;
+}
+
+// Doubled class outranks Carbon's full-width content switcher.
+.switcher.switcher {
+  flex: 0 0 auto;
+  inline-size: calc(#{$spacing-13} * 3);
+  max-inline-size: 100%;
+}
+
+.back {
+  @include type-style('label-01');
+}
+
+.title {
+  @include mx.display-heading('heading-04');
+}
+
+.meta {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+.call {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $spacing-04;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.stage {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-block-size: 20rem;
+  overflow: hidden;
+  border-radius: radius.$border-radius-16;
+  background: $layer-02;
+}
+
+.video {
+  position: absolute;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  inset: 0;
+}
+
+.placeholder {
+  @include type-style('body-02');
+
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-04;
+  padding: $spacing-06;
+  color: $text-secondary;
+  text-align: center;
+  inset: 0;
+}
+
+.avatar {
+  @include type-style('heading-04');
+
+  display: grid;
+  place-items: center;
+  inline-size: $spacing-10;
+  block-size: $spacing-10;
+  border-radius: 50%;
+  background: $layer-01;
+  color: $text-primary;
+}
+
+.caption {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  margin: $spacing-05;
+  padding: $spacing-04 $spacing-05;
+  border-radius: radius.$border-radius-08;
+  background: $layer-01;
+}
+
+.captionText {
+  @include type-style('body-02');
+}
+
+.progress {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: $spacing-03;
+  min-inline-size: 0;
+}
+
+.questionStage {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: $spacing-07;
+  min-block-size: 0;
+
+  @include breakpoint(lg) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+
+    // 120px: spacing-12 + spacing-06. No single Carbon spacing token is 7.5rem.
+    // stylelint-disable-next-line carbon/layout-use
+    padding-inline-start: calc(#{$spacing-12} + #{$spacing-06});
+  }
+}
+
+.progressWidget {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  inline-size: 100%;
+  max-inline-size: calc(#{$spacing-13} * 2);
+  padding: $spacing-05;
+
+  @include breakpoint(lg) {
+    flex: 0 0 auto;
+    inline-size: calc(#{$spacing-13} * 2);
+    margin-inline-start: auto;
+  }
+}
+
+.widgetTitle {
+  @include type-style('heading-02');
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  min-inline-size: 0;
+  max-inline-size: 40rem;
+}
+
+.section {
+  @include type-style('heading-02');
+}
+
+.question {
+  @include mx.display-heading('heading-04');
+}
+
+.chatActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.done {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-05;
+  max-inline-size: 40rem;
+}
+
+.empty {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}

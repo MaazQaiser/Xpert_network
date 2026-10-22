@@ -30,7 +30,7 @@ export function InterviewReview({ interview }: { interview: Interview }) {
     <>
       <PageHeader
         title="Check your answers"
-        breadcrumbs={[{ label: 'Open calls', href: routes.expert.calls }]}
+        breadcrumbs={[{ label: 'Interview requests', href: routes.expert.calls }]}
         subtitle={interview.callTitle}
       />
       <div className={styles.review}>
@@ -194,7 +194,7 @@ export function InterviewSubmitted({ interview }: { interview: Interview }) {
               ? 'Interview not accepted'
               : 'Interview submitted'
         }
-        breadcrumbs={[{ label: 'Open calls', href: routes.expert.calls }]}
+        breadcrumbs={[{ label: 'Interview requests', href: routes.expert.calls }]}
         subtitle={interview.callTitle}
         actions={
           <StatusTag
@@ -223,7 +223,7 @@ export function InterviewSubmitted({ interview }: { interview: Interview }) {
             Go to earnings
           </Button>
           <Button as={Link} href={routes.expert.calls} kind="tertiary">
-            Browse open calls
+            Browse interview requests
           </Button>
         </div>
       </section>

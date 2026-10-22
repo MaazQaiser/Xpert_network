@@ -5,8 +5,17 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button, Form, InlineNotification, PasswordInput, Stack, TextInput } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
+import {
+  Button,
+  Form,
+  InlineNotification,
+  PasswordInput,
+  Popover,
+  PopoverContent,
+  Stack,
+  TextInput,
+} from '@carbon/react';
+import { UserMultiple } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
 import { useLogin } from '../../api/useLogin';
@@ -26,6 +35,7 @@ export function LoginForm({ realm }: LoginFormProps) {
   const router = useRouter();
   const login = useLogin();
   const [formError, setFormError] = useState<string | null>(null);
+  const [demoOpen, setDemoOpen] = useState(false);
   const accounts = DEMO_ACCOUNTS.filter((a) =>
     realm === 'admin' ? a.role === 'admin' : a.role !== 'admin',
   );
@@ -93,12 +103,17 @@ export function LoginForm({ realm }: LoginFormProps) {
           <div className={styles.actions}>
             <Button
               type="submit"
-              renderIcon={ArrowRight}
+              size="md"
+              className={styles.submit}
               disabled={isSubmitting || login.isPending}
             >
               Log in
             </Button>
-            {realm === 'app' ? <Link href={routes.signUp}>Create an account</Link> : null}
+            {realm === 'app' ? (
+              <p className={styles.signUp}>
+                New to Xpert Network? <Link href={routes.signUp}>Create an account</Link>
+              </p>
+            ) : null}
           </div>
         </Stack>
       </Form>
@@ -109,23 +124,48 @@ export function LoginForm({ realm }: LoginFormProps) {
         </section>
       ) : null}
 
-      <section className={styles.demo} aria-labelledby="demo-accounts-heading">
-        <h2 id="demo-accounts-heading" className={styles.demoHeading}>
-          Demo accounts
-        </h2>
-        <p className={styles.demoHelp}>Skip the form and continue as a test persona.</p>
-        <div className={styles.demoList}>
-          <AccountList
-            label="Demo accounts"
-            items={accounts.map((a) => ({ id: a.personaId, name: a.name, detail: a.summary }))}
-            disabled={login.isPending}
-            onSelect={(id) => {
-              const account = accounts.find((a) => a.personaId === id);
-              if (account) void signIn({ personaId: account.personaId });
-            }}
-          />
-        </div>
-      </section>
+      {/* Prototype shortcut, tucked into the bottom-right corner so the form stays clean. */}
+      <div className={styles.demoCorner}>
+        <Popover
+          open={demoOpen}
+          align="top-end"
+          caret={false}
+          dropShadow
+          onRequestClose={() => setDemoOpen(false)}
+        >
+          <Button
+            kind="secondary"
+            size="md"
+            renderIcon={UserMultiple}
+            aria-expanded={demoOpen}
+            aria-controls="demo-accounts"
+            onClick={() => setDemoOpen((open) => !open)}
+          >
+            Demo accounts
+          </Button>
+          <PopoverContent id="demo-accounts">
+            <div className={styles.demoPanel}>
+              <h2 className={styles.demoHeading}>Demo accounts</h2>
+              <p className={styles.demoHelp}>Skip the form and continue as a test persona.</p>
+              <div className={styles.demoList}>
+                <AccountList
+                  label="Demo accounts"
+                  items={accounts.map((a) => ({
+                    id: a.personaId,
+                    name: a.name,
+                    detail: a.summary,
+                  }))}
+                  disabled={login.isPending}
+                  onSelect={(id) => {
+                    const account = accounts.find((a) => a.personaId === id);
+                    if (account) void signIn({ personaId: account.personaId });
+                  }}
+                />
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
     </div>
   );
 }

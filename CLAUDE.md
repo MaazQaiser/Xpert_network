@@ -35,6 +35,7 @@ Full plan: [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md) — flows F0–F17, sc
 | Doc | Read when… |
 |---|---|
 | [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md) | Personas, flow inventory (F0–F17), screen-by-screen critical flows, how mocks work, build phases |
+| [`docs/ADMIN_PLAN.md`](docs/ADMIN_PLAN.md) | Anything in the admin (project manager) console or the client/expert link pages: the 28 PRD screens, F11–F20 |
 | [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) | Building or styling any UI |
 | [`docs/UX_PRINCIPLES.md`](docs/UX_PRINCIPLES.md) | Designing a flow, form, empty state, error, table, nav |
 | [`docs/AI_NATIVE.md`](docs/AI_NATIVE.md) | Anything that shows, streams, or acts on AI output |
@@ -46,7 +47,7 @@ Full plan: [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md) — flows F0–F17, sc
 
 ## Non-negotiables
 
-1. **Carbon first.** Use a Carbon component before building one. Never restyle Carbon internals with deep selectors; compose or wrap. The exceptions are field shape (8px corners, full border) in `src/styles/_carbon-shape.scss` (ADR 0010) and notification reflow at 320px in `src/styles/_carbon-reflow.scss` (ADR 0011); button corners use Carbon's `--cds-button-radius` token.
+1. **Carbon first.** Use a Carbon component before building one. Never restyle Carbon internals with deep selectors; compose or wrap. The exceptions are field shape (8px corners, full border) in `src/styles/_carbon-shape.scss` (ADR 0010) notification reflow at 320px in `src/styles/_carbon-reflow.scss` (ADR 0011), and side nav item rhythm in `src/styles/_carbon-side-nav.scss` (ADR 0012); button corners use Carbon's `--cds-button-radius` token.
 2. **Tokens only.** No hex colours, no raw `px` spacing, no custom font stacks. Use `$spacing-*`, colour tokens (`$text-primary`, `$layer-01`…), and type sets (`@include type-style('body-01')`). Raw colours exist only in `src/styles/_themes.scss`; page titles and soft cards come from `src/styles/_mixins.scss` (`display-heading`, `surface-card`).
 3. **Accessible by default.** WCAG 2.2 AA. Every interactive element is keyboard-reachable, labelled, and has visible focus. Run axe in tests.
 4. **Feature-sliced.** Code lives in `src/features/<feature>`. Features never import each other's internals — only their `index.ts` public API.

@@ -1,29 +1,50 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/motion' as *;
 @use '../../../../styles/mixins' as mx;
+@use '../../../../styles/tokens' as *;
 
+// Topics sit in the middle of the page. The ask field docks to the bottom.
 .root {
   display: flex;
   flex-direction: column;
-  gap: $spacing-09;
+  min-block-size: calc(100vh - #{$pt-shell-header-height} - #{$spacing-10});
 }
 
-.hero {
-  @include mx.surface-card;
+.stage {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: safe center;
+  gap: $spacing-07;
+  inline-size: 100%;
+  max-inline-size: 46rem;
+  margin-inline: auto;
+  padding-block: $spacing-07;
+}
 
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-05;
+}
+
+.intro {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: $spacing-05;
-  padding: $spacing-07;
+  gap: $spacing-03;
+  min-inline-size: 0;
 }
 
-.heroTitle {
+.title {
   @include mx.display-heading('heading-05');
 }
 
-.heroBody {
+.subtitle {
   @include type-style('body-02');
 
   color: $text-secondary;
@@ -43,8 +64,97 @@
   gap: $spacing-04;
 }
 
-.meta {
+.sectionTitle {
+  @include type-style('heading-03');
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.card {
+  @include mx.surface-card(radius.$border-radius-16);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-02;
+  padding: $spacing-04 $spacing-08 $spacing-04 $spacing-05;
+  transition:
+    transform $duration-fast-02 motion(standard, productive),
+    background-color $duration-fast-02 motion(standard, productive);
+
+  &:hover {
+    background-color: $layer-hover-01;
+    transform: translateY(calc(-1 * $spacing-01));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+// The title link covers the card. The mark stays above it so its button isn't inside the link.
+.cardLink {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  color: $text-primary;
+  text-decoration: none;
+
+  &::after {
+    position: absolute;
+    content: '';
+    inset: 0;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+}
+
+.kind {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.cardTitle {
+  @include type-style('body-compact-02');
+}
+
+.mark {
+  position: relative;
+  z-index: 1;
+  display: flex;
+}
+
+.chevron {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: $spacing-05;
+  fill: $icon-secondary;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.empty {
   @include type-style('body-01');
 
   color: $text-secondary;
+}
+
+.ask {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  inline-size: 100%;
+  max-inline-size: 46rem;
+  margin-inline: auto;
 }

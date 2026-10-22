@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, type ReactNode } from 'react';
-import { Loading } from '@carbon/react';
+import { PageLoading } from '@/shared/ui';
 
 // One worker per page, even when React mounts this provider twice (strict mode).
 let workerReady: Promise<unknown> | null = null;
@@ -30,6 +30,6 @@ export function MockProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  if (!isReady) return <Loading description="Loading Xpert Network" withOverlay={false} />;
+  if (!isReady) return <PageLoading description="Loading Xpert Network" />;
   return <>{children}</>;
 }

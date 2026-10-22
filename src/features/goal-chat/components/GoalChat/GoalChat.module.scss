@@ -1,5 +1,9 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/motion' as *;
+@use '../../../../styles/mixins' as mx;
 @use '../../../../styles/tokens' as *;
 
 .layout {
@@ -24,11 +28,6 @@
   margin-inline: auto;
 }
 
-.skeletonBlock {
-  inline-size: 100%;
-  block-size: $spacing-13;
-}
-
 // Full-bleed filling bar pinned right under the header (cancels the page's padding).
 .progress {
   position: sticky;
@@ -44,4 +43,87 @@
 
 .briefAccordion {
   margin-block-end: $spacing-03;
+}
+
+.stageRoot {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.workspace {
+  display: flex;
+  flex: 1;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.stageChat {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.stageColumn {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  inline-size: 100%;
+  max-inline-size: 46rem;
+  min-block-size: 0;
+  margin-inline: auto;
+}
+
+.workspaceOpen .stageColumn {
+  max-inline-size: none;
+}
+
+.stageTop {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.progressWidget {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  inline-size: calc(#{$spacing-10} * 3);
+  padding: $spacing-04;
+}
+
+.progressLabel {
+  @include type-style('label-01');
+
+  display: flex;
+  justify-content: space-between;
+  gap: $spacing-03;
+  color: $text-secondary;
+}
+
+.stageThread {
+  flex: 1;
+  min-block-size: 0;
+  padding-block-end: $spacing-05;
+  overflow: auto;
+}
+
+.reportPane {
+  flex: 0 0 0;
+  min-inline-size: 0;
+  overflow: hidden;
+  transition: flex-basis $duration-slow-01 motion(standard, productive);
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.workspaceOpen .reportPane {
+  flex-basis: 50%;
 }

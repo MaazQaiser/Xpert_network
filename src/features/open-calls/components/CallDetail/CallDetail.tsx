@@ -42,7 +42,7 @@ export function CallDetail({ callId }: { callId: string }) {
           title="We couldn’t find that call"
           message="It may have closed or filled up. There are usually new calls every weekday."
           backHref={routes.expert.calls}
-          backLabel="Back to open calls"
+          backLabel="Back to interview requests"
         />
       }
       loading={
@@ -63,7 +63,7 @@ function DetailView({ call }: { call: OpenCall }) {
     <>
       <PageHeader
         title={call.title}
-        breadcrumbs={[{ label: 'Open calls', href: routes.expert.calls }]}
+        breadcrumbs={[{ label: 'Interview requests', href: routes.expert.calls }]}
         subtitle={`Published ${formatDate(call.publishedAt)}`}
         actions={
           application ? (

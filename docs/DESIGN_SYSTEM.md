@@ -104,7 +104,7 @@ Rules of thumb:
 - Our own containers (hero tiles, panels, auth card, onboarding/settings cards, status pages) use `@include mx.surface-card` (translucent glass, no blur). Fixed shell parts that content scrolls under use `@include mx.glass-chrome`. Never put `backdrop-filter` directly on an element that contains a Carbon modal or header panel.
 - Cards are `$border-radius-16` with a bright hairline border and soft shadow. Put form content inside Carbon `<Layer>` so fields use the right contextual tokens.
 - Primary buttons are black with 8px corners (`--cds-button-radius`, set in `_themes.scss`); orange is reserved for links, focus, the active nav item and unread dots.
-- Form fields have 8px corners and a full `$border-strong` border, set only in `src/styles/_carbon-shape.scss` (ADR 0010). Tags and modals keep Carbon's shapes — don't restyle Carbon internals anywhere else. Button corners come only from the `--cds-button-radius` token.
+- Form fields have 8px corners and a full `$border-strong` border (slate, not black — ADR 0009), set only in `src/styles/_carbon-shape.scss` (ADR 0010). Side nav items are 40px, rounded and inset, with a fill-only current-page marker, set only in `src/styles/_carbon-side-nav.scss` (ADR 0012). Tags and modals keep Carbon’s shapes — don’t restyle Carbon internals anywhere else. Button corners come only from the `--cds-button-radius` token.
 
 Use `@include type-style('<token>')`. Productive set for the app:
 
@@ -212,7 +212,13 @@ Allowed when a pattern repeats ≥ 3 times. Each wraps Carbon, has a story, and 
 
 ---
 
-## 9. Governance
+## 9. Living design system page
+
+`/design-system` shows every token and component from the live theme (ADR 0013). Token edits there apply app-wide in that browser only; use **Export changes** and commit the values into `src/styles/_themes.scss`. When you add a shared component or a new Carbon component to the app, add a specimen to `ComponentGallery.tsx`.
+
+---
+
+## 10. Governance
 
 - Need a new token or shared component? Open an ADR (`docs/adr`) with: problem, Carbon alternatives considered, screenshots.
 - When upgrading Carbon, refresh the pinned `carbon` skill in the **same PR** so Claude Code's reference matches the installed version (steps in `CLAUDE.md`).

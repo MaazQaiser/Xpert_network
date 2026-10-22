@@ -1,0 +1,124 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  padding-block-end: $spacing-07;
+}
+
+.briefCard {
+  @include mx.surface-card;
+
+  padding: $spacing-05;
+}
+
+.briefMeta {
+  @include type-style('label-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+  margin: 0;
+  color: $text-secondary;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-04;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toolbarLeft {
+  display: flex;
+  flex: 1 1 18rem;
+  flex-direction: column;
+  gap: $spacing-03;
+  min-inline-size: 0;
+}
+
+.searched {
+  @include type-style('label-01');
+
+  margin: 0;
+  color: $text-secondary;
+}
+
+.heading {
+  @include type-style('heading-03');
+
+  margin: 0;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+  align-items: center;
+}
+
+.filterLabel {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.toolbarRight {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+  align-items: center;
+}
+
+.searchRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+  align-items: center;
+}
+
+.matchCell {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  min-inline-size: 5rem;
+}
+
+.matchValue {
+  @include type-style('heading-compact-01');
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.expertCell {
+  display: flex;
+  gap: $spacing-03;
+  align-items: center;
+}
+
+.avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: $spacing-07;
+  block-size: $spacing-07;
+  border-radius: 50%;
+  background: $layer-accent-01;
+  color: $text-secondary;
+
+  @include type-style('label-01');
+}
+
+.fromMd {
+  @include breakpoint-down(md) {
+    display: none;
+  }
+}

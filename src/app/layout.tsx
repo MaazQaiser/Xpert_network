@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { AppProviders } from '@/providers/AppProviders';
+import { DesignTokenOverrides } from '@/features/design-system';
 import { PrototypeToolbar } from '@/features/prototype-toolbar';
 import { env } from '@/shared/config/env';
 import '@/styles/globals.scss';
@@ -15,6 +16,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" data-carbon-theme="white" suppressHydrationWarning>
       <body>
         <AppProviders>
+          <DesignTokenOverrides />
           {children}
           {env.isPrototype ? <PrototypeToolbar /> : null}
         </AppProviders>

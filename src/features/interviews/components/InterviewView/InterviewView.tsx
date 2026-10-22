@@ -21,7 +21,7 @@ export function InterviewView({ interviewId }: { interviewId: string }) {
           title="We couldn’t find that interview"
           message="The link may be incomplete. Interviews you’ve been approved for start from their open call."
           backHref={routes.expert.calls}
-          backLabel="Back to open calls"
+          backLabel="Back to interview requests"
         />
       }
       loading={

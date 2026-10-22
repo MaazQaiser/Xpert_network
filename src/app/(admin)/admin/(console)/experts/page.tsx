@@ -7,9 +7,9 @@ export default function Page() {
   return (
     <PlaceholderScreen
       title="Experts"
-      flow="F12 · Approve experts"
+      flow="F20 · Experts directory (screen 26)"
       phase={6}
-      description="the vetting queue with AI fit scores and red flags."
+      description="the expert network with filters, duplicate detection and an edit panel."
     />
   );
 }

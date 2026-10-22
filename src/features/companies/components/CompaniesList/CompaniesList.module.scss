@@ -1,0 +1,78 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/motion' as *;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-07;
+  min-inline-size: 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  max-inline-size: 46rem;
+}
+
+.skeleton {
+  inline-size: 100%;
+  block-size: $spacing-10;
+}
+
+.card {
+  @include mx.surface-card(radius.$border-radius-16);
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-04;
+  padding: $spacing-04 $spacing-05;
+  color: $text-primary;
+  text-decoration: none;
+  transition:
+    transform $duration-fast-02 motion(standard, productive),
+    background-color $duration-fast-02 motion(standard, productive);
+
+  &:hover {
+    background-color: $layer-hover-01;
+    transform: translateY(calc(-1 * $spacing-01));
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $spacing-02;
+  min-inline-size: 0;
+}
+
+.title {
+  @include type-style('heading-compact-01');
+}
+
+.detail {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.chevron {
+  flex-shrink: 0;
+  fill: $icon-secondary;
+}

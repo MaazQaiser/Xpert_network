@@ -45,7 +45,7 @@ export function InterviewsList() {
       empty={
         <p className={styles.empty}>
           No interviews yet. When an application is approved, the interview appears here.{' '}
-          <Link href={routes.expert.calls}>Browse open calls</Link>
+          <Link href={routes.expert.calls}>Browse interview requests</Link>
         </p>
       }
     >

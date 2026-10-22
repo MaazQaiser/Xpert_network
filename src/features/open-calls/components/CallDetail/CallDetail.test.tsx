@@ -12,10 +12,16 @@ describe('Open calls (F8)', () => {
   it('lists calls with match, fee and time, strongest first', async () => {
     mockLocation.pathname = '/expert/calls';
     const { container } = renderWithProviders(<CallsBrowser />, { persona: 'sara' });
-    const list = await screen.findByRole('list', { name: 'Open calls' });
-    const first = within(list).getAllByRole('article')[0]!;
-    expect(within(first).getByRole('link')).toHaveTextContent(
-      'Specialty coffee supply chains in Saudi Arabia',
+    expect(await screen.findByRole('heading', { name: 'Interview requests' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Specialty coffee' })).toBeInTheDocument();
+    const coffee = screen.getByRole('link', {
+      name: 'Specialty coffee supply chains in Saudi Arabia',
+    });
+    expect(coffee).toHaveAttribute('href', '/expert/calls/call_ksa_coffee_supply/session');
+    const first = coffee.closest('article');
+    if (!first) throw new Error('Coffee request card was not found');
+    expect(first).toHaveTextContent(
+      'Category Procurement & sourcing · Supplier negotiation · Import lead times & customs',
     );
     expect(within(first).getByText('Strong match')).toBeInTheDocument();
     expect(within(first).getByText('$300')).toBeInTheDocument();
@@ -28,7 +34,7 @@ describe('Open calls (F8)', () => {
     mockLocation.search = '?minFee=300&maxMinutes=30';
     renderWithProviders(<CallsBrowser />, { persona: 'sara' });
     expect(
-      await screen.findByRole('heading', { name: 'No calls match these filters' }),
+      await screen.findByRole('heading', { name: 'No requests match these filters' }),
     ).toBeInTheDocument();
     await userEvent.click(screen.getAllByRole('button', { name: 'Clear filters' })[0]!);
     expect(mockRouter.replace).toHaveBeenCalledWith('/expert/calls', { scroll: false });
@@ -85,7 +91,7 @@ describe('Open calls (F8)', () => {
     mockLocation.pathname = '/expert/calls';
     renderWithProviders(<CallsBrowser />, { persona: 'sara' });
     expect(
-      await screen.findByRole('heading', { name: 'No open calls right now' }),
+      await screen.findByRole('heading', { name: 'No interview requests right now' }),
     ).toBeInTheDocument();
   });
 });

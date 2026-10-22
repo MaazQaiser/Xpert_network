@@ -11,7 +11,7 @@ export type SignUpRole = z.infer<typeof signUpRoleSchema>;
 export const personaIdSchema = z.enum(['ayesha', 'bilal', 'sara', 'ops']);
 export type PersonaId = z.infer<typeof personaIdSchema>;
 
-export const authProviderSchema = z.enum(['email', 'google', 'linkedin']);
+export const authProviderSchema = z.enum(['email', 'google', 'apple']);
 export type AuthProvider = z.infer<typeof authProviderSchema>;
 
 export const userSchema = z.object({
@@ -49,7 +49,7 @@ export const signUpInputSchema = z.object({
 });
 export type SignUpInput = z.infer<typeof signUpInputSchema>;
 
-export const oauthProviderSchema = z.enum(['google', 'linkedin']);
+export const oauthProviderSchema = z.enum(['google', 'apple']);
 export type OAuthProvider = z.infer<typeof oauthProviderSchema>;
 
 /** One account offered by the (mocked) provider's account chooser. */
@@ -76,7 +76,7 @@ export const passwordResetConfirmSchema = z.object({ token: z.string(), password
 export const ROLE_HOME: Record<Role, string> = {
   client: '/home',
   expert: '/expert/home',
-  admin: '/admin/dashboard',
+  admin: '/admin/home',
 };
 
 export const ROLE_LOGIN: Record<Role, string> = {

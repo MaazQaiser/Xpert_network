@@ -35,3 +35,9 @@ Stakeholders want a calm, Notion-like feel — white page, soft grey panels, hai
 ## Revision 2026-10-16 — slate focus
 
 The focus ring is slate (`#475569` light, `#94a3b8` dark; ≥ 7:1 on page and panels), not burnt orange: an orange outline on every click read as an error state. Orange stays for links, the active nav item, the page glow and the composer glow.
+
+## Revision 2026-10-16 — slate field outlines
+
+Strong borders (`border-strong-01..03`: field, dropdown, search and content-switcher outlines, checkboxes) are slate (`#7c8aa0` light, `#6b7a90` dark) instead of warm grey; the warm grey read as a near-black stroke around every control. Both keep ≥ 3:1 against the page and panels (WCAG 1.4.11) and sit with the slate focus ring.
+
+Follow-up the same day: the selected content-switcher segment (`layer-selected-inverse`, also selected tags and slider fill) is slate (`#475569` light, `#cbd5e1` dark) instead of black, and checkboxes and radios draw their edge and checked fill in slate through `--pt-control-edge` (`#7c8aa0` light, `#94a3b8` dark; the tick keeps ≥ 3:1), set in `_carbon-shape.scss`.

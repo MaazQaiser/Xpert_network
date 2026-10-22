@@ -33,6 +33,24 @@ export const widgetSchema = z.discriminatedUnion('kind', [
     purchasedReportIds: z.array(z.string()),
     requestId: z.string().nullable(),
   }),
+  z.object({ kind: z.literal('library-report'), reportId: z.string() }),
+  z.object({
+    kind: z.literal('library-search'),
+    steps: z.array(z.string().min(1)).min(1).max(4),
+  }),
+  z.object({
+    kind: z.literal('report-artifact'),
+    reportId: z.string(),
+    title: z.string(),
+    finding: z.string(),
+    sources: z.array(z.object({ label: z.string(), percent: z.number().int().min(0).max(100) })),
+  }),
+  z.object({
+    kind: z.literal('custom-request'),
+    requestId: z.string(),
+    /** What the library does not cover, shown in the closing box. */
+    gap: z.string(),
+  }),
 ]);
 export type Widget = z.infer<typeof widgetSchema>;
 

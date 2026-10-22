@@ -22,6 +22,16 @@
   gap: $spacing-05;
 }
 
+// A long title wraps its own text rather than pushing the actions onto a new row.
+.heading {
+  flex: 1 1 24rem;
+  min-inline-size: 0;
+}
+
+.eyebrow {
+  margin-block-end: $spacing-03;
+}
+
 .title {
   @include mx.display-heading('heading-06');
 }
@@ -35,6 +45,7 @@
 
 .actions {
   display: flex;
+  flex: none;
   flex-wrap: wrap;
   gap: $spacing-03;
 }

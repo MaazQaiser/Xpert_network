@@ -1,0 +1,108 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/border-radius' as radius;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-05;
+  gap: $spacing-04;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
+
+.title {
+  @include type-style('heading-02');
+}
+
+.meta {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+// The page is a sheet of paper on a layer, so it reads as a document, not app UI.
+.sheet {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-06 $spacing-05;
+  border: 1px solid $border-subtle-01;
+  border-radius: radius.$border-radius-08;
+  background: $layer-01;
+  gap: $spacing-04;
+  max-block-size: 28rem;
+  min-block-size: 18rem;
+  overflow-y: auto;
+}
+
+.heading {
+  @include type-style('heading-compact-02');
+}
+
+.text,
+.source,
+.highlight {
+  @include type-style('body-01');
+}
+
+.text {
+  color: $text-secondary;
+}
+
+.source {
+  color: $text-primary;
+}
+
+.highlight {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-03;
+  border: 1px solid $border-strong-01;
+  border-radius: radius.$border-radius-04;
+  gap: $spacing-02;
+
+  mark {
+    background: $highlight;
+    color: $text-primary;
+  }
+}
+
+.highlightLabel {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.footer {
+  display: grid;
+  align-items: center;
+  gap: $spacing-03;
+  grid-template-areas:
+    'previous . next'
+    'hint hint hint';
+  grid-template-columns: auto minmax(0, 1fr) auto;
+
+  > :first-child {
+    grid-area: previous;
+  }
+
+  > :last-child {
+    grid-area: next;
+  }
+}
+
+.hint {
+  @include type-style('helper-text-01');
+
+  color: $text-helper;
+  grid-area: hint;
+}

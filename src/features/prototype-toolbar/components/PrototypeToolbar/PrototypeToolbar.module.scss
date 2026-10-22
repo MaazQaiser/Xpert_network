@@ -52,6 +52,12 @@
   margin-block-end: $spacing-03;
 }
 
+.hint {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
 .trigger {
   box-shadow: 0 $spacing-02 $spacing-05 $shadow;
 }

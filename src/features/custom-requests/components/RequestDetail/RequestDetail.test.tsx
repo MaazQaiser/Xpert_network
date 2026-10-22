@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { db, scenarios } from '@/test/mockBackend';
+import { db, scenarios, setControls } from '@/test/mockBackend';
 import { expectNoAxeViolations } from '@/test/axe';
 import { renderWithProviders } from '@/test/render';
 import { RequestsList } from '../RequestsList/RequestsList';
@@ -81,8 +81,17 @@ describe('RequestsList (F4)', () => {
     await expectNoAxeViolations(container);
   });
 
-  it('invites a first request when there are none', async () => {
+  it('shows every request the client has, open and closed', async () => {
+    renderWithProviders(<RequestsList />, { persona: 'bilal' });
+    expect(await screen.findByRole('heading', { name: /In progress/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Closed/ })).toBeInTheDocument();
+    expect(screen.getByText(/3 of 4 interviews · 45 credits refunded/)).toBeInTheDocument();
+  });
+
+  it('points to the one New request action when there are none', async () => {
+    setControls({ emptyData: true });
     renderWithProviders(<RequestsList />, { persona: 'bilal' });
     expect(await screen.findByText('No custom research yet')).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /New request/ })).toHaveLength(1);
   });
 });

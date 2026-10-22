@@ -11,6 +11,8 @@ export type PageHeaderProps = {
   title: string;
   subtitle?: ReactNode;
   breadcrumbs?: Crumb[];
+  /** Small row above the title, e.g. an ID and status tag. */
+  eyebrow?: ReactNode;
   /** Primary / secondary actions. Max one primary button. */
   actions?: ReactNode;
   /** Optional row under the title, e.g. Tabs or filters. */
@@ -18,7 +20,14 @@ export type PageHeaderProps = {
 };
 
 /** Breadcrumb + the page's single h1 + actions (DESIGN_SYSTEM §6). */
-export function PageHeader({ title, subtitle, breadcrumbs, actions, children }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  subtitle,
+  breadcrumbs,
+  eyebrow,
+  actions,
+  children,
+}: PageHeaderProps) {
   return (
     <header className={styles.root}>
       {breadcrumbs && breadcrumbs.length > 0 ? (
@@ -31,7 +40,8 @@ export function PageHeader({ title, subtitle, breadcrumbs, actions, children }: 
         </Breadcrumb>
       ) : null}
       <div className={styles.row}>
-        <div>
+        <div className={styles.heading}>
+          {eyebrow ? <div className={styles.eyebrow}>{eyebrow}</div> : null}
           <h1 className={styles.title}>{title}</h1>
           {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
         </div>

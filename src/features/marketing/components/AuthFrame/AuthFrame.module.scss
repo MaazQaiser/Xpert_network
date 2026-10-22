@@ -1,15 +1,29 @@
-@use '@carbon/react/scss/breakpoint' as *;
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
 @use '../../../../styles/mixins' as mx;
 
+// Fills the space between header and footer and centres the form on both axes.
 .root {
-  padding-block: $spacing-10;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-09 $spacing-05;
+}
+
+// Flat and narrow: the form sits on the page gradient, no card around it.
+.column {
+  inline-size: 100%;
+  max-inline-size: 24rem;
+}
+
+.header {
+  text-align: center;
 }
 
 .title {
-  @include mx.display-heading('heading-06');
+  @include mx.display-heading('heading-05');
 }
 
 .description {
@@ -20,12 +34,5 @@
 }
 
 .body {
-  @include mx.surface-card;
-
-  margin-block-start: $spacing-08;
-  padding: $spacing-06 $spacing-05;
-
-  @include breakpoint(md) {
-    padding: $spacing-07 $spacing-06;
-  }
+  margin-block-start: $spacing-07;
 }

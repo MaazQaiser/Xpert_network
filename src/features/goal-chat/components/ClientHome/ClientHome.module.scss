@@ -2,15 +2,28 @@
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
 @use '@carbon/react/scss/border-radius' as radius;
+@use '@carbon/react/scss/motion' as *;
 @use '../../../../styles/mixins' as mx;
 @use '../../../../styles/tokens' as *;
 
-// Centre the start column in the viewport, a little above the middle.
+// Greeting, story and cards sit in the middle. The ask field docks to the bottom.
 .root {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   min-block-size: calc(100vh - #{$pt-shell-header-height} - #{$spacing-10});
-  padding-block: 12vh $spacing-09;
+}
+
+.chatting {
+  block-size: calc(100vh - #{$pt-shell-header-height} - #{$spacing-10});
+  min-block-size: 0;
+}
+
+.stage {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding-block: $spacing-07;
 }
 
 .column {
@@ -19,6 +32,16 @@
   gap: $spacing-07;
   inline-size: 100%;
   max-inline-size: 46rem;
+}
+
+.ask {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-05;
+  inline-size: 100%;
+  max-inline-size: 46rem;
+  margin-inline: auto;
 }
 
 .intro {
@@ -30,13 +53,100 @@
 }
 
 .greeting {
-  @include type-style('body-02');
+  @include mx.display-heading('heading-05');
+}
+
+.story {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: $spacing-03;
+  text-align: center;
+}
+
+.storyText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $spacing-03;
+
+  p {
+    @include type-style('body-02');
+
+    color: $text-primary;
+  }
+}
+
+.keyword {
+  padding-inline: $spacing-02;
+  border-radius: radius.$border-radius-04;
+  background: $highlight;
+  color: $text-primary;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.card {
+  @include mx.surface-card(radius.$border-radius-16);
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-04;
+  padding: $spacing-04 $spacing-05;
+  color: $text-primary;
+  text-decoration: none;
+  transition:
+    transform $duration-fast-02 motion(standard, productive),
+    background-color $duration-fast-02 motion(standard, productive);
+
+  &:hover {
+    background-color: $layer-hover-01;
+    transform: translateY(calc(-1 * $spacing-01));
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+.cardText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $spacing-01;
+  min-inline-size: 0;
+}
+
+.kind {
+  @include type-style('label-01');
 
   color: $text-secondary;
 }
 
-.title {
-  @include mx.display-heading('heading-05');
+.cardTitle {
+  @include type-style('body-compact-02');
+}
+
+.cardDetail {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.chevron {
+  flex-shrink: 0;
+  fill: $icon-secondary;
 }
 
 .quickStarts {
@@ -44,7 +154,6 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: $spacing-03;
-  margin-block-start: calc(-1 * $spacing-03);
 }
 
 // Doubled class outranks Carbon's tertiary-button root rule; only the root is styled.

@@ -1,0 +1,17 @@
+@use '@carbon/react/scss/spacing' as *;
+
+// Six steps don't fit a phone; the trail scrolls sideways instead of wrapping.
+.root {
+  overflow-x: auto;
+}
+
+.indicator {
+  min-inline-size: 36rem;
+  padding-block: $spacing-03;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
