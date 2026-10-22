@@ -2,19 +2,32 @@
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
 @use '@carbon/react/scss/breakpoint' as *;
-@use '@carbon/react/scss/border-radius' as radius;
 @use '@carbon/react/scss/motion' as *;
 @use '../../../../styles/mixins' as mx;
 
-// Phones show the list or the open email; from lg both panes sit side by side.
+// The page header spans both columns; below it the list and the reading pane start on one
+// line. Phones show the list or the open email; from lg both panes sit side by side. minmax(0)
+// lets long rows ellipsise instead of pushing the page wider than the screen.
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+}
+
 .layout {
   display: grid;
-  gap: $spacing-05;
-  grid-template-columns: 1fr;
+  gap: $spacing-06;
+  grid-template-columns: minmax(0, 1fr);
 
   @include breakpoint(lg) {
     align-items: start;
-    grid-template-columns: minmax(18rem, 2fr) 3fr;
+    grid-template-columns: minmax(18rem, 2fr) minmax(0, 3fr);
   }
 }
 
@@ -38,18 +51,22 @@
   .readingPane {
     display: block;
   }
+
+  // On phones the open email replaces the list, so the page header goes with it.
+  .pageHeader {
+    display: none;
+
+    @include breakpoint(lg) {
+      display: flex;
+    }
+  }
 }
 
 .listPane {
   display: flex;
   flex-direction: column;
   gap: $spacing-04;
-}
-
-.listHeader {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-02;
+  min-inline-size: 0;
 }
 
 .title {
@@ -65,12 +82,14 @@
 
 .agent {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: $spacing-03;
 }
 
+// Sits on the first line of the status text, even when it wraps.
 .liveDot {
   flex: none;
+  margin-block-start: $spacing-02;
   border-radius: 50%;
   background: $support-success;
   block-size: $spacing-03;
@@ -84,11 +103,11 @@
 }
 
 .view.view {
-  // Doubled class outranks Carbon's tertiary-button root rule; matches the Home prompt pills.
+  // Doubled class outranks Carbon's tertiary-button root rule. 8px corners, like the search
+  // field and the buttons on this page.
   max-inline-size: 100%;
   padding-inline: $spacing-04;
   border-color: $border-subtle-01;
-  border-radius: radius.$border-radius-24;
   background: $layer-01;
   color: $text-primary;
 
@@ -135,7 +154,7 @@
 .row {
   display: flex;
   flex-direction: column;
-  padding: $spacing-04;
+  padding: $spacing-05;
   color: $text-primary;
   gap: $spacing-02;
   text-decoration: none;
@@ -195,10 +214,23 @@
   white-space: nowrap;
 }
 
+// The reading pane is one surface, the same card as the list, with the same 16px inset. Its
+// parts are separated by hairlines rather than nested cards.
 .reading {
+  @include mx.surface-card;
+
   display: flex;
   flex-direction: column;
+  padding: $spacing-05;
   gap: $spacing-05;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  padding-block-start: $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
+  gap: $spacing-04;
 }
 
 .back {
@@ -228,21 +260,24 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: $layer-02;
+  background: $layer-01;
   block-size: $spacing-09;
   inline-size: $spacing-09;
 }
 
+// The title takes the room it needs (at least ~20rem); when the pane is too narrow for the
+// actions beside it, they wrap onto their own row, kept to the right.
 .readingTitle {
   display: flex;
-  flex: 1;
+  flex: 1 1 20rem;
   flex-direction: column;
   gap: $spacing-02;
-  min-inline-size: 12rem;
+  min-inline-size: 0;
 }
 
+// Same display face as the page title, one step smaller.
 .subjectLarge {
-  @include type-style('heading-03');
+  @include mx.display-heading('heading-03');
 }
 
 .from {
@@ -256,20 +291,12 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  margin-inline-start: auto;
   gap: $spacing-03;
 }
 
 .body {
   @include type-style('body-02');
-}
-
-.panel {
-  @include mx.surface-card;
-
-  display: flex;
-  flex-direction: column;
-  padding: $spacing-05;
-  gap: $spacing-04;
 }
 
 .panelHeader {

@@ -2,7 +2,6 @@
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
 @use '@carbon/react/scss/breakpoint' as *;
-@use '@carbon/react/scss/border-radius' as radius;
 @use '@carbon/react/scss/motion' as *;
 @use '../../../../styles/mixins' as mx;
 
@@ -109,7 +108,6 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-05;
-  border-radius: radius.$border-radius-16;
   background: $layer-02;
 }
 
@@ -330,7 +328,6 @@
   display: block;
   overflow: hidden;
   block-size: $spacing-02;
-  border-radius: radius.$border-radius-24;
   background: $layer-02;
 }
 

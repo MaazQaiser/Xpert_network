@@ -1,7 +1,6 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
-@use '@carbon/react/scss/border-radius' as radius;
 @use '@carbon/react/scss/motion' as *;
 @use '../../../../styles/tokens' as *;
 
@@ -46,7 +45,6 @@
 
   max-inline-size: 80%;
   padding: $spacing-03 $spacing-05;
-  border-radius: radius.$border-radius-24;
   background: $highlight;
   color: $text-primary;
   white-space: pre-wrap;
@@ -140,14 +138,12 @@
   align-items: center;
   gap: $spacing-02;
   padding: $spacing-04 $spacing-05;
-  border-radius: radius.$border-radius-24;
   background: $layer-01;
 }
 
 .typingDot {
   inline-size: $spacing-03;
   block-size: $spacing-03;
-  border-radius: radius.$border-radius-24;
   background: $icon-secondary;
   animation: typing-bounce $duration-slow-02 motion(standard, productive) infinite;
 

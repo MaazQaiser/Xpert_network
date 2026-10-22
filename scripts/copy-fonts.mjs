@@ -1,6 +1,7 @@
 // Copies self-hosted font files from node_modules into public/fonts (git-ignored).
 // - IBM Plex Mono: code, IDs and citations, via Carbon's @font-face (ADR 0007).
 // - Inter (all UI text): @font-face in src/styles/_fonts.scss (ADR 0009).
+// - Plus Jakarta Sans (headings): @font-face in src/styles/_fonts.scss (ADR 0014).
 import { copyFileSync, cpSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -22,6 +23,16 @@ const files = [
   ['@fontsource-variable/inter', 'inter', 'inter-latin-wght-normal.woff2'],
   ['@fontsource-variable/inter', 'inter', 'inter-latin-wght-italic.woff2'],
   ['@fontsource-variable/inter', 'inter', 'inter-latin-ext-wght-normal.woff2'],
+  [
+    '@fontsource-variable/plus-jakarta-sans',
+    'jakarta',
+    'plus-jakarta-sans-latin-wght-normal.woff2',
+  ],
+  [
+    '@fontsource-variable/plus-jakarta-sans',
+    'jakarta',
+    'plus-jakarta-sans-latin-ext-wght-normal.woff2',
+  ],
 ];
 for (const [pkg, dir, file] of files) {
   const from = join(modules, pkg, 'files', file);

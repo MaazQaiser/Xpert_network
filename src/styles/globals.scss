@@ -30,20 +30,37 @@
 @use '@carbon/react/scss/theme';
 @use '@carbon/react/scss/motion' as *;
 @use 'themes' as app-themes;
-@use 'carbon-shape';
+@use 'mixins';
 @use 'carbon-reflow';
-@use 'carbon-side-nav';
 
-// Global theme: warm stone light by default, warm dark when the user (or the system)
-// prefers dark. ThemeProvider writes data-carbon-theme on <html> (`white` / `g100`).
+// Global theme: flat white by default, deep navy when the user (or the system) prefers dark.
+// ThemeProvider writes data-carbon-theme on <html> (`white` / `g100`).
 :root {
   @include app-themes.app-theme(light);
+
+  // Headings use Plus Jakarta Sans; body text stays Inter (ADR 0014).
+  --pt-font-display: 'Plus Jakarta Sans Variable', 'Inter Variable', system-ui, sans-serif;
 }
 
 :root[data-carbon-theme='g100'] {
   @include app-themes.app-theme(dark);
 
   color-scheme: dark;
+}
+
+// Every page and section heading uses the display face; Carbon tokens still set the size.
+h1,
+h2 {
+  @include mixins.display-face;
+}
+
+h3 {
+  @include mixins.display-face(-0.01em);
+}
+
+::selection {
+  background: theme.$highlight;
+  color: theme.$text-primary;
 }
 
 body {

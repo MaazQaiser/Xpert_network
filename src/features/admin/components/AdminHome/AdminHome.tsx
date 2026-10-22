@@ -1,10 +1,19 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { Button, InlineLoading, SkeletonPlaceholder, Tag } from '@carbon/react';
-import { ArrowRight, Email, Folders, MagicWand, UserMultiple } from '@carbon/icons-react';
-import type { ComponentType } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  Button,
+  ClickableTile,
+  InlineLoading,
+  Layer,
+  Link as CarbonLink,
+  SkeletonPlaceholder,
+  Tile,
+} from '@carbon/react';
+import { ArrowUpRight } from '@carbon/icons-react';
 import { useSession } from '@/features/auth';
 import { FloatingComposer } from '@/features/goal-chat';
 import { AIExplainLabel } from '@/shared/ai';
@@ -24,73 +33,132 @@ function partOfDay(now: Date = new Date()): string {
 
 type Turn = { id: string; question: string; answer: AssistantReply | null; error: unknown };
 
+/** What the mascot shows: resting, working, or a short reaction to the last answer. */
+type MascotMood = 'idle' | 'thinking' | 'happy' | 'oops';
+
+// How long a reaction plays before the mascot settles back to idle (matches the CSS).
+const REACTION_MS = 1200;
+
 type SummaryCardProps = {
   href: string;
   label: string;
   value: number;
   action: string;
-  icon: ComponentType<{ className?: string; 'aria-hidden'?: boolean }>;
 };
 
-function SummaryCard({ href, label, value, action, icon: Icon }: SummaryCardProps) {
+// Carbon ClickableTile: the count, the label underneath, Carbon's corner arrow. Plain clicks
+// navigate in-app through Next's router; modified clicks (new tab, etc.) stay normal links. The
+// action is the accessible name, so screen readers still hear where it goes.
+function SummaryCard({ href, label, value, action }: SummaryCardProps) {
+  const router = useRouter();
+  const navigate = (event: MouseEvent<HTMLAnchorElement> | KeyboardEvent<HTMLAnchorElement>) => {
+    if (
+      'button' in event &&
+      (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey)
+    )
+      return;
+    event.preventDefault();
+    router.push(href);
+  };
   return (
     <li>
-      <Link href={href} className={styles.card} aria-label={`${label}: ${value}. ${action}`}>
-        <span className={styles.cardTop}>
-          <span className={styles.cardLabel}>{label}</span>
-          <Icon className={styles.cardIcon} aria-hidden={true} />
-        </span>
-        <span className={styles.cardValue}>{value}</span>
-        <span className={styles.cardAction}>
-          {action} <ArrowRight aria-hidden={true} />
-        </span>
-      </Link>
+      <ClickableTile
+        href={href}
+        onClick={navigate}
+        renderIcon={ArrowUpRight}
+        className={styles.countTile}
+        aria-label={`${label}: ${value}. ${action}`}
+      >
+        {/* Shown as two digits (04, 12); screen readers get the plain number from the label. */}
+        <span className={styles.cardValue}>{String(value).padStart(2, '0')}</span>
+        <span className={styles.cardLabel}>{label}</span>
+      </ClickableTile>
     </li>
   );
 }
 
-function Summary({ summary }: { summary: HomeSummary }) {
+function SummaryCards({ summary }: { summary: HomeSummary }) {
   return (
-    <>
-      <ul className={styles.cards} aria-label="Today’s summary">
-        <SummaryCard
-          href={routes.admin.inbox}
-          label="Emails received today"
-          value={summary.emailsToday}
-          action="Open inbox"
-          icon={Email}
+    <Layer as="ul" className={styles.cards}>
+      <SummaryCard
+        href={routes.admin.inbox}
+        label="Emails received today"
+        value={summary.emailsToday}
+        action="Open inbox"
+      />
+      <SummaryCard
+        href={routes.admin.projects}
+        label="Experts pending review"
+        value={summary.expertsPendingReview}
+        action="Review experts"
+      />
+      <SummaryCard
+        href={routes.admin.projects}
+        label="New projects today"
+        value={summary.newProjectsToday}
+        action="Review projects"
+      />
+    </Layer>
+  );
+}
+
+type BriefingProps = {
+  summary: ReturnType<typeof useHomeSummary>;
+};
+
+/**
+ * The assistant's briefing as a Carbon Tile: the mascot mark, the title, what came in (with
+ * today's tip and its project as an inline Carbon link), then the three count tiles.
+ */
+function Briefing({ summary }: BriefingProps) {
+  const tip = summary.data?.tip;
+  return (
+    <section aria-labelledby="admin-briefing-title">
+      <Tile className={styles.briefing}>
+        {/* Decorative: the assistant's mark, as on the greeting above. */}
+        <Image
+          src="/images/assistant-mascot.png"
+          alt=""
+          width={24}
+          height={28}
+          className={styles.briefingMark}
         />
-        <SummaryCard
-          href={routes.admin.projects}
-          label="Experts pending review"
-          value={summary.expertsPendingReview}
-          action="Review experts"
-          icon={UserMultiple}
-        />
-        <SummaryCard
-          href={routes.admin.projects}
-          label="New projects today"
-          value={summary.newProjectsToday}
-          action="Review projects"
-          icon={Folders}
-        />
-      </ul>
-      {summary.tip ? (
-        <div className={styles.tip}>
-          <AIExplainLabel
-            summary="Suggested from today’s inbox and project files."
-            basis="Draft projects, open confirmations and requested call dates"
-            aria-label="AI tip"
-          />
-          <p>
-            <Link href={summary.tip.href} className={styles.tipLead}>
-              {summary.tip.lead}
-            </Link>{' '}
-            · {summary.tip.detail}
-          </p>
+        <div className={styles.briefingHead}>
+          <h2 id="admin-briefing-title" className={styles.briefingTitle}>
+            Your briefing
+          </h2>
         </div>
-      ) : null}
-    </>
+        <div className={styles.briefingBody}>
+          <p className={styles.briefingText}>
+            Here’s what came in while you were away. I’ve already read the emails and drafted
+            project files. They just need your eyes.
+          </p>
+          {tip ? (
+            <p className={styles.briefingText}>
+              <CarbonLink as={Link} href={tip.href} inline className={styles.tipLead}>
+                {tip.lead}
+              </CarbonLink>{' '}
+              · {tip.detail}
+            </p>
+          ) : null}
+          {summary.isPending ? (
+            <div aria-busy="true" aria-label="Loading today’s summary" className={styles.cards}>
+              {[0, 1, 2].map((i) => (
+                <SkeletonPlaceholder key={i} className={styles.cardSkeleton} />
+              ))}
+            </div>
+          ) : summary.data ? (
+            <SummaryCards summary={summary.data} />
+          ) : (
+            <ErrorState
+              title="Today’s summary didn’t load"
+              message={toUserMessage(summary.error)}
+              onRetry={() => void summary.refetch()}
+            />
+          )}
+        </div>
+      </Tile>
+    </section>
   );
 }
 
@@ -101,51 +169,59 @@ export function AdminHome() {
   const ask = useAskAssistant();
   const [turns, setTurns] = useState<Turn[]>([]);
   const turnCount = useRef(0);
+  const [reaction, setReaction] = useState<'happy' | 'oops' | null>(null);
   const name = session.data?.user?.name;
+
+  // A reaction plays once, then the mascot settles back to idle.
+  useEffect(() => {
+    if (!reaction) return;
+    const timer = window.setTimeout(() => setReaction(null), REACTION_MS);
+    return () => window.clearTimeout(timer);
+  }, [reaction]);
+
+  const mood: MascotMood = ask.isPending || summary.isPending ? 'thinking' : (reaction ?? 'idle');
 
   const send = (question: string) => {
     turnCount.current += 1;
     const id = `turn_${turnCount.current}`;
     setTurns((current) => [...current, { id, question, answer: null, error: null }]);
     ask.mutate(question, {
-      onSuccess: (answer) =>
-        setTurns((current) => current.map((t) => (t.id === id ? { ...t, answer } : t))),
-      onError: (error) =>
-        setTurns((current) => current.map((t) => (t.id === id ? { ...t, error } : t))),
+      onSuccess: (answer) => {
+        setTurns((current) => current.map((t) => (t.id === id ? { ...t, answer } : t)));
+        setReaction('happy');
+      },
+      onError: (error) => {
+        setTurns((current) => current.map((t) => (t.id === id ? { ...t, error } : t)));
+        setReaction('oops');
+      },
     });
   };
 
+  // Assistant start page: mark and greeting, today's summary as three cards, the conversation,
+  // then suggestions and the ask field docked at the bottom.
   return (
     <div className={styles.root}>
-      <div className={styles.column}>
+      <div className={styles.stage}>
         <header className={styles.intro}>
-          <Tag type="high-contrast" size="sm" renderIcon={MagicWand} className={styles.eyebrow}>
-            Your AI assistant
-          </Tag>
+          {/* Decorative: the line below names the assistant. Its mood mirrors the assistant:
+              resting, perking up while you type, thinking, or reacting to an answer. */}
+          <span className={styles.mascot} data-mood={mood} aria-hidden={true}>
+            <Image
+              src="/images/assistant-mascot.png"
+              alt=""
+              width={81}
+              height={96}
+              priority
+              className={styles.mascotImage}
+            />
+          </span>
+          <p className={styles.kicker}>Your AI assistant</p>
           <h1 className={styles.greeting}>
             {name ? `Hey ${name}, good ${partOfDay()}.` : `Good ${partOfDay()}.`}
           </h1>
-          <p className={styles.lede}>
-            Here’s what came in while you were away. I’ve already read the emails and drafted
-            project files. They just need your eyes.
-          </p>
         </header>
 
-        {summary.isPending ? (
-          <div aria-busy="true" aria-label="Loading today’s summary" className={styles.cards}>
-            {[0, 1, 2].map((i) => (
-              <SkeletonPlaceholder key={i} className={styles.cardSkeleton} />
-            ))}
-          </div>
-        ) : summary.data ? (
-          <Summary summary={summary.data} />
-        ) : (
-          <ErrorState
-            title="Today’s summary didn’t load"
-            message={toUserMessage(summary.error)}
-            onRetry={() => void summary.refetch()}
-          />
-        )}
+        <Briefing summary={summary} />
 
         {turns.length > 0 ? (
           <ol className={styles.thread} aria-label="Conversation with your AI assistant">
@@ -193,7 +269,7 @@ export function AdminHome() {
           {SUGGESTED_PROMPTS.map((prompt) => (
             <li key={prompt}>
               <Button
-                kind="tertiary"
+                kind="ghost"
                 size="sm"
                 className={styles.prompt}
                 onClick={() => send(prompt)}

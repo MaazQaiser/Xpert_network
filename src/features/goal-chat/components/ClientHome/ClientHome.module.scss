@@ -1,7 +1,6 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
-@use '@carbon/react/scss/border-radius' as radius;
 @use '@carbon/react/scss/motion' as *;
 @use '../../../../styles/mixins' as mx;
 @use '../../../../styles/tokens' as *;
@@ -79,7 +78,6 @@
 
 .keyword {
   padding-inline: $spacing-02;
-  border-radius: radius.$border-radius-04;
   background: $highlight;
   color: $text-primary;
 }
@@ -91,7 +89,7 @@
 }
 
 .card {
-  @include mx.surface-card(radius.$border-radius-16);
+  @include mx.surface-card;
 
   display: flex;
   align-items: center;
@@ -162,6 +160,5 @@
 
   border-color: $border-subtle-01;
   padding-inline: $spacing-05;
-  border-radius: radius.$border-radius-24;
   color: $text-primary;
 }

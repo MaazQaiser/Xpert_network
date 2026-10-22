@@ -65,16 +65,18 @@ function InboxBody({ selectedId }: { selectedId: string | null }) {
 
 function InboxSkeleton() {
   return (
-    <div className={styles.layout} aria-busy="true" aria-label="Loading the inbox">
-      <div className={styles.listPane}>
-        <SkeletonText heading width="60%" />
-        {[0, 1, 2, 3].map((i) => (
-          <SkeletonText key={i} paragraph lineCount={3} />
-        ))}
-      </div>
-      <div className={styles.readingPane}>
-        <SkeletonText heading width="70%" />
-        <SkeletonText paragraph lineCount={8} />
+    <div className={styles.page} aria-busy="true" aria-label="Loading the inbox">
+      <SkeletonText heading width="30%" />
+      <div className={styles.layout}>
+        <div className={styles.listPane}>
+          {[0, 1, 2, 3].map((i) => (
+            <SkeletonText key={i} paragraph lineCount={3} />
+          ))}
+        </div>
+        <div className={styles.readingPane}>
+          <SkeletonText heading width="70%" />
+          <SkeletonText paragraph lineCount={8} />
+        </div>
       </div>
     </div>
   );
@@ -107,94 +109,97 @@ function InboxLayout({
 
   const hrefFor = (id: string) => `${routes.admin.inboxRequest(id)}${search ? `?${search}` : ''}`;
 
+  // The page header spans both columns, so the list and the reading pane start on one line.
   return (
-    <div className={`${styles.layout} ${selectedId ? styles.hasSelection : ''}`}>
-      <section className={styles.listPane} aria-labelledby="inbox-title">
-        <header className={styles.listHeader}>
-          <h1 id="inbox-title" className={styles.title}>
-            Incoming requests
-          </h1>
-          <p className={styles.subtitle}>
-            AI opens every email and attachment the moment it lands, then drafts a project file.
-          </p>
-          <p className={styles.agent}>
-            <span className={styles.liveDot} aria-hidden="true" />
-            AI agent live · Watching {INBOX_ADDRESS} ·{' '}
-            {processing.length === 1
-              ? '1 email processing now'
-              : `${processing.length} emails processing now`}
-          </p>
-        </header>
-        <Search
-          size="md"
-          labelText="Search requests"
-          placeholder="Search by sender, company, subject or file"
-          defaultValue={query}
-          onChange={(event) => setParam('q', event.target.value)}
-          closeButtonLabelText="Clear search"
-        />
-        <div className={styles.views} role="group" aria-label="Show">
-          {INBOX_VIEWS.map((option) => (
-            <ViewButton
-              key={option}
-              view={option}
-              isActive={view === option}
-              count={requests.filter((r) => inView(r, option)).length}
-              onSelect={() => setParam('view', option)}
-            />
-          ))}
-        </div>
-        {shown.length === 0 ? (
-          <p className={styles.noResults} role="status">
-            No requests match. Clear the search or choose another view.
-          </p>
-        ) : (
-          <ul className={styles.list} aria-label="Requests">
-            {shown.map((request) => (
-              <li key={request.id}>
-                <Link
-                  href={hrefFor(request.id)}
-                  className={`${styles.row} ${request.id === selected?.id ? styles.rowSelected : ''}`}
-                  aria-current={request.id === selected?.id ? 'true' : undefined}
-                  scroll={false}
-                >
-                  <span className={styles.rowTop}>
-                    <span className={styles.sender}>
-                      {request.from.name}
-                      <span className={styles.company}> · {request.company}</span>
-                    </span>
-                    <time className={styles.time} dateTime={request.receivedAt}>
-                      {receivedLabel(request.receivedAt)}
-                    </time>
-                  </span>
-                  <span className={styles.subject}>{request.subject}</span>
-                  <span className={styles.rowBottom}>
-                    <span className={styles.file}>{attachmentLine(request)}</span>
-                    <span className={styles.rowStatus}>
-                      <InboxStatusTag request={request} />
-                    </span>
-                  </span>
-                </Link>
-              </li>
+    <div className={`${styles.page} ${selectedId ? styles.hasSelection : ''}`}>
+      <header className={styles.pageHeader}>
+        <h1 id="inbox-title" className={styles.title}>
+          Incoming requests
+        </h1>
+        <p className={styles.subtitle}>
+          AI opens every email and attachment the moment it lands, then drafts a project file.
+        </p>
+        <p className={styles.agent}>
+          <span className={styles.liveDot} aria-hidden="true" />
+          AI agent live · Watching {INBOX_ADDRESS} ·{' '}
+          {processing.length === 1
+            ? '1 email processing now'
+            : `${processing.length} emails processing now`}
+        </p>
+      </header>
+      <div className={styles.layout}>
+        <section className={styles.listPane} aria-labelledby="inbox-title">
+          <Search
+            size="md"
+            labelText="Search requests"
+            placeholder="Search by sender, company, subject or file"
+            defaultValue={query}
+            onChange={(event) => setParam('q', event.target.value)}
+            closeButtonLabelText="Clear search"
+          />
+          <div className={styles.views} role="group" aria-label="Show">
+            {INBOX_VIEWS.map((option) => (
+              <ViewButton
+                key={option}
+                view={option}
+                isActive={view === option}
+                count={requests.filter((r) => inView(r, option)).length}
+                onSelect={() => setParam('view', option)}
+              />
             ))}
-          </ul>
-        )}
-      </section>
+          </div>
+          {shown.length === 0 ? (
+            <p className={styles.noResults} role="status">
+              No requests match. Clear the search or choose another view.
+            </p>
+          ) : (
+            <ul className={styles.list} aria-label="Requests">
+              {shown.map((request) => (
+                <li key={request.id}>
+                  <Link
+                    href={hrefFor(request.id)}
+                    className={`${styles.row} ${request.id === selected?.id ? styles.rowSelected : ''}`}
+                    aria-current={request.id === selected?.id ? 'true' : undefined}
+                    scroll={false}
+                  >
+                    <span className={styles.rowTop}>
+                      <span className={styles.sender}>
+                        {request.from.name}
+                        <span className={styles.company}> · {request.company}</span>
+                      </span>
+                      <time className={styles.time} dateTime={request.receivedAt}>
+                        {receivedLabel(request.receivedAt)}
+                      </time>
+                    </span>
+                    <span className={styles.subject}>{request.subject}</span>
+                    <span className={styles.rowBottom}>
+                      <span className={styles.file}>{attachmentLine(request)}</span>
+                      <span className={styles.rowStatus}>
+                        <InboxStatusTag request={request} />
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
-      <section className={styles.readingPane} aria-label="Selected request">
-        {selected ? (
-          <ReadingPane
-            request={selected}
-            backHref={`${routes.admin.inbox}${search ? `?${search}` : ''}`}
-          />
-        ) : (
-          <EmptyState
-            pictogram={<EmailPictogram aria-hidden="true" />}
-            title="We couldn’t find that email"
-            description="It may have been moved or deleted. Choose another request from the list."
-          />
-        )}
-      </section>
+        <section className={styles.readingPane} aria-label="Selected request">
+          {selected ? (
+            <ReadingPane
+              request={selected}
+              backHref={`${routes.admin.inbox}${search ? `?${search}` : ''}`}
+            />
+          ) : (
+            <EmptyState
+              pictogram={<EmailPictogram aria-hidden="true" />}
+              title="We couldn’t find that email"
+              description="It may have been moved or deleted. Choose another request from the list."
+            />
+          )}
+        </section>
+      </div>
     </div>
   );
 }
@@ -288,7 +293,7 @@ function ReadingPane({ request, backHref }: { request: InboxRequest; backHref: s
       <blockquote className={styles.body}>“{request.body}”</blockquote>
 
       {request.autoReply ? (
-        <div className={styles.panel}>
+        <div className={styles.section}>
           <div className={styles.panelHeader}>
             <AIExplainLabel
               summary="The AI replied because the email had no brief to work from."
@@ -301,7 +306,7 @@ function ReadingPane({ request, backHref }: { request: InboxRequest; backHref: s
         </div>
       ) : null}
 
-      <div className={styles.panel}>
+      <div className={styles.section}>
         <div className={styles.panelHeader}>
           <AIExplainLabel
             summary="Every step the AI took on this email, in order."
@@ -329,7 +334,7 @@ function ReadingPane({ request, backHref }: { request: InboxRequest; backHref: s
       </div>
 
       {file ? (
-        <div className={styles.panel}>
+        <div className={styles.section}>
           <div className={styles.fileRow}>
             <FileIcon kind={file.kind} />
             <div>
@@ -371,6 +376,7 @@ function AttachmentPreview({ projectId, fileName }: { projectId: string; fileNam
       pageCount={document.pageCount}
       page={page}
       onPageChange={setPage}
+      embedded
     />
   );
 }

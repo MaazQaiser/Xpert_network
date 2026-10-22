@@ -31,6 +31,17 @@ describe('AdminHome (F11, screen 01)', () => {
     expect(screen.getByRole('link', { name: 'Open PRJ-1040' })).toBeInTheDocument();
   });
 
+  it('the mascot thinks while loading, rests, then reacts to an answer', async () => {
+    const { container } = renderWithProviders(<AdminHome />, { persona: 'ops' });
+    const mascot = () => container.querySelector('[data-mood]');
+    expect(mascot()).toHaveAttribute('data-mood', 'thinking');
+    await screen.findByRole('link', { name: 'Experts pending review: 4. Review experts' });
+    expect(mascot()).toHaveAttribute('data-mood', 'idle');
+    await userEvent.click(screen.getByRole('button', { name: 'Which experts need my review?' }));
+    expect(await screen.findByText(/4 expert answers are waiting/)).toBeInTheDocument();
+    expect(mascot()).toHaveAttribute('data-mood', 'happy');
+  });
+
   it('shows an error with retry when the summary fails', async () => {
     setControls({ apiError: true });
     renderWithProviders(<AdminHome />, { persona: 'ops' });

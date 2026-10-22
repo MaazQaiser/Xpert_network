@@ -40,12 +40,6 @@ const EXTRA_COLORS: ColorToken[] = [
     contrast: { against: '--cds-text-on-color', min: 4.5 },
   },
   {
-    name: '--pt-control-edge',
-    label: 'Control edge',
-    usage: 'Checkbox and radio outline and checked fill',
-    contrast: { against: '--cds-background', min: 3 },
-  },
-  {
     name: '--cds-support-success',
     label: 'Toggle on',
     usage: 'Toggle track when on, success icons',
@@ -109,39 +103,11 @@ const buttonRadius: TokenControl = {
     name: '--cds-button-radius',
     label: 'Button radius',
     usage: 'Every Carbon button',
-    defaultPx: 8,
+    defaultPx: 0,
     min: 0,
     max: 24,
     unit: 'rem',
     preview: 'radius',
-  },
-};
-
-const fieldRadius: TokenControl = {
-  kind: 'length',
-  token: {
-    name: '--pt-field-radius',
-    label: 'Field radius',
-    usage: 'Inputs, selects, dropdowns, search, content switcher',
-    defaultPx: 8,
-    min: 0,
-    max: 24,
-    unit: 'rem',
-    preview: 'radius',
-  },
-};
-
-const fieldBorder: TokenControl = {
-  kind: 'length',
-  token: {
-    name: '--pt-field-border-width',
-    label: 'Field border width',
-    usage: 'Outline around inputs, dropdowns and the content switcher',
-    defaultPx: 1,
-    min: 1,
-    max: 3,
-    unit: 'px',
-    preview: 'border',
   },
 };
 
@@ -151,7 +117,7 @@ const cardRadius: TokenControl = {
     name: '--pt-card-radius',
     label: 'Card radius',
     usage: 'Cards, panels, hero tiles and auth forms',
-    defaultPx: 16,
+    defaultPx: 0,
     min: 0,
     max: 32,
     unit: 'rem',
@@ -169,8 +135,7 @@ const cardShadow: TokenControl = {
     usage: 'Elevation of cards and panels',
     preview: 'shadow',
     options: [
-      { label: 'Soft (theme default)', value: null },
-      { label: 'None', value: 'none' },
+      { label: 'None (theme default)', value: null },
       { label: 'Hairline only', value: ring },
       { label: 'Raised', value: `${ring}, 0 0.75rem 2rem var(--cds-shadow)` },
       {
@@ -183,8 +148,6 @@ const cardShadow: TokenControl = {
 
 export const SHAPE_CONTROLS: TokenControl[] = [
   buttonRadius,
-  fieldRadius,
-  fieldBorder,
   cardRadius,
   cardShadow,
   color('--cds-shadow'),
@@ -203,8 +166,6 @@ export const COMPONENT_CONTROLS: Record<string, TokenControl[]> = {
     color('--cds-focus'),
   ],
   fields: [
-    fieldRadius,
-    fieldBorder,
     color('--cds-field-01'),
     color('--cds-field-02'),
     color('--cds-border-strong-01'),
@@ -214,11 +175,9 @@ export const COMPONENT_CONTROLS: Record<string, TokenControl[]> = {
     color('--cds-focus'),
   ],
   selection: [
-    color('--pt-control-edge'),
     color('--cds-layer-selected-inverse'),
     color('--cds-toggle-off'),
     color('--cds-support-success'),
-    fieldRadius,
   ],
   notifications: [
     color('--cds-notification-background-info'),

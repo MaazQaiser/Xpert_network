@@ -20,7 +20,7 @@ export function ChipGroup({ label, chips, isDisabled, onPick }: ChipGroupProps) 
       {chips.map((chip) => (
         <Button
           key={chip.id}
-          kind="tertiary"
+          kind="ghost"
           size="sm"
           className={styles.chip}
           disabled={isDisabled}

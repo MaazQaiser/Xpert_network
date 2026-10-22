@@ -20,7 +20,7 @@ Full plan: [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md) — flows F0–F17, sc
 | Concern | Choice |
 |---|---|
 | Framework | Next.js (App Router, latest stable), React, TypeScript `strict` |
-| Design system | Carbon v11 — `@carbon/react`, `@carbon/icons-react`, `@carbon/pictograms-react`, `@carbon/charts-react` — with the Xpert Network Notion-like themes: gradient page, glass panels, black buttons, orange accent, Inter (ADR 0009) |
+| Design system | Carbon v11 — `@carbon/react`, `@carbon/icons-react`, `@carbon/pictograms-react`, `@carbon/charts-react` — in Carbon's own visual language (square, flat layers, Carbon UI Shell; ADR 0015), themed with a blue primary, navy dark mode, Plus Jakarta Sans headings and Inter body (ADR 0014) |
 | Styling | Sass (`.module.scss`) using Carbon tokens only. No Tailwind, no CSS-in-JS |
 | Server state | TanStack Query |
 | Client state | React state → URL search params → Zustand (only if truly global) |
@@ -47,8 +47,8 @@ Full plan: [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md) — flows F0–F17, sc
 
 ## Non-negotiables
 
-1. **Carbon first.** Use a Carbon component before building one. Never restyle Carbon internals with deep selectors; compose or wrap. The exceptions are field shape (8px corners, full border) in `src/styles/_carbon-shape.scss` (ADR 0010) notification reflow at 320px in `src/styles/_carbon-reflow.scss` (ADR 0011), and side nav item rhythm in `src/styles/_carbon-side-nav.scss` (ADR 0012); button corners use Carbon's `--cds-button-radius` token.
-2. **Tokens only.** No hex colours, no raw `px` spacing, no custom font stacks. Use `$spacing-*`, colour tokens (`$text-primary`, `$layer-01`…), and type sets (`@include type-style('body-01')`). Raw colours exist only in `src/styles/_themes.scss`; page titles and soft cards come from `src/styles/_mixins.scss` (`display-heading`, `surface-card`).
+1. **Carbon first.** Use a Carbon component before building one. Never restyle Carbon internals with deep selectors; compose or wrap. The one exception is notification reflow at 320px in `src/styles/_carbon-reflow.scss` (ADR 0011). Keep Carbon's own shapes: no custom rounded corners, glass or glows (ADR 0015).
+2. **Tokens only.** No hex colours, no raw `px` spacing, no custom font stacks. Use `$spacing-*`, colour tokens (`$text-primary`, `$layer-01`…), and type sets (`@include type-style('body-01')`). Raw colours exist only in `src/styles/_themes.scss`; page titles and Carbon-tile surfaces come from `src/styles/_mixins.scss` (`display-heading`, `surface-card`).
 3. **Accessible by default.** WCAG 2.2 AA. Every interactive element is keyboard-reachable, labelled, and has visible focus. Run axe in tests.
 4. **Feature-sliced.** Code lives in `src/features/<feature>`. Features never import each other's internals — only their `index.ts` public API.
 5. **Server Components by default.** Add `'use client'` only at the leaf that needs interactivity. Carbon interactive components are client components — wrap them.

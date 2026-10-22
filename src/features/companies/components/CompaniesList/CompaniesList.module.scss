@@ -1,7 +1,6 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
-@use '@carbon/react/scss/border-radius' as radius;
 @use '@carbon/react/scss/motion' as *;
 @use '../../../../styles/mixins' as mx;
 
@@ -25,7 +24,7 @@
 }
 
 .card {
-  @include mx.surface-card(radius.$border-radius-16);
+  @include mx.surface-card;
 
   display: flex;
   align-items: center;

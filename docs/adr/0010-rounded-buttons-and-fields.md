@@ -1,6 +1,6 @@
 # 0010 — 8px corners on buttons and form fields
 
-- Status: Accepted · 2026-10-16
+- Status: Superseded by ADR 0015 (2026-10-22) · was Accepted 2026-10-16
 - Amends: CLAUDE.md non-negotiable 1 ("never restyle Carbon internals"), ADR 0009
 
 ## Context

@@ -1,4 +1,3 @@
-@use '@carbon/react/scss/border-radius' as radius;
 @use '@carbon/react/scss/breakpoint' as *;
 @use '@carbon/react/scss/motion' as *;
 @use '@carbon/react/scss/spacing' as *;
@@ -63,7 +62,6 @@
   grid-template-columns: $spacing-05 minmax(0, 1fr);
   gap: $spacing-03;
   padding: $spacing-03;
-  border-radius: radius.$border-radius-08;
   color: $text-secondary;
   text-decoration: none;
 
@@ -106,7 +104,6 @@
 }
 
 .highlighted {
-  border-radius: radius.$border-radius-08;
   background: $highlight;
   outline: $spacing-03 solid $highlight;
 }
@@ -144,7 +141,6 @@
   gap: $spacing-02;
   padding: $spacing-05;
   border: 1px solid $border-subtle-01;
-  border-radius: radius.$border-radius-08;
 }
 
 .figureValue {

@@ -1,6 +1,6 @@
 # 0012 — Side nav items get room and a minimal current-page marker
 
-- Status: Accepted · 2026-10-16
+- Status: Superseded by ADR 0015 (2026-10-22) · was Accepted 2026-10-16
 - Amends: CLAUDE.md non-negotiable 1, ADR 0010, ADR 0011
 
 ## Context

@@ -37,6 +37,7 @@ AI is not a chatbot bolted on the side. In Xpert Network, AI is **woven into the
 - **AI presence styling** — use Carbon's AI tokens/gradients/aura for AI-generated containers so users can distinguish them at a glance. Don't invent our own AI colours or sparkle icons.
 - **Revert state** — once a human edits an AI-filled field, switch the label to its "revert" state so they can return to AI output or keep their edit.
 - Keep AI styling **subtle**; content must remain the hero.
+- **Exception — admin Home briefing (2026-10-22).** The "Your briefing" panel on `/admin/home` has no `AILabel`, at the stakeholder's request. It is still marked as the assistant's by the mascot and the "Your AI assistant" heading above it; the assistant's chat answers on the same page keep their labels.
 
 ---
 

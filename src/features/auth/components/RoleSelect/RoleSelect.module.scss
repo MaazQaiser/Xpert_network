@@ -1,7 +1,6 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
-@use '@carbon/react/scss/border-radius' as radius;
 
 .tile {
   margin-block-end: $spacing-03;
@@ -34,7 +33,6 @@
   justify-content: center;
   inline-size: $spacing-08;
   block-size: $spacing-08;
-  border-radius: radius.$border-radius-08;
   background: $layer-accent-01;
   color: $icon-primary;
 }

@@ -41,11 +41,11 @@ Next.js notes:
 
 | Area | Carbon theme | Why |
 |---|---|---|
-| App (default, light) | `white` + Xpert Network overrides | Gradient page (orange glow → white), glass panels, black buttons, orange accent for links/focus/active (ADR 0009) |
+| App (default, light) | `white` + Xpert Network overrides | Flat white page, solid cards with hairlines, blue (`#0040ff`) primary buttons, links, focus and active item (ADR 0014, amends ADR 0009) |
 | App alt surfaces (side panels, filters) | `g10` layer | Subtle separation |
-| Dark mode | `g100` + Xpert Network overrides | User preference / system setting |
-| UI Shell header + side nav | App theme (light or dark) | Borderless header; side nav floats as a rounded panel at `lg+`; accent bar marks the active item |
-| Admin header | `g100` (Carbon) | Separate realm must look different |
+| Dark mode | `g100` + Xpert Network overrides (deep navy) | User preference / system setting |
+| UI Shell header + side nav | App theme (light or dark), all roles | Hairline under the header; docked side nav at `lg+`; blue tint marks the active item (ADR 0014) |
+| Admin login header | `g100` (Carbon) | Login page only; the admin console uses the app theme (ADR 0014) |
 
 - Theme follows `prefers-color-scheme`, overridable in user settings (persisted server-side).
 - Never hard-code a colour. Raw values live only in `src/styles/_themes.scss`; add a token there (light and dark, AA-checked) rather than in a component. Test every screen in both themes.
@@ -94,17 +94,17 @@ Rules of thumb:
 - Between related groups: `$spacing-06`–`$spacing-07`.
 - Between page sections: `$spacing-09`+.
 
-### 4.4 Typography — Inter, Plex Mono
+### 4.4 Typography — Plus Jakarta Sans, Inter, Plex Mono
 
-- All text: **Inter** (Carbon `sans`). Code: **IBM Plex Mono**. No serif.
+- Headings (`h1`–`h3`, `display-heading`): **Plus Jakarta Sans** via `mx.display-face` (ADR 0014). Body text: **Inter** (Carbon `sans`). Code: **IBM Plex Mono**. No serif.
 - Page and hero titles: `@include mx.display-heading('heading-06')` (Carbon type token, semibold).
 
 ### 4.4.1 Surfaces
 
-- Our own containers (hero tiles, panels, auth card, onboarding/settings cards, status pages) use `@include mx.surface-card` (translucent glass, no blur). Fixed shell parts that content scrolls under use `@include mx.glass-chrome`. Never put `backdrop-filter` directly on an element that contains a Carbon modal or header panel.
+- Prefer Carbon's own containers: `Tile`, `ClickableTile` and `Layer` (ADR 0015). Where a custom container is still needed (hero tiles, panels, auth card, onboarding/settings cards, status pages), use `@include mx.surface-card`, which draws Carbon's tile look: `$layer-01`, square, no border or shadow. The header and side nav keep Carbon's UI Shell styling.
 - Cards are `$border-radius-16` with a bright hairline border and soft shadow. Put form content inside Carbon `<Layer>` so fields use the right contextual tokens.
-- Primary buttons are black with 8px corners (`--cds-button-radius`, set in `_themes.scss`); orange is reserved for links, focus, the active nav item and unread dots.
-- Form fields have 8px corners and a full `$border-strong` border (slate, not black — ADR 0009), set only in `src/styles/_carbon-shape.scss` (ADR 0010). Side nav items are 40px, rounded and inset, with a fill-only current-page marker, set only in `src/styles/_carbon-side-nav.scss` (ADR 0012). Tags and modals keep Carbon’s shapes — don’t restyle Carbon internals anywhere else. Button corners come only from the `--cds-button-radius` token.
+- Primary buttons are blue and square, Carbon's default (`--cds-button-radius: 0` in `_themes.scss`). The same blue is used for links and focus (ADR 0014).
+- Form fields, tags, modals and the side nav keep Carbon's own shapes and styles (ADR 0015). Don't add rounded corners, glass, glows or gradients, and don't restyle Carbon internals.
 
 Use `@include type-style('<token>')`. Productive set for the app:
 

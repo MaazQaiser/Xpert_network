@@ -1,12 +1,6 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
-@use '@carbon/react/scss/border-radius' as radius;
-@use '../../../../styles/mixins' as mx;
-
-// Slow on purpose: ambient motion should be felt, not watched.
-$pt-composer-orbit: 9s;
-$pt-composer-breathe: 6s;
 
 // Sticks to the bottom of the viewport while content scrolls; sits after short content.
 .dock {
@@ -28,104 +22,22 @@ $pt-composer-breathe: 6s;
   gap: $spacing-02;
 }
 
+// The message box in Carbon's field look (ADR 0015): the field fill, a strong bottom border,
+// square corners, and Carbon's 2px focus outline when anything inside has focus.
 .pill {
-  position: relative;
-  isolation: isolate;
   display: flex;
   align-items: center;
   gap: $spacing-03;
   inline-size: 100%;
   padding: $spacing-02 $spacing-02 $spacing-02 $spacing-05;
-  border: 1px solid transparent;
-  border-radius: radius.$border-radius-24;
+  border-block-end: 1px solid $border-strong-01;
+  background: $field-01;
 
-  // Frosted glass: content scrolling underneath is blurred. The fill stops at the padding box
-  // so the animated ring (::before) shows through the transparent border.
-  /* stylelint-disable carbon/theme-use -- Xpert Network glass tokens (ADR 0009) */
-  background: var(--pt-glass-bg);
-  background-clip: padding-box;
-  backdrop-filter: var(--pt-glass-filter);
-  /* stylelint-enable carbon/theme-use */
-  animation: composer-breathe $pt-composer-breathe ease-in-out infinite;
-
-  // A soft accent light travelling slowly round the rim.
-  &::before {
-    position: absolute;
-    z-index: -1;
-    padding: 1px;
-    border-radius: inherit;
-    background: conic-gradient(
-      from var(--xn-composer-angle),
-      transparent 0deg,
-      $interactive 50deg,
-      transparent 120deg,
-      transparent 180deg,
-      $interactive 230deg,
-      transparent 300deg
-    );
-    content: '';
-    inset: -1px;
-    mask:
-      linear-gradient(black 0 0) content-box exclude,
-      linear-gradient(black 0 0);
-    opacity: 0.7;
-    pointer-events: none;
-    animation: composer-orbit $pt-composer-orbit linear infinite;
-  }
-
-  // Focus is a soft accent rim plus a brighter rim light: clearly visible, never a dark box.
   &:focus-within {
-    outline: 1px solid color-mix(in srgb, $interactive 55%, transparent);
-    outline-offset: 0;
-
-    &::before {
-      opacity: 0.9;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-
-    &::before {
-      animation: none;
-    }
+    outline: 2px solid $focus;
+    outline-offset: -2px;
   }
 }
-
-// Registered so the gradient angle can be animated smoothly.
-@property --xn-composer-angle {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 0deg;
-}
-
-@keyframes composer-orbit {
-  to {
-    --xn-composer-angle: 360deg;
-  }
-}
-
-// Orange glow that gently swells and settles, with a 2px lift — calm, never bouncy.
-/* stylelint-disable carbon/theme-use -- Xpert Network glass border token (ADR 0009) */
-@keyframes composer-breathe {
-  0%,
-  100% {
-    box-shadow:
-      0 0 0 1px var(--pt-glass-border),
-      0 $spacing-03 $spacing-07 color-mix(in srgb, $interactive 22%, transparent),
-      0 $spacing-01 $spacing-03 $shadow;
-    transform: translateY(0);
-  }
-
-  50% {
-    box-shadow:
-      0 0 0 1px var(--pt-glass-border),
-      0 $spacing-04 $spacing-09 color-mix(in srgb, $interactive 36%, transparent),
-      0 $spacing-02 $spacing-04 $shadow;
-    transform: translateY(-$spacing-01);
-  }
-}
-/* stylelint-enable carbon/theme-use */
 
 .leading {
   display: flex;
@@ -150,16 +62,12 @@ $pt-composer-breathe: 6s;
   }
 
   &:focus {
-    outline: none; // The pill shows the focus ring (:focus-within).
+    outline: none; // The box shows the focus outline (:focus-within).
   }
 }
 
-// Round 40px buttons. With the pill's 4px padding they sit the same distance from the top,
-// bottom and right edge, concentric with its rounded end. Carbon's own radius hook, no
-// internals touched.
+// Carbon icon buttons at the end of the field.
 .actions {
-  --cds-button-radius: 50%;
-
   display: flex;
   flex-shrink: 0;
   align-items: center;

@@ -26,6 +26,9 @@ importers:
       '@fontsource-variable/inter':
         specifier: 5.2.8
         version: 5.2.8
+      '@fontsource-variable/plus-jakarta-sans':
+        specifier: 5.2.8
+        version: 5.2.8
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(ajv@8.20.0)(react-hook-form@7.90.0(@types/react@19.3.0)(react@19.3.0))(zod@4.6.7)
@@ -548,6 +551,9 @@ packages:
 
   '@fontsource-variable/inter@5.2.8':
     resolution: {integrity: sha512-kOfP2D+ykbcX/P3IFnokOhVRNoTozo5/JxhAIVYLpea/UBmCQ/YWPBfWIDuBImXX/15KH+eKh4xpEUyS2sQQGQ==}
+
+  '@fontsource-variable/plus-jakarta-sans@5.2.8':
+    resolution: {integrity: sha512-iQecBizIdZxezODNHzOn4SvvRMrZL/S8k4MEXGDynCmUrImVW0VmX+tIAMqnADwH4haXlHSXqMgU6+kcfBQJdw==}
 
   '@hookform/resolvers@5.9.1':
     resolution: {integrity: sha512-7b7vsbraJxKgjVSA1Nur9tLwj539WGJUBLA7QNvXnFoT2pM5Z7G+6rlukk4B2/QrTZy6huRtH6wKeESPKuIr6w==}
@@ -4470,6 +4476,8 @@ snapshots:
   '@floating-ui/utils@0.2.12': {}
 
   '@fontsource-variable/inter@5.2.8': {}
+
+  '@fontsource-variable/plus-jakarta-sans@5.2.8': {}
 
   '@hookform/resolvers@5.9.1(ajv@8.20.0)(react-hook-form@7.90.0(@types/react@19.3.0)(react@19.3.0))(zod@4.6.7)':
     dependencies:

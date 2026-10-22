@@ -97,7 +97,7 @@ export function AppShell({
 
   const chrome = (
     <>
-      <SkipToContent href="#main-content" className={styles.skipLink} />
+      <SkipToContent href="#main-content" />
       {hasNav ? (
         <HeaderMenuButton
           className={styles.menuButton}

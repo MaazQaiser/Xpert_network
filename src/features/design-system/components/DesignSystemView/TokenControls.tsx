@@ -250,15 +250,6 @@ function LengthControlRow({
           }}
         />
         {token.name === '--cds-button-radius' ? <Button size="sm">Preview</Button> : null}
-        {token.name === '--pt-field-radius' || token.name === '--pt-field-border-width' ? (
-          <TextInput
-            id={`${id}-field`}
-            size="sm"
-            labelText="Preview field"
-            hideLabel
-            placeholder="Riyadh"
-          />
-        ) : null}
         {isEdited ? (
           <IconButton
             kind="ghost"

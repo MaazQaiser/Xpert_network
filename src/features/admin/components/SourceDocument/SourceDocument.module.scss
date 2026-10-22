@@ -1,7 +1,6 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
-@use '@carbon/react/scss/border-radius' as radius;
 @use '../../../../styles/mixins' as mx;
 
 .root {
@@ -11,6 +10,15 @@
   flex-direction: column;
   padding: $spacing-05;
   gap: $spacing-04;
+}
+
+// Embedded in another surface: drop the card so surfaces never nest.
+.embedded {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
 }
 
 .header {
@@ -36,7 +44,6 @@
   flex-direction: column;
   padding: $spacing-06 $spacing-05;
   border: 1px solid $border-subtle-01;
-  border-radius: radius.$border-radius-08;
   background: $layer-01;
   gap: $spacing-04;
   max-block-size: 28rem;
@@ -67,7 +74,6 @@
   flex-direction: column;
   padding: $spacing-03;
   border: 1px solid $border-strong-01;
-  border-radius: radius.$border-radius-04;
   gap: $spacing-02;
 
   mark {

@@ -17,6 +17,8 @@ type SourceDocumentProps = {
   /** Human label for a highlighted passage, e.g. "Question 1". */
   labelFor?: (sourceFor: string) => string;
   hint?: string;
+  /** Inside another surface (e.g. the inbox reading pane): no card of its own. */
+  embedded?: boolean;
 };
 
 /** A mocked rendering of the client's document with AI source highlights (wireframe 03). */
@@ -30,6 +32,7 @@ export function SourceDocument({
   highlightFor = null,
   labelFor,
   hint,
+  embedded = false,
 }: SourceDocumentProps) {
   const current = pages.find((p) => p.page === page);
   const highlightRef = useRef<HTMLParagraphElement>(null);
@@ -39,7 +42,10 @@ export function SourceDocument({
   }, [highlightFor, page]);
 
   return (
-    <section className={styles.root} aria-labelledby="source-document-title">
+    <section
+      className={`${styles.root} ${embedded ? styles.embedded : ''}`}
+      aria-labelledby="source-document-title"
+    >
       <div className={styles.header}>
         <h2 id="source-document-title" className={styles.title}>
           {title}

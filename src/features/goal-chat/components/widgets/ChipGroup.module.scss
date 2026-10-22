@@ -1,6 +1,5 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
-@use '@carbon/react/scss/border-radius' as radius;
 
 .chips {
   display: flex;
@@ -10,13 +9,20 @@
 }
 
 .chip.chip {
-  // Doubled class outranks Carbon's tertiary-button root rule; only the root is styled.
+  // Light Carbon ghost buttons on a layer fill, like the admin Home suggestions. Doubled class
+  // outranks Carbon's button root rule; only the root is styled.
   max-inline-size: 100%;
-  border-color: $border-subtle-01;
-  border-radius: radius.$border-radius-24;
   background: $layer-01;
-  box-shadow: 0 $spacing-01 $spacing-03 $shadow;
   color: $text-primary;
   text-align: end;
   white-space: normal;
+
+  &:hover {
+    background: $layer-hover-01;
+    color: $text-primary;
+  }
+
+  &:active {
+    background: $layer-active-01;
+  }
 }

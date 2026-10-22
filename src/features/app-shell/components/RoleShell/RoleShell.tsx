@@ -35,7 +35,6 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
             <AppShell
               {...(SUFFIX[role] ? { productSuffix: SUFFIX[role] } : {})}
               homeHref={ROLE_HOME[role]}
-              {...(role === 'admin' ? { chromeTheme: 'g100' as const } : {})}
               navItems={isFocused ? [] : NAVIGATION[role]}
               headerActions={
                 <>

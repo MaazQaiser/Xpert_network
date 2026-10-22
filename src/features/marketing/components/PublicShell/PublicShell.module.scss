@@ -37,19 +37,7 @@
   }
 }
 
-// Glass header over the page gradient (ADR 0009); doubled class outranks Carbon's root rule.
-.header.header {
-  @include mx.glass-chrome;
-
-  // Header items paint $background; let the glass show through instead.
-  --cds-background: transparent;
-
-  border-block-end-color: transparent;
-  box-shadow: none;
-}
-
-// The header's transparent --cds-background would leave the skip link see-through over the
-// product name; give it an opaque surface while it's shown.
+// The skip link gets an opaque surface while it's shown over the product name.
 .skipLink.skipLink:focus {
   background-color: $layer-02;
 }

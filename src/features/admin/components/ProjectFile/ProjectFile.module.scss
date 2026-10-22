@@ -2,7 +2,6 @@
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
 @use '@carbon/react/scss/breakpoint' as *;
-@use '@carbon/react/scss/border-radius' as radius;
 @use '../../../../styles/mixins' as mx;
 
 .root {
@@ -188,7 +187,6 @@
   align-items: center;
   justify-content: center;
   border: 1px solid $border-strong-01;
-  border-radius: radius.$border-radius-04;
   block-size: $spacing-06;
   inline-size: $spacing-06;
 }

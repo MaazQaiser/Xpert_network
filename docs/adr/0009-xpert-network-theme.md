@@ -1,6 +1,7 @@
 # 0009 — Xpert Network look: Notion-like neutral themes, glass panels, black buttons, Inter
 
 - Status: Accepted · 2026-10-15 · Revised 2026-10-16 (warm stone → Notion off-white, serif dropped, floating side nav; then black buttons, gradient page, glass panels, brand logos; then docked side nav and full-width pages)
+- Palette, buttons, page gradient, glass and admin chrome superseded by ADR 0014 (2026-10-22).
 - Amends: ADR 0002 (Carbon v11 design system), ADR 0007 (fonts)
 
 ## Context

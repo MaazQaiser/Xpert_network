@@ -3,7 +3,6 @@
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
 @use '@carbon/react/scss/breakpoint' as *;
-@use '@carbon/react/scss/border-radius' as radius;
 @use '../../../../styles/mixins' as mx;
 
 .root {
@@ -180,7 +179,6 @@
   block-size: $spacing-09;
   flex-shrink: 0;
   border: 1px solid $border-strong-01;
-  border-radius: radius.$border-radius-08;
   background: $field-01;
 }
 
@@ -249,10 +247,6 @@
   border: 1px solid $border-subtle-01;
 }
 
-.swatch {
-  border-radius: radius.$border-radius-08;
-}
-
 .radiusPreview {
   background: $layer-accent-01;
   border-color: $border-strong-01;
@@ -310,7 +304,6 @@
   block-size: $spacing-07;
   padding: 0;
   border: 1px solid $border-strong-01;
-  border-radius: radius.$border-radius-08;
   background: transparent;
   cursor: pointer;
 
@@ -325,7 +318,6 @@
 
   &::-webkit-color-swatch {
     border: 0;
-    border-radius: radius.$border-radius-04;
   }
 }
 
@@ -348,7 +340,6 @@
   min-inline-size: 12rem;
   padding: $spacing-05;
   border: 1px solid $border-subtle-01;
-  border-radius: radius.$border-radius-08;
 }
 
 .familySample {
@@ -409,7 +400,6 @@ $type-specimens: (
 
 .spacingBar {
   block-size: $spacing-04;
-  border-radius: radius.$border-radius-02;
   background: $interactive;
 }
 

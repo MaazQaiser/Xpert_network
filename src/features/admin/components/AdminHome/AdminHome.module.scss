@@ -2,48 +2,301 @@
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
 @use '@carbon/react/scss/breakpoint' as *;
-@use '@carbon/react/scss/border-radius' as radius;
 @use '@carbon/react/scss/motion' as *;
 @use '../../../../styles/mixins' as mx;
 @use '../../../../styles/tokens' as *;
 
-// Greeting, summary and the conversation sit in the middle; the ask field docks below.
+// Assistant start page, in Carbon's own visual language: a Tile for the briefing, ClickableTiles
+// for the counts, tertiary buttons for suggestions, flat layers (no glass or glow). One content
+// width shared by the briefing, the conversation and the docked ask field, so every edge lines up. The stage (mark, greeting, cards) sits in the
+// middle of the free space; suggestions, the field and the note dock at the bottom.
+$content-width: 52rem; // fits the three suggestions on one line
+
+$pt-mascot-float: 6s;
+
 .root {
   display: flex;
   flex-direction: column;
-  gap: $spacing-07;
   min-block-size: calc(100vh - #{$pt-shell-header-height} - #{$spacing-10});
 }
 
-.column,
+.stage,
 .ask {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-06;
   inline-size: 100%;
-  max-inline-size: 46rem;
+  max-inline-size: $content-width;
   margin-inline: auto;
 }
 
-.column {
+.stage {
+  display: flex;
   flex: 1;
+  flex-direction: column;
   justify-content: center;
+  gap: $spacing-08;
+  padding-block: $spacing-07;
 }
+
+// ——— Mark and greeting ————————————————————————————————————————————————————
 
 .intro {
   display: flex;
   flex-direction: column;
-  gap: $spacing-03;
+  align-items: center;
+  text-align: center;
 }
 
-.greeting {
-  @include mx.display-heading('heading-05');
+// ——— Mascot ————————————————————————————————————————————————————————————————
+// One motion per state, all from the feet (transform-origin at the bottom), with a soft floor
+// shadow that shrinks as it rises:
+//   idle      gentle float
+//   attentive perks up while the ask field has focus (CSS :has, no JS)
+//   thinking  rocks side to side while the summary loads or an answer is coming
+//   happy     one hop with squash and stretch when an answer lands
+//   oops      a small head-shake when something fails
+//   hover     a friendly wiggle
+// Everything stops for reduced motion. Reaction length matches REACTION_MS in AdminHome.tsx.
+$pt-mascot-reaction: 1.2s;
+$pt-mascot-think: 1.4s;
+
+.mascot {
+  position: relative;
+  display: inline-block;
+  margin-block-end: $spacing-05;
+
+  // Floor shadow: a soft ellipse under the feet.
+  &::after {
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    /* stylelint-disable-next-line carbon/theme-use -- soft shadow from the Carbon shadow token */
+    background: radial-gradient(closest-side, $shadow, transparent);
+    block-size: $spacing-04;
+    content: '';
+    inline-size: 70%;
+    inset-block-end: calc(-1 * #{$spacing-02});
+    inset-inline-start: 15%;
+    animation: mascot-shadow $pt-mascot-float ease-in-out infinite;
+  }
 }
 
-.lede {
+.mascotImage {
+  display: block;
+  block-size: $spacing-11;
+  inline-size: auto;
+  animation: mascot-float $pt-mascot-float ease-in-out infinite;
+  transform-origin: 50% 100%;
+  transition: scale $duration-moderate-02 motion(entrance, expressive);
+}
+
+.mascot:hover .mascotImage {
+  animation: mascot-wiggle $duration-slow-02 motion(standard, expressive);
+}
+
+// Attentive: the field has focus, so the mascot perks up (and stops wandering).
+.root:has(.ask form:focus-within) .mascot[data-mood='idle'] .mascotImage {
+  animation: none;
+  scale: 1.06;
+  translate: 0 calc(-1 * #{$spacing-02});
+}
+
+.mascot[data-mood='thinking'] {
+  .mascotImage {
+    animation: mascot-think $pt-mascot-think ease-in-out infinite;
+  }
+
+  &::after {
+    animation: none;
+  }
+}
+
+.mascot[data-mood='happy'] {
+  .mascotImage {
+    animation: mascot-hop $pt-mascot-reaction motion(entrance, expressive) 1;
+  }
+
+  &::after {
+    animation: mascot-hop-shadow $pt-mascot-reaction motion(entrance, expressive) 1;
+  }
+}
+
+.mascot[data-mood='oops'] .mascotImage {
+  animation: mascot-shake $pt-mascot-reaction motion(standard, productive) 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot::after,
+  .mascot .mascotImage,
+  .mascot:hover .mascotImage,
+  .mascot[data-mood] .mascotImage,
+  .mascot[data-mood]::after {
+    animation: none;
+    transition: none;
+  }
+}
+
+@keyframes mascot-float {
+  50% {
+    transform: translateY(calc(-1 * #{$spacing-02}));
+  }
+}
+
+@keyframes mascot-shadow {
+  50% {
+    opacity: 0.6;
+    transform: scaleX(0.85);
+  }
+}
+
+@keyframes mascot-wiggle {
+  25% {
+    transform: rotate(-6deg);
+  }
+
+  60% {
+    transform: rotate(4deg);
+  }
+
+  85% {
+    transform: rotate(-1deg);
+  }
+}
+
+@keyframes mascot-think {
+  0%,
+  100% {
+    transform: rotate(-5deg) translateY(0);
+  }
+
+  50% {
+    transform: rotate(5deg) translateY(calc(-1 * #{$spacing-01}));
+  }
+}
+
+@keyframes mascot-hop {
+  0% {
+    transform: none;
+  }
+
+  15% {
+    transform: scale(1.08, 0.9);
+  }
+
+  40% {
+    transform: translateY(calc(-1 * #{$spacing-05})) scale(0.94, 1.08);
+  }
+
+  65% {
+    transform: translateY(0) scale(1.06, 0.94);
+  }
+
+  80% {
+    transform: scale(0.98, 1.02);
+  }
+
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes mascot-hop-shadow {
+  40% {
+    opacity: 0.4;
+    transform: scaleX(0.6);
+  }
+}
+
+@keyframes mascot-shake {
+  15%,
+  45% {
+    transform: translateX(calc(-1 * #{$spacing-02})) rotate(-3deg);
+  }
+
+  30%,
+  60% {
+    transform: translateX($spacing-02) rotate(3deg);
+  }
+
+  80% {
+    transform: none;
+  }
+}
+
+.kicker {
   @include type-style('body-02');
 
   color: $text-secondary;
+}
+
+.greeting {
+  @include mx.display-heading('heading-04');
+
+  margin-block-start: $spacing-02;
+  text-wrap: balance;
+
+  @include breakpoint(md) {
+    @include mx.display-heading('heading-05');
+  }
+}
+
+// ——— Briefing ————————————————————————————————————————————————————————————————
+// A Carbon Tile ($layer-01): a small mascot mark, a small uppercase title, the note in 16px
+// paragraphs, then the three counts as ClickableTiles one layer up ($layer-02, via Layer).
+// From md up everything is indented under the title; on phones the body uses the full width.
+
+.briefing.briefing {
+  display: grid;
+  align-items: start;
+  gap: $spacing-02 $spacing-04;
+  grid-template-areas:
+    'mark head'
+    'body body';
+  grid-template-columns: auto 1fr;
+  padding: $spacing-05;
+
+  @include breakpoint(md) {
+    grid-template-areas:
+      'mark head'
+      '. body';
+    padding: $spacing-06;
+  }
+}
+
+.briefingMark {
+  grid-area: mark;
+  block-size: $spacing-07;
+  inline-size: auto;
+}
+
+.briefingHead {
+  display: flex;
+  align-items: center;
+  grid-area: head;
+  min-block-size: $spacing-07; // centred on the mark
+}
+
+.briefingTitle {
+  @include type-style('heading-compact-01');
+
+  text-transform: uppercase;
+}
+
+.briefingBody {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  grid-area: body;
+  min-inline-size: 0;
+}
+
+.briefingText {
+  @include type-style('body-02');
+
+  text-wrap: pretty;
+}
+
+// Today's tip leads with its project as an inline Carbon link.
+.tipLead {
+  @include font-weight('semibold');
 }
 
 .cards {
@@ -57,78 +310,34 @@
 }
 
 .cardSkeleton {
-  border-radius: radius.$border-radius-16;
-  block-size: $spacing-12;
+  block-size: $spacing-11;
   inline-size: 100%;
 }
 
-.card {
-  @include mx.surface-card;
-
+// Carbon ClickableTile: the count, then the label; Carbon draws the arrow in the corner, so the
+// text keeps clear of it. Doubled class outranks Carbon's tile root rule for layout only.
+.countTile.countTile {
   display: flex;
   flex-direction: column;
-  gap: $spacing-03;
-  padding: $spacing-05;
-  color: $text-primary;
-  text-decoration: none;
-  transition: background-color $duration-fast-02 motion(standard, productive);
-
-  &:hover {
-    background-color: $layer-hover-01;
-  }
-
-  &:focus-visible {
-    outline: 2px solid $focus;
-    outline-offset: 2px;
-  }
-}
-
-.cardTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  gap: $spacing-01;
+  block-size: 100%;
+  padding-inline-end: $spacing-08;
 }
 
 .cardLabel {
-  @include type-style('label-01');
+  @include type-style('body-compact-01');
 
   color: $text-secondary;
 }
 
-.cardIcon {
-  fill: $icon-secondary;
-}
-
+// The count leads: the display face, one size up from the label.
 .cardValue {
-  @include type-style('heading-05');
+  @include type-style('heading-03');
+  @include mx.display-face;
+  @include font-weight('semibold');
 }
 
-.cardAction {
-  @include type-style('heading-compact-01');
-
-  display: inline-flex;
-  align-items: center;
-  gap: $spacing-02;
-}
-
-.tip {
-  @include mx.surface-card;
-
-  display: flex;
-  align-items: flex-start;
-  gap: $spacing-03;
-  padding: $spacing-04 $spacing-05;
-
-  p {
-    @include type-style('body-01');
-  }
-}
-
-.tipLead {
-  @include type-style('heading-compact-01');
-
-  color: $text-primary;
-}
+// ——— Conversation ———————————————————————————————————————————————————————————
 
 .thread {
   display: flex;
@@ -148,8 +357,6 @@
   align-self: flex-end;
   max-inline-size: 80%;
   padding: $spacing-03 $spacing-04;
-  border: 1px solid $border-subtle-01;
-  border-radius: radius.$border-radius-16;
   background: $layer-01;
 }
 
@@ -176,22 +383,39 @@
   gap: $spacing-04;
 }
 
+// ——— Docked ask: suggestions, field, note ——————————————————————————————————————
+
+// Docked from md up; on phones it would cover the cards, so it simply follows them.
 .ask {
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
   gap: $spacing-04;
+  padding-block: $spacing-05 $spacing-03;
+
+  @include breakpoint(md) {
+    position: sticky;
+    inset-block-end: 0;
+  }
 }
 
+// Suggestions are light Carbon ghost buttons on a $layer-01 fill, sharing one row edge to edge;
+// a narrow page wraps. (Tertiary's ink outline and black hover read too heavy here.)
 .prompts {
   display: flex;
   flex-wrap: wrap;
-  gap: $spacing-03;
+  gap: $spacing-04;
+
+  li {
+    display: flex;
+    flex: 1 1 auto;
+  }
 }
 
+// Doubled class outranks Carbon's button root rule: width, a quiet layer fill and ink text.
 .prompt.prompt {
-  // Doubled class outranks Carbon's tertiary-button root rule; matches the client ChipGroup pills.
-  max-inline-size: 100%;
-  padding-inline: $spacing-05;
-  border-color: $border-subtle-01;
-  border-radius: radius.$border-radius-24;
+  inline-size: 100%;
+  max-inline-size: none;
   background: $layer-01;
   color: $text-primary;
 
@@ -199,11 +423,10 @@
     background: $layer-hover-01;
     color: $text-primary;
   }
-}
 
-.eyebrow {
-  align-self: flex-start;
-  margin: 0;
+  &:active {
+    background: $layer-active-01;
+  }
 }
 
 .disclaimer {

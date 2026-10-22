@@ -3,7 +3,6 @@
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
 @use '../../../../styles/mixins' as mx;
-@use '@carbon/react/scss/border-radius' as radius;
 
 .root {
   display: flex;
@@ -43,7 +42,6 @@
   block-size: $spacing-08;
   padding-inline: $spacing-04;
   border: 1px solid $border-strong-01;
-  border-radius: radius.$border-radius-08;
   background: $field-01;
 }
 
