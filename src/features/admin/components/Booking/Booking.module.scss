@@ -1,0 +1,473 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '../../../../styles/mixins' as mx;
+
+// Screens 11–13 share one page language with screen 10: header, flat Carbon tiles, hairline rows.
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+// ——— Header ————————————————————————————————————————————————————————————————————
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: $spacing-05;
+}
+
+.heading {
+  display: flex;
+  flex: 1 1 28rem;
+  flex-direction: column;
+  gap: $spacing-03;
+  min-inline-size: 0;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.metaText,
+.subtitle,
+.cardText {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.subtitle {
+  max-inline-size: 44rem;
+}
+
+.title {
+  @include mx.display-heading('heading-04');
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+// ——— Layouts ———————————————————————————————————————————————————————————————————
+.split,
+.layout,
+.layoutWide {
+  display: grid;
+  align-items: start;
+  gap: $spacing-06;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.split {
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+}
+
+// Booking: details and checklist on the left, briefing and calls on the right.
+.layout {
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+}
+
+// Sync: confirmations on the left, the (longer) message on the right.
+.layoutWide {
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  }
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  min-inline-size: 0;
+}
+
+// ——— Cards ————————————————————————————————————————————————————————————————————
+.card,
+.quietCard {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  padding: $spacing-06;
+}
+
+// "What locked means" is reference text: it sits on the page, outlined rather than filled.
+.quietCard.quietCard {
+  border: 1px solid $border-subtle-01;
+  background: transparent;
+}
+
+.cardHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.cardTitle {
+  @include type-style('heading-compact-02');
+}
+
+.cardMeta {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.headerEnd {
+  margin-inline-start: auto;
+}
+
+.subTitle {
+  @include type-style('heading-compact-01');
+}
+
+// ——— Person rows ————————————————————————————————————————————————————————————————
+.rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: grid;
+  align-items: center;
+  gap: $spacing-05;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding-block: $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
+
+  &:first-child {
+    padding-block-start: 0;
+    border-block-start: 0;
+  }
+
+  &:last-child {
+    padding-block-end: 0;
+  }
+}
+
+.rowBody {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-01;
+  min-inline-size: 0;
+}
+
+.rowTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: $spacing-02 $spacing-03;
+}
+
+.name {
+  @include type-style('heading-compact-02');
+}
+
+.rowText {
+  @include type-style('body-compact-01');
+}
+
+.rowMeta {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+// The call time, right-aligned like a calendar column.
+.when {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-01;
+  text-align: end;
+  white-space: nowrap;
+}
+
+.avatar,
+.avatarSmall,
+.avatarEmpty {
+  @include type-style('label-02');
+
+  overflow: hidden;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: $layer-accent-01;
+  block-size: $spacing-08;
+  inline-size: $spacing-08;
+}
+
+.avatarSmall {
+  block-size: $spacing-07;
+  inline-size: $spacing-07;
+}
+
+// Released experts: an empty, dashed placeholder instead of a face.
+.avatarEmpty {
+  border: 1px dashed $border-strong-01;
+  background: transparent;
+  color: $text-secondary;
+}
+
+.photo {
+  display: block;
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: cover;
+}
+
+// ——— Screen 11: the client's reply ——————————————————————————————————————————————
+.mailHead {
+  display: grid;
+  align-items: center;
+  gap: $spacing-05;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.mailFrom {
+  @include type-style('heading-compact-01');
+
+  overflow-wrap: anywhere;
+}
+
+.aiNote {
+  @include type-style('label-01');
+
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-02;
+  color: $text-secondary;
+}
+
+.quote {
+  @include type-style('body-02');
+
+  max-inline-size: 48rem;
+}
+
+.steps,
+.numbered {
+  @include type-style('body-01');
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  padding-inline-start: $spacing-06;
+  list-style: decimal;
+
+  li::marker {
+    color: $text-secondary;
+  }
+}
+
+.standby {
+  display: flex;
+  flex-direction: column;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-04;
+    padding-block: $spacing-03;
+    border-block-end: 1px solid $border-subtle-01;
+  }
+}
+
+// ——— Screen 12: the message to the client ——————————————————————————————————————————
+.recipient {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: $spacing-04;
+  overflow-wrap: anywhere;
+}
+
+.fieldLabel {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+// The booked calls as they appear in the email: read-only, from the confirmed times.
+.callsTable {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $border-subtle-01;
+  background: $layer-02;
+
+  li {
+    @include type-style('body-compact-01');
+
+    display: grid;
+    align-items: baseline;
+    gap: $spacing-02 $spacing-05;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: $spacing-04 $spacing-05;
+
+    + li {
+      border-block-start: 1px solid $border-subtle-01;
+    }
+  }
+
+  span {
+    color: $text-secondary;
+    white-space: nowrap;
+  }
+}
+
+.checksRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03 $spacing-07;
+}
+
+// ——— Screen 13: booking ——————————————————————————————————————————————————————————
+.details {
+  display: grid;
+  gap: $spacing-06 $spacing-05;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  dt {
+    @include type-style('label-01');
+
+    margin-block-end: $spacing-02;
+    color: $text-secondary;
+  }
+
+  dd {
+    @include type-style('body-compact-01');
+  }
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+
+  li {
+    @include type-style('body-compact-01');
+
+    display: grid;
+    align-items: center;
+    gap: $spacing-01 $spacing-04;
+    grid-template-columns: auto minmax(0, 1fr);
+    padding-block: $spacing-03;
+    color: $text-secondary;
+
+    // From md the time sits in its own right-hand column; below it drops under the label.
+    > :last-child {
+      grid-column: 2;
+    }
+
+    @include breakpoint(md) {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+
+      > :last-child {
+        grid-column: auto;
+      }
+    }
+  }
+}
+
+.checkDone.checkDone {
+  color: $text-primary;
+
+  .checkIcon {
+    fill: $support-success;
+  }
+}
+
+.checkIcon {
+  fill: $icon-secondary;
+}
+
+.checkLabel {
+  min-inline-size: 0;
+}
+
+.briefing {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  padding: $spacing-05;
+  background: $layer-02;
+
+  p {
+    @include type-style('body-01');
+  }
+
+  .subTitle:not(:first-child) {
+    margin-block-start: $spacing-03;
+  }
+}
+
+.callList {
+  display: flex;
+  flex-direction: column;
+
+  li + li {
+    border-block-start: 1px solid $border-subtle-01;
+  }
+}
+
+// Each booked call selects which call the details card shows.
+.callButton,
+.callIdle {
+  display: grid;
+  align-items: center;
+  gap: $spacing-04;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  inline-size: 100%;
+  padding: $spacing-04 $spacing-03;
+  text-align: start;
+}
+
+.callButton {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+
+  &:hover {
+    background: $layer-hover-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: -2px;
+  }
+
+  &[aria-pressed='true'] {
+    background: $layer-selected-01;
+  }
+}
+
+.callName {
+  @include type-style('heading-compact-01');
+}

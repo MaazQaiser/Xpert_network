@@ -1,0 +1,184 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/motion' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '../../../../styles/tokens' as *;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+}
+
+// The tab already names the section on screen; the heading is for screen readers.
+.title {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.status {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+// A found expert slides in as it joins the table; still for reduced motion.
+.row {
+  animation: expert-in $duration-moderate-02 motion(entrance, productive);
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes expert-in {
+  from {
+    opacity: 0;
+    transform: translateY($spacing-03);
+  }
+}
+
+.expert {
+  @include type-style('heading-compact-01');
+}
+
+.actionCell {
+  white-space: nowrap;
+}
+
+.sent {
+  @include type-style('body-compact-01');
+
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-02;
+  color: $text-secondary;
+
+  svg {
+    fill: $support-success;
+  }
+}
+
+// Skeleton rows while a further search runs, matching Carbon's skeleton colours.
+.skeletonBar {
+  display: block;
+  block-size: $spacing-04;
+  inline-size: 70%;
+  background: $skeleton-background;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-03;
+  padding-block: $spacing-09;
+  text-align: center;
+}
+
+.emptyTitle {
+  @include type-style('heading-compact-02');
+}
+
+.emptyText {
+  @include type-style('body-01');
+
+  max-inline-size: 32rem;
+  margin-block-end: $spacing-03;
+  color: $text-secondary;
+}
+
+// The large calls to action under the table.
+.ctaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+// ——— Bottom sheet ——————————————————————————————————————————————————————————————
+// Docked to the bottom of the viewport over the tab, sliding up; still for reduced motion.
+.sheet {
+  position: fixed;
+  z-index: 8000;
+  inset-block-end: 0;
+  inset-inline: 0;
+  max-block-size: 85vh;
+  overflow-y: auto;
+  border-block-start: 1px solid $border-subtle-01;
+  background: $layer-01;
+  box-shadow: 0 calc(-1 * #{$spacing-03}) $spacing-07 $shadow;
+  animation: sheet-up $duration-moderate-02 motion(entrance, expressive);
+
+  @include breakpoint(lg) {
+    // Sit beside the docked side nav, not under it.
+    inset-inline-start: $pt-shell-side-nav-width;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+.sheetForm {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  max-inline-size: 64rem;
+  margin-inline: auto;
+  padding: $spacing-06 $spacing-05;
+
+  @include breakpoint(md) {
+    padding-inline: $spacing-07;
+  }
+}
+
+.sheetHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-05;
+}
+
+.sheetTitle {
+  @include type-style('heading-03');
+}
+
+.sheetText {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+  margin-block-start: $spacing-02;
+}
+
+.sheetGrid {
+  display: grid;
+  gap: $spacing-05;
+  grid-template-columns: 1fr;
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.sheetActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-03;
+}

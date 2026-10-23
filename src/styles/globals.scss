@@ -48,6 +48,15 @@
   color-scheme: dark;
 }
 
+// A dark zone inside a light page (Carbon <Theme theme="g100">, e.g. the live call bar) uses the
+// same navy tokens as dark mode, not Carbon's grey g100.
+/* stylelint-disable-next-line selector-class-pattern -- Carbon's own zone class */
+.cds--g100:not(:root) {
+  @include app-themes.app-theme(dark);
+
+  color-scheme: dark;
+}
+
 // Every page and section heading uses the display face; Carbon tokens still set the size.
 h1,
 h2 {

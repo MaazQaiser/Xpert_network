@@ -3,11 +3,59 @@
 @use '@carbon/react/scss/type' as *;
 @use '@carbon/react/scss/breakpoint' as *;
 @use '../../../../styles/mixins' as mx;
+@use '@carbon/react/scss/border-radius' as radius;
 
 .root {
   display: flex;
   flex-direction: column;
   gap: $spacing-06;
+}
+
+// ——— Header (wireframe 03) ————————————————————————————————————————————————————
+// Breadcrumb, then the ID / status row, the title and the source line on the left, with the
+// three actions at the top right beside them. Wraps under the title on narrow screens.
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+}
+
+.headerRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-04 $spacing-05;
+}
+
+.heading {
+  display: flex;
+  flex: 1 1 24rem;
+  flex-direction: column;
+  gap: $spacing-02;
+  min-inline-size: 0;
+}
+
+.title {
+  @include mx.display-heading('heading-03');
+}
+
+// Text-only Carbon buttons sized to their label (Carbon reserves room for an icon on the
+// right). Doubled class outranks Carbon's button root rule; only the end padding changes.
+.compactButton.compactButton {
+  padding-inline-end: $spacing-05;
+}
+
+.subtitle {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
 }
 
 .meta {
@@ -23,32 +71,90 @@
   color: $text-secondary;
 }
 
-// Brief on the left; source document and checks follow it on the right from lg.
-.layout {
-  display: grid;
-  gap: $spacing-05;
-  grid-template-columns: 1fr;
+// ——— Brief under the title ——————————————————————————————————————————————————————
+.briefBlock {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+}
 
-  @include breakpoint(lg) {
-    align-items: start;
-    grid-template-columns: 3fr 2fr;
+// ——— Tabs: a segmented track with counts (reference) ——————————————————————————————
+// Carbon Tabs keep their roles and keyboard behaviour; only the roots of the tab list and each
+// tab are restyled (track, selected pill, counts). Triple class outranks Carbon's tab rules.
+.segmented.segmented {
+  inline-size: 100%;
+  min-block-size: auto;
+  padding: $spacing-02;
+  border-radius: radius.$border-radius-16;
+  background: $layer-01;
+}
+
+.segmented .segment.segment {
+  display: inline-flex;
+  align-items: center;
+  block-size: auto;
+  padding: $spacing-03 $spacing-05;
+  border: 0;
+  border-radius: radius.$border-radius-08;
+  background: transparent;
+  box-shadow: none;
+  color: $text-secondary;
+
+  &:hover {
+    background: $layer-hover-01;
+    color: $text-primary;
+  }
+
+  &[aria-selected='true'] {
+    background: $layer-02;
+    box-shadow: 0 1px $spacing-02 $shadow;
+    color: $text-primary;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: -2px;
   }
 }
 
-.main,
-.side {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-05;
-  min-inline-size: 0;
+.count {
+  @include type-style('label-01');
+
+  display: inline-flex;
+  justify-content: center;
+  min-inline-size: $spacing-06;
+  margin-inline-start: $spacing-03;
+  padding-inline: $spacing-02;
+  border-radius: radius.$border-radius-24;
+  background: $layer-accent-01;
+  color: $text-secondary;
 }
 
-.card {
-  @include mx.surface-card;
+.segment[aria-selected='true'] .count {
+  background: $background-inverse;
+  color: $text-inverse;
+}
 
+// The selected section sits on the page under the track; Carbon's panel padding is replaced.
+.tabPanel.tabPanel {
+  padding: $spacing-05 0 0;
+}
+
+// Inside a tab the section title repeats the tab's own label, so it is kept for screen readers
+// only; the AI label, note and actions in the same row stay visible.
+.tabPanel :is(.cardTitle, .cardTitleInline) {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+// A section inside a tab: no card of its own (the tabs are the structure).
+.card {
   display: flex;
   flex-direction: column;
-  padding: $spacing-05;
   gap: $spacing-04;
 }
 
@@ -61,8 +167,17 @@
 
 .cardTitle {
   @include type-style('heading-02');
+}
 
-  flex: 1;
+// In a header row the title takes the row; on a narrow card the actions wrap under it
+// instead of squeezing it. (Scoped: in a column, flex-basis would set the height.)
+.cardHeader .cardTitle {
+  flex: 1 1 12rem;
+}
+
+// A title followed directly by its note (Expert profile needed · Used to match…).
+.cardTitleInline {
+  @include type-style('heading-02');
 }
 
 .cardMeta {
@@ -78,8 +193,7 @@
 }
 
 .briefText {
-  @include type-style('body-02');
-  @include mx.reading-width;
+  @include type-style('body-01');
 }
 
 .editor {
@@ -95,60 +209,37 @@
   gap: $spacing-03;
 }
 
-.facts {
-  display: grid;
-  gap: $spacing-04 $spacing-05;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-
-  @include breakpoint(md) {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-// Label and its page link share the top row, so every source link sits in the same place.
-.fact {
-  display: grid;
-  align-content: start;
-  gap: $spacing-02;
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-
-.factLabel {
-  @include type-style('label-01');
-
-  align-self: center;
-  color: $text-secondary;
-  grid-column: 1;
-  grid-row: 1;
-  text-transform: uppercase;
-}
-
-.factSource {
-  grid-column: 2;
-  grid-row: 1;
-}
-
-.factValue {
-  @include type-style('body-compact-01');
-
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: $spacing-02;
-  grid-column: 1 / -1;
-}
-
-.pageRef {
-  @include type-style('code-01');
-
-  min-block-size: auto;
-  padding-inline: $spacing-02;
+// A header row's action sits at the right edge (e.g. "Add question").
+.headerAction.headerAction {
+  margin-inline-start: auto;
 }
 
 .tags {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: $spacing-02;
+}
+
+// Expert profile: a Carbon ContainedList. Each row leads with a quiet two-digit index.
+.requirements.requirements {
+  margin-block-start: $spacing-02;
+}
+
+.requirement {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  align-items: baseline;
+  gap: $spacing-04;
+}
+
+.requirementNumber {
+  @include type-style('label-01');
+
+  flex: none;
+  inline-size: $spacing-05; // fixed, so every label starts on the same line
+  color: $text-helper;
 }
 
 .inlineForm {
@@ -168,8 +259,10 @@
   flex-direction: column;
 }
 
+// On narrow cards the page ref and buttons wrap under the question text, right-aligned.
 .question {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   padding-block: $spacing-03;
   gap: $spacing-03;
@@ -194,13 +287,14 @@
 .questionText {
   @include type-style('body-01');
 
-  flex: 1;
+  flex: 1 1 14rem;
 }
 
 .questionActions {
   display: flex;
   flex: none;
   align-items: center;
+  margin-inline-start: auto;
   gap: $spacing-01;
 }
 
@@ -225,18 +319,6 @@
 
   > :last-child {
     flex: none;
-  }
-}
-
-.activity {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-02;
-
-  li {
-    @include type-style('label-01');
-
-    color: $text-secondary;
   }
 }
 

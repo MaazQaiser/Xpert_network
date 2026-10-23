@@ -2,6 +2,7 @@
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
 @use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/border-radius' as radius;
 @use '@carbon/react/scss/motion' as *;
 @use '../../../../styles/mixins' as mx;
 @use '../../../../styles/tokens' as *;
@@ -221,12 +222,6 @@ $pt-mascot-think: 1.4s;
   }
 }
 
-.kicker {
-  @include type-style('body-02');
-
-  color: $text-secondary;
-}
-
 .greeting {
   @include mx.display-heading('heading-04');
 
@@ -238,63 +233,34 @@ $pt-mascot-think: 1.4s;
   }
 }
 
-// ——— Briefing ————————————————————————————————————————————————————————————————
-// A Carbon Tile ($layer-01): a small mascot mark, a small uppercase title, the note in 16px
-// paragraphs, then the three counts as ClickableTiles one layer up ($layer-02, via Layer).
-// From md up everything is indented under the title; on phones the body uses the full width.
-
-.briefing.briefing {
-  display: grid;
-  align-items: start;
-  gap: $spacing-02 $spacing-04;
-  grid-template-areas:
-    'mark head'
-    'body body';
-  grid-template-columns: auto 1fr;
-  padding: $spacing-05;
-
-  @include breakpoint(md) {
-    grid-template-areas:
-      'mark head'
-      '. body';
-    padding: $spacing-06;
-  }
-}
-
-.briefingMark {
-  grid-area: mark;
-  block-size: $spacing-07;
-  inline-size: auto;
-}
-
-.briefingHead {
-  display: flex;
-  align-items: center;
-  grid-area: head;
-  min-block-size: $spacing-07; // centred on the mark
-}
-
-.briefingTitle {
-  @include type-style('heading-compact-01');
-
-  text-transform: uppercase;
-}
-
-.briefingBody {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-05;
-  grid-area: body;
-  min-inline-size: 0;
-}
-
-.briefingText {
+// The intro sits right under the greeting as plain text.
+.lede {
   @include type-style('body-02');
 
+  max-inline-size: 36rem;
+  margin-block-start: $spacing-03;
+  color: $text-secondary;
   text-wrap: pretty;
 }
 
-// Today's tip leads with its project as an inline Carbon link.
+// ——— Today: tip and counts ————————————————————————————————————————————————————
+// Today's tip as one line, then the three counts as Carbon ClickableTiles on Carbon's own
+// $layer-01 (#f6f7f9 in the light theme) — no panel around them.
+
+.today {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+}
+
+.tip {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+  text-align: center;
+  text-wrap: pretty;
+}
+
 .tipLead {
   @include font-weight('semibold');
 }
@@ -399,8 +365,8 @@ $pt-mascot-think: 1.4s;
   }
 }
 
-// Suggestions are light Carbon ghost buttons on a $layer-01 fill, sharing one row edge to edge;
-// a narrow page wraps. (Tertiary's ink outline and black hover read too heavy here.)
+// Suggestions are light Carbon ghost buttons on a $layer-01 fill with 8px corners (ADR 0015
+// exception, with the glow field below), sharing one row edge to edge; a narrow page wraps.
 .prompts {
   display: flex;
   flex-wrap: wrap;
@@ -412,10 +378,19 @@ $pt-mascot-think: 1.4s;
   }
 }
 
-// Doubled class outranks Carbon's button root rule: width, a quiet layer fill and ink text.
+// Doubled class outranks Carbon's button root rule: width, height, corners, a quiet layer fill
+// and ink text, centred.
 .prompt.prompt {
+  justify-content: center;
   inline-size: 100%;
   max-inline-size: none;
+  min-block-size: $spacing-08;
+  padding-inline: $spacing-05;
+
+  // No outline, as in the reference: the fill is quiet (~1.07:1 to the page), and the chip is
+  // identified by its own label (text 15.7:1), which WCAG 1.4.11 accepts for buttons.
+  border: 1px solid transparent;
+  border-radius: radius.$border-radius-08;
   background: $layer-01;
   color: $text-primary;
 

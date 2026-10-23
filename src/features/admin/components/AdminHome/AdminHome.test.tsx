@@ -10,7 +10,7 @@ describe('AdminHome (F11, screen 01)', () => {
   it('greets the PM, shows the summary and the AI tip', async () => {
     const { container } = renderWithProviders(<AdminHome />, { persona: 'ops' });
     expect(
-      await screen.findByRole('heading', { name: /Hey Paltu Kerison, good/ }),
+      await screen.findByRole('heading', { name: /Hey Palto Kersion, good/ }),
     ).toBeInTheDocument();
     expect(
       await screen.findByRole('link', { name: 'Experts pending review: 4. Review experts' }),

@@ -19,7 +19,7 @@ Use these terms in copy, routes and code (UX_PRINCIPLES §2).
 | Interview      | An expert's voice or text session with the AI interviewer                                |
 | Expert         | A vetted person who gives interviews; anonymous to clients (role, years, region)         |
 | Workspace      | A client's folders and labels for briefs, reports and requests                           |
-| Project manager | The internal user who runs projects in the admin console (persona: Paltu Kerison)       |
+| Project manager | The internal user who runs projects in the admin console (persona: Palto Kersion)       |
 | Project        | A client brief turned into a tracked job (`PRJ-1042`), from draft to booked calls        |
 | Project file   | The AI-drafted brief, key facts, expert profile and client questions, with page sources  |
 | Shortlist      | The AI-ranked experts chosen from the matches, each with "why picked"                    |

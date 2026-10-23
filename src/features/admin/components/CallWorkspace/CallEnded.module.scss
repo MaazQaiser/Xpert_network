@@ -1,0 +1,273 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/motion' as *;
+@use '../../../../styles/mixins' as mx;
+
+// One authored moment, same mascot language as Admin home (transform-origin at the feet):
+//   drop    falls in and lands with a squash
+//   ring    one soft ripple as it lands
+//   wave    a friendly wave once it has landed
+//   float   then the idle float, forever
+//   hop     on click, a hop with squash and stretch
+// Everything stops for reduced motion. Hop length matches HOP_MS in CallEnded.tsx.
+$pt-ended-drop: 0.9s;
+$pt-ended-wave: 1.1s;
+$pt-ended-float: 6s;
+$pt-ended-hop: 0.9s;
+
+// Above the Carbon UI Shell header and side nav.
+$pt-ended-layer: 9000;
+
+.overlay {
+  position: fixed;
+  z-index: $pt-ended-layer;
+  display: grid;
+  overflow-y: auto;
+  padding: $spacing-07 $spacing-05;
+  background: $background;
+  inset: 0;
+  place-items: center;
+  animation: fade-in $duration-moderate-02 motion(entrance, productive) both;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-05;
+  max-inline-size: 34rem;
+  text-align: center;
+}
+
+// ——— Mascot ————————————————————————————————————————————————————————————————————
+.mascot {
+  position: relative;
+  display: inline-grid;
+  padding: $spacing-03;
+  border: 0;
+  margin-block-end: $spacing-03;
+  background: transparent;
+  cursor: pointer;
+  place-items: center;
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+
+  // Floor shadow under the feet; it shrinks while the mascot is in the air.
+  &::after {
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    /* stylelint-disable-next-line carbon/theme-use -- soft shadow from the Carbon shadow token */
+    background: radial-gradient(closest-side, $shadow, transparent);
+    block-size: $spacing-05;
+    content: '';
+    inline-size: 60%;
+    inset-block-end: 0;
+    inset-inline-start: 20%;
+    animation:
+      shadow-drop $pt-ended-drop motion(entrance, expressive) both,
+      shadow-float $pt-ended-float ease-in-out calc($pt-ended-drop + $pt-ended-wave) infinite;
+  }
+}
+
+.mascotImage {
+  display: block;
+  block-size: $spacing-12;
+  inline-size: auto;
+  transform-origin: 50% 100%;
+  animation:
+    drop $pt-ended-drop motion(entrance, expressive) both,
+    wave $pt-ended-wave motion(standard, expressive) $pt-ended-drop 1,
+    float $pt-ended-float ease-in-out calc($pt-ended-drop + $pt-ended-wave) infinite;
+}
+
+.mascot:hover .mascotImage {
+  animation: wave $duration-slow-02 motion(standard, expressive);
+}
+
+.mascot[data-hop] .mascotImage {
+  animation: hop $pt-ended-hop motion(entrance, expressive) 1;
+}
+
+// A soft ripple behind the mascot as it lands: "done".
+.ring {
+  position: absolute;
+  z-index: -1;
+  border: 2px solid $support-success;
+  border-radius: 50%;
+  block-size: $spacing-13;
+  inline-size: $spacing-13;
+  opacity: 0;
+  animation: ripple $pt-ended-wave motion(exit, expressive) calc($pt-ended-drop * 0.7) 1;
+}
+
+// ——— Copy and actions ————————————————————————————————————————————————————————————
+.tag.tag {
+  margin: 0;
+}
+
+.title {
+  @include mx.display-heading('heading-05');
+}
+
+.text {
+  @include type-style('body-02');
+
+  color: $text-secondary;
+}
+
+.notes {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  padding: $spacing-05;
+  background: $layer-01;
+  inline-size: 100%;
+  text-align: start;
+
+  li {
+    display: grid;
+    gap: $spacing-03;
+    grid-template-columns: auto minmax(0, 1fr);
+
+    // A small dot per note, aligned with the first line.
+    &::before {
+      border-radius: 50%;
+      background: $icon-secondary;
+      block-size: $spacing-02;
+      content: '';
+      inline-size: $spacing-02;
+      margin-block-start: $spacing-03;
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: $spacing-03;
+  margin-block-start: $spacing-03;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .ring,
+  .mascot::after,
+  .mascot .mascotImage,
+  .mascot:hover .mascotImage,
+  .mascot[data-hop] .mascotImage {
+    animation: none;
+  }
+}
+
+// ——— Keyframes ———————————————————————————————————————————————————————————————————
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes drop {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(-1 * #{$spacing-10})) scale(0.9);
+  }
+
+  55% {
+    opacity: 1;
+    transform: translateY(0) scale(0.96, 1.06);
+  }
+
+  72% {
+    transform: scale(1.1, 0.88);
+  }
+
+  88% {
+    transform: translateY(calc(-1 * #{$spacing-02})) scale(0.98, 1.02);
+  }
+
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes shadow-drop {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.4);
+  }
+
+  55%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes wave {
+  20% {
+    transform: rotate(-8deg);
+  }
+
+  45% {
+    transform: rotate(6deg);
+  }
+
+  70% {
+    transform: rotate(-4deg);
+  }
+
+  90% {
+    transform: rotate(1deg);
+  }
+}
+
+@keyframes float {
+  50% {
+    transform: translateY(calc(-1 * #{$spacing-03}));
+  }
+}
+
+@keyframes shadow-float {
+  50% {
+    opacity: 0.6;
+    transform: scaleX(0.85);
+  }
+}
+
+@keyframes hop {
+  15% {
+    transform: scale(1.1, 0.88);
+  }
+
+  45% {
+    transform: translateY(calc(-1 * #{$spacing-07})) scale(0.94, 1.08);
+  }
+
+  75% {
+    transform: translateY(0) scale(1.06, 0.92);
+  }
+
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.5);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}

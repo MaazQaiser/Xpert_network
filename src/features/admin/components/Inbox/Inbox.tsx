@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button, InlineNotification, ProgressBar, Search, SkeletonText } from '@carbon/react';
@@ -27,7 +28,13 @@ import {
   type InboxRequest,
   type InboxView,
 } from '../../model/inbox.schema';
-import { attachmentLine, InboxStatusTag, initials, receivedLabel } from '../inboxDisplay';
+import {
+  attachmentLine,
+  InboxStatusTag,
+  initials,
+  receivedLabel,
+  senderPhoto,
+} from '../inboxDisplay';
 import { SourceDocument } from '../SourceDocument/SourceDocument';
 import styles from './Inbox.module.scss';
 
@@ -246,7 +253,17 @@ function ReadingPane({ request, backHref }: { request: InboxRequest; backHref: s
       </Link>
       <header className={styles.readingHeader}>
         <span className={styles.avatar} aria-hidden="true">
-          {initials(request.from.name)}
+          {senderPhoto(request.from.email) ? (
+            <Image
+              src={senderPhoto(request.from.email) ?? ''}
+              alt=""
+              width={48}
+              height={48}
+              className={styles.avatarPhoto}
+            />
+          ) : (
+            initials(request.from.name)
+          )}
         </span>
         <div className={styles.readingTitle}>
           <h2 id="request-subject" className={styles.subjectLarge}>
@@ -259,7 +276,15 @@ function ReadingPane({ request, backHref }: { request: InboxRequest; backHref: s
         </div>
         <div className={styles.readingActions}>
           <InboxStatusTag request={request} size="md" />
-          {projectHref && request.status === 'brief_ready' ? (
+          {request.projectId && request.status === 'client_reply' ? (
+            <Button
+              as={Link}
+              href={routes.admin.projectStep(request.projectId, 'pick')}
+              renderIcon={ArrowRight}
+            >
+              Open {request.from.name.split(' ')[0]}’s picks
+            </Button>
+          ) : projectHref && request.status === 'brief_ready' ? (
             <Button as={Link} href={projectHref} renderIcon={ArrowRight}>
               Open project file
             </Button>

@@ -1,0 +1,265 @@
+'use client';
+
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Button,
+  DataTableSkeleton,
+  InlineLoading,
+  IconButton,
+  InlineNotification,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@carbon/react';
+import { ArrowRight, CheckmarkFilled, MagicWand, Search, Send } from '@carbon/icons-react';
+import { routes } from '@/shared/config/routes';
+import { useExpertSearch, useSendScreening } from '../../api/queries';
+import type { ExtendResearch } from '../../model/expertSearch.schema';
+import type { MatchedExpert } from '../../model/match.schema';
+import type { Project } from '../../model/project.schema';
+import { ExtendResearchSheet } from './ExtendResearchSheet';
+import type { ProjectNotice } from './ProjectFile';
+import styles from './ExpertsTab.module.scss';
+
+const HEADERS = ['Expert', 'Relevant role', 'Yrs', 'Country', 'Match', 'Screening'] as const;
+const FIRST_BATCH = 8;
+// Found experts join the table one at a time, so the search reads as work in progress.
+const REVEAL_MS = process.env.NODE_ENV === 'test' ? 0 : 450;
+
+type Phase = 'idle' | 'searching' | 'revealing' | 'done';
+
+type ExpertsTabProps = {
+  project: Project;
+  /** How many experts the table shows so far (for the tab's count). */
+  onFound: (count: number) => void;
+  onNotice: (notice: ProjectNotice) => void;
+};
+
+/**
+ * Screen 03 Experts tab: empty until the PM starts the search; then a skeleton while the AI
+ * searches, and the found experts appearing one by one. Each row can be sent the screening
+ * questions, and "Extend research" opens a sheet to look for more.
+ */
+export function ExpertsTab({ project, onFound, onNotice }: ExpertsTabProps) {
+  const search = useExpertSearch(project.id);
+  const screening = useSendScreening(project.id);
+  const [phase, setPhase] = useState<Phase>('idle');
+  const [experts, setExperts] = useState<MatchedExpert[]>([]);
+  const [shown, setShown] = useState(0);
+  const [sent, setSent] = useState<string[]>([]);
+  const [remaining, setRemaining] = useState<number | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const extendButton = useRef<HTMLButtonElement>(null);
+
+  // Reveal the found experts one by one; the last one switches the search to done.
+  useEffect(() => {
+    if (phase !== 'revealing' || shown >= experts.length) return;
+    const timer = window.setTimeout(() => {
+      setShown((count) => count + 1);
+      onFound(shown + 1);
+      if (shown + 1 >= experts.length) setPhase('done');
+    }, REVEAL_MS);
+    return () => window.clearTimeout(timer);
+  }, [phase, shown, experts.length, onFound]);
+
+  const run = (limit: number, criteria?: ExtendResearch) => {
+    setPhase('searching');
+    search.mutate(
+      { offset: experts.length, limit, ...(criteria ? { criteria } : {}) },
+      {
+        onSuccess: (result) => {
+          setExperts((current) => [...current, ...result.experts]);
+          setSent(result.screeningSent);
+          setRemaining(result.remaining);
+          setPhase(result.experts.length > 0 ? 'revealing' : 'done');
+        },
+        onError: (error) => {
+          setPhase(experts.length > 0 ? 'done' : 'idle');
+          onNotice({ kind: 'error', error });
+        },
+      },
+    );
+  };
+
+  const send = (expert: MatchedExpert) =>
+    screening.mutate(expert.id, {
+      onSuccess: (result) => {
+        setSent(result.screeningSent);
+        onNotice({
+          kind: 'success',
+          message: `Screening questions sent to ${expert.label}. Their answers will appear here.`,
+        });
+      },
+      onError: (error) => onNotice({ kind: 'error', error }),
+    });
+
+  const visible = experts.slice(0, shown);
+  const isBusy = phase === 'searching' || phase === 'revealing';
+
+  return (
+    <section className={styles.root} aria-labelledby="experts-title">
+      <div className={styles.header}>
+        <h2 id="experts-title" className={styles.title}>
+          Experts
+        </h2>
+        <p className={styles.status} aria-live="polite">
+          {phase === 'idle'
+            ? 'No experts yet. Start the search to find experts who match this brief.'
+            : phase === 'searching'
+              ? 'Searching the expert network…'
+              : phase === 'revealing'
+                ? `Found ${shown} of ${experts.length}…`
+                : `${experts.length} experts found${sent.length > 0 ? ` · ${sent.length} sent screening questions` : ''}.`}
+        </p>
+      </div>
+
+      {phase === 'searching' && experts.length === 0 ? (
+        <DataTableSkeleton
+          aria-label="Finding experts"
+          headers={HEADERS.map((header) => ({ key: header, header }))}
+          columnCount={HEADERS.length}
+          rowCount={6}
+          showHeader={false}
+          showToolbar={false}
+        />
+      ) : (
+        <TableContainer>
+          <Table size="lg" aria-label="Experts for this project">
+            <TableHead>
+              <TableRow>
+                {HEADERS.map((header) => (
+                  <TableHeader key={header}>{header}</TableHeader>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {visible.map((expert) => {
+                const isSent = sent.includes(expert.id);
+                return (
+                  <TableRow key={expert.id} className={styles.row}>
+                    <TableCell className={styles.expert}>{expert.label}</TableCell>
+                    <TableCell>{expert.role}</TableCell>
+                    <TableCell>{expert.years}</TableCell>
+                    <TableCell>{expert.country}</TableCell>
+                    <TableCell>{expert.matchPercent}%</TableCell>
+                    <TableCell className={styles.actionCell}>
+                      {/* Carbon's row-action pattern: an icon button named by its tooltip (also
+                          shown on keyboard focus); once sent, the status stays visible. */}
+                      {isSent ? (
+                        <span className={styles.sent}>
+                          <CheckmarkFilled aria-hidden={true} /> Sent
+                        </span>
+                      ) : (
+                        <IconButton
+                          kind="ghost"
+                          size="sm"
+                          align="top-end"
+                          label="Send screening questions"
+                          disabled={screening.isPending}
+                          onClick={() => send(expert)}
+                        >
+                          <Send />
+                        </IconButton>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              {/* While searching for more, a few skeleton rows follow the found experts. */}
+              {phase === 'searching' && experts.length > 0
+                ? [0, 1, 2].map((i) => (
+                    <TableRow key={`loading-${i}`} aria-hidden="true">
+                      {HEADERS.map((header) => (
+                        <TableCell key={header}>
+                          <span className={styles.skeletonBar} />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                : null}
+              {phase === 'idle' ? (
+                <TableRow>
+                  <TableCell colSpan={HEADERS.length}>
+                    <div className={styles.empty}>
+                      <p className={styles.emptyTitle}>No experts yet</p>
+                      <p className={styles.emptyText}>
+                        The AI searches the network for people who match the expert profile and the
+                        client questions.
+                      </p>
+                      <Button renderIcon={Search} onClick={() => run(FIRST_BATCH)}>
+                        Start finding experts
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : null}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+      {phase === 'revealing' ? (
+        <InlineLoading description="Adding experts as they’re found…" />
+      ) : null}
+
+      {phase === 'done' && remaining === 0 ? (
+        <InlineNotification
+          kind="info"
+          lowContrast
+          hideCloseButton
+          title="That’s everyone in the current pool."
+          subtitle="Extend the research to look further, for example on LinkedIn."
+        />
+      ) : null}
+
+      {phase !== 'idle' ? (
+        <div className={styles.ctaRow}>
+          <Button
+            ref={extendButton}
+            size="lg"
+            renderIcon={MagicWand}
+            disabled={isBusy}
+            onClick={() => setIsSheetOpen(true)}
+          >
+            Extend research with AI
+          </Button>
+          {/* Once questions are out, the next step is reading who answered (screen 08). */}
+          {sent.length > 0 ? (
+            <Button
+              as={Link}
+              href={routes.admin.projectStep(project.id, 'responses')}
+              kind="tertiary"
+              size="lg"
+              renderIcon={ArrowRight}
+            >
+              View screening answers ({sent.length})
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {isSheetOpen ? (
+        <ExtendResearchSheet
+          project={project}
+          onClose={() => {
+            setIsSheetOpen(false);
+            extendButton.current?.focus();
+          }}
+          onSubmit={(criteria) => {
+            setIsSheetOpen(false);
+            run(criteria.maxExperts, criteria);
+            onNotice({
+              kind: 'success',
+              message: `Searching for ${criteria.minExperts}–${criteria.maxExperts} more experts.`,
+            });
+          }}
+        />
+      ) : null}
+    </section>
+  );
+}

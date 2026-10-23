@@ -26,7 +26,15 @@ import { SEED_WORKSPACES, type StoredWorkspace } from '../fixtures/workspace';
 import { SEED_APPLICATIONS } from '../fixtures/calls';
 import { SEED_EARNINGS, type StoredEarnings } from '../fixtures/earnings';
 import type { StoredInterview } from '../ai/interviewer/engine';
-import type { InboxRequest, MatchResult, Project, Shortlist } from '@/features/admin';
+import type {
+  InboxRequest,
+  MatchResult,
+  Project,
+  Shortlist,
+  ClientDraft,
+  Booking,
+  CallSession,
+} from '@/features/admin';
 import { seedInbox, seedProjects, type SentMail } from '../fixtures/admin/seed';
 
 export type DemoState = {
@@ -74,6 +82,21 @@ export type DemoState = {
   adminMatches: Record<string, MatchResult>;
   /** F13: AI shortlist per project, filled when the PM generates one. */
   adminShortlists: Record<string, Shortlist>;
+  /** Screen 03 Experts tab: who has been sent the screening questions, per project. */
+  adminScreening: Record<string, string[]>;
+  /** When each project's screening questions first went out. */
+  adminScreeningSentAt: Record<string, string>;
+  /** Screen 09: the experts moved forward, when their times were asked, and the send to client. */
+  /** Screen 10: the AI-drafted email to the client, per project. */
+  adminClientDraft: Record<string, ClientDraft>;
+  /** Screens 11–13: the client's picks, the sync and the booked calls, per project. */
+  adminBooking: Record<string, Booking>;
+  /** Screen 14: the live call workspace, per project. */
+  adminCall: Record<string, CallSession>;
+  adminAvailability: Record<
+    string,
+    { expertIds: string[]; askedAt: string; sentToClientAt: string | null }
+  >;
 };
 
 export type StoredApplication = {
@@ -144,6 +167,12 @@ function seed(): DemoState {
     adminMail: [],
     adminMatches: {},
     adminShortlists: {},
+    adminScreening: {},
+    adminScreeningSentAt: {},
+    adminAvailability: {},
+    adminClientDraft: {},
+    adminBooking: {},
+    adminCall: {},
   };
   withCustomReports(state, customReports);
   return state;
@@ -169,7 +198,15 @@ function withNewSeeds(saved: DemoState, fresh: DemoState): DemoState {
     const freshCount = fresh.messages[brief.id]?.length ?? 0;
     return !saved.briefs?.[brief.id] || savedCount < freshCount;
   });
-  const needsAdminSlices = !saved.adminMatches || !saved.adminShortlists;
+  const needsAdminSlices =
+    !saved.adminMatches ||
+    !saved.adminShortlists ||
+    !saved.adminScreening ||
+    !saved.adminScreeningSentAt ||
+    !saved.adminAvailability ||
+    !saved.adminClientDraft ||
+    !saved.adminBooking ||
+    !saved.adminCall;
   if (missingRequests.length === 0 && storyBriefs.length === 0 && !needsAdminSlices) {
     return saved;
   }
@@ -182,6 +219,12 @@ function withNewSeeds(saved: DemoState, fresh: DemoState): DemoState {
     ...saved,
     adminMatches: saved.adminMatches ?? {},
     adminShortlists: saved.adminShortlists ?? {},
+    adminScreening: saved.adminScreening ?? {},
+    adminScreeningSentAt: saved.adminScreeningSentAt ?? {},
+    adminAvailability: saved.adminAvailability ?? {},
+    adminClientDraft: saved.adminClientDraft ?? {},
+    adminBooking: saved.adminBooking ?? {},
+    adminCall: saved.adminCall ?? {},
     requests: {
       ...saved.requests,
       ...Object.fromEntries(missingRequests.map((r) => [r.id, r])),

@@ -10,7 +10,7 @@ import { ProjectFile } from './ProjectFile';
 const project = () => db.get().adminProjects['PRJ-1042']!;
 
 describe('ProjectFile (F12, screen 03)', () => {
-  it('shows the AI brief, facts, profile and questions', async () => {
+  it('shows the brief under the title and the sections in tabs', async () => {
     const { container } = renderWithProviders(<ProjectFile projectId="PRJ-1042" />, {
       persona: 'ops',
     });
@@ -19,26 +19,74 @@ describe('ProjectFile (F12, screen 03)', () => {
         name: 'EV battery recycling — Europe market diligence',
       }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Client questions · 8 found' })).toBeInTheDocument();
-    expect(screen.getByText('Not in doc')).toBeInTheDocument();
+    expect(screen.getByText(/Helix is evaluating an investment/)).toBeInTheDocument();
+    // The sections live in tabs, each with its count.
+    expect(screen.getByRole('tab', { name: /Expert profile needed\s*6/ })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs[tabs.length - 1]).toHaveAccessibleName(/^Experts\s*0/);
+    await userEvent.click(screen.getByRole('tab', { name: /Screening questions\s*8/ }));
+    expect(
+      screen.getByRole('heading', { name: 'Screening questions · 8 found' }),
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('tab', { name: /Needs confirming\s*2/ }));
     expect(screen.getByRole('heading', { name: 'Needs confirming (2)' })).toBeInTheDocument();
     await expectNoAxeViolations(container);
   });
 
-  it('jumps to the source of a question and highlights it', async () => {
+  it('shows four section tabs and the screening questions without page numbers', async () => {
     renderWithProviders(<ProjectFile projectId="PRJ-1042" />, { persona: 'ops' });
-    await userEvent.click(
-      await screen.findByRole('button', { name: 'Show the source of question 3, page 5' }),
-    );
-    expect(screen.getByText('Page 5 of 14')).toBeInTheDocument();
-    expect(screen.getByText('Source of question 3')).toBeInTheDocument();
+    expect(await screen.findAllByRole('tab')).toHaveLength(4);
+    expect(screen.queryByRole('tab', { name: /Source document/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /Activity/ })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('tab', { name: /Screening questions/ }));
+    expect(screen.queryByText('p.4')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /^Edit question/ })).toHaveLength(8);
+    expect(screen.getAllByRole('button', { name: /^Delete question/ })).toHaveLength(8);
+  });
+
+  it('finds experts on request, then sends one the screening questions', async () => {
+    renderWithProviders(<ProjectFile projectId="PRJ-1042" />, { persona: 'ops' });
+    await userEvent.click(await screen.findByRole('tab', { name: /^Experts/ }));
+    expect(screen.getByText('No experts yet')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Start finding experts' }));
+    expect(await screen.findByText(/8 experts found/)).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Experts\s*8/ })).toBeInTheDocument();
+    // One send button per row; the first row is Expert #4821.
+    await userEvent.click(screen.getAllByRole('button', { name: 'Send screening questions' })[0]!);
+    expect(await screen.findByText(/Screening questions sent to Expert #4821/)).toBeInTheDocument();
+    expect(screen.getByText('Sent')).toBeInTheDocument();
+    expect(db.get().adminScreening['PRJ-1042']).toEqual(['exp_4821']);
+  });
+
+  it('extends the research from the bottom sheet and adds more experts', async () => {
+    renderWithProviders(<ProjectFile projectId="PRJ-1042" />, { persona: 'ops' });
+    await userEvent.click(await screen.findByRole('tab', { name: /^Experts/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'Start finding experts' }));
+    await screen.findByText(/8 experts found/);
+    await userEvent.click(screen.getByRole('button', { name: 'Extend research with AI' }));
+    const sheet = screen.getByRole('dialog', { name: 'Extend research' });
+    expect(within(sheet).getByRole('checkbox', { name: 'LinkedIn' })).toBeChecked();
+    expect(within(sheet).getByRole('checkbox', { name: 'Expert network API' })).toBeChecked();
+    // At least one source is required.
+    await userEvent.click(within(sheet).getByRole('checkbox', { name: 'LinkedIn' }));
+    await userEvent.click(within(sheet).getByRole('checkbox', { name: 'Expert network API' }));
+    await userEvent.click(within(sheet).getByRole('button', { name: 'Find more experts' }));
+    expect(await within(sheet).findByText('Choose at least one source.')).toBeInTheDocument();
+    await userEvent.click(within(sheet).getByRole('checkbox', { name: 'LinkedIn' }));
+    await userEvent.click(within(sheet).getByRole('button', { name: 'Find more experts' }));
+    expect(await screen.findByText(/18 experts found/)).toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'Extend research' })).not.toBeInTheDocument();
   });
 
   it('removes a question with undo', async () => {
     renderWithProviders(<ProjectFile projectId="PRJ-1042" />, { persona: 'ops' });
-    await userEvent.click(await screen.findByRole('button', { name: 'Remove question 8' }));
+    await userEvent.click(await screen.findByRole('tab', { name: /Screening questions/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'Delete question 8' }));
     expect(
-      await screen.findByRole('heading', { name: 'Client questions · 7 found' }),
+      await screen.findByRole('heading', { name: 'Screening questions · 7 found' }),
     ).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Undo' }));
     await waitFor(() => expect(project().questions).toHaveLength(8));
@@ -46,7 +94,8 @@ describe('ProjectFile (F12, screen 03)', () => {
 
   it('confirms the deadline the AI proposed', async () => {
     renderWithProviders(<ProjectFile projectId="PRJ-1042" />, { persona: 'ops' });
-    await userEvent.click(await screen.findByRole('button', { name: 'Confirm 2 Nov' }));
+    await userEvent.click(await screen.findByRole('tab', { name: /Needs confirming/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'Confirm 2 Nov' }));
     expect(await screen.findByText('Confirmed: 2 Nov.')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Needs confirming (1)' })).toBeInTheDocument();
   });

@@ -38,6 +38,7 @@ AI is not a chatbot bolted on the side. In Xpert Network, AI is **woven into the
 - **Revert state** — once a human edits an AI-filled field, switch the label to its "revert" state so they can return to AI output or keep their edit.
 - Keep AI styling **subtle**; content must remain the hero.
 - **Exception — admin Home briefing (2026-10-22).** The "Your briefing" panel on `/admin/home` has no `AILabel`, at the stakeholder's request. It is still marked as the assistant's by the mascot and the "Your AI assistant" heading above it; the assistant's chat answers on the same page keep their labels.
+- **Exception — screen 03 project file (2026-10-23).** The AI-drafted sections are marked with the animated assistant mascot instead of `AILabel`, with no explainability popover, at the stakeholder's request. Reversibility stays: once a section is edited, a *Revert to AI draft* button appears beside the mascot.
 
 ---
 

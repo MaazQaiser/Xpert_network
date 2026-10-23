@@ -1,6 +1,99 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+
+// ——— Account trigger in the header ————————————————————————————————————————————
+// A Carbon header action (48px tall) that grows to fit the avatar, name and designation.
+// Doubled class outranks Carbon's square header-action root rule; only width and layout change.
+.trigger.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-03;
+  inline-size: auto;
+  padding-inline: $spacing-03;
+
+  @include breakpoint(md) {
+    padding-inline: $spacing-04 $spacing-03;
+  }
+}
+
+.avatar,
+.avatarLarge {
+  @include type-style('label-02');
+  @include font-weight('semibold');
+
+  overflow: hidden;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  block-size: $spacing-07;
+  inline-size: $spacing-07;
+
+  /* stylelint-disable carbon/theme-use -- Carbon tag palette tokens, theme-aware */
+  background: var(--cds-tag-background-blue);
+  color: var(--cds-tag-color-blue);
+  /* stylelint-enable carbon/theme-use */
+}
+
+// The account panel opens with a larger avatar above the name.
+.avatarLarge.avatarLarge {
+  margin-block-end: $spacing-03;
+  block-size: $spacing-09;
+  inline-size: $spacing-09;
+}
+
+.avatarPhoto {
+  display: block;
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: cover;
+}
+
+// Name over designation; hidden on phones so the header still fits at 320px.
+.identity {
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  max-inline-size: 14rem;
+  text-align: start;
+
+  @include breakpoint(md) {
+    display: flex;
+  }
+}
+
+.triggerName,
+.triggerTitle {
+  overflow: hidden;
+  max-inline-size: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.triggerName {
+  @include type-style('heading-compact-01');
+
+  color: $text-primary;
+}
+
+.triggerTitle {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.chevron {
+  display: none;
+  flex: none;
+  fill: $icon-secondary;
+
+  @include breakpoint(md) {
+    display: block;
+  }
+}
 
 .panel {
   display: flex;

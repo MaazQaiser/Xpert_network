@@ -10,6 +10,7 @@ const STATUS: Record<InboxRequest['status'], { tone: StatusTone; label: string }
   needs_client_info: { tone: 'warning', label: 'Needs client info' },
   cant_open: { tone: 'error', label: 'Can’t open file' },
   converted: { tone: 'success', label: 'Converted' },
+  client_reply: { tone: 'info', label: 'Client picked' },
 };
 
 export function InboxStatusTag({
@@ -28,6 +29,22 @@ export function InboxStatusTag({
         ? `${label} · ${progress}%`
         : label;
   return <StatusTag tone={tone} label={text} size={size} />;
+}
+
+// Placeholder portraits for the demo senders (randomuser.me, saved in /public/images/avatars).
+// They are stand-ins, not the real people; anyone else gets their initials.
+const SENDER_PHOTOS: Record<string, string> = {
+  'sarah.lin@helixcap.example': '/images/avatars/sarah-lin.jpg',
+  'omar.siddiqui@northgate.example': '/images/avatars/omar-siddiqui.jpg',
+  'priya.raman@lakeview.example': '/images/avatars/priya-raman.jpg',
+  'j.okafor@brightlinepe.example': '/images/avatars/james-okafor.jpg',
+  'elena@corvidpartners.example': '/images/avatars/elena-duarte.jpg',
+  'tom.becker@halden.example': '/images/avatars/tom-becker.jpg',
+};
+
+/** The sender's photo if we have one, else null (callers show initials). */
+export function senderPhoto(email: string): string | null {
+  return SENDER_PHOTOS[email] ?? null;
 }
 
 export function initials(name: string): string {

@@ -1,0 +1,219 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: $spacing-05;
+}
+
+.heading {
+  display: flex;
+  flex: 1 1 24rem;
+  flex-direction: column;
+  gap: $spacing-03;
+  min-inline-size: 0;
+}
+
+.title {
+  @include mx.display-heading('heading-04');
+}
+
+.subtitle {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+// ——— Four Carbon tiles with the counts ———————————————————————————————————————
+.stats {
+  display: grid;
+  gap: $spacing-04;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.stat.stat {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  min-block-size: auto;
+}
+
+.statLabel {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.statValue {
+  @include type-style('heading-04');
+  @include mx.display-face;
+}
+
+// ——— Table and the client panel side by side from lg —————————————————————————————
+.layout {
+  display: grid;
+  gap: $spacing-06;
+  grid-template-columns: minmax(0, 1fr);
+
+  @include breakpoint(lg) {
+    align-items: start;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}
+
+.tablePane {
+  min-inline-size: 0;
+}
+
+.tableHint {
+  @include type-style('helper-text-01');
+
+  margin-block-end: $spacing-03;
+  color: $text-helper;
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.row td {
+  block-size: auto;
+  padding-block: $spacing-04;
+  vertical-align: middle;
+}
+
+.expert {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+}
+
+.expertTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.expertName {
+  @include type-style('heading-compact-01');
+}
+
+.expertRole {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.warning {
+  @include type-style('label-01');
+
+  color: $text-error;
+  margin-block-start: $spacing-03;
+}
+
+.actionCell {
+  text-align: end;
+  white-space: nowrap;
+}
+
+// ——— Ready for the client ——————————————————————————————————————————————————————
+.panel {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  padding: $spacing-06;
+
+  @include breakpoint(lg) {
+    position: sticky;
+    inset-block-start: $spacing-09;
+  }
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.mascot {
+  flex: none;
+  block-size: $spacing-06;
+  inline-size: auto;
+}
+
+.panelTitle {
+  @include type-style('heading-compact-02');
+}
+
+.panelText {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+.clientList {
+  display: flex;
+  flex-direction: column;
+
+  li {
+    @include type-style('body-compact-01');
+
+    display: flex;
+    justify-content: space-between;
+    gap: $spacing-03;
+    padding-block: $spacing-03;
+    border-block-end: 1px solid $border-subtle-01;
+  }
+}
+
+// An expert with no slots chosen won't go to the client.
+.clientOff {
+  color: $text-disabled;
+}
+
+.slotCount {
+  flex: none;
+  color: $text-secondary;
+}
+
+.send.send {
+  inline-size: 100%;
+  max-inline-size: none;
+}
+
+.sent {
+  @include type-style('heading-compact-01');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-02;
+
+  svg {
+    fill: $support-success;
+  }
+}

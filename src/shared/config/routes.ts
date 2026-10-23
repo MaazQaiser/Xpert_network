@@ -42,8 +42,20 @@ export const routes = {
     inboxRequest: (requestId: string) => `/admin/inbox/${requestId}`,
     projects: '/admin/projects',
     project: (projectId: string) => `/admin/projects/${projectId}`,
-    projectStep: (projectId: string, step: 'brief' | 'match' | 'shortlist') =>
-      `/admin/projects/${projectId}/${step}`,
+    projectStep: (
+      projectId: string,
+      step:
+        | 'brief'
+        | 'match'
+        | 'shortlist'
+        | 'responses'
+        | 'availability'
+        | 'client'
+        | 'pick'
+        | 'sync'
+        | 'booking'
+        | 'call',
+    ) => `/admin/projects/${projectId}/${step}`,
     clients: '/admin/clients',
     experts: '/admin/experts',
     outreach: '/admin/outreach',

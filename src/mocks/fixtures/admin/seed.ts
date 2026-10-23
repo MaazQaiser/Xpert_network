@@ -8,7 +8,7 @@ import {
 } from './prj1042';
 
 export const PROJECTS_INBOX = 'projects@xpertnetwork.example';
-export const PM_NAME = 'Paltu Kerison';
+export const PM_NAME = 'Palto Kersion';
 
 export type SentMail = {
   id: string;
@@ -181,7 +181,7 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
         step('Attachment saved to secure storage', t(60 * 27)),
         step('Criteria read from 3 sheets', t(60 * 27)),
         step('Brief, requirements and 6 client questions extracted', t(60 * 27)),
-        step('Approved by Paltu Kerison and converted to PRJ-1039', t(60 * 25)),
+        step('Approved by Palto Kersion and converted to PRJ-1039', t(60 * 25)),
       ],
       confirmations: [],
       autoReply: null,

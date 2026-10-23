@@ -1,7 +1,9 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { AILabel, AILabelActions, AILabelContent } from '@carbon/react';
+import Image from 'next/image';
+import { AILabel, AILabelActions, AILabelContent, Button } from '@carbon/react';
+import { Undo } from '@carbon/icons-react';
 import styles from './AIExplainLabel.module.scss';
 
 export type AIExplainLabelProps = {
@@ -18,6 +20,9 @@ export type AIExplainLabelProps = {
   actions?: ReactNode;
   /** Accessible context, e.g. "Research brief". */
   'aria-label'?: string;
+  /** `ai`: Carbon's AI label (default). `mascot`: the animated assistant mascot as a plain mark,
+   * with an inline "Revert to AI draft" once edited (screen 03; AI_NATIVE §3 exception). */
+  mark?: 'ai' | 'mascot';
 };
 
 /** Carbon AILabel with Xpert Network's standard explainability content (AI_NATIVE §3). */
@@ -30,7 +35,51 @@ export function AIExplainLabel({
   onRevert,
   actions,
   'aria-label': ariaLabel,
+  mark = 'ai',
 }: AIExplainLabelProps) {
+  const explanation = (
+    <div className={styles.content}>
+      <p className={styles.eyebrow}>AI explained</p>
+      <p className={styles.summary}>{summary}</p>
+      {basis ? (
+        <p className={styles.meta}>
+          <strong>Based on:</strong> {basis}
+        </p>
+      ) : null}
+      {confidence ? (
+        <p className={styles.meta}>
+          <strong>Confidence:</strong> {confidence}
+        </p>
+      ) : null}
+      <p className={styles.meta}>
+        {isEdited
+          ? 'You edited this. Revert to bring back the AI draft.'
+          : 'Review and edit before you rely on it.'}
+      </p>
+    </div>
+  );
+
+  // The mascot marks AI content on its own (no popover); when a person has edited it, an
+  // inline action brings the AI draft back.
+  if (mark === 'mascot') {
+    return (
+      <span className={styles.mascotMark}>
+        <Image
+          src="/images/assistant-mascot.png"
+          alt={`AI generated${ariaLabel ? `: ${ariaLabel}` : ''}`}
+          width={20}
+          height={24}
+          className={styles.mascot}
+        />
+        {isEdited && onRevert ? (
+          <Button kind="ghost" size="sm" renderIcon={Undo} onClick={onRevert}>
+            Revert to AI draft
+          </Button>
+        ) : null}
+      </span>
+    );
+  }
+
   return (
     <AILabel
       size={size}
@@ -40,21 +89,7 @@ export function AIExplainLabel({
       {...(ariaLabel ? { 'aria-label': ariaLabel } : {})}
     >
       <AILabelContent>
-        <div className={styles.content}>
-          <p className={styles.eyebrow}>AI explained</p>
-          <p className={styles.summary}>{summary}</p>
-          {basis ? (
-            <p className={styles.meta}>
-              <strong>Based on:</strong> {basis}
-            </p>
-          ) : null}
-          {confidence ? (
-            <p className={styles.meta}>
-              <strong>Confidence:</strong> {confidence}
-            </p>
-          ) : null}
-          <p className={styles.meta}>Review and edit before you rely on it.</p>
-        </div>
+        {explanation}
         {actions ? <AILabelActions>{actions}</AILabelActions> : null}
       </AILabelContent>
     </AILabel>

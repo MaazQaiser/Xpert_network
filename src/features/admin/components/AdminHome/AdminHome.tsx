@@ -8,10 +8,8 @@ import {
   Button,
   ClickableTile,
   InlineLoading,
-  Layer,
   Link as CarbonLink,
   SkeletonPlaceholder,
-  Tile,
 } from '@carbon/react';
 import { ArrowUpRight } from '@carbon/icons-react';
 import { useSession } from '@/features/auth';
@@ -79,7 +77,7 @@ function SummaryCard({ href, label, value, action }: SummaryCardProps) {
 
 function SummaryCards({ summary }: { summary: HomeSummary }) {
   return (
-    <Layer as="ul" className={styles.cards}>
+    <ul className={styles.cards}>
       <SummaryCard
         href={routes.admin.inbox}
         label="Emails received today"
@@ -98,66 +96,42 @@ function SummaryCards({ summary }: { summary: HomeSummary }) {
         value={summary.newProjectsToday}
         action="Review projects"
       />
-    </Layer>
+    </ul>
   );
 }
 
-type BriefingProps = {
+type TodayProps = {
   summary: ReturnType<typeof useHomeSummary>;
 };
 
-/**
- * The assistant's briefing as a Carbon Tile: the mascot mark, the title, what came in (with
- * today's tip and its project as an inline Carbon link), then the three count tiles.
- */
-function Briefing({ summary }: BriefingProps) {
+/** Today's tip as one line, then the three counts as Carbon ClickableTiles ($layer-01). */
+function Today({ summary }: TodayProps) {
   const tip = summary.data?.tip;
   return (
-    <section aria-labelledby="admin-briefing-title">
-      <Tile className={styles.briefing}>
-        {/* Decorative: the assistant's mark, as on the greeting above. */}
-        <Image
-          src="/images/assistant-mascot.png"
-          alt=""
-          width={24}
-          height={28}
-          className={styles.briefingMark}
+    <section className={styles.today} aria-label="Today’s summary">
+      {tip ? (
+        <p className={styles.tip}>
+          <CarbonLink as={Link} href={tip.href} inline className={styles.tipLead}>
+            {tip.lead}
+          </CarbonLink>{' '}
+          · {tip.detail}
+        </p>
+      ) : null}
+      {summary.isPending ? (
+        <div aria-busy="true" aria-label="Loading today’s summary" className={styles.cards}>
+          {[0, 1, 2].map((i) => (
+            <SkeletonPlaceholder key={i} className={styles.cardSkeleton} />
+          ))}
+        </div>
+      ) : summary.data ? (
+        <SummaryCards summary={summary.data} />
+      ) : (
+        <ErrorState
+          title="Today’s summary didn’t load"
+          message={toUserMessage(summary.error)}
+          onRetry={() => void summary.refetch()}
         />
-        <div className={styles.briefingHead}>
-          <h2 id="admin-briefing-title" className={styles.briefingTitle}>
-            Your briefing
-          </h2>
-        </div>
-        <div className={styles.briefingBody}>
-          <p className={styles.briefingText}>
-            Here’s what came in while you were away. I’ve already read the emails and drafted
-            project files. They just need your eyes.
-          </p>
-          {tip ? (
-            <p className={styles.briefingText}>
-              <CarbonLink as={Link} href={tip.href} inline className={styles.tipLead}>
-                {tip.lead}
-              </CarbonLink>{' '}
-              · {tip.detail}
-            </p>
-          ) : null}
-          {summary.isPending ? (
-            <div aria-busy="true" aria-label="Loading today’s summary" className={styles.cards}>
-              {[0, 1, 2].map((i) => (
-                <SkeletonPlaceholder key={i} className={styles.cardSkeleton} />
-              ))}
-            </div>
-          ) : summary.data ? (
-            <SummaryCards summary={summary.data} />
-          ) : (
-            <ErrorState
-              title="Today’s summary didn’t load"
-              message={toUserMessage(summary.error)}
-              onRetry={() => void summary.refetch()}
-            />
-          )}
-        </div>
-      </Tile>
+      )}
     </section>
   );
 }
@@ -197,7 +171,7 @@ export function AdminHome() {
     });
   };
 
-  // Assistant start page: mark and greeting, today's summary as three cards, the conversation,
+  // Assistant start page: mascot, greeting and intro, today's tip and three count cards, the conversation,
   // then suggestions and the ask field docked at the bottom.
   return (
     <div className={styles.root}>
@@ -215,13 +189,16 @@ export function AdminHome() {
               className={styles.mascotImage}
             />
           </span>
-          <p className={styles.kicker}>Your AI assistant</p>
           <h1 className={styles.greeting}>
             {name ? `Hey ${name}, good ${partOfDay()}.` : `Good ${partOfDay()}.`}
           </h1>
+          <p className={styles.lede}>
+            Here’s what came in while you were away. I’ve already read the emails and drafted
+            project files. They just need your eyes.
+          </p>
         </header>
 
-        <Briefing summary={summary} />
+        <Today summary={summary} />
 
         {turns.length > 0 ? (
           <ol className={styles.thread} aria-label="Conversation with your AI assistant">
@@ -284,6 +261,7 @@ export function AdminHome() {
           label="Ask your AI assistant"
           placeholder="Ask anything about your emails, projects or experts…"
           placement="inline"
+          look="glow"
           isBusy={ask.isPending}
           onSend={send}
         />

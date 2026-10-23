@@ -12,7 +12,7 @@ The console is where an internal **project manager** turns a client's emailed br
 
 | Role | Persona (fixtures) | Where they work |
 |---|---|---|
-| Project manager (internal) | **Paltu Kerison** | The console, with the sidebar |
+| Project manager (internal) | **Palto Kersion** | The console, with the sidebar |
 | Client | **Sarah Lin**, Helix Capital Partners | Their own email, plus a private pick page (no login) |
 | Expert (in network) | **Expert #4821**, and Sara in the existing expert app | The expert app if they have an account, or the same screens through a private link from email (§3a) |
 | Applicant (outreach) | **Katarzyna Wójcik** | Email reply to a hiring poster, plus an onboarding link; becomes an expert account once onboarded |
@@ -161,7 +161,7 @@ Console routes live under `src/app/(admin)/admin/(console)/` and go into `routes
 | `/expert/calls/upcoming` | 15 expert's booked calls and briefing pack |
 | `/l/onboard/[token]` and `/expert/onboarding` | 22 applicant onboarding |
 
-**Steps trail** on every project screen (Carbon `ProgressIndicator`): *Brief › Match › Shortlist › Pitch › Responses › Availability › Client › Booked*. Outreach shows as a branch from Match and rejoins at Availability.
+**Steps trail** on every project screen (Carbon `ProgressIndicator`): *Brief › Match › Shortlist › Pitch › Responses › Availability › Client › Booked*. Outreach shows as a branch from Match and rejoins at Availability. **Exception (2026-10-23):** screen 03, the client project file, has no steps trail, to match wireframe 03 at the stakeholder's request. Its next step is the *Approve & find experts* button.
 
 **Sidebar (matches the wireframes):** Home · Inbox · Projects · Clients · Experts · Outreach · Scheduling · Calls. Team, Trash and Settings come later (F18, F20). The old admin nav (Dashboard, Briefs & quotes, Experts, Interview checks, Finance) is gone; `/admin/dashboard` redirects to `/admin/home`.
 
@@ -235,7 +235,7 @@ New Zod schemas in `src/features/admin/model/` (split into per-record features l
 | Scripted AI: email + attachment reading, brief / facts / questions drafter with page refs, matcher and scores, ranker with weights, email drafters, answer scoring, reply parser, no-match diagnosis, poster drafter, CV screening, live call transcript and request detection | `src/mocks/ai/admin/` |
 | Toolbar scenarios: *New client email*, *Expert submits form*, *Client picks experts*, *Applicant replies to poster*, *Link expired*, *Password-protected attachment*, *Email with no attachment* | `src/mocks/scenarios.ts` |
 
-Personas: add **Paltu Kerison** (PM) to the persona picker alongside Omar. Sara (existing expert persona) is in PRJ-1042's matches so the expert app side can be demoed. Sarah Lin, Expert #4821 and Katarzyna Wójcik are records, not login personas; their link pages open from the email sandbox or the toolbar.
+Personas: add **Palto Kersion** (PM) to the persona picker alongside Omar. Sara (existing expert persona) is in PRJ-1042's matches so the expert app side can be demoed. Sarah Lin, Expert #4821 and Katarzyna Wójcik are records, not login personas; their link pages open from the email sandbox or the toolbar.
 
 ---
 

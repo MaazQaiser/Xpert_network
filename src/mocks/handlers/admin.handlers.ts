@@ -1,7 +1,13 @@
 import { http, HttpResponse } from 'msw';
 import {
   assistantInputSchema,
+  availabilityActionSchema,
+  bookingActionSchema,
+  callActionSchema,
   clarificationSchema,
+  clientDraftInputSchema,
+  expertSearchInputSchema,
+  screeningInputSchema,
   generateShortlistInputSchema,
   matchPatchSchema,
   matchResultSchema,
@@ -19,6 +25,12 @@ import { getControls } from '../controls';
 import { assistantReply } from '../ai/admin/assistant';
 import { buildShortlist, swapOrRemove } from '../ai/admin/shortlist';
 import { emptyMatches, seedPrj1042Matches } from '../fixtures/admin/experts';
+import { buildResponses } from '../fixtures/admin/responses';
+import { buildAvailability } from '../fixtures/admin/availability';
+import { buildClientDraft } from '../fixtures/admin/clientDraft';
+import { expertPerson } from '../fixtures/admin/expertPeople';
+import { buildBooking, buildChecklist, replyInboxRequest } from '../fixtures/admin/booking';
+import { buildCallSession } from '../fixtures/admin/call';
 import { PM_NAME } from '../fixtures/admin/seed';
 import { PRJ_1042_BRIEFS } from '../fixtures/admin/prj1042';
 import { db } from '../store/db';
@@ -114,7 +126,425 @@ function clarificationDraft(project: Project) {
   };
 }
 
+/** Experts the screen 03 search can find for a project, best match first. */
+function searchPool(project: Project) {
+  return ensureMatches(project, new Date()).experts;
+}
+
 export const adminHandlers = [
+  // Screen 03 Experts tab: returns the next batch of matching experts. Unlike /matches it works
+  // on a draft project file, so the PM can look before approving. Nothing about the project
+  // changes; the "Extend research" criteria are accepted and shape only the batch size here.
+  http.post('/api/admin/projects/:id/expert-search', async ({ params, request }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const project = findProject(params.id);
+    if (!project) return notFound();
+    const parsed = expertSearchInputSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return errorResponse(400, 'invalid', 'Check the search settings and try again.');
+    }
+    const pool = getControls().emptyData ? [] : searchPool(project);
+    const { offset, limit } = parsed.data;
+    const experts = pool.slice(offset, offset + limit);
+    return HttpResponse.json({
+      experts,
+      remaining: Math.max(0, pool.length - offset - experts.length),
+      screeningSent: db.get().adminScreening[project.id] ?? [],
+    });
+  }),
+
+  // Sends the project's client questions to one expert as their screening questions (sandbox).
+  http.post('/api/admin/projects/:id/screening', async ({ params, request }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const project = findProject(params.id);
+    if (!project) return notFound();
+    const parsed = screeningInputSchema.safeParse(await request.json());
+    if (!parsed.success) return errorResponse(400, 'invalid', 'Choose an expert to send to.');
+    const current = db.get().adminScreening[project.id] ?? [];
+    const next = current.includes(parsed.data.expertId)
+      ? current
+      : [...current, parsed.data.expertId];
+    db.update((draft) => {
+      draft.adminScreening[project.id] = next;
+      draft.adminScreeningSentAt[project.id] ??= new Date().toISOString();
+    });
+    return HttpResponse.json({ screeningSent: next });
+  }),
+
+  // Screen 08: how the experts who were sent the screening questions have responded.
+  http.get('/api/admin/projects/:id/responses', async ({ params }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const project = findProject(params.id);
+    if (!project) return notFound();
+    const sentIds = db.get().adminScreening[project.id] ?? [];
+    const pool = searchPool(project);
+    const sent = sentIds.flatMap((id) => pool.filter((expert) => expert.id === id));
+    return HttpResponse.json(
+      buildResponses(project, sent, db.get().adminScreeningSentAt[project.id] ?? null, new Date()),
+    );
+  }),
+
+  // Screen 09: the experts moved forward and their offered times. `?experts=a,b` records a new
+  // selection (from screen 08); without it, the last selection is shown.
+  http.get('/api/admin/projects/:id/availability', async ({ params, request }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const project = findProject(params.id);
+    if (!project) return notFound();
+    const requested = new URL(request.url).searchParams.get('experts');
+    const stored = db.get().adminAvailability[project.id];
+    const expertIds = requested ? requested.split(',').filter(Boolean) : (stored?.expertIds ?? []);
+    const askedAt =
+      requested && stored?.expertIds.join(',') !== expertIds.join(',')
+        ? new Date().toISOString()
+        : (stored?.askedAt ?? new Date().toISOString());
+    const sentToClientAt =
+      stored && stored.expertIds.join(',') === expertIds.join(',') ? stored.sentToClientAt : null;
+    db.update((draft) => {
+      draft.adminAvailability[project.id] = { expertIds, askedAt, sentToClientAt };
+    });
+    const pool = searchPool(project);
+    const experts = expertIds.flatMap((id) => pool.filter((expert) => expert.id === id));
+    return HttpResponse.json(buildAvailability(project, experts, askedAt, sentToClientAt));
+  }),
+
+  // Screen 09 actions: nudge, resend the compliance form, message an expert, send to the client.
+  // Everything goes to the email sandbox; nothing leaves the browser.
+  http.post('/api/admin/projects/:id/availability', async ({ params, request }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const project = findProject(params.id);
+    if (!project) return notFound();
+    const parsed = availabilityActionSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return errorResponse(
+        400,
+        'invalid',
+        parsed.error.issues[0]?.message ?? 'Check and try again.',
+      );
+    }
+    const now = new Date().toISOString();
+    const mail = (to: string, subject: string, body: string) => ({
+      id: createId('mail'),
+      projectId: project.id,
+      to,
+      subject,
+      body,
+      sentAt: now,
+    });
+    const action = parsed.data;
+    let count = 0;
+    const sentToClientAt: string | null =
+      db.get().adminAvailability[project.id]?.sentToClientAt ?? null;
+    db.update((draft) => {
+      if (action.action === 'nudge') {
+        count = action.expertIds.length;
+        for (const id of action.expertIds) {
+          draft.adminMail.push(
+            mail(
+              id,
+              `Reminder: confirm your call times for ${project.id}`,
+              'Please confirm the times that work for you.',
+            ),
+          );
+        }
+      } else if (action.action === 'resend_compliance') {
+        count = 1;
+        draft.adminMail.push(
+          mail(
+            action.expertId,
+            `Compliance form for ${project.id}`,
+            'Please sign the compliance form before the call.',
+          ),
+        );
+      } else if (action.action === 'message') {
+        count = 1;
+        draft.adminMail.push(mail(action.expertId, `About ${project.id}`, action.text));
+      } else {
+        // Prepare the client email (screen 10). Nothing is sent until the PM presses send there.
+        count = action.experts.length;
+        const pool = searchPool(project);
+        const stored = draft.adminAvailability[project.id];
+        const offered = buildAvailability(
+          project,
+          (stored?.expertIds ?? []).flatMap((id) => pool.filter((e) => e.id === id)),
+          stored?.askedAt ?? now,
+          null,
+        );
+        const chosen = action.experts.flatMap(({ expertId, slotIds }) => {
+          const expert = pool.find((e) => e.id === expertId);
+          const row = offered.experts.find((e) => e.expertId === expertId);
+          return expert && row
+            ? [{ expert, slots: row.slots.filter((slot) => slotIds.includes(slot.id)) }]
+            : [];
+        });
+        draft.adminClientDraft[project.id] = buildClientDraft(
+          project,
+          chosen,
+          pool.length,
+          action.holdSlots,
+          new Date(now),
+        );
+      }
+    });
+    return HttpResponse.json({ ok: true, count, sentToClientAt });
+  }),
+
+  // Screen 10: the drafted client email. 404 until screen 09 prepares one.
+  http.get('/api/admin/projects/:id/client-draft', async ({ params }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const project = findProject(params.id);
+    if (!project) return notFound();
+    const draft = db.get().adminClientDraft[project.id];
+    if (!draft) return errorResponse(404, 'not_found', 'No experts are ready to send yet.');
+    // Drafts saved before experts had names get them filled in.
+    return HttpResponse.json({
+      ...draft,
+      experts: draft.experts.map((e) => ({ ...expertPerson(e.expertId), ...e })),
+    });
+  }),
+
+  // Saves the draft, or sends it to the client (email sandbox).
+  http.post('/api/admin/projects/:id/client-draft', async ({ params, request }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const project = findProject(params.id);
+    if (!project) return notFound();
+    const current = db.get().adminClientDraft[project.id];
+    if (!current) return errorResponse(404, 'not_found', 'No experts are ready to send yet.');
+    const parsed = clientDraftInputSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return errorResponse(400, 'invalid', parsed.error.issues[0]?.message ?? 'Check the email.');
+    }
+    const { action, subject, intro, expertIds, settings } = parsed.data;
+    const now = new Date().toISOString();
+    const next = {
+      ...current,
+      subject,
+      intro,
+      settings,
+      experts: current.experts
+        .filter((e) => expertIds.includes(e.expertId))
+        .map((e) => ({ ...expertPerson(e.expertId), ...e })),
+      savedAt: action === 'save' ? now : current.savedAt,
+      sentAt: action === 'send' ? now : current.sentAt,
+    };
+    db.update((draft) => {
+      draft.adminClientDraft[project.id] = next;
+      if (action === 'send') {
+        draft.adminMail.push({
+          id: createId('mail'),
+          projectId: project.id,
+          to: current.to.email,
+          subject,
+          body: intro,
+          sentAt: now,
+        });
+        const availability = draft.adminAvailability[project.id];
+        if (availability) availability.sentToClientAt = now;
+        // Scripted: the client replies with their picks, and the reply lands in the inbox.
+        const booking = buildBooking(project, next, new Date());
+        draft.adminBooking[project.id] = booking;
+        draft.adminInbox[booking.reply.inboxId] = replyInboxRequest(project, booking);
+      }
+    });
+    return HttpResponse.json(next);
+  }),
+
+  // Screen 14: the live call workspace. The session is created the first time it is opened.
+  http.get('/api/admin/projects/:id/call', async ({ params }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const project = findProject(params.id);
+    if (!project) return notFound();
+    const booking = db.get().adminBooking[project.id];
+    if (booking?.stage !== 'booked') {
+      return errorResponse(404, 'not_found', 'No call is booked on this project yet.');
+    }
+    let session = db.get().adminCall[project.id];
+    if (!session) {
+      const created = buildCallSession(booking);
+      db.update((draft) => {
+        draft.adminCall[project.id] = created;
+      });
+      session = created;
+    }
+    return HttpResponse.json(session);
+  }),
+
+  http.post('/api/admin/projects/:id/call', async ({ params, request }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const project = findProject(params.id);
+    if (!project) return notFound();
+    const current = db.get().adminCall[project.id];
+    if (!current) return errorResponse(404, 'not_found', 'No call is booked on this project yet.');
+    const parsed = callActionSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return errorResponse(400, 'invalid', parsed.error.issues[0]?.message ?? 'Check the request.');
+    }
+    const action = parsed.data;
+    const iso = new Date().toISOString();
+    const next = structuredClone(current);
+    const mail: { to: string; subject: string; body: string }[] = [];
+
+    if (action.action === 'resolve') {
+      const target = next.requests.find((r) => r.id === action.requestId);
+      if (!target) return errorResponse(404, 'not_found', 'That request is gone.');
+      target.status = action.status;
+      // Dropping a question changes the locked scope, so the project file moves to v1.1.
+      if (target.kind === 'remove_requirement') {
+        next.version = action.status === 'accepted' ? 'v1.1' : current.version;
+      }
+    } else if (action.action === 'note') {
+      next.notes.push({ id: createId('note'), at: action.at, text: action.text });
+    } else if (action.action === 'end') {
+      next.endedAt = iso;
+      next.duration = action.duration;
+    } else {
+      if (!next.endedAt) return errorResponse(409, 'live', 'End the call first.');
+      if (action.action === 'send_all') {
+        next.sentToClientAt = iso;
+        mail.push({
+          to: project.contact.email,
+          subject: `Your call with Expert ${next.expert.letter}: summary and documents`,
+          body: 'Call summary, full transcript, expert bio and the updated project file are attached.',
+        });
+      } else {
+        next.expertPaidAt = iso;
+      }
+    }
+
+    db.update((draft) => {
+      draft.adminCall[project.id] = next;
+      for (const m of mail) {
+        draft.adminMail.push({ id: createId('mail'), projectId: project.id, sentAt: iso, ...m });
+      }
+    });
+    return HttpResponse.json(next);
+  }),
+
+  // Screens 11–13: the client's picks, the sync with the experts and the booked calls.
+  http.get('/api/admin/projects/:id/booking', async ({ params }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const project = findProject(params.id);
+    if (!project) return notFound();
+    let booking = db.get().adminBooking[project.id];
+    // The email went out but its booking is missing (saved by an older build): the client's
+    // scripted reply is rebuilt from the sent email, and the inbox reply is kept as it is.
+    const sent = db.get().adminClientDraft[project.id];
+    if (!booking && sent?.sentAt) {
+      const rebuilt = buildBooking(project, sent, new Date(sent.sentAt));
+      db.update((draft) => {
+        draft.adminBooking[project.id] = rebuilt;
+        draft.adminInbox[rebuilt.reply.inboxId] ??= replyInboxRequest(project, rebuilt);
+      });
+      booking = rebuilt;
+    }
+    if (!booking) return errorResponse(404, 'not_found', 'The client hasn’t replied yet.');
+    return HttpResponse.json(booking);
+  }),
+
+  http.post('/api/admin/projects/:id/booking', async ({ params, request }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const project = findProject(params.id);
+    if (!project) return notFound();
+    const current = db.get().adminBooking[project.id];
+    if (!current) return errorResponse(404, 'not_found', 'The client hasn’t replied yet.');
+    const parsed = bookingActionSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return errorResponse(400, 'invalid', parsed.error.issues[0]?.message ?? 'Check the message.');
+    }
+    const action = parsed.data;
+    const now = new Date();
+    const iso = now.toISOString();
+    const next = structuredClone(current);
+    const mail: { to: string; subject: string; body: string }[] = [];
+
+    if (action.action === 'sync') {
+      // The AI messages each picked expert; in the prototype they confirm straight away.
+      next.stage = 'synced';
+      next.syncedAt = iso;
+      next.picks = next.picks.map((p) => ({ ...p, confirmedAt: iso }));
+      next.notPicked = next.notPicked.map((e) => ({
+        ...e,
+        standby: action.standbyIds.includes(e.expertId),
+      }));
+      for (const pick of next.picks) {
+        mail.push({
+          to: pick.name,
+          subject: `Please confirm your call on ${pick.slot.startsAt.slice(0, 10)}`,
+          body: `${current.client.company} picked you for a 60-minute call.${pick.note ? ` They asked you to cover ${pick.note}.` : ''}`,
+        });
+      }
+    } else if (action.action === 'unlock') {
+      next.stage = 'synced';
+      next.bookedAt = null;
+      next.checklist = [];
+    } else {
+      const { subject, intro, closing, attachInvites, revealNames } = action.message;
+      next.message = { ...next.message, subject, intro, closing, attachInvites, revealNames };
+      if (action.action === 'save_message') {
+        next.messageSavedAt = iso;
+      } else {
+        if (next.stage === 'picked') {
+          return errorResponse(409, 'not_synced', 'Sync with the experts first.');
+        }
+        next.stage = 'booked';
+        next.bookedAt = iso;
+        next.version = 'v1.0';
+        next.checklist = buildChecklist(next, now);
+        mail.push({ to: current.client.email, subject, body: `${intro}\n\n${closing}` });
+      }
+    }
+
+    db.update((draft) => {
+      draft.adminBooking[project.id] = next;
+      for (const m of mail) {
+        draft.adminMail.push({ id: createId('mail'), projectId: project.id, sentAt: iso, ...m });
+      }
+      const reply = draft.adminInbox[current.reply.inboxId];
+      if (reply && action.action === 'sync') {
+        reply.steps = reply.steps.map((s) => (s.done ? s : { ...s, done: true, at: iso }));
+      }
+    });
+    return HttpResponse.json(next);
+  }),
+
+  // Reminds the experts who haven't finished (sandbox mail; nothing leaves the browser).
+  http.post('/api/admin/projects/:id/responses/nudge', async ({ params }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const project = findProject(params.id);
+    if (!project) return notFound();
+    const sentIds = db.get().adminScreening[project.id] ?? [];
+    const pool = searchPool(project);
+    const sent = sentIds.flatMap((id) => pool.filter((expert) => expert.id === id));
+    const waiting = buildResponses(project, sent, null, new Date()).responses.filter(
+      (r) => r.status === 'in_progress' || r.status === 'not_opened',
+    );
+    const now = new Date().toISOString();
+    db.update((draft) => {
+      for (const expert of waiting) {
+        draft.adminMail.push({
+          id: createId('mail'),
+          projectId: project.id,
+          to: expert.label,
+          subject: `Reminder: screening questions for ${project.id}`,
+          body: `Hi, a quick reminder to answer the ${project.questions.length} screening questions for ${project.name}.`,
+          sentAt: now,
+        });
+      }
+    });
+    return HttpResponse.json({ nudged: waiting.length });
+  }),
+
   http.get('/api/admin/summary', async () => {
     const auth = await guard();
     if ('response' in auth) return auth.response;

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, type FormEvent, type MouseEvent } from 'react';
-import { Button, DismissibleTag, TextInput } from '@carbon/react';
-import { Add } from '@carbon/icons-react';
+import { useState, type FormEvent } from 'react';
+import { Button, ContainedList, ContainedListItem, IconButton, TextInput } from '@carbon/react';
+import { Add, TrashCan } from '@carbon/icons-react';
 import { AIExplainLabel } from '@/shared/ai';
 import { createId } from '@/shared/lib/id';
 import { useResetToAi, useUpdateProject } from '../../api/queries';
@@ -55,10 +55,20 @@ export function ExpertProfileCard({ project, onNotice }: ExpertProfileCardProps)
     setAdding(false);
   };
 
+  const remove = (requirement: Requirement) =>
+    saveRequirements(
+      project.requirements.filter((r) => r.id !== requirement.id),
+      `Removed “${requirement.text}”.`,
+      project.requirements,
+    );
+
+  // A Carbon ContainedList: one row per requirement with its remove action, the add form as the
+  // last row, and "Add requirement" in the list header. The AI label explains where it came from.
   return (
     <section className={styles.card} aria-labelledby="profile-title">
       <div className={styles.cardHeader}>
         <AIExplainLabel
+          mark="mascot"
           summary="The profile the AI will match experts against on the next step."
           basis="Section 4 of the client’s document and the questions they asked"
           isEdited={isEdited(project).requirements}
@@ -73,35 +83,65 @@ export function ExpertProfileCard({ project, onNotice }: ExpertProfileCardProps)
           }
           aria-label="Expert profile needed"
         />
-        <h2 id="profile-title" className={styles.cardTitle}>
+        <h2 id="profile-title" className={styles.cardTitleInline}>
           Expert profile needed
         </h2>
-        <span className={styles.cardMeta}>Used to match experts on the next step</span>
+        <span className={styles.cardMeta}>
+          The AI matches experts against these {project.requirements.length} requirements on the
+          next step.
+        </span>
       </div>
-      <div className={styles.tags} role="group" aria-label="Requirements">
-        {project.requirements.map((requirement) => (
-          <DismissibleTag
+
+      <ContainedList
+        label={`Requirements (${project.requirements.length})`}
+        kind="on-page"
+        size="md"
+        className={styles.requirements}
+        action={
+          <Button
+            kind="ghost"
+            size="sm"
+            renderIcon={Add}
+            disabled={adding}
+            onClick={() => setAdding(true)}
+          >
+            Add requirement
+          </Button>
+        }
+      >
+        {project.requirements.map((requirement, index) => (
+          <ContainedListItem
             key={requirement.id}
-            type="outline"
-            text={requirement.text}
-            title={`Remove “${requirement.text}”`}
-            dismissTooltipLabel={`Remove “${requirement.text}”`}
-            onClose={(event: MouseEvent<HTMLButtonElement>) => {
-              event.preventDefault();
-              saveRequirements(
-                project.requirements.filter((r) => r.id !== requirement.id),
-                `Removed “${requirement.text}”.`,
-                project.requirements,
-              );
-            }}
-          />
+            action={
+              <IconButton
+                kind="ghost"
+                size="sm"
+                label={`Delete “${requirement.text}”`}
+                align="left"
+                disabled={update.isPending}
+                onClick={() => remove(requirement)}
+              >
+                <TrashCan />
+              </IconButton>
+            }
+          >
+            <span className={styles.requirement}>
+              <span className={styles.requirementNumber} aria-hidden="true">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              {requirement.text}
+            </span>
+          </ContainedListItem>
         ))}
-        {project.requirements.length === 0 ? (
-          <p className={styles.cardMeta}>
-            No requirements yet. Add at least one so the AI can match experts.
-          </p>
+        {project.requirements.length === 0 && !adding ? (
+          <ContainedListItem>
+            <span className={styles.cardMeta}>
+              No requirements yet. Add at least one so the AI can match experts.
+            </span>
+          </ContainedListItem>
         ) : null}
-      </div>
+      </ContainedList>
+
       {adding ? (
         <form className={styles.inlineForm} onSubmit={add} noValidate>
           <TextInput
@@ -122,13 +162,7 @@ export function ExpertProfileCard({ project, onNotice }: ExpertProfileCardProps)
             Add
           </Button>
         </form>
-      ) : (
-        <div>
-          <Button kind="ghost" size="sm" renderIcon={Add} onClick={() => setAdding(true)}>
-            Add requirement
-          </Button>
-        </div>
-      )}
+      ) : null}
     </section>
   );
 }

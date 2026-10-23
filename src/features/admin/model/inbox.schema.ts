@@ -8,6 +8,8 @@ export const inboxStatusSchema = z.enum([
   'needs_client_info',
   'cant_open',
   'converted',
+  // The client replied to an email we sent, e.g. with their expert picks (screen 11).
+  'client_reply',
 ]);
 export type InboxStatus = z.infer<typeof inboxStatusSchema>;
 
@@ -62,7 +64,7 @@ export const INBOX_VIEW_LABELS: Record<InboxView, string> = {
 };
 
 const VIEW_STATUSES: Record<Exclude<InboxView, 'all'>, InboxStatus[]> = {
-  review: ['brief_ready'],
+  review: ['brief_ready', 'client_reply'],
   processing: ['reading', 'extracting'],
   client_info: ['needs_client_info', 'cant_open'],
   converted: ['converted'],

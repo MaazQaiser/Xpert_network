@@ -1,0 +1,343 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+// ——— Header ————————————————————————————————————————————————————————————————————
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: $spacing-05;
+}
+
+.heading {
+  display: flex;
+  flex: 1 1 28rem;
+  flex-direction: column;
+  gap: $spacing-03;
+  min-inline-size: 0;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.aiMascot {
+  flex: none;
+  block-size: $spacing-06;
+  inline-size: auto;
+}
+
+.metaText,
+.subtitle,
+.cardText {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.subtitle {
+  max-inline-size: 44rem;
+}
+
+.title {
+  @include mx.display-heading('heading-04');
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.sent {
+  @include type-style('heading-compact-01');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-02;
+
+  svg {
+    fill: $support-success;
+  }
+}
+
+// ——— Email on the left, settings and coverage on the right ——————————————————————————
+.layout {
+  display: grid;
+  gap: $spacing-06;
+  grid-template-columns: minmax(0, 1fr);
+
+  @include breakpoint(lg) {
+    align-items: start;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}
+
+.email,
+.card {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  padding: $spacing-06;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+
+  @include breakpoint(lg) {
+    position: sticky;
+    inset-block-start: $spacing-09;
+  }
+}
+
+.cardTitle {
+  @include type-style('heading-compact-02');
+}
+
+.recipient {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-04;
+}
+
+.recipientValue {
+  @include type-style('body-compact-01');
+
+  overflow-wrap: anywhere;
+}
+
+.fieldLabel {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+// ——— One expert per row ————————————————————————————————————————————————————————
+.experts {
+  display: flex;
+  flex-direction: column;
+}
+
+.expert {
+  display: grid;
+  align-items: start;
+  gap: $spacing-05;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding-block: $spacing-07;
+  border-block-start: 1px solid $border-subtle-01;
+
+  // The message field's own underline already separates it from the first expert.
+  &:first-child {
+    border-block-start: 0;
+  }
+}
+
+// Circular portrait, as in the header and inbox; initials when there is no photo.
+.avatar {
+  @include type-style('label-02');
+  @include font-weight('semibold');
+
+  overflow: hidden;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: $layer-accent-01;
+  block-size: $spacing-08;
+  inline-size: $spacing-08;
+}
+
+.photo {
+  display: block;
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: cover;
+}
+
+.expertBody {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+  min-inline-size: 0;
+}
+
+.expertTitle {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: $spacing-02 $spacing-03;
+}
+
+.expertHead {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-01;
+}
+
+.expertName {
+  @include type-style('heading-compact-02');
+}
+
+.expertRole {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.expertMeta {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.quote {
+  @include type-style('body-01');
+
+  margin-block-end: $spacing-02;
+}
+
+// Label column on the left, values wrap in their own column so they never fall under it.
+.line {
+  display: grid;
+  align-items: start;
+  gap: $spacing-03;
+  grid-template-columns: $spacing-10 minmax(0, 1fr);
+}
+
+.values {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+// The clock stays beside the first time when the times stack on small screens.
+.times {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-03;
+  padding-block-start: $spacing-01;
+}
+
+// Free times are data, not labels: plain text with tabular figures and hairline dividers.
+.slotIcon {
+  flex: none;
+  fill: $icon-secondary;
+}
+
+.slots {
+  @include type-style('body-compact-01');
+
+  // Stacked on small screens; side by side with a hairline divider from md.
+  display: flex;
+  flex-flow: column wrap;
+  align-items: flex-start;
+  gap: $spacing-02;
+
+  li {
+    white-space: nowrap;
+  }
+
+  @include breakpoint(md) {
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+
+    li + li {
+      padding-inline-start: $spacing-04;
+      border-inline-start: 1px solid $border-subtle-01;
+      margin-inline-start: $spacing-04;
+    }
+  }
+}
+
+.lineLabel {
+  @include type-style('label-01');
+
+  // Centres the label on the first row of values (a small tag is 24px tall).
+  padding-block-start: $spacing-01;
+  color: $text-secondary;
+}
+
+// ——— Settings and coverage ———————————————————————————————————————————————————————
+.checks {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.coverage {
+  display: flex;
+  flex-direction: column;
+
+  li {
+    @include type-style('body-compact-01');
+
+    display: flex;
+    justify-content: space-between;
+    gap: $spacing-03;
+    padding-block: $spacing-03;
+    border-block-end: 1px solid $border-subtle-01;
+  }
+}
+
+.letters {
+  flex: none;
+  color: $text-secondary;
+}
+
+.notCovered {
+  flex: none;
+  color: $text-error;
+}
+
+// ——— Preview modal ——————————————————————————————————————————————————————————————
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+
+  p {
+    @include type-style('body-01');
+  }
+}
+
+.previewExpert {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  padding-block-start: $spacing-04;
+  border-block-start: 1px solid $border-subtle-01;
+}
+
+.previewName.previewName {
+  @include type-style('heading-compact-01');
+}
+
+.previewMeta.previewMeta {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}

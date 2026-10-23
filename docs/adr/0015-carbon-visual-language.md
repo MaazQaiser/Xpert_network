@@ -18,6 +18,7 @@ Stakeholders want the product to look like the Carbon Design System everywhere, 
 - **Message box.** `FloatingComposer` uses Carbon's field look: the field fill, a strong bottom border, square corners and Carbon's 2px focus outline. The orbiting rim and breathing glow are removed.
 - **Quick suggestions.** Suggestion chips (admin Home, client chat) are Carbon ghost buttons on a `$layer-01` fill. Tertiary's ink outline and black hover read too heavy for this use.
 - **Kept.** The blue primary and navy dark theme (ADR 0014), the fonts (ADR 0014), and the admin Home mascot and its state animations.
+- **Exception (2026-10-23): admin Home ask area.** At the stakeholder's request, the docked ask area on `/admin/home` keeps a softer look: suggestion chips with 8px corners, and the message box in `FloatingComposer`'s `look="glow"` (white, 16px corners, a faint moving blue rim and a gentle glow; still for reduced motion). Every other message box keeps the Carbon field look.
 
 ## Consequences
 

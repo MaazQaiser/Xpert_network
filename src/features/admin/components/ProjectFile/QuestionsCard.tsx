@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { Button, IconButton, TextArea } from '@carbon/react';
-import { Add, Close, Edit } from '@carbon/icons-react';
+import { Add, Edit, TrashCan } from '@carbon/icons-react';
 import { AIExplainLabel } from '@/shared/ai';
 import { createId } from '@/shared/lib/id';
 import { useResetToAi, useUpdateProject } from '../../api/queries';
@@ -17,13 +17,12 @@ import styles from './ProjectFile.module.scss';
 
 type QuestionsCardProps = {
   project: Project;
-  onShowSource: (page: number, sourceFor: string) => void;
   onNotice: (notice: ProjectNotice) => void;
 };
 
 type Editing = { id: string | null; text: string; touched: boolean };
 
-export function QuestionsCard({ project, onShowSource, onNotice }: QuestionsCardProps) {
+export function QuestionsCard({ project, onNotice }: QuestionsCardProps) {
   const update = useUpdateProject(project.id);
   const reset = useResetToAi(project.id);
   const [editing, setEditing] = useState<Editing | null>(null);
@@ -96,6 +95,7 @@ export function QuestionsCard({ project, onShowSource, onNotice }: QuestionsCard
     <section className={styles.card} aria-labelledby="questions-title">
       <div className={styles.cardHeader}>
         <AIExplainLabel
+          mark="mascot"
           summary="Questions the AI found in the client’s document, with the page each came from."
           basis={project.source.fileName ?? 'The client’s email'}
           isEdited={isEdited(project).questions}
@@ -104,19 +104,23 @@ export function QuestionsCard({ project, onShowSource, onNotice }: QuestionsCard
               { part: 'questions' },
               {
                 onSuccess: () =>
-                  onNotice({ kind: 'success', message: 'Client questions reset to the AI draft.' }),
+                  onNotice({
+                    kind: 'success',
+                    message: 'Screening questions reset to the AI draft.',
+                  }),
               },
             )
           }
-          aria-label="Client questions"
+          aria-label="Screening questions"
         />
         <h2 id="questions-title" className={styles.cardTitle}>
-          Client questions · {count} found
+          Screening questions · {count} found
         </h2>
         <Button
           kind="ghost"
           size="sm"
           renderIcon={Add}
+          className={styles.headerAction}
           disabled={editing !== null}
           onClick={() => setEditing({ id: null, text: '', touched: false })}
         >
@@ -146,21 +150,12 @@ export function QuestionsCard({ project, onShowSource, onNotice }: QuestionsCard
                   {question.text}
                 </p>
                 <div className={styles.questionActions}>
-                  {question.page ? (
-                    <Button
-                      kind="ghost"
-                      size="sm"
-                      className={styles.pageRef}
-                      aria-label={`Show the source of question ${index + 1}, page ${question.page}`}
-                      onClick={() => onShowSource(question.page ?? 1, question.id)}
-                    >
-                      p.{question.page}
-                    </Button>
-                  ) : null}
+                  {/* Carbon ghost icon buttons with tooltips: the standard row-action pattern. */}
                   <IconButton
                     kind="ghost"
                     size="sm"
                     label={`Edit question ${index + 1}`}
+                    align="top"
                     disabled={editing !== null}
                     onClick={() =>
                       setEditing({ id: question.id, text: question.text, touched: false })
@@ -171,17 +166,18 @@ export function QuestionsCard({ project, onShowSource, onNotice }: QuestionsCard
                   <IconButton
                     kind="ghost"
                     size="sm"
-                    label={`Remove question ${index + 1}`}
+                    label={`Delete question ${index + 1}`}
+                    align="top-end"
                     disabled={editing !== null || update.isPending}
                     onClick={() =>
                       saveQuestions(
                         project.questions.filter((q) => q.id !== question.id),
-                        `Removed question ${index + 1}.`,
+                        `Deleted question ${index + 1}.`,
                         project.questions,
                       )
                     }
                   >
-                    <Close />
+                    <TrashCan />
                   </IconButton>
                 </div>
               </>

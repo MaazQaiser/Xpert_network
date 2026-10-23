@@ -94,6 +94,7 @@ export function SourceDocument({
         <Button
           kind="tertiary"
           size="sm"
+          className={styles.navButton}
           aria-label="Previous page"
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
@@ -104,6 +105,7 @@ export function SourceDocument({
         <Button
           kind="tertiary"
           size="sm"
+          className={styles.navButton}
           aria-label="Next page"
           disabled={page >= pageCount}
           onClick={() => onPageChange(page + 1)}

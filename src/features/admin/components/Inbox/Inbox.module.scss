@@ -259,10 +259,18 @@
   flex: none;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   border-radius: 50%;
-  background: $layer-01;
+  background: $layer-accent-01;
   block-size: $spacing-09;
   inline-size: $spacing-09;
+}
+
+.avatarPhoto {
+  display: block;
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: cover;
 }
 
 // The title takes the room it needs (at least ~20rem); when the pane is too narrow for the

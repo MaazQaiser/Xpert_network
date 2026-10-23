@@ -18,6 +18,9 @@ type FloatingComposerProps = {
   onSend: (text: string) => void;
   /** `dock`: sticks to the bottom of the page (chat). `inline`: sits in the flow (Home). */
   placement?: 'dock' | 'inline';
+  /** `field`: Carbon's field look (default). `glow`: a rounded white box with a soft moving
+   * blue rim and glow (admin Home, ADR 0015 exception). */
+  look?: 'field' | 'glow';
   autoFocus?: boolean;
 };
 
@@ -36,6 +39,7 @@ export function FloatingComposer({
   leading,
   onSend,
   placement = 'dock',
+  look = 'field',
   autoFocus = false,
 }: FloatingComposerProps) {
   const id = useId();
@@ -75,7 +79,11 @@ export function FloatingComposer({
 
   return (
     <div className={placement === 'dock' ? styles.dock : styles.inline}>
-      <form className={styles.pill} onSubmit={submit} aria-label={label}>
+      <form
+        className={`${styles.pill} ${look === 'glow' ? styles.glow : ''}`}
+        onSubmit={submit}
+        aria-label={label}
+      >
         {leading ? <div className={styles.leading}>{leading}</div> : null}
         <label htmlFor={id} className={styles.srOnly}>
           {label}

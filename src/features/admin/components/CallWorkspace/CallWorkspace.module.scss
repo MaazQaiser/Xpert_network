@@ -1,0 +1,346 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/motion' as *;
+@use '../../../../styles/mixins' as mx;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+// ——— Call bar (a dark Carbon zone) —————————————————————————————————————————————————
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+  padding: $spacing-04 $spacing-05;
+  background: $background;
+  color: $text-primary;
+}
+
+.barInfo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03 $spacing-05;
+  min-inline-size: 0;
+}
+
+.barActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.live {
+  @include type-style('label-02');
+
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-02;
+  padding: $spacing-01 $spacing-03;
+  background: $layer-01;
+}
+
+// The red recording dot breathes while the call is live.
+.liveDot {
+  border-radius: 50%;
+  background: $support-error;
+  block-size: $spacing-03;
+  inline-size: $spacing-03;
+  animation: pulse $duration-slow-02 motion(standard, expressive) infinite alternate;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes pulse {
+  to {
+    opacity: 0.3;
+  }
+}
+
+.clock {
+  @include type-style('heading-compact-02');
+}
+
+.participants {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+// ——— Layout ————————————————————————————————————————————————————————————————————
+.layout {
+  display: grid;
+  align-items: start;
+  gap: $spacing-06;
+  grid-template-columns: minmax(0, 1fr);
+
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  min-inline-size: 0;
+}
+
+.card {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  padding: $spacing-06;
+}
+
+.cardHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.cardTitle {
+  @include type-style('heading-compact-02');
+}
+
+.cardText {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.headerEnd {
+  margin-inline-start: auto;
+}
+
+.count {
+  @include type-style('heading-compact-02');
+
+  margin-inline-start: auto;
+}
+
+// ——— Transcript ——————————————————————————————————————————————————————————————
+.transcript {
+  display: flex;
+  overflow-y: auto;
+  flex-direction: column;
+  gap: $spacing-02;
+  max-block-size: 36rem;
+  scroll-behavior: smooth;
+
+  @media (prefers-reduced-motion: reduce) {
+    scroll-behavior: auto;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+}
+
+.lineRow,
+.requestRow,
+.noteRow {
+  @include type-style('body-01');
+
+  display: grid;
+  gap: $spacing-04;
+  grid-template-columns: $spacing-10 minmax(0, 1fr);
+  padding: $spacing-03;
+
+  @include breakpoint(md) {
+    grid-template-columns: $spacing-12 minmax(0, 1fr);
+  }
+}
+
+// A line the AI read as a client request: a quiet fill, the request itself underlined.
+.requestRow {
+  background: $layer-accent-01;
+}
+
+.noteRow {
+  color: $text-secondary;
+}
+
+.speaker {
+  @include type-style('heading-compact-01');
+
+  display: inline-flex;
+  align-items: flex-start;
+  gap: $spacing-02;
+
+  svg {
+    flex: none;
+    margin-block-start: $spacing-01;
+    fill: $icon-secondary;
+  }
+}
+
+.mark {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.speaking {
+  color: $text-secondary;
+}
+
+// The ellipsis breathes, so the transcript reads as live.
+.dots::after {
+  content: '…';
+  animation: pulse $duration-slow-02 motion(standard, expressive) infinite alternate;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+.noteForm {
+  display: grid;
+  align-items: end;
+  gap: $spacing-03;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.noteMeta {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+// ——— Requests ——————————————————————————————————————————————————————————————————
+.requests {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+}
+
+.request {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  padding: $spacing-05;
+  background: $layer-02;
+}
+
+.requestHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
+
+.requestText {
+  @include type-style('body-01');
+}
+
+.docs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-02;
+}
+
+.requestActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.resolved {
+  @include type-style('label-02');
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-02 $spacing-03;
+  color: $text-secondary;
+
+  svg {
+    fill: $support-success;
+  }
+}
+
+.inlineLink {
+  @include type-style('label-02');
+
+  color: $link-primary;
+}
+
+// ——— Questions ———————————————————————————————————————————————————————————————————
+.questions {
+  display: flex;
+  flex-direction: column;
+
+  li {
+    @include type-style('body-compact-01');
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $spacing-03;
+    padding-block: $spacing-03;
+
+    svg {
+      flex: none;
+      fill: $icon-secondary;
+    }
+  }
+}
+
+.covered.covered {
+  fill: $support-success;
+}
+
+.removed {
+  color: $text-secondary;
+}
+
+.struck {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+  text-decoration: line-through;
+}
+
+// ——— After the call ——————————————————————————————————————————————————————————————
+.deliverables {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.afterActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03 $spacing-05;
+}
+
+.done {
+  @include type-style('heading-compact-01');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-02;
+
+  svg {
+    fill: $support-success;
+  }
+}
+
+.modalText {
+  @include type-style('body-01');
+}

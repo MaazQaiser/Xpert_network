@@ -88,13 +88,17 @@
   color: $text-secondary;
 }
 
+// Text-only Carbon buttons sized to their label; doubled class outranks Carbon's root rule.
+.navButton.navButton {
+  padding-inline-end: $spacing-05;
+}
+
+// Previous · hint · Next on one row (wireframe 03); the hint takes the middle and wraps.
 .footer {
   display: grid;
   align-items: center;
   gap: $spacing-03;
-  grid-template-areas:
-    'previous . next'
-    'hint hint hint';
+  grid-template-areas: 'previous hint next';
   grid-template-columns: auto minmax(0, 1fr) auto;
 
   > :first-child {
@@ -111,4 +115,5 @@
 
   color: $text-helper;
   grid-area: hint;
+  text-align: center;
 }
