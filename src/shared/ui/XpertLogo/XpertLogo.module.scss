@@ -1,0 +1,103 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/motion' as *;
+@use '../../../styles/mixins' as mx;
+
+// Draw-in: the four strokes trace one after another, then the nodes pop in at the joints.
+$pt-logo-stroke: 0.5s;
+$pt-logo-step: 0.12s;
+
+.lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.mark {
+  display: block;
+  flex: none;
+}
+
+.tile {
+  fill: $background-brand;
+}
+
+.lines path {
+  fill: none;
+  stroke: $text-on-color;
+  stroke-linecap: round;
+  stroke-width: 2.4;
+}
+
+.nodes circle {
+  fill: $text-on-color;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.mark[data-animated] {
+  .lines path {
+    animation: trace $pt-logo-stroke motion(entrance, expressive) both;
+    stroke-dasharray: 1;
+
+    @for $i from 1 through 4 {
+      &:nth-child(#{$i}) {
+        animation-delay: $pt-logo-step * ($i - 1);
+      }
+    }
+  }
+
+  .nodes circle {
+    animation: pop $duration-moderate-02 motion(entrance, expressive) both;
+    animation-delay: $pt-logo-stroke + $pt-logo-step * 2;
+
+    &:last-child {
+      animation-delay: $pt-logo-stroke + $pt-logo-step * 4;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lines path,
+    .nodes circle {
+      animation: none;
+    }
+  }
+}
+
+.wordmark {
+  @include type-style('heading-compact-02');
+  @include mx.display-face;
+
+  display: inline-flex;
+  align-items: baseline;
+  gap: $spacing-02;
+  white-space: nowrap;
+}
+
+.suffix {
+  @include type-style('body-compact-02');
+
+  color: $text-secondary;
+}
+
+@keyframes trace {
+  from {
+    stroke-dashoffset: 1;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  70% {
+    transform: scale(1.25);
+  }
+}

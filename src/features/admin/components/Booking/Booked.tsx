@@ -130,11 +130,7 @@ function BookedView({ project, booking }: { project: Project; booking: Booking }
 
           <section className={styles.card} aria-labelledby="checklist-title">
             <div className={styles.cardHeader}>
-              <AIExplainLabel
-                mark="mascot"
-                summary="Everything the AI did when you locked the project, and what is still scheduled."
-                aria-label="Sync checklist"
-              />
+              <AIExplainLabel aria-label="Sync checklist" />
               <h2 id="checklist-title" className={styles.cardTitle}>
                 Sync checklist
               </h2>
@@ -190,11 +186,7 @@ function BookedView({ project, booking }: { project: Project; booking: Booking }
           {selected ? (
             <section className={styles.card} aria-labelledby="briefing-title">
               <div className={styles.cardHeader}>
-                <AIExplainLabel
-                  mark="mascot"
-                  summary="The AI drafted this briefing from the project brief and the client’s questions."
-                  aria-label="Briefing pack"
-                />
+                <AIExplainLabel aria-label="Briefing pack" />
                 <h2 id="briefing-title" className={styles.cardTitle}>
                   Briefing pack for {selected.name.split(' ')[0]}
                 </h2>

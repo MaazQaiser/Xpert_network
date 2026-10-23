@@ -7,7 +7,7 @@ AI is not a chatbot bolted on the side. In Xpert Network, AI is **woven into the
 ## 1. Principles
 
 1. **Augment, don't replace.** AI drafts, summarises and suggests; humans (clients, researchers) decide and publish.
-2. **Transparent.** Every AI-generated or AI-modified element is visibly marked (Carbon `AILabel`) and explains itself on demand.
+2. **Transparent.** Every AI-generated or AI-modified element is visibly marked with the assistant mascot (`AIExplainLabel`); its accessible name says it is AI generated (§3).
 3. **Grounded.** Answers about the library cite sources. No citation → say so explicitly.
 4. **Reversible.** Every AI action can be edited, regenerated, or discarded. Nothing AI does is silently committed.
 5. **In context.** AI appears where the work happens (search bar, request form, transcript view) — not only in a separate chat page.
@@ -31,14 +31,11 @@ AI is not a chatbot bolted on the side. In Xpert Network, AI is **woven into the
 
 ## 3. Carbon for AI — how we apply it
 
-- **`AILabel`** on any component whose content was generated or altered by AI (Tile, DataTable cell/row, form field, Modal, text block). Clicking it opens an explainability popover:
-  - what the AI did, which model/source set was used, confidence or coverage, and a link to learn more.
-  - `AILabelActions` for *View sources*, *Regenerate*, *Revert to original*.
+- **The mascot mark (`AIExplainLabel`)** on any component whose content was generated or altered by AI (Tile, DataTable cell/row, form field, Modal, text block). Since 2026-10-23, at the stakeholder's request and across the whole product, it is the animated assistant mascot with **no explainability popover** (Carbon `AILabel` is no longer used). Its accessible name is "AI generated: …". Where the AI's basis matters, say it in the visible copy next to the content instead (e.g. "Drafted from the client's email").
 - **AI presence styling** — use Carbon's AI tokens/gradients/aura for AI-generated containers so users can distinguish them at a glance. Don't invent our own AI colours or sparkle icons.
-- **Revert state** — once a human edits an AI-filled field, switch the label to its "revert" state so they can return to AI output or keep their edit.
+- **Revert state** — once a human edits an AI-filled field, a *Revert to AI draft* button appears beside the mascot so they can return to AI output or keep their edit.
 - Keep AI styling **subtle**; content must remain the hero.
-- **Exception — admin Home briefing (2026-10-22).** The "Your briefing" panel on `/admin/home` has no `AILabel`, at the stakeholder's request. It is still marked as the assistant's by the mascot and the "Your AI assistant" heading above it; the assistant's chat answers on the same page keep their labels.
-- **Exception — screen 03 project file (2026-10-23).** The AI-drafted sections are marked with the animated assistant mascot instead of `AILabel`, with no explainability popover, at the stakeholder's request. Reversibility stays: once a section is edited, a *Revert to AI draft* button appears beside the mascot.
+- **Exception — admin Home briefing (2026-10-22).** The "Your briefing" panel on `/admin/home` carries no mark, at the stakeholder's request. It is still marked as the assistant's by the mascot and greeting above it; the assistant's chat answers on the same page keep their marks.
 
 ---
 
@@ -107,7 +104,7 @@ Anything with side effects (send a request, invite an expert, publish) is **prop
 
 ## 7. AI UX checklist
 
-- [ ] `AILabel` present with explainability content
+- [ ] Mascot mark (`AIExplainLabel`) present, with an accessible name
 - [ ] Sources/citations shown or absence stated
 - [ ] Stop / Regenerate / Edit / Discard available
 - [ ] Feedback control present

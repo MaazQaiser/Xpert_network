@@ -182,6 +182,7 @@ export function replyInboxRequest(project: Project, booking: Booking): InboxRequ
     confirmations: [],
     autoReply: null,
     projectId: project.id,
+    read: false,
   };
 }
 

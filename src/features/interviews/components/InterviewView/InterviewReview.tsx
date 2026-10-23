@@ -119,8 +119,6 @@ function SummaryItem({
         </h2>
         <AIExplainLabel
           aria-label={`${title} summary`}
-          summary="Drafted by the AI interviewer from your answers in this section."
-          basis="Only what you said here; exact figures you shared were left out."
           isEdited={summary.isEdited}
           onRevert={() => {
             edit.mutate({ sectionId: summary.sectionId, text: null });

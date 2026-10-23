@@ -2,6 +2,7 @@ import { http, HttpResponse } from 'msw';
 import {
   assistantInputSchema,
   availabilityActionSchema,
+  addMailAccountInputSchema,
   bookingActionSchema,
   callActionSchema,
   clarificationSchema,
@@ -570,10 +571,55 @@ export const adminHandlers = [
     const auth = await guard();
     if ('response' in auth) return auth.response;
     if (getControls().emptyData) return HttpResponse.json([]);
-    const requests = Object.values(db.get().adminInbox).sort((a, b) =>
-      b.receivedAt.localeCompare(a.receivedAt),
-    );
+    const requests = Object.values(db.get().adminInbox)
+      // Emails saved before read state existed count as read.
+      .map((r) => ({ ...r, read: r.read ?? true }))
+      .sort((a, b) => b.receivedAt.localeCompare(a.receivedAt));
     return HttpResponse.json(requests);
+  }),
+
+  // The mailboxes the AI watches, and connecting another one (no real OAuth in the prototype).
+  http.get('/api/admin/inbox/accounts', async () => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    return HttpResponse.json(db.get().adminMailAccounts);
+  }),
+
+  http.post('/api/admin/inbox/accounts', async ({ request }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const parsed = addMailAccountInputSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return errorResponse(400, 'invalid', parsed.error.issues[0]?.message ?? 'Check the address.');
+    }
+    const address = parsed.data.address.toLowerCase();
+    if (db.get().adminMailAccounts.some((a) => a.address === address)) {
+      return errorResponse(409, 'duplicate', `${address} is already connected.`);
+    }
+    const account = {
+      address,
+      provider: parsed.data.provider,
+      connectedAt: new Date().toISOString(),
+    };
+    db.update((draft) => {
+      draft.adminMailAccounts.push(account);
+    });
+    return HttpResponse.json(account);
+  }),
+
+  // Opening an email marks it read; the toolbar can mark it unread again.
+  http.post('/api/admin/inbox/:id/read', async ({ params, request }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const id = String(params.id);
+    if (!db.get().adminInbox[id]) return errorResponse(404, 'not_found', 'That email is gone.');
+    const body = (await request.json().catch(() => ({}))) as { read?: unknown };
+    const read = body.read !== false;
+    db.update((draft) => {
+      const email = draft.adminInbox[id];
+      if (email) email.read = read;
+    });
+    return HttpResponse.json({ ...db.get().adminInbox[id], read });
   }),
 
   http.get('/api/admin/projects', async () => {

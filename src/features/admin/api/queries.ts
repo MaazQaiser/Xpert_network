@@ -17,7 +17,12 @@ import {
 import { clientDraftSchema, type ClientDraftInput } from '../model/clientDraft.schema';
 import { bookingSchema, type BookingAction } from '../model/booking.schema';
 import { callSessionSchema, type CallAction } from '../model/call.schema';
-import { inboxRequestSchema } from '../model/inbox.schema';
+import {
+  inboxRequestSchema,
+  mailAccountSchema,
+  type AddMailAccountInput,
+  type InboxRequest,
+} from '../model/inbox.schema';
 import { nudgeResultSchema, responsesSchema } from '../model/responses.schema';
 import {
   generateShortlistInputSchema,
@@ -43,6 +48,7 @@ export const adminKeys = {
   all: ['admin'] as const,
   summary: () => [...adminKeys.all, 'summary'] as const,
   inbox: () => [...adminKeys.all, 'inbox'] as const,
+  mailAccounts: () => [...adminKeys.all, 'inbox', 'accounts'] as const,
   projects: () => [...adminKeys.all, 'projects'] as const,
   project: (id: string) => [...adminKeys.all, 'project', id] as const,
   clarification: (id: string) => [...adminKeys.all, 'project', id, 'clarification'] as const,
@@ -60,6 +66,41 @@ export function useHomeSummary() {
   return useQuery({
     queryKey: adminKeys.summary(),
     queryFn: ({ signal }) => apiRequest('/admin/summary', { schema: homeSummarySchema, signal }),
+  });
+}
+
+/** Marks an email read (on open) or unread (from the toolbar); the list updates straight away. */
+export function useMarkInboxRead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, read }: { id: string; read: boolean }) =>
+      apiRequest(`/admin/inbox/${id}/read`, {
+        method: 'POST',
+        body: { read },
+        schema: inboxRequestSchema,
+      }),
+    onMutate: ({ id, read }) =>
+      queryClient.setQueryData<InboxRequest[]>(adminKeys.inbox(), (list) =>
+        list?.map((r) => (r.id === id ? { ...r, read } : r)),
+      ),
+  });
+}
+
+/** Screen 02: the mailboxes the AI watches. */
+export function useMailAccounts() {
+  return useQuery({
+    queryKey: adminKeys.mailAccounts(),
+    queryFn: ({ signal }) =>
+      apiRequest('/admin/inbox/accounts', { schema: z.array(mailAccountSchema), signal }),
+  });
+}
+
+export function useAddMailAccount() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: AddMailAccountInput) =>
+      apiRequest('/admin/inbox/accounts', { method: 'POST', body, schema: mailAccountSchema }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.mailAccounts() }),
   });
 }
 

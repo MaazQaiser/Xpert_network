@@ -1,4 +1,4 @@
-import type { Activity, InboxRequest, PipelineStep, Project } from '@/features/admin';
+import type { Activity, InboxRequest, MailAccount, PipelineStep, Project } from '@/features/admin';
 import {
   PRJ_1042_BRIEFS,
   PRJ_1042_FACTS,
@@ -8,6 +8,7 @@ import {
 } from './prj1042';
 
 export const PROJECTS_INBOX = 'projects@xpertnetwork.example';
+export const PARTNERS_INBOX = 'partners@xpertnetwork.example';
 export const PM_NAME = 'Palto Kersion';
 
 export type SentMail = {
@@ -24,9 +25,20 @@ const minutesAgo = (now: Date, minutes: number) =>
 
 const step = (label: string, at: string | null): PipelineStep => ({ label, done: at !== null, at });
 
+// The two newest emails haven't been opened yet.
+const UNREAD = new Set(['req_helix_ev', 'req_northgate_mro', 'req_kite_coldstorage']);
+
+/** The mailboxes the AI watches. */
+export function seedMailAccounts(now = new Date()): MailAccount[] {
+  return [
+    { address: PROJECTS_INBOX, provider: 'google', connectedAt: minutesAgo(now, 60 * 24 * 30) },
+    { address: PARTNERS_INBOX, provider: 'microsoft', connectedAt: minutesAgo(now, 60 * 24 * 12) },
+  ];
+}
+
 export function seedInbox(now = new Date()): Record<string, InboxRequest> {
   const t = (minutes: number) => minutesAgo(now, minutes);
-  const requests: InboxRequest[] = [
+  const requests: Omit<InboxRequest, 'read'>[] = [
     {
       id: 'req_helix_ev',
       from: { name: 'Sarah Lin', email: 'sarah.lin@helixcap.example' },
@@ -187,8 +199,60 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
       autoReply: null,
       projectId: 'PRJ-1039',
     },
+    // A second connected mailbox, so the account switcher has somewhere to go.
+    {
+      id: 'req_kite_coldstorage',
+      from: { name: 'Mei Tanaka', email: 'mei.tanaka@kitecap.example' },
+      company: 'Kite Capital',
+      to: PARTNERS_INBOX,
+      subject: 'Brief: cold storage in Southeast Asia',
+      body: 'Sharing the brief for our cold-storage deal in Vietnam and Thailand. We’d like 3 calls with former operators before the IC on the 6th.',
+      receivedAt: t(41),
+      status: 'extracting',
+      attachment: {
+        name: 'Kite_ColdStorage_Brief.pdf',
+        kind: 'pdf',
+        pages: 8,
+        size: '1.6 MB',
+        note: 'scanned, OCR running',
+        progress: 35,
+      },
+      steps: [
+        step('Email received and sender matched to client “Kite Capital”', t(41)),
+        step('Attachment saved to secure storage', t(41)),
+        step('Extracting text from 8 scanned pages', null),
+        step('Extract brief, requirements and client questions', null),
+        step('Waiting for your review before matching experts', null),
+      ],
+      confirmations: [],
+      autoReply: null,
+      projectId: null,
+    },
+    {
+      id: 'req_arctic_partnership',
+      from: { name: 'Daniel Weiss', email: 'd.weiss@arcticbridge.example' },
+      company: 'Arctic Bridge Capital',
+      to: PARTNERS_INBOX,
+      subject: 'Expert calls for our portfolio teams',
+      body: 'Could Xpert Network support our portfolio companies with expert calls next quarter? Happy to set up an intro.',
+      receivedAt: t(60 * 30),
+      status: 'needs_client_info',
+      attachment: null,
+      steps: [
+        step('Email received and sender matched to client “Arctic Bridge Capital”', t(60 * 30)),
+        step('No brief yet: this is a partnership enquiry', t(60 * 30)),
+        step('Sent an automatic reply asking for a first brief', t(60 * 30)),
+        step('Waiting for Daniel to reply', null),
+      ],
+      confirmations: [],
+      autoReply:
+        'Hi Daniel, thanks for reaching out. Happy to support your portfolio teams. To get started, could you send a first brief: the company, the decision, the questions and the expert profile? — Xpert Network',
+      projectId: null,
+    },
   ];
-  return Object.fromEntries(requests.map((request) => [request.id, request]));
+  return Object.fromEntries(
+    requests.map((request) => [request.id, { ...request, read: !UNREAD.has(request.id) }]),
+  );
 }
 
 let activitySeq = 0;

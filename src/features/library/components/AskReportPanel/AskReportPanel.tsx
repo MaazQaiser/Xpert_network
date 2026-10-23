@@ -12,12 +12,7 @@ import {
   useAIStream,
 } from '@/shared/ai';
 import { createId } from '@/shared/lib/id';
-import {
-  reportAnswerSchema,
-  type Citation,
-  type ReportAnswer,
-  type ReportSection,
-} from '../../model/report.schema';
+import { reportAnswerSchema, type Citation, type ReportAnswer } from '../../model/report.schema';
 import styles from './AskReportPanel.module.scss';
 
 type Turn = {
@@ -30,7 +25,6 @@ type Turn = {
 
 type AskReportPanelProps = {
   itemId: string;
-  sections: ReportSection[];
   /** Questions this report can answer, from the server. */
   starters: string[];
   /** Scroll the report to a cited section. */
@@ -41,7 +35,7 @@ type AskReportPanelProps = {
  * "Ask this report" (F3, AI_NATIVE §4): answers only from this report, streamed, with
  * numbered citations into its sections, sources, feedback and follow-ups.
  */
-export function AskReportPanel({ itemId, sections, starters, onCite }: AskReportPanelProps) {
+export function AskReportPanel({ itemId, starters, onCite }: AskReportPanelProps) {
   const stream = useAIStream({ path: `/library/${itemId}/ask`, resultSchema: reportAnswerSchema });
   const [turns, setTurns] = useState<Turn[]>([]);
   const [draft, setDraft] = useState('');
@@ -77,11 +71,7 @@ export function AskReportPanel({ itemId, sections, starters, onCite }: AskReport
         <h2 id="ask-heading" className={styles.title}>
           Ask this report
         </h2>
-        <AIExplainLabel
-          aria-label="About these answers"
-          summary="Answers are written by AI from this report only, with links to the sections they come from."
-          basis={`This report: ${sections.length} sections from expert interviews.`}
-        />
+        <AIExplainLabel aria-label="About these answers" />
       </header>
       <div className={styles.scope}>
         <Tag type="gray" size="sm">

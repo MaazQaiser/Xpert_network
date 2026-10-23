@@ -6,29 +6,6 @@
 // Slow on purpose: a living mark, not a distraction.
 $pt-mascot-bob: 4s;
 
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-03;
-  max-inline-size: 36ch;
-}
-
-.eyebrow {
-  @include type-style('label-01');
-
-  color: $text-secondary;
-}
-
-.summary {
-  @include type-style('body-01');
-}
-
-.meta {
-  @include type-style('helper-text-01');
-
-  color: $text-secondary;
-}
-
 // ——— Mascot mark ——————————————————————————————————————————————————————————————
 // The assistant mascot marks AI content: a gentle bob, still for reduced motion. When edited,
 // a "Revert to AI draft" ghost button sits beside it.
@@ -40,7 +17,6 @@ $pt-mascot-bob: 4s;
 
 .mascot {
   display: block;
-  block-size: $spacing-06;
   inline-size: auto;
   animation: mascot-bob $pt-mascot-bob ease-in-out infinite;
   transform-origin: 50% 100%;

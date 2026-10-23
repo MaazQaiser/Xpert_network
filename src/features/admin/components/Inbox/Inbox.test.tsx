@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { setControls } from '@/test/mockBackend';
+import { db, setControls } from '@/test/mockBackend';
 import { expectNoAxeViolations } from '@/test/axe';
 import { mockLocation, mockRouter } from '@/test/navigation';
 import { renderWithProviders } from '@/test/render';
@@ -32,20 +32,53 @@ describe('Inbox (F12, screen 02)', () => {
   it('filters by view through the URL', async () => {
     mockLocation.pathname = '/admin/inbox';
     renderWithProviders(<Inbox />, { persona: 'ops' });
-    await userEvent.click(await screen.findByRole('button', { name: /Needs client info/ }));
-    expect(mockRouter.replace).toHaveBeenCalledWith('/admin/inbox?view=client_info', {
+    await userEvent.click(await screen.findByRole('button', { name: /^Attachments/ }));
+    expect(mockRouter.replace).toHaveBeenCalledWith('/admin/inbox?view=attachments', {
       scroll: false,
     });
   });
 
-  it('shows only the matching emails for a view', async () => {
-    mockLocation.search = 'view=client_info';
+  it('shows only unread emails, and opening one marks it read', async () => {
+    mockLocation.search = 'view=unread';
+    renderWithProviders(<Inbox selectedId="req_northgate_mro" />, { persona: 'ops' });
+    const list = await screen.findByRole('list', { name: 'Requests' });
+    expect(screen.getByRole('button', { name: /^Unread/ })).toHaveAttribute('aria-pressed', 'true');
+    // Two unread to start; opening Omar's email reads it.
+    await waitFor(() => expect(within(list).getAllByRole('listitem')).toHaveLength(1));
+    expect(db.get().adminInbox['req_northgate_mro']?.read).toBe(true);
+  });
+
+  it('shows only the emails of the chosen mailbox', async () => {
+    mockLocation.search = 'account=partners%40xpertnetwork.example';
     renderWithProviders(<Inbox />, { persona: 'ops' });
     const list = await screen.findByRole('list', { name: 'Requests' });
-    expect(within(list).getAllByRole('listitem')).toHaveLength(2);
-    expect(screen.getByRole('button', { name: /Needs client info/ })).toHaveAttribute(
-      'aria-pressed',
-      'true',
+    await waitFor(() => expect(within(list).getAllByRole('listitem')).toHaveLength(2));
+    expect(within(list).getByText('Mei Tanaka')).toBeInTheDocument();
+  });
+
+  it('connects another mailbox and switches to it', async () => {
+    mockLocation.pathname = '/admin/inbox';
+    renderWithProviders(<Inbox />, { persona: 'ops' });
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'projects@xpertnetwork.example' }),
+    );
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Add another account' }));
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByText('Connect another mailbox')).toBeInTheDocument();
+    await userEvent.click(within(dialog).getByLabelText('Microsoft 365'));
+    await userEvent.type(
+      within(dialog).getByLabelText('Mailbox address'),
+      'briefs@xpertnetwork.example',
+    );
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Connect mailbox' }));
+    await waitFor(() =>
+      expect(mockRouter.replace).toHaveBeenCalledWith(
+        '/admin/inbox?account=briefs%40xpertnetwork.example',
+        { scroll: false },
+      ),
+    );
+    expect(db.get().adminMailAccounts.map((a) => a.address)).toContain(
+      'briefs@xpertnetwork.example',
     );
   });
 

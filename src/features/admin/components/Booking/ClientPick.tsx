@@ -140,11 +140,7 @@ function PickView({ project, booking }: { project: Project; booking: Booking }) 
             </p>
           </div>
           <span className={styles.aiNote}>
-            <AIExplainLabel
-              mark="mascot"
-              summary="The AI read the picks and times from the client’s reply."
-              aria-label="AI read the picks"
-            />
+            <AIExplainLabel aria-label="AI read the picks" />
             AI read the picks
           </span>
         </div>
@@ -154,11 +150,7 @@ function PickView({ project, booking }: { project: Project; booking: Booking }) 
       <div className={styles.split}>
         <section className={styles.card} aria-labelledby="next-title">
           <div className={styles.cardHeader}>
-            <AIExplainLabel
-              mark="mascot"
-              summary="What the AI will do next, read from the client’s reply."
-              aria-label="Next steps"
-            />
+            <AIExplainLabel aria-label="Next steps" />
             <h2 id="next-title" className={styles.cardTitle}>
               Next steps
             </h2>

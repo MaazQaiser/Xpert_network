@@ -165,7 +165,7 @@ Productive curves by default. Durations: `$duration-fast-01` (70ms) · `fast-02`
 | Loading | `SkeletonText`, `DataTableSkeleton`, `SkeletonPlaceholder`, `InlineLoading` |
 | Empty states | `@carbon/ibm-products` empty-state components or Tile + pictogram |
 | Charts / analytics | `@carbon/charts-react` |
-| AI content markers | `AILabel` (+ `AILabelContent`, `AILabelActions`) |
+| AI content markers | `AIExplainLabel`: the assistant mascot, no popover (AI_NATIVE §3) |
 
 `@carbon/ibm-products` (Carbon for IBM Products) adds higher-level patterns (side panel, tearsheet, empty states, page header, create flows). Use it where it fits; it's built on the same tokens.
 

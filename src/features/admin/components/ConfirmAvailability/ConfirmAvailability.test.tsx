@@ -33,7 +33,7 @@ describe('ConfirmAvailability (F15, screen 09)', () => {
     expect(
       await screen.findByRole('heading', { name: 'Confirm availability' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('4 / 5')).toBeInTheDocument();
+    expect(screen.getByText('04 / 05')).toBeInTheDocument();
     expect(screen.getByText('Compliance form not signed')).toBeInTheDocument();
     expect(screen.getByText('Expert A · VP Operations')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Send 5 experts to the client' })).toBeEnabled();

@@ -224,12 +224,7 @@ export function ClientHome() {
                   </p>
                 ))}
               </div>
-              <AIExplainLabel
-                size="mini"
-                aria-label="About this home story"
-                summary="This is your home story for this demo persona."
-                basis="The library report, the brief, and the request named below."
-              />
+              <AIExplainLabel size="mini" aria-label="About this home story" />
             </div>
           ) : null}
 

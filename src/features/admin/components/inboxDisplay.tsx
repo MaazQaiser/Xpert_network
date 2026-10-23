@@ -68,6 +68,37 @@ const sameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString();
 const time = new Intl.DateTimeFormat('en-GB', { timeStyle: 'short' });
 const day = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' });
 
+const weekdayDay = new Intl.DateTimeFormat('en-GB', {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+});
+const full = new Intl.DateTimeFormat('en-GB', { dateStyle: 'full', timeStyle: 'short' });
+
+/** The open email's date: "Today, 15:05", "Yesterday, 14:12", then "Wed 21 Oct, 14:12". */
+export function dateTimeLabel(iso: string, now: Date = new Date()): string {
+  const date = new Date(iso);
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const dayPart = sameDay(date, now)
+    ? 'Today'
+    : sameDay(date, yesterday)
+      ? 'Yesterday'
+      : weekdayDay.format(date);
+  return `${dayPart}, ${time.format(date)}`;
+}
+
+/** A step's time: just "12:25" on the email's own day (the header shows the day), else the day too. */
+export function stepTimeLabel(iso: string, emailIso: string): string {
+  const date = new Date(iso);
+  return sameDay(date, new Date(emailIso)) ? time.format(date) : dateTimeLabel(iso);
+}
+
+/** "Thursday 22 October 2026 at 14:12", for a hover title. */
+export function fullDateLabel(iso: string): string {
+  return full.format(new Date(iso));
+}
+
 /** "09:42" today, "Yesterday", then "20 Oct" (wireframe 02). */
 export function receivedLabel(iso: string, now: Date = new Date()): string {
   const date = new Date(iso);

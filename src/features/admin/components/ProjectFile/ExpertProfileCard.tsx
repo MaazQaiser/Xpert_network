@@ -68,9 +68,6 @@ export function ExpertProfileCard({ project, onNotice }: ExpertProfileCardProps)
     <section className={styles.card} aria-labelledby="profile-title">
       <div className={styles.cardHeader}>
         <AIExplainLabel
-          mark="mascot"
-          summary="The profile the AI will match experts against on the next step."
-          basis="Section 4 of the client’s document and the questions they asked"
           isEdited={isEdited(project).requirements}
           onRevert={() =>
             reset.mutate(

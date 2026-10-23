@@ -34,8 +34,9 @@ import type {
   ClientDraft,
   Booking,
   CallSession,
+  MailAccount,
 } from '@/features/admin';
-import { seedInbox, seedProjects, type SentMail } from '../fixtures/admin/seed';
+import { seedInbox, seedMailAccounts, seedProjects, type SentMail } from '../fixtures/admin/seed';
 
 export type DemoState = {
   version: 2;
@@ -74,6 +75,8 @@ export type DemoState = {
   earnings: Record<string, StoredEarnings>;
   /** F12: client emails in the connected projects inbox, by id. */
   adminInbox: Record<string, InboxRequest>;
+  /** Screen 02: the mailboxes the AI watches (account switcher). */
+  adminMailAccounts: MailAccount[];
   /** F12+: projects by id (PRJ-1042). */
   adminProjects: Record<string, Project>;
   /** Email sandbox: everything the PM "sent". Nothing leaves the browser. */
@@ -163,6 +166,7 @@ function seed(): DemoState {
     interviews: {},
     earnings: structuredClone(SEED_EARNINGS),
     adminInbox: seedInbox(),
+    adminMailAccounts: seedMailAccounts(),
     adminProjects: seedProjects(),
     adminMail: [],
     adminMatches: {},
@@ -206,7 +210,8 @@ function withNewSeeds(saved: DemoState, fresh: DemoState): DemoState {
     !saved.adminAvailability ||
     !saved.adminClientDraft ||
     !saved.adminBooking ||
-    !saved.adminCall;
+    !saved.adminCall ||
+    !saved.adminMailAccounts;
   if (missingRequests.length === 0 && storyBriefs.length === 0 && !needsAdminSlices) {
     return saved;
   }
@@ -225,6 +230,11 @@ function withNewSeeds(saved: DemoState, fresh: DemoState): DemoState {
     adminClientDraft: saved.adminClientDraft ?? {},
     adminBooking: saved.adminBooking ?? {},
     adminCall: saved.adminCall ?? {},
+    adminMailAccounts: saved.adminMailAccounts ?? fresh.adminMailAccounts,
+    // The second demo mailbox's emails arrive with the account list.
+    adminInbox: saved.adminMailAccounts
+      ? saved.adminInbox
+      : { ...fresh.adminInbox, ...saved.adminInbox },
     requests: {
       ...saved.requests,
       ...Object.fromEntries(missingRequests.map((r) => [r.id, r])),

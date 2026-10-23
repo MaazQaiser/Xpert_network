@@ -49,29 +49,55 @@ export const inboxRequestSchema = z.object({
   /** The email the AI sent back when something was missing, shown read-only. */
   autoReply: z.string().nullable(),
   projectId: z.string().nullable(),
+  /** Opened by the PM, as in any mail client. */
+  read: z.boolean(),
 });
 export type InboxRequest = z.infer<typeof inboxRequestSchema>;
 
-export const INBOX_VIEWS = ['all', 'review', 'processing', 'client_info', 'converted'] as const;
+/** A mailbox the AI watches (screen 02 account switcher). */
+export const mailProviderSchema = z.enum(['google', 'microsoft', 'imap']);
+export type MailProvider = z.infer<typeof mailProviderSchema>;
+
+export const MAIL_PROVIDER_LABELS: Record<MailProvider, string> = {
+  google: 'Google Workspace',
+  microsoft: 'Microsoft 365',
+  imap: 'Other (IMAP)',
+};
+
+export const mailAccountSchema = z.object({
+  address: z.string(),
+  provider: mailProviderSchema,
+  connectedAt: z.string(),
+});
+export type MailAccount = z.infer<typeof mailAccountSchema>;
+
+export const addMailAccountInputSchema = z.object({
+  provider: mailProviderSchema,
+  address: z
+    .string()
+    .trim()
+    .min(1, 'Enter the mailbox address.')
+    .email('Enter a full email address, like team@company.com.'),
+});
+export type AddMailAccountInput = z.infer<typeof addMailAccountInputSchema>;
+
+// The filters a mail client has; the AI's progress shows on each email's status tag instead.
+export const INBOX_VIEWS = ['all', 'unread', 'attachments'] as const;
 export type InboxView = (typeof INBOX_VIEWS)[number];
 
 export const INBOX_VIEW_LABELS: Record<InboxView, string> = {
   all: 'All',
-  review: 'Needs your review',
-  processing: 'AI processing',
-  client_info: 'Needs client info',
-  converted: 'Converted to project',
+  unread: 'Unread',
+  attachments: 'Attachments',
 };
 
-const VIEW_STATUSES: Record<Exclude<InboxView, 'all'>, InboxStatus[]> = {
-  review: ['brief_ready', 'client_reply'],
-  processing: ['reading', 'extracting'],
-  client_info: ['needs_client_info', 'cant_open'],
-  converted: ['converted'],
-};
-
-export function inView(request: Pick<InboxRequest, 'status'>, view: InboxView): boolean {
-  return view === 'all' || VIEW_STATUSES[view].includes(request.status);
+export function inView(
+  request: Pick<InboxRequest, 'read' | 'attachment'>,
+  view: InboxView,
+): boolean {
+  if (view === 'unread') return !request.read;
+  if (view === 'attachments') return request.attachment !== null;
+  return true;
 }
 
 export function parseInboxView(value: string | null): InboxView {

@@ -444,12 +444,7 @@ export function ComponentGallery() {
             />
             <div className={styles.row}>
               <span className={styles.tokenUsage}>AI-drafted brief</span>
-              <AIExplainLabel
-                aria-label="Research brief"
-                summary="Drafted from your chat with the research assistant."
-                basis="Your goal, market and budget answers."
-                confidence="High: every question has coverage."
-              />
+              <AIExplainLabel aria-label="Research brief" />
             </div>
           </div>
         </div>

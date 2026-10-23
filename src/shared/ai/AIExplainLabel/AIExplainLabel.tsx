@@ -1,97 +1,58 @@
 'use client';
 
-import type { ReactNode } from 'react';
 import Image from 'next/image';
-import { AILabel, AILabelActions, AILabelContent, Button } from '@carbon/react';
+import { Button } from '@carbon/react';
 import { Undo } from '@carbon/icons-react';
 import styles from './AIExplainLabel.module.scss';
 
 export type AIExplainLabelProps = {
-  /** What the AI did, in one sentence. */
-  summary: string;
-  /** What the AI used: sources, scope, model note. */
-  basis?: string;
-  /** Coverage or confidence signal shown to calibrate trust. */
-  confidence?: string;
+  /** Mark size; the small sizes sit inline with body text, the large ones beside headings. */
   size?: 'mini' | '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  /** Set once a human has edited the AI output; switches the label to its revert state. */
+  /** Set once a human has edited the AI output; shows "Revert to AI draft" beside the mark. */
   isEdited?: boolean;
   onRevert?: () => void;
-  actions?: ReactNode;
-  /** Accessible context, e.g. "Research brief". */
+  /** Accessible context, e.g. "Research brief" → "AI generated: Research brief". */
   'aria-label'?: string;
-  /** `ai`: Carbon's AI label (default). `mascot`: the animated assistant mascot as a plain mark,
-   * with an inline "Revert to AI draft" once edited (screen 03; AI_NATIVE §3 exception). */
-  mark?: 'ai' | 'mascot';
 };
 
-/** Carbon AILabel with Xpert Network's standard explainability content (AI_NATIVE §3). */
+// Mascot height per size, matching the line it sits on.
+const HEIGHTS: Record<NonNullable<AIExplainLabelProps['size']>, number> = {
+  mini: 16,
+  '2xs': 16,
+  xs: 20,
+  sm: 20,
+  md: 24,
+  lg: 24,
+  xl: 24,
+};
+
+/**
+ * Marks AI-written content across the product with the animated assistant mascot (AI_NATIVE §3,
+ * as amended 2026-10-23: no explainability popover). Once a person edits the content, an
+ * inline "Revert to AI draft" brings the AI's version back.
+ */
 export function AIExplainLabel({
-  summary,
-  basis,
-  confidence,
-  size = 'xs',
+  size = 'md',
   isEdited = false,
   onRevert,
-  actions,
   'aria-label': ariaLabel,
-  mark = 'ai',
 }: AIExplainLabelProps) {
-  const explanation = (
-    <div className={styles.content}>
-      <p className={styles.eyebrow}>AI explained</p>
-      <p className={styles.summary}>{summary}</p>
-      {basis ? (
-        <p className={styles.meta}>
-          <strong>Based on:</strong> {basis}
-        </p>
-      ) : null}
-      {confidence ? (
-        <p className={styles.meta}>
-          <strong>Confidence:</strong> {confidence}
-        </p>
-      ) : null}
-      <p className={styles.meta}>
-        {isEdited
-          ? 'You edited this. Revert to bring back the AI draft.'
-          : 'Review and edit before you rely on it.'}
-      </p>
-    </div>
-  );
-
-  // The mascot marks AI content on its own (no popover); when a person has edited it, an
-  // inline action brings the AI draft back.
-  if (mark === 'mascot') {
-    return (
-      <span className={styles.mascotMark}>
-        <Image
-          src="/images/assistant-mascot.png"
-          alt={`AI generated${ariaLabel ? `: ${ariaLabel}` : ''}`}
-          width={20}
-          height={24}
-          className={styles.mascot}
-        />
-        {isEdited && onRevert ? (
-          <Button kind="ghost" size="sm" renderIcon={Undo} onClick={onRevert}>
-            Revert to AI draft
-          </Button>
-        ) : null}
-      </span>
-    );
-  }
-
+  const height = HEIGHTS[size];
   return (
-    <AILabel
-      size={size}
-      autoAlign
-      revertActive={isEdited}
-      {...(onRevert ? { onRevertClick: onRevert } : {})}
-      {...(ariaLabel ? { 'aria-label': ariaLabel } : {})}
-    >
-      <AILabelContent>
-        {explanation}
-        {actions ? <AILabelActions>{actions}</AILabelActions> : null}
-      </AILabelContent>
-    </AILabel>
+    <span className={styles.mascotMark}>
+      <Image
+        src="/images/assistant-mascot.png"
+        alt={`AI generated${ariaLabel ? `: ${ariaLabel}` : ''}`}
+        width={Math.round(height * 0.84)}
+        height={height}
+        className={styles.mascot}
+        style={{ blockSize: height }}
+      />
+      {isEdited && onRevert ? (
+        <Button kind="ghost" size="sm" renderIcon={Undo} onClick={onRevert}>
+          Revert to AI draft
+        </Button>
+      ) : null}
+    </span>
   );
 }

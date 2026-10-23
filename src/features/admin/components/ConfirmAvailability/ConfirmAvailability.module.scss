@@ -36,7 +36,7 @@
   color: $text-secondary;
 }
 
-// ——— Four Carbon tiles with the counts ———————————————————————————————————————
+// ——— Four Carbon tiles with the counts, styled like the Admin home cards ————————————————
 .stats {
   display: grid;
   gap: $spacing-04;
@@ -47,22 +47,26 @@
   }
 }
 
+// The count leads, then the label (as on Admin home). The markup keeps <dt> first for screen
+// readers; column-reverse only changes the visual order.
 .stat.stat {
   display: flex;
-  flex-direction: column;
-  gap: $spacing-03;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: $spacing-01;
   min-block-size: auto;
 }
 
 .statLabel {
-  @include type-style('label-01');
+  @include type-style('body-compact-01');
 
   color: $text-secondary;
 }
 
 .statValue {
-  @include type-style('heading-04');
+  @include type-style('heading-03');
   @include mx.display-face;
+  @include font-weight('semibold');
 }
 
 // ——— Table and the client panel side by side from lg —————————————————————————————
@@ -84,7 +88,7 @@
 .tableHint {
   @include type-style('helper-text-01');
 
-  margin-block-end: $spacing-03;
+  margin-block-start: $spacing-03;
   color: $text-helper;
 }
 

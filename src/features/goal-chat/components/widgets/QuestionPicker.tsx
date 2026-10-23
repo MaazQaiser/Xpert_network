@@ -94,12 +94,7 @@ export function QuestionPicker({
         <p className={styles.label} id="question-list-label">
           Questions in priority order
         </p>
-        <AIExplainLabel
-          size="mini"
-          aria-label="About the suggested questions"
-          summary="Suggested from your goal and subjects, using the questions experts are most often asked for similar briefs."
-          basis="Your goal, subjects and Xpert Network’s question library"
-        />
+        <AIExplainLabel size="mini" aria-label="About the suggested questions" />
       </div>
       <ol className={styles.questionList} aria-labelledby="question-list-label">
         {rows.map((row, index) => (

@@ -193,7 +193,6 @@ function ViewerBody({ report }: { report: Report }) {
         <aside className={isWide || isAskOpen ? styles.askAside : styles.askHidden}>
           <AskReportPanel
             itemId={entry.id}
-            sections={sections}
             starters={report.starterQuestions}
             onCite={goToSection}
           />

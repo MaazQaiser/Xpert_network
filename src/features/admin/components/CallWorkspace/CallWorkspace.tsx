@@ -362,11 +362,7 @@ function LiveCall({ project, session }: { project: Project; session: CallSession
         <div className={styles.column}>
           <section className={styles.card} aria-labelledby="requests-title">
             <div className={styles.cardHeader}>
-              <AIExplainLabel
-                mark="mascot"
-                summary="The AI listens for things the client asks for and lines each one up for you."
-                aria-label="Client requests"
-              />
+              <AIExplainLabel aria-label="Client requests" />
               <h2 id="requests-title" className={styles.cardTitle}>
                 Client requests detected · {requests.length}
               </h2>
@@ -393,11 +389,7 @@ function LiveCall({ project, session }: { project: Project; session: CallSession
 
           <section className={styles.card} aria-labelledby="questions-title">
             <div className={styles.cardHeader}>
-              <AIExplainLabel
-                mark="mascot"
-                summary="The AI ticks a question off once the expert has answered it."
-                aria-label="Questions covered"
-              />
+              <AIExplainLabel aria-label="Questions covered" />
               <h2 id="questions-title" className={styles.cardTitle}>
                 Questions covered
               </h2>

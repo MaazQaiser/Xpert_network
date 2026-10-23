@@ -1,0 +1,359 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/motion' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '../../../../styles/mixins' as mx;
+
+// ——— Motion ———————————————————————————————————————————————————————————————————
+// One entrance, then a quiet loop:
+//   links    trace from each expert to the hub, one after another
+//   experts  pop in as their link arrives; the hub lands last
+//   flow     dots travel along each link toward the hub, forever
+//   pulse    a soft ring breathes around the hub
+// The form steers it (CSS :has): focus brightens the flow, logging in quickens the pulse,
+// an error shakes the hub. The pointer adds a little parallax. Reduced motion: still image.
+$pt-link: 0.7s;
+$pt-stagger: 0.14s;
+$pt-flow: 3.2s;
+$pt-pulse: 2.4s;
+$pt-shake: 0.5s;
+$pt-hub-at: $pt-link + $pt-stagger * 6;
+
+// ——— Layout ———————————————————————————————————————————————————————————————————
+.root {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-block-size: 100dvh;
+
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  }
+}
+
+// ——— Brand panel (a navy Carbon zone in both themes) ——————————————————————————————
+.brand {
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: $spacing-07;
+  padding: $spacing-06 $spacing-05;
+  border-inline-end: 1px solid $border-subtle-01;
+
+  // One step up from the page navy, so the halves stay distinct in dark mode too.
+  background: $layer-01;
+  color: $text-primary;
+
+  @include breakpoint(lg) {
+    position: sticky;
+    inset-block-start: 0;
+    block-size: 100dvh;
+    padding: $spacing-07 $spacing-09;
+  }
+}
+
+// The network only shows where there's room for it; phones get the logo and the line.
+.artWrap {
+  display: none;
+
+  @include breakpoint(lg) {
+    display: grid;
+    flex: 1;
+    min-block-size: 0;
+    place-items: center;
+  }
+}
+
+.art {
+  block-size: 100%;
+  inline-size: 100%;
+  max-block-size: 28rem;
+  max-inline-size: 34rem;
+}
+
+.pitch {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+}
+
+.headline {
+  @include mx.display-heading('heading-04');
+
+  max-inline-size: 22rem;
+}
+
+// Brief › Match › Screen › Book › Call, joined by short rules like the links in the art.
+.steps {
+  @include type-style('label-02');
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+  color: $text-secondary;
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-03;
+
+    & + li::before {
+      background: $border-strong-01;
+      block-size: 1px;
+      content: '';
+      inline-size: $spacing-04;
+    }
+  }
+}
+
+// ——— Network art ———————————————————————————————————————————————————————————————
+.linkLayer,
+.nodeLayer {
+  transition: transform $duration-slow-01 motion(standard, expressive);
+}
+
+// The pointer offsets are set on these layers by AdminLoginFrame.tsx (front moves more).
+
+.link,
+.ringLink {
+  fill: none;
+  stroke: $border-strong-01;
+  stroke-dasharray: 1;
+  stroke-width: 1.5;
+  animation: trace $pt-link motion(entrance, expressive) both;
+  animation-delay: calc(var(--i) * #{$pt-stagger});
+}
+
+.ringLink {
+  stroke: $border-subtle-01;
+  stroke-width: 1;
+}
+
+// Dots travelling to the hub: short dashes slid along each link.
+.flow {
+  fill: none;
+  opacity: 0.45;
+  stroke: $interactive;
+  stroke-dasharray: 2 22;
+  stroke-linecap: round;
+  stroke-width: 3;
+  transition: opacity $duration-moderate-02 motion(standard, productive);
+  animation:
+    appear $duration-moderate-02 linear both,
+    flow $pt-flow linear infinite;
+  animation-delay: $pt-hub-at, calc(var(--i) * -0.5s);
+}
+
+.expert {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pop $duration-moderate-02 motion(entrance, expressive) both;
+  animation-delay: calc(var(--i) * #{$pt-stagger} + #{$pt-link * 0.8});
+}
+
+.expertRing {
+  fill: $layer-01;
+  stroke: $border-strong-01;
+  stroke-width: 1.5;
+  transition: stroke $duration-moderate-02 motion(standard, productive);
+}
+
+.hub {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pop $duration-moderate-02 motion(entrance, expressive) both;
+  animation-delay: $pt-hub-at;
+}
+
+.hubTile {
+  fill: $background-brand;
+}
+
+.hubMark {
+  path {
+    fill: none;
+    stroke: $text-on-color;
+    stroke-linecap: round;
+    stroke-width: 2.4;
+  }
+
+  circle {
+    fill: $text-on-color;
+  }
+}
+
+.hubPulse {
+  fill: none;
+  stroke: $interactive;
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pulse $pt-pulse motion(exit, expressive) infinite;
+  animation-delay: $pt-hub-at;
+}
+
+// The form wakes the network: brighter flow while a field has focus…
+.root:has(.formSide form:focus-within) {
+  .flow {
+    opacity: 1;
+  }
+
+  .expertRing {
+    stroke: $interactive;
+  }
+}
+
+// …a quick pulse while logging in…
+.root:has(.formSide button[type='submit']:disabled) .hubPulse {
+  animation-duration: $duration-slow-02;
+}
+
+// …and a shake when the login fails.
+.root:has(.formSide [class*='inline-notification--error']) .hub {
+  animation: shake $pt-shake motion(standard, productive) 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .linkLayer,
+  .nodeLayer {
+    transition: none;
+  }
+
+  .link,
+  .ringLink,
+  .flow,
+  .expert,
+  .hub,
+  .hubPulse,
+  .root:has(.formSide [class*='inline-notification--error']) .hub {
+    animation: none;
+  }
+
+  .hubPulse {
+    opacity: 0;
+  }
+}
+
+// ——— Form side ———————————————————————————————————————————————————————————————————
+.formSide {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100%;
+  background: $background;
+}
+
+// The theme toggle floats in the corner so it never costs the form a row (phones).
+.topBar {
+  position: absolute;
+  padding: $spacing-03;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+}
+
+.formMain {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-07 $spacing-05;
+}
+
+.column {
+  inline-size: 100%;
+  max-inline-size: 24rem;
+}
+
+.title {
+  @include mx.display-heading('heading-05');
+}
+
+.description {
+  @include type-style('body-02');
+
+  color: $text-secondary;
+  margin-block-start: $spacing-03;
+}
+
+.body {
+  margin-block-start: $spacing-07;
+}
+
+.footer {
+  @include type-style('helper-text-01');
+
+  padding: $spacing-06 $spacing-05;
+  color: $text-secondary;
+  text-align: center;
+
+  // Clear the fixed demo-accounts button in the bottom-right corner on small screens.
+  @include breakpoint-down(md) {
+    padding-block-end: $spacing-11;
+  }
+}
+
+// ——— Keyframes ———————————————————————————————————————————————————————————————————
+@keyframes trace {
+  from {
+    stroke-dashoffset: 1;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+
+  70% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0.7;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+
+@keyframes shake {
+  20% {
+    transform: translateX(-6%);
+  }
+
+  40% {
+    transform: translateX(5%);
+  }
+
+  60% {
+    transform: translateX(-3%);
+  }
+
+  80% {
+    transform: translateX(2%);
+  }
+}

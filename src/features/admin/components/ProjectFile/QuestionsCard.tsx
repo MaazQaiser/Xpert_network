@@ -95,9 +95,6 @@ export function QuestionsCard({ project, onNotice }: QuestionsCardProps) {
     <section className={styles.card} aria-labelledby="questions-title">
       <div className={styles.cardHeader}>
         <AIExplainLabel
-          mark="mascot"
-          summary="Questions the AI found in the client’s document, with the page each came from."
-          basis={project.source.fileName ?? 'The client’s email'}
           isEdited={isEdited(project).questions}
           onRevert={() =>
             reset.mutate(

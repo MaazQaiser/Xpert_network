@@ -27,12 +27,7 @@ type ChatThreadProps = {
 function AssistantFooter({ at, messageId }: { at: string; messageId?: string }) {
   return (
     <div className={styles.footer}>
-      <AIExplainLabel
-        size="mini"
-        aria-label="About this reply"
-        summary="Written by Xpert Network’s research assistant to scope your brief. It doesn’t give investment advice."
-        basis="Your answers in this chat and the Xpert Network library catalogue"
-      />
+      <AIExplainLabel size="mini" aria-label="About this reply" />
       <time dateTime={at} title={formatDateTime(at)} className={styles.time}>
         {formatRelative(at)}
       </time>

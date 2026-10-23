@@ -223,8 +223,6 @@ function SyncView({ project, booking }: { project: Project; booking: Booking }) 
         <section className={styles.card} aria-labelledby="message-title">
           <div className={styles.cardHeader}>
             <AIExplainLabel
-              mark="mascot"
-              summary="The AI drafted this from the confirmed times and the client’s note."
               aria-label="Message to the client"
               isEdited={!isAiCopy && !isBooked}
               onRevert={() => set(message.ai)}

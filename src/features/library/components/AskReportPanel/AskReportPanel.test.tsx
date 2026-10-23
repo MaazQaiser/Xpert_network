@@ -15,7 +15,7 @@ function renderPanel(onCite = vi.fn()) {
   return {
     onCite,
     ...renderWithProviders(
-      <AskReportPanel itemId="lib_dubai_rents" sections={[]} starters={STARTERS} onCite={onCite} />,
+      <AskReportPanel itemId="lib_dubai_rents" starters={STARTERS} onCite={onCite} />,
       { persona: 'bilal' },
     ),
   };

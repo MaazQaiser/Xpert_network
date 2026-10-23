@@ -84,8 +84,6 @@ export function BriefSummaryCard({ brief, isInteractive, onConfirm }: BriefSumma
         <AIExplainLabel
           size="xs"
           aria-label="About this research brief"
-          summary="Assembled by AI from your answers in this chat. Edit anything that’s wrong — your edits are kept."
-          basis="Your answers to the goal, subject, question and constraint steps"
           isEdited={brief.isEditedByUser}
           {...(brief.aiSnapshot ? { onRevert: () => update.mutate({ revertToAi: true }) } : {})}
         />

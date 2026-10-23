@@ -36,7 +36,7 @@ describe('admin mock API (F11–F12)', () => {
   it('summarises today from the store', async () => {
     logIn('usr_ops');
     const { body } = await call('/api/admin/summary');
-    expect(body).toMatchObject({ emailsToday: 4, expertsPendingReview: 4, newProjectsToday: 1 });
+    expect(body).toMatchObject({ emailsToday: 5, expertsPendingReview: 4, newProjectsToday: 1 });
     expect(body.tip).toMatchObject({ lead: 'Start with PRJ-1042' });
   });
 

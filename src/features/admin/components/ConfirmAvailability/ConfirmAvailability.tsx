@@ -199,17 +199,14 @@ function AvailabilityView({ project, data }: { project: Project; data: Availabil
       ) : null}
 
       <dl className={styles.stats}>
-        <Stat label="Confirmed" value={String(count('confirmed'))} />
-        <Stat label="Waiting" value={String(count('waiting'))} />
-        <Stat label="Declined" value={String(count('declined'))} />
-        <Stat label="Compliance signed" value={`${signed} / ${data.experts.length}`} />
+        <Stat label="Confirmed" value={pad(count('confirmed'))} />
+        <Stat label="Waiting" value={pad(count('waiting'))} />
+        <Stat label="Declined" value={pad(count('declined'))} />
+        <Stat label="Compliance signed" value={`${pad(signed)} / ${pad(data.experts.length)}`} />
       </dl>
 
       <div className={styles.layout}>
         <section aria-label="Experts and their offered times" className={styles.tablePane}>
-          <p className={styles.tableHint}>
-            Selected times go to the client. Select a time again to leave it out.
-          </p>
           <TableContainer className={styles.tableScroll}>
             <Table size="lg" aria-label="Offered times">
               <TableHead>
@@ -307,6 +304,10 @@ function AvailabilityView({ project, data }: { project: Project; data: Availabil
               </TableBody>
             </Table>
           </TableContainer>
+          {/* Helper text sits under the table so the table and the panel share a top edge. */}
+          <p className={styles.tableHint}>
+            Selected times go to the client. Select a time again to leave it out.
+          </p>
         </section>
 
         <aside className={styles.panel} aria-labelledby="client-ready-title">
@@ -412,6 +413,9 @@ function AvailabilityView({ project, data }: { project: Project; data: Availabil
     </div>
   );
 }
+
+/** Counts read as two digits, like the Admin home cards ("04"). */
+const pad = (n: number) => String(n).padStart(2, '0');
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (

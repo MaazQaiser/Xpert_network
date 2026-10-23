@@ -6,7 +6,6 @@ import { StatusTag, type StatusTone } from '@/shared/ui';
 import { useOpenReportReview } from '../ReportReview/reportReviewContext';
 import {
   COVERAGE_LABELS,
-  summariseCoverage,
   type CoverageLevel,
   type CoverageResult,
 } from '../../model/coverage.schema';
@@ -23,7 +22,6 @@ type CoverageMapProps = { coverage: CoverageResult; questions: Question[] };
 
 /** Per question: Covered / Partly / Not covered, with the "why" (PRODUCT_PLAN §10). */
 export function CoverageMap({ coverage, questions }: CoverageMapProps) {
-  const counts = summariseCoverage(coverage.items);
   const openReport = useOpenReportReview();
   return (
     <section className={styles.stack} aria-labelledby="coverage-heading">
@@ -31,13 +29,7 @@ export function CoverageMap({ coverage, questions }: CoverageMapProps) {
         <h3 id="coverage-heading" className={styles.sectionTitle}>
           Coverage map
         </h3>
-        <AIExplainLabel
-          size="mini"
-          aria-label="About the coverage map"
-          summary="Each question was matched to sections of published library reports. “Partly” means the report covers a broader or different region or company."
-          basis={`${coverage.reports.length} library reports`}
-          confidence={`${counts.full} covered · ${counts.partial} partly · ${counts.none} not covered`}
-        />
+        <AIExplainLabel size="mini" aria-label="About the coverage map" />
       </div>
       <ul className={styles.coverageList}>
         {coverage.items.map((item) => {

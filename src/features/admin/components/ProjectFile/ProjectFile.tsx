@@ -221,12 +221,7 @@ function ProjectFileView({ project }: { project: Project }) {
             {project.confirmations.length > 0 ? (
               <section className={styles.card} aria-labelledby="confirm-title">
                 <div className={styles.cardHeader}>
-                  <AIExplainLabel
-                    mark="mascot"
-                    summary="Facts the AI couldn’t settle from the document."
-                    basis="Missing or ambiguous budget and deadline wording"
-                    aria-label="Needs confirming"
-                  />
+                  <AIExplainLabel aria-label="Needs confirming" />
                   <h2 id="confirm-title" className={styles.cardTitle}>
                     Needs confirming ({open.length})
                   </h2>

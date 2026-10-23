@@ -207,11 +207,7 @@ export function AdminHome() {
                 <p className={styles.question}>{turn.question}</p>
                 {turn.answer ? (
                   <div className={styles.answer}>
-                    <AIExplainLabel
-                      summary="Answered from your inbox and project files."
-                      basis={turn.answer.basis}
-                      aria-label="AI answer"
-                    />
+                    <AIExplainLabel aria-label="AI answer" />
                     <div>
                       <p>{turn.answer.text}</p>
                       {turn.answer.links.length > 0 ? (

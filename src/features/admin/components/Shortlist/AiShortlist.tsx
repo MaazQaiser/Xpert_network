@@ -213,11 +213,7 @@ function ShortlistView({
       <ProjectSteps projectId={project.id} status={project.status} />
 
       <div className={styles.weights}>
-        <AIExplainLabel
-          summary="Ranked from the matched experts using these weights."
-          basis={`${shortlist.fromMatchCount} matches after filters`}
-          aria-label="Shortlist ranking"
-        />
+        <AIExplainLabel aria-label="Shortlist ranking" />
         {WEIGHT_LABELS.map(([key, label]) => (
           <Tag key={key} type="gray" size="sm">
             {label} {shortlist.weights[key]}%
@@ -318,11 +314,7 @@ function ShortlistView({
           <h2 id="coverage-title" className={styles.sideTitle}>
             Client question coverage
           </h2>
-          <AIExplainLabel
-            summary="How many shortlisted experts can speak to each client question."
-            basis="Expert answers predicted from their profiles"
-            aria-label="Question coverage"
-          />
+          <AIExplainLabel aria-label="Question coverage" />
           <ul className={styles.coverageList}>
             {shortlist.coverage.map((item, index) => (
               <li key={item.questionId} className={styles.coverageItem}>

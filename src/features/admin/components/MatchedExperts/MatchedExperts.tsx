@@ -106,11 +106,7 @@ function MatchedExpertsView({ project }: { project: Project }) {
       <section className={styles.briefCard} aria-label="Project brief summary">
         <Accordion align="start" size="md">
           <AccordionItem title="Project brief" open>
-            <AIExplainLabel
-              summary="Drafted from the client’s email and document."
-              basis={project.source.fileName ?? 'Client email'}
-              aria-label="Project brief"
-            />
+            <AIExplainLabel aria-label="Project brief" />
             <p>{project.brief}</p>
           </AccordionItem>
         </Accordion>

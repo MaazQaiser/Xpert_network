@@ -61,11 +61,7 @@ export function ClarificationModal({ project, onClose, onSent }: ClarificationMo
       ) : (
         <form className={styles.modalForm} onSubmit={(event) => void submit(event)} noValidate>
           <div className={styles.aiNote}>
-            <AIExplainLabel
-              summary="Drafted from the things that still need confirming."
-              basis="Open items in Needs confirming"
-              aria-label="AI-drafted email"
-            />
+            <AIExplainLabel aria-label="AI-drafted email" />
             <span>Drafted by AI. Check it before sending.</span>
           </div>
           <TextInput id="clarify-to" labelText="To" readOnly {...register('to')} />
