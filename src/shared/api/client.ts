@@ -20,18 +20,41 @@ async function toApiError(response: Response): Promise<ApiError> {
   return new ApiError(response.status, code, fallbackMessage(code));
 }
 
+/**
+ * The prototype's backend is a mock service worker (src/mocks). Browsers can stop an idle
+ * service worker; when it starts again it no longer serves this tab, so calls fall through to
+ * Next.js and come back as its HTML 404 page. MockProvider registers a recovery hook here.
+ */
+type RecoverMocks = () => Promise<void>;
+const mockScope = globalThis as typeof globalThis & { __xnRecoverMocks?: RecoverMocks };
+
+function fellThroughMocks(response: Response): boolean {
+  return (
+    response.status === 404 &&
+    !(response.headers.get('content-type') ?? '').includes('application/json') &&
+    typeof mockScope.__xnRecoverMocks === 'function'
+  );
+}
+
 export async function send(
   path: string,
   { method = 'GET', body, signal }: Omit<RequestOptions<z.ZodType>, 'schema'> = {},
 ): Promise<Response> {
-  let response: Response;
-  try {
-    response = await fetch(`${API_BASE}${path}`, {
+  const request = () =>
+    fetch(`${API_BASE}${path}`, {
       method,
       headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
       body: body === undefined ? null : JSON.stringify(body),
       signal: signal ?? null,
     });
+  let response: Response;
+  try {
+    response = await request();
+    // The mocks dropped out (see above): restart them and try once more.
+    if (fellThroughMocks(response)) {
+      await mockScope.__xnRecoverMocks?.();
+      response = await request();
+    }
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') throw error;
     throw new ApiError(0, 'network', fallbackMessage('network'));

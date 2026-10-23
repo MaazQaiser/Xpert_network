@@ -1,0 +1,399 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/motion' as *;
+@use '../../../../styles/mixins' as mx;
+
+// Rich answers in the Home chat: emails to pick from, the brief as a document, summaries and
+// next-step chips. Flat Carbon layers, hairlines, no nested cards.
+
+// ——— Email picks ———————————————————————————————————————————————————————————————
+.picks {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $border-subtle-01;
+  background: $layer-01;
+}
+
+.pick {
+  display: grid;
+  align-items: center;
+  gap: $spacing-04;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding: $spacing-04 $spacing-05;
+
+  & + & {
+    border-block-start: 1px solid $border-subtle-01;
+  }
+
+  @include breakpoint(md) {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+}
+
+.avatar {
+  @include type-style('label-02');
+
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: $layer-accent-01;
+  block-size: $spacing-08;
+  inline-size: $spacing-08;
+}
+
+.avatarPhoto {
+  display: block;
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: cover;
+}
+
+.pickBody {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-01;
+  min-inline-size: 0;
+}
+
+.pickTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
+
+.pickFrom {
+  @include type-style('heading-compact-01');
+}
+
+.pickCompany {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.pickTime {
+  @include type-style('label-01');
+
+  flex: none;
+  color: $text-secondary;
+}
+
+.pickSubject {
+  @include type-style('body-compact-01');
+
+  overflow-wrap: anywhere;
+}
+
+.pickMeta {
+  @include type-style('label-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-02 $spacing-04;
+  color: $text-secondary;
+}
+
+.reason {
+  color: $text-primary;
+}
+
+.file {
+  display: inline-flex;
+  overflow-wrap: anywhere;
+  align-items: center;
+  gap: $spacing-02;
+
+  svg {
+    fill: $icon-secondary;
+  }
+}
+
+// On phones the action takes its own row under the email.
+.pickAction.pickAction {
+  grid-column: 1 / -1;
+  justify-self: start;
+
+  @include breakpoint(md) {
+    grid-column: auto;
+  }
+}
+
+.countBadge {
+  @include type-style('heading-compact-02');
+  @include mx.display-face;
+
+  display: grid;
+  background: $layer-accent-01;
+  block-size: $spacing-08;
+  inline-size: $spacing-08;
+  place-items: center;
+}
+
+// ——— Brief canvas ————————————————————————————————————————————————————————————————
+// A document in the chat: a toolbar (what it is, Edit), the page, then the way on.
+.canvas {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $border-subtle-01;
+  background: $layer-01;
+}
+
+.canvasBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+  padding: $spacing-03 $spacing-03 $spacing-03 $spacing-05;
+  border-block-end: 1px solid $border-subtle-01;
+}
+
+.canvasLabel {
+  @include type-style('label-02');
+
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-03;
+  color: $text-secondary;
+
+  svg {
+    fill: $icon-secondary;
+  }
+}
+
+.canvasActions {
+  display: inline-flex;
+  gap: $spacing-03;
+  margin-inline-start: auto;
+}
+
+// The page itself: white, generous margins, a readable measure.
+.canvasPage {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  padding: $spacing-06 $spacing-05;
+  background: $background;
+
+  @include breakpoint(md) {
+    padding: $spacing-07 $spacing-08;
+  }
+}
+
+.docHead {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-03;
+}
+
+.docTitle {
+  @include mx.display-heading('heading-04');
+}
+
+.docMeta {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.docSection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.docHeading {
+  @include type-style('heading-compact-02');
+}
+
+.docText {
+  @include type-style('body-02');
+
+  max-inline-size: 44rem;
+}
+
+.docList,
+.docNumbered {
+  @include type-style('body-01');
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  padding-inline-start: $spacing-06;
+  list-style: disc;
+
+  li::marker {
+    color: $text-secondary;
+  }
+}
+
+.docNumbered {
+  list-style: decimal;
+}
+
+.confirmList {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-03;
+  }
+
+  svg {
+    flex: none;
+    fill: $support-warning;
+  }
+}
+
+.facts {
+  display: grid;
+  gap: $spacing-05 $spacing-06;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  dt {
+    @include type-style('label-01');
+
+    color: $text-secondary;
+  }
+
+  dd {
+    @include type-style('body-compact-01');
+
+    margin-block-start: $spacing-01;
+  }
+}
+
+.factMissing {
+  color: $text-secondary;
+}
+
+// The bottom of the brief: the question, then the way on to screen 03.
+.canvasFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+  padding: $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
+
+  p {
+    @include type-style('body-compact-01');
+  }
+}
+
+// ——— Summary and draft cards ——————————————————————————————————————————————————————
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  padding: $spacing-05;
+  border: 1px solid $border-subtle-01;
+  background: $layer-01;
+}
+
+.cardHead {
+  display: grid;
+  align-items: center;
+  gap: $spacing-04;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.points {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+
+  // Label beside value from md; stacked on phones.
+  div {
+    display: grid;
+    gap: $spacing-01 $spacing-04;
+    grid-template-columns: minmax(0, 1fr);
+
+    @include breakpoint(md) {
+      grid-template-columns: 8rem minmax(0, 1fr);
+    }
+  }
+
+  dt {
+    @include type-style('label-01');
+
+    padding-block-start: $spacing-01;
+    color: $text-secondary;
+  }
+
+  dd {
+    @include type-style('body-compact-01');
+
+    overflow-wrap: anywhere;
+  }
+}
+
+.draftHead {
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.draftBody {
+  @include type-style('body-01');
+
+  padding: $spacing-05;
+  background: $background;
+  white-space: pre-line;
+}
+
+// ——— Next-step chips (like the Home suggestions) ——————————————————————————————————
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.chip {
+  @include type-style('body-compact-01');
+
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-02;
+  padding: $spacing-03 $spacing-05;
+  border: 0;
+  background: $layer-01;
+  color: $text-primary;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color $duration-fast-02 motion(standard, productive);
+
+  &:hover {
+    background: $layer-hover-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: -2px;
+  }
+
+  &:disabled {
+    color: $text-disabled;
+    cursor: not-allowed;
+  }
+
+  svg {
+    fill: $icon-secondary;
+  }
+}

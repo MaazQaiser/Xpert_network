@@ -61,6 +61,19 @@ describe('ProjectFile (F12, screen 03)', () => {
     expect(db.get().adminScreening['PRJ-1042']).toEqual(['exp_4821']);
   });
 
+  it('shows flags and match bars, and refresh turns Sent into the reply status', async () => {
+    renderWithProviders(<ProjectFile projectId="PRJ-1042" />, { persona: 'ops' });
+    await userEvent.click(await screen.findByRole('tab', { name: /^Experts/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'Start finding experts' }));
+    expect(await screen.findByText(/8 experts found/)).toBeInTheDocument();
+    expect(screen.getAllByText('Germany').length).toBeGreaterThan(0);
+    await userEvent.click(screen.getAllByRole('button', { name: 'Send screening questions' })[0]!);
+    expect(await screen.findByText('Sent')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Refresh screening status' }));
+    expect(await screen.findByText(/Screening status updated/)).toBeInTheDocument();
+    expect(screen.queryByText('Sent')).not.toBeInTheDocument();
+  });
+
   it('extends the research from the bottom sheet and adds more experts', async () => {
     renderWithProviders(<ProjectFile projectId="PRJ-1042" />, { persona: 'ops' });
     await userEvent.click(await screen.findByRole('tab', { name: /^Experts/ }));

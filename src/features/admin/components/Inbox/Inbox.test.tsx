@@ -8,7 +8,7 @@ import { renderWithProviders } from '@/test/render';
 import { Inbox } from './Inbox';
 
 describe('Inbox (F12, screen 02)', () => {
-  it('lists client emails and shows what the AI did with the open one', async () => {
+  it('lists client emails and opens the selected one', async () => {
     const { container } = renderWithProviders(<Inbox selectedId="req_helix_ev" />, {
       persona: 'ops',
     });
@@ -25,7 +25,8 @@ describe('Inbox (F12, screen 02)', () => {
       '/admin/projects/PRJ-1042',
     );
     expect(within(pane).getByText('2 things need confirming:')).toBeInTheDocument();
-    expect(within(pane).getByText('4 of 5 done')).toBeInTheDocument();
+    // The AI's step-by-step log isn't shown in the email any more.
+    expect(within(pane).queryByText('What the system did')).not.toBeInTheDocument();
     await expectNoAxeViolations(container);
   });
 

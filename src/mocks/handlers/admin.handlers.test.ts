@@ -36,7 +36,7 @@ describe('admin mock API (F11–F12)', () => {
   it('summarises today from the store', async () => {
     logIn('usr_ops');
     const { body } = await call('/api/admin/summary');
-    expect(body).toMatchObject({ emailsToday: 5, expertsPendingReview: 4, newProjectsToday: 1 });
+    expect(body).toMatchObject({ emailsToday: 5, expertsPendingReview: 4, newProjectsToday: 3 });
     expect(body.tip).toMatchObject({ lead: 'Start with PRJ-1042' });
   });
 
@@ -129,6 +129,9 @@ describe('admin mock API (F11–F12)', () => {
       text: 'Which experts need my review?',
     });
     expect(body.text).toContain('4 expert answers are waiting');
-    expect(body.links).toEqual([{ label: 'Open PRJ-1040', href: '/admin/projects/PRJ-1040' }]);
+    expect((body.blocks as unknown[])[0]).toMatchObject({
+      kind: 'experts',
+      items: [{ projectId: 'PRJ-1040', count: 4, href: '/admin/projects/PRJ-1040' }],
+    });
   });
 });

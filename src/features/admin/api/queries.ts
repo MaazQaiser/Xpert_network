@@ -262,9 +262,10 @@ export function useSendScreening(id: string) {
 }
 
 /** Screen 08: who answered the screening questions, with the AI's quality read and picks. */
-export function useResponses(id: string) {
+export function useResponses(id: string, { enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: adminKeys.responses(id),
+    enabled,
     queryFn: ({ signal }) =>
       apiRequest(`/admin/projects/${id}/responses`, { schema: responsesSchema, signal }),
   });

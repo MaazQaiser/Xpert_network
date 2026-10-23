@@ -105,9 +105,13 @@
     color: $text-primary;
   }
 
+  // The selected tab: a raised pill with a blue line along its bottom edge, as Carbon marks
+  // its own selected tabs.
   &[aria-selected='true'] {
     background: $layer-02;
-    box-shadow: 0 1px $spacing-02 $shadow;
+    box-shadow:
+      inset 0 -2px 0 $interactive,
+      0 1px $spacing-02 $shadow;
     color: $text-primary;
   }
 

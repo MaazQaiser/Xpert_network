@@ -212,7 +212,17 @@ function withNewSeeds(saved: DemoState, fresh: DemoState): DemoState {
     !saved.adminBooking ||
     !saved.adminCall ||
     !saved.adminMailAccounts;
-  if (missingRequests.length === 0 && storyBriefs.length === 0 && !needsAdminSlices) {
+  // Seeded admin projects a saved demo predates (e.g. today's PRJ-1043/1044), and the inbox
+  // emails they were drafted from, which change from "reading" to "brief ready".
+  const missingProjects = Object.values(fresh.adminProjects).filter(
+    (p) => !saved.adminProjects?.[p.id],
+  );
+  if (
+    missingRequests.length === 0 &&
+    storyBriefs.length === 0 &&
+    !needsAdminSlices &&
+    missingProjects.length === 0
+  ) {
     return saved;
   }
   const reports = Object.fromEntries(
@@ -232,9 +242,21 @@ function withNewSeeds(saved: DemoState, fresh: DemoState): DemoState {
     adminCall: saved.adminCall ?? {},
     adminMailAccounts: saved.adminMailAccounts ?? fresh.adminMailAccounts,
     // The second demo mailbox's emails arrive with the account list.
-    adminInbox: saved.adminMailAccounts
-      ? saved.adminInbox
-      : { ...fresh.adminInbox, ...saved.adminInbox },
+    adminInbox: {
+      ...(saved.adminMailAccounts
+        ? saved.adminInbox
+        : { ...fresh.adminInbox, ...saved.adminInbox }),
+      ...Object.fromEntries(
+        missingProjects
+          .map((p) => (p.source.requestId ? fresh.adminInbox[p.source.requestId] : undefined))
+          .filter((r) => r !== undefined)
+          .map((r) => [r.id, r]),
+      ),
+    },
+    adminProjects: {
+      ...saved.adminProjects,
+      ...Object.fromEntries(missingProjects.map((p) => [p.id, p])),
+    },
     requests: {
       ...saved.requests,
       ...Object.fromEntries(missingRequests.map((r) => [r.id, r])),

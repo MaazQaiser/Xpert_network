@@ -6,6 +6,7 @@ import {
   PRJ_1042_QUESTIONS,
   PRJ_1042_REQUIREMENTS,
 } from './prj1042';
+import { PRJ_1043, PRJ_1044, type DraftProjectContent } from './newProjects';
 
 export const PROJECTS_INBOX = 'projects@xpertnetwork.example';
 export const PARTNERS_INBOX = 'partners@xpertnetwork.example';
@@ -75,25 +76,25 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
       subject: 'Looking for MRO / aviation compliance experts',
       body: 'Hello — we’re advising on a carve-out of an MRO business in the UK. Scope attached. We’d like 4–5 calls with former quality and compliance leads who know EASA Part 145.',
       receivedAt: t(29),
-      status: 'reading',
+      status: 'brief_ready',
       attachment: {
         name: 'Scope_v2.docx',
         kind: 'docx',
-        pages: 6,
+        pages: 4,
         size: '310 KB',
-        note: null,
-        progress: 60,
+        note: 'text layer found',
+        progress: null,
       },
       steps: [
         step('Email received and sender matched to client “Northgate Advisory”', t(29)),
         step('Attachment saved to secure storage', t(29)),
-        step('Reading 6 pages', null),
-        step('Extract brief, requirements and client questions', null),
+        step('Text extracted from 4 pages', t(28)),
+        step('Brief, requirements and 6 client questions extracted', t(27)),
         step('Waiting for your review before matching experts', null),
       ],
-      confirmations: [],
+      confirmations: ['budget not stated in the scope'],
       autoReply: null,
-      projectId: null,
+      projectId: 'PRJ-1043',
     },
     {
       id: 'req_lakeview_semis',
@@ -103,25 +104,25 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
       subject: 'Need 3 experts: semiconductor supply chain',
       body: 'Hi, our RFP is attached (sorry, it’s a scan). We need 3 experts on advanced packaging capacity in Taiwan and Malaysia, ideally this month.',
       receivedAt: t(42),
-      status: 'extracting',
+      status: 'brief_ready',
       attachment: {
         name: 'RFP.pdf',
         kind: 'pdf',
-        pages: 9,
+        pages: 4,
         size: '5.8 MB',
-        note: 'scanned, OCR running',
-        progress: 35,
+        note: 'scanned, read with OCR',
+        progress: null,
       },
       steps: [
         step('Email received and sender matched to client “Lakeview Consulting”', t(42)),
         step('Attachment saved to secure storage', t(42)),
-        step('No text layer, so running OCR on 9 scanned pages', null),
-        step('Extract brief, requirements and client questions', null),
+        step('No text layer, so read 4 scanned pages with OCR', t(40)),
+        step('Brief, requirements and 5 client questions extracted', t(38)),
         step('Waiting for your review before matching experts', null),
       ],
-      confirmations: [],
+      confirmations: ['“ideally this month” deadline is vague'],
       autoReply: null,
-      projectId: null,
+      projectId: 'PRJ-1044',
     },
     {
       id: 'req_brightline_cold',
@@ -290,6 +291,25 @@ function makeProject(seed: ProjectSeed): Project {
   };
 }
 
+/** A full AI-drafted project file (brief, profile, questions, facts, source document). */
+function draftProject(content: DraftProjectContent, seed: ProjectSeed): Project {
+  const { brief, requirements, questions } = content;
+  return makeProject({
+    ...seed,
+    brief,
+    requirements,
+    questions,
+    ai: { brief, requirements, questions },
+    facts: content.facts,
+    confirmations: content.confirmations,
+    activity: [
+      activity(seed.createdAt, 'ai', 'AI created project file v0.1'),
+      activity(seed.createdAt, 'ai', `AI matched sender to client ${seed.client.name}`),
+    ],
+    document: { pageCount: content.pages.length, pages: content.pages },
+  });
+}
+
 export function seedProjects(now = new Date()): Record<string, Project> {
   const t = (minutes: number) => minutesAgo(now, minutes);
   const brief = PRJ_1042_BRIEFS.standard[0];
@@ -329,6 +349,24 @@ export function seedProjects(now = new Date()): Record<string, Project> {
         activity(t(18), 'system', 'Email received'),
       ],
       document: { pageCount: PRJ_1042_PAGES.length, pages: PRJ_1042_PAGES },
+    }),
+    draftProject(PRJ_1043, {
+      id: 'PRJ-1043',
+      name: 'UK MRO carve-out — Part 145 readiness',
+      status: 'draft',
+      client: { id: 'cli_northgate', name: 'Northgate Advisory' },
+      contact: { name: 'Omar Siddiqui', email: 'omar.siddiqui@northgate.example' },
+      source: { requestId: 'req_northgate_mro', fileName: 'Scope_v2.docx' },
+      createdAt: t(27),
+    }),
+    draftProject(PRJ_1044, {
+      id: 'PRJ-1044',
+      name: 'Advanced packaging capacity — Taiwan and Malaysia',
+      status: 'draft',
+      client: { id: 'cli_lakeview', name: 'Lakeview Consulting' },
+      contact: { name: 'Priya Raman', email: 'priya.raman@lakeview.example' },
+      source: { requestId: 'req_lakeview_semis', fileName: 'RFP.pdf' },
+      createdAt: t(38),
     }),
     makeProject({
       id: 'PRJ-1041',

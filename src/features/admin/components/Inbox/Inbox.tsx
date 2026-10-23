@@ -28,7 +28,6 @@ import {
   Folder,
   Locked,
   CheckmarkFilled,
-  CircleDash,
   DocumentPdf,
   Document,
   DataTable as SpreadsheetIcon,
@@ -54,7 +53,6 @@ import {
   initials,
   receivedLabel,
   senderPhoto,
-  stepTimeLabel,
 } from '../inboxDisplay';
 import { SourceDocument } from '../SourceDocument/SourceDocument';
 import { AddAccountModal } from './AddAccountModal';
@@ -352,12 +350,15 @@ function ReadingPane({
   backHref: string;
   onToggleRead: () => void;
 }) {
-  const done = request.steps.filter((s) => s.done).length;
   const file = request.attachment;
   const projectHref = request.projectId ? routes.admin.project(request.projectId) : null;
   const photo = senderPhoto(request.from.email);
   const domain = request.from.email.split('@')[1] ?? request.from.email;
   const first = request.from.name.split(' ')[0] ?? request.from.name;
+  const hasAiNotes =
+    (request.confirmations.length > 0 && request.status === 'brief_ready') ||
+    (request.status === 'cant_open' && file !== null) ||
+    request.autoReply !== null;
 
   return (
     <article className={styles.reading} aria-labelledby="request-subject">
@@ -457,66 +458,40 @@ function ReadingPane({
         {file ? <Attachments request={request} file={file} /> : null}
       </div>
 
-      {/* What the AI did with it, kept apart from the email. */}
-      <section className={styles.aiWork} aria-labelledby="ai-work-title">
-        {request.confirmations.length > 0 && request.status === 'brief_ready' ? (
-          <InlineNotification
-            kind="warning"
-            lowContrast
-            hideCloseButton
-            title={`${request.confirmations.length} things need confirming:`}
-            subtitle={request.confirmations.join(' · ')}
-          />
-        ) : null}
-        {request.status === 'cant_open' && file ? (
-          <InlineNotification
-            kind="error"
-            lowContrast
-            hideCloseButton
-            title="Can’t open the file:"
-            subtitle={`${file.name} is password-protected. We never try to open protected files. Ask ${first} for an unlocked copy.`}
-          />
-        ) : null}
+      {/* The AI's notes on this email (what needs confirming, its automatic reply), kept apart
+          from the email and shown only when there are any. */}
+      {hasAiNotes ? (
+        <section className={styles.aiWork} aria-label="Notes from the AI">
+          {request.confirmations.length > 0 && request.status === 'brief_ready' ? (
+            <InlineNotification
+              kind="warning"
+              lowContrast
+              hideCloseButton
+              title={`${request.confirmations.length} things need confirming:`}
+              subtitle={request.confirmations.join(' · ')}
+            />
+          ) : null}
+          {request.status === 'cant_open' && file ? (
+            <InlineNotification
+              kind="error"
+              lowContrast
+              hideCloseButton
+              title="Can’t open the file:"
+              subtitle={`${file.name} is password-protected. We never try to open protected files. Ask ${first} for an unlocked copy.`}
+            />
+          ) : null}
 
-        {request.autoReply ? (
-          <div className={styles.section}>
-            <div className={styles.panelHeader}>
-              <AIExplainLabel aria-label="Automatic reply" />
-              <h3 className={styles.panelTitle}>AI replied automatically</h3>
+          {request.autoReply ? (
+            <div className={styles.section}>
+              <div className={styles.panelHeader}>
+                <AIExplainLabel aria-label="Automatic reply" />
+                <h3 className={styles.panelTitle}>AI replied automatically</h3>
+              </div>
+              <p className={styles.autoReply}>{request.autoReply}</p>
             </div>
-            <p className={styles.autoReply}>{request.autoReply}</p>
-          </div>
-        ) : null}
-
-        <div className={styles.section}>
-          <div className={styles.panelHeader}>
-            <AIExplainLabel aria-label="What the system did" />
-            <h3 id="ai-work-title" className={styles.panelTitle}>
-              What the system did
-            </h3>
-            <span className={styles.panelMeta}>
-              {done} of {request.steps.length} done
-            </span>
-            {/* Where the AI got to with this email: the outcome of the steps below. */}
-            <InboxStatusTag request={request} size="sm" />
-          </div>
-          <ol className={styles.steps}>
-            {request.steps.map((step) => (
-              <li key={step.label} className={step.done ? styles.stepDone : styles.stepPending}>
-                {step.done ? (
-                  <CheckmarkFilled aria-label="Done" className={styles.stepIcon} />
-                ) : (
-                  <CircleDash aria-label="Not done yet" className={styles.stepIcon} />
-                )}
-                <span className={styles.stepLabel}>{step.label}</span>
-                <span className={styles.stepTime}>
-                  {step.at ? stepTimeLabel(step.at, request.receivedAt) : 'Now'}
-                </span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
+          ) : null}
+        </section>
+      ) : null}
     </article>
   );
 }

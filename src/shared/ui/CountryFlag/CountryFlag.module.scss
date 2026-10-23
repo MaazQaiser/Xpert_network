@@ -1,0 +1,16 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-03;
+  white-space: nowrap;
+}
+
+// A hairline keeps white flag edges visible on light rows.
+.flag {
+  flex: none;
+  outline: 1px solid $border-subtle-01;
+  outline-offset: -1px;
+}

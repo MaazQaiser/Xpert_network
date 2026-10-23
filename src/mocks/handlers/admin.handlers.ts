@@ -55,7 +55,9 @@ async function guard() {
 const notFound = () =>
   errorResponse(404, 'not_found', 'We couldn’t find that project. It may have been deleted.');
 
-const isToday = (iso: string, now: Date) => new Date(iso).toDateString() === now.toDateString();
+// "Today" on Home means the last 24 hours, so a demo left open over midnight still adds up.
+const isToday = (iso: string, now: Date) =>
+  now.getTime() - new Date(iso).getTime() < 24 * 60 * 60 * 1000;
 
 function findProject(id: unknown): Project | null {
   return typeof id === 'string' ? (db.get().adminProjects[id] ?? null) : null;

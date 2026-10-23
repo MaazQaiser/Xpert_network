@@ -11,10 +11,35 @@
   gap: $spacing-05;
 }
 
+// The found count on the left, the refresh on the right.
 .header {
   display: flex;
-  flex-direction: column;
-  gap: $spacing-02;
+  align-items: center;
+  gap: $spacing-03;
+
+  // The status line comes first on screen; the refresh, when there is one, sits at the end.
+  .status {
+    order: -1;
+  }
+}
+
+.refreshSlot {
+  margin-inline-start: auto;
+}
+
+// While checking for answers the refresh arrows turn; still for reduced motion.
+.spinning svg {
+  animation: spin $duration-slow-01 linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 // The tab already names the section on screen; the heading is for screen readers.
@@ -55,6 +80,59 @@
 
 .actionCell {
   white-space: nowrap;
+}
+
+// The relevant role as a quiet chip.
+.role.role {
+  max-inline-size: 100%;
+  margin: 0;
+}
+
+// Match: the number, then a thin bar filled to it.
+.match {
+  display: inline-flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  inline-size: 4.5rem;
+}
+
+.matchTrack {
+  display: block;
+  overflow: hidden;
+  background: $border-subtle-02;
+  block-size: $spacing-02;
+}
+
+.matchFill {
+  display: block;
+  background: $interactive;
+  block-size: 100%;
+}
+
+// Screening replies after a refresh: icon and words, never colour alone.
+.reply {
+  @include type-style('body-compact-01');
+
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-02;
+  color: $text-primary;
+
+  svg {
+    fill: $icon-secondary;
+  }
+}
+
+.replyAnswered svg {
+  fill: $support-success;
+}
+
+.replyInProgress svg {
+  fill: $support-info;
+}
+
+.replyDeclined svg {
+  fill: $support-error;
 }
 
 .sent {

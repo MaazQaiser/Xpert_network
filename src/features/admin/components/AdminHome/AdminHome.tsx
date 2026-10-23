@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   Button,
   ClickableTile,
@@ -19,7 +18,13 @@ import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
 import { ErrorState } from '@/shared/ui';
 import { useAskAssistant, useHomeSummary } from '../../api/queries';
-import { SUGGESTED_PROMPTS, type AssistantReply, type HomeSummary } from '../../model/home.schema';
+import {
+  CARD_PROMPTS,
+  SUGGESTED_PROMPTS,
+  type AssistantReply,
+  type HomeSummary,
+} from '../../model/home.schema';
+import { ChatBlocks, ChatChips } from './ChatBlocks';
 import styles from './AdminHome.module.scss';
 
 function partOfDay(now: Date = new Date()): string {
@@ -42,27 +47,27 @@ type SummaryCardProps = {
   label: string;
   value: number;
   action: string;
+  onAsk: () => void;
 };
 
-// Carbon ClickableTile: the count, the label underneath, Carbon's corner arrow. Plain clicks
-// navigate in-app through Next's router; modified clicks (new tab, etc.) stay normal links. The
-// action is the accessible name, so screen readers still hear where it goes.
-function SummaryCard({ href, label, value, action }: SummaryCardProps) {
-  const router = useRouter();
-  const navigate = (event: MouseEvent<HTMLAnchorElement> | KeyboardEvent<HTMLAnchorElement>) => {
+// Carbon ClickableTile: the count, the label underneath, Carbon's corner arrow. A plain click asks
+// the assistant (the answer opens in the chat below, AI-native); modified clicks (new tab, etc.)
+// stay normal links to the page. The action is the accessible name.
+function SummaryCard({ href, label, value, action, onAsk }: SummaryCardProps) {
+  const ask = (event: MouseEvent<HTMLAnchorElement> | KeyboardEvent<HTMLAnchorElement>) => {
     if (
       'button' in event &&
       (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey)
     )
       return;
     event.preventDefault();
-    router.push(href);
+    onAsk();
   };
   return (
     <li>
       <ClickableTile
         href={href}
-        onClick={navigate}
+        onClick={ask}
         renderIcon={ArrowUpRight}
         className={styles.countTile}
         aria-label={`${label}: ${value}. ${action}`}
@@ -75,26 +80,29 @@ function SummaryCard({ href, label, value, action }: SummaryCardProps) {
   );
 }
 
-function SummaryCards({ summary }: { summary: HomeSummary }) {
+function SummaryCards({ summary, onAsk }: { summary: HomeSummary; onAsk: (q: string) => void }) {
   return (
     <ul className={styles.cards}>
       <SummaryCard
         href={routes.admin.inbox}
         label="Emails received today"
         value={summary.emailsToday}
-        action="Open inbox"
+        action="Ask the assistant for the most important emails"
+        onAsk={() => onAsk(CARD_PROMPTS.emails)}
       />
       <SummaryCard
         href={routes.admin.projects}
         label="Experts pending review"
         value={summary.expertsPendingReview}
-        action="Review experts"
+        action="Ask the assistant which experts need review"
+        onAsk={() => onAsk(CARD_PROMPTS.experts)}
       />
       <SummaryCard
         href={routes.admin.projects}
         label="New projects today"
         value={summary.newProjectsToday}
-        action="Review projects"
+        action="Ask the assistant for today’s new projects"
+        onAsk={() => onAsk(CARD_PROMPTS.projects)}
       />
     </ul>
   );
@@ -102,10 +110,11 @@ function SummaryCards({ summary }: { summary: HomeSummary }) {
 
 type TodayProps = {
   summary: ReturnType<typeof useHomeSummary>;
+  onAsk: (question: string) => void;
 };
 
 /** Today's tip as one line, then the three counts as Carbon ClickableTiles ($layer-01). */
-function Today({ summary }: TodayProps) {
+function Today({ summary, onAsk }: TodayProps) {
   const tip = summary.data?.tip;
   return (
     <section className={styles.today} aria-label="Today’s summary">
@@ -124,7 +133,7 @@ function Today({ summary }: TodayProps) {
           ))}
         </div>
       ) : summary.data ? (
-        <SummaryCards summary={summary.data} />
+        <SummaryCards summary={summary.data} onAsk={onAsk} />
       ) : (
         <ErrorState
           title="Today’s summary didn’t load"
@@ -154,6 +163,13 @@ export function AdminHome() {
   }, [reaction]);
 
   const mood: MascotMood = ask.isPending || summary.isPending ? 'thinking' : (reaction ?? 'idle');
+
+  // Keep the newest question and its answer in view as the conversation grows.
+  const latest = useRef<HTMLLIElement>(null);
+  const lastTurn = turns.at(-1);
+  useEffect(() => {
+    latest.current?.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
+  }, [turns.length, lastTurn?.answer]);
 
   const send = (question: string) => {
     turnCount.current += 1;
@@ -198,18 +214,24 @@ export function AdminHome() {
           </p>
         </header>
 
-        <Today summary={summary} />
+        <Today summary={summary} onAsk={send} />
 
         {turns.length > 0 ? (
           <ol className={styles.thread} aria-label="Conversation with your AI assistant">
-            {turns.map((turn) => (
-              <li key={turn.id} className={styles.turn}>
+            {turns.map((turn, index) => (
+              <li
+                key={turn.id}
+                className={styles.turn}
+                ref={index === turns.length - 1 ? latest : undefined}
+              >
                 <p className={styles.question}>{turn.question}</p>
                 {turn.answer ? (
                   <div className={styles.answer}>
                     <AIExplainLabel aria-label="AI answer" />
-                    <div>
+                    <div className={styles.answerBody}>
                       <p>{turn.answer.text}</p>
+                      <ChatBlocks blocks={turn.answer.blocks} onAsk={send} isBusy={ask.isPending} />
+                      <ChatChips chips={turn.answer.chips} onAsk={send} isBusy={ask.isPending} />
                       {turn.answer.links.length > 0 ? (
                         <ul className={styles.links}>
                           {turn.answer.links.map((link) => (

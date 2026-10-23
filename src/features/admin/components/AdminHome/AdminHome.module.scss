@@ -336,6 +336,19 @@ $pt-mascot-think: 1.4s;
   }
 }
 
+// The answer's text, then its cards, canvas and next-step chips, one under another.
+.answerBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $spacing-05;
+  min-inline-size: 0;
+}
+
+.turn {
+  scroll-margin-block-start: $spacing-09;
+}
+
 .answerError {
   @include type-style('body-01');
 
@@ -361,6 +374,9 @@ $pt-mascot-think: 1.4s;
 
   @include breakpoint(md) {
     position: sticky;
+
+    // Docked over a long answer (e.g. a brief canvas): the page shows behind it, not the chat.
+    background: $background;
     inset-block-end: 0;
   }
 }

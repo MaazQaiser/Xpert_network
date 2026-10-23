@@ -12,6 +12,7 @@ export { PageHeader } from './PageHeader/PageHeader';
 export type { Crumb, PageHeaderProps } from './PageHeader/PageHeader';
 export { StatusTag } from './StatusTag/StatusTag';
 export { XpertLogo } from './XpertLogo/XpertLogo';
+export { CountryFlag, countryName } from './CountryFlag/CountryFlag';
 export type { XpertLogoProps } from './XpertLogo/XpertLogo';
 export type { StatusTone, StatusTagProps } from './StatusTag/StatusTag';
 export { PlaceholderScreen } from './PlaceholderScreen/PlaceholderScreen';
