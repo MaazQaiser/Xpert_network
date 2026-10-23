@@ -130,7 +130,7 @@ export function AppShell({
           onOverlayClick={() => setIsNavOpen(false)}
           href={homeHref}
         >
-          <SideNavItems>
+          <SideNavItems className={styles.navItems}>
             {navItems.map((item) => {
               const isActive = [item.href, ...(item.activeFor ?? [])].some(
                 (path) => pathname === path || pathname.startsWith(`${path}/`),
@@ -144,6 +144,7 @@ export function AppShell({
                   isActive={isActive}
                   aria-current={isActive ? 'page' : undefined}
                   onClick={() => setIsNavOpen(false)}
+                  className={styles.navLink}
                 >
                   {item.label}
                 </SideNavLink>

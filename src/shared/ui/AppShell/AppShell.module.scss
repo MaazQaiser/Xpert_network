@@ -33,6 +33,24 @@
   }
 }
 
+// The side nav is divided from the page by the same light line as the header's bottom edge.
+.sideNav.sideNav {
+  border-inline-end: 1px solid $border-subtle-01;
+}
+
+// A little more room per item than Carbon's compact 32px: 40px links with a 4px gap, so the
+// list reads as a menu rather than a table.
+.navItems.navItems {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  padding-block: $spacing-05;
+}
+
+.navLink.navLink {
+  min-block-size: $spacing-08;
+}
+
 // Collapsed on desktop: the docked nav is removed and content takes the full width.
 .sideNavCollapsed.sideNavCollapsed {
   @include breakpoint(lg) {
