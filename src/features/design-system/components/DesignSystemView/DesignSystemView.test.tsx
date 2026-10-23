@@ -22,7 +22,7 @@ describe('DesignSystemView', () => {
     const { container } = renderView();
 
     expect(screen.getByRole('heading', { level: 1, name: 'Design system' })).toBeInTheDocument();
-    const coloursPanel = screen.getAllByRole('tabpanel', { hidden: true })[0];
+    const coloursPanel = screen.getAllByRole('tabpanel', { hidden: true })[0]!;
     const field = within(coloursPanel).getByLabelText('Button primary value');
     await user.clear(field);
     await user.type(field, '#123456{Enter}');
