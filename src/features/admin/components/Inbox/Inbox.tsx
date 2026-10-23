@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -8,9 +9,9 @@ import {
   Button,
   IconButton,
   InlineNotification,
-  ProgressBar,
   Search,
   MenuButton,
+  Modal,
   MenuItem,
   MenuItemDivider,
   MenuItemRadioGroup,
@@ -24,6 +25,8 @@ import {
   Attachment,
   Email,
   EmailNew,
+  Folder,
+  Locked,
   CheckmarkFilled,
   CircleDash,
   DocumentPdf,
@@ -43,10 +46,11 @@ import {
   parseInboxView,
   type InboxRequest,
 } from '../../model/inbox.schema';
+import type { SourcePage } from '../../model/project.schema';
 import {
-  dateTimeLabel,
   fullDateLabel,
   InboxStatusTag,
+  longDateLabel,
   initials,
   receivedLabel,
   senderPhoto,
@@ -352,6 +356,8 @@ function ReadingPane({
   const file = request.attachment;
   const projectHref = request.projectId ? routes.admin.project(request.projectId) : null;
   const photo = senderPhoto(request.from.email);
+  const domain = request.from.email.split('@')[1] ?? request.from.email;
+  const first = request.from.name.split(' ')[0] ?? request.from.name;
 
   return (
     <article className={styles.reading} aria-labelledby="request-subject">
@@ -360,7 +366,8 @@ function ReadingPane({
         <ArrowLeft aria-hidden={true} /> Inbox
       </Link>
 
-      {/* Mail header: who it's from, the subject and addresses; actions and the date on the right. */}
+      {/* Mail header, as in Apple Mail: who sent it and to whom on the left; the mailbox, the
+          date and what to do with it on the right. */}
       <header className={styles.mailHeader}>
         <span className={styles.avatar} aria-hidden="true">
           {photo ? (
@@ -370,25 +377,29 @@ function ReadingPane({
           )}
         </span>
         <div className={styles.mailFrom}>
-          <p className={styles.fromName}>
-            {request.from.name}
-            <span className={styles.fromCompany}> · {request.company}</span>
+          <p className={styles.fromName}>{request.from.name}</p>
+          <p className={styles.fromDomain} title={`Sender matched to client “${request.company}”`}>
+            <CheckmarkFilled aria-hidden={true} className={styles.verified} />
+            {domain} · {request.company}
           </p>
+        </div>
+        <div className={styles.mailSubject}>
           <h2 id="request-subject" className={styles.subjectLarge}>
             {request.subject}
           </h2>
-          <dl className={styles.mailMeta}>
-            <div>
-              <dt>From:</dt>
-              <dd>{request.from.email}</dd>
-            </div>
-            <div>
-              <dt>To:</dt>
-              <dd>{request.to}</dd>
-            </div>
-          </dl>
+          <p className={styles.mailTo}>
+            <span className={styles.mailToLabel}>To:</span> {request.to}
+          </p>
         </div>
         <div className={styles.headerSide}>
+          <p className={styles.mailWhere}>
+            <span className={styles.mailbox}>
+              <Folder aria-hidden={true} /> Inbox · {mailboxName(request.to).replace(' inbox', '')}
+            </span>
+            <time dateTime={request.receivedAt} title={fullDateLabel(request.receivedAt)}>
+              {longDateLabel(request.receivedAt)}
+            </time>
+          </p>
           <div className={styles.headerActions}>
             <IconButton
               kind="ghost"
@@ -406,7 +417,7 @@ function ReadingPane({
                 size="md"
                 renderIcon={ArrowRight}
               >
-                Open {request.from.name.split(' ')[0]}’s picks
+                Open {first}’s picks
               </Button>
             ) : projectHref && request.status === 'brief_ready' ? (
               <Button as={Link} href={projectHref} size="md" renderIcon={ArrowRight}>
@@ -424,118 +435,234 @@ function ReadingPane({
               </Button>
             ) : null}
           </div>
-          <time
-            className={styles.mailDate}
-            dateTime={request.receivedAt}
-            title={fullDateLabel(request.receivedAt)}
-          >
-            {dateTimeLabel(request.receivedAt)}
-          </time>
         </div>
       </header>
 
-      {request.confirmations.length > 0 && request.status === 'brief_ready' ? (
-        <InlineNotification
-          kind="warning"
-          lowContrast
-          hideCloseButton
-          title={`${request.confirmations.length} things need confirming:`}
-          subtitle={request.confirmations.join(' · ')}
-        />
-      ) : null}
-      {request.status === 'cant_open' && file ? (
-        <InlineNotification
-          kind="error"
-          lowContrast
-          hideCloseButton
-          title="Can’t open the file:"
-          subtitle={`${file.name} is password-protected. We never try to open protected files. Ask ${request.from.name.split(' ')[0]} for an unlocked copy.`}
-        />
-      ) : null}
+      {/* The email itself, on its own white page: the message, the sender's signature, and
+          the attachment (as in Gmail). */}
+      <div className={styles.paper}>
+        <p className={styles.body}>{request.body}</p>
 
-      <p className={styles.body}>{request.body}</p>
-
-      {request.autoReply ? (
-        <div className={styles.section}>
-          <div className={styles.panelHeader}>
-            <AIExplainLabel aria-label="Automatic reply" />
-            <h3 className={styles.panelTitle}>AI replied automatically</h3>
-          </div>
-          <p className={styles.autoReply}>{request.autoReply}</p>
-        </div>
-      ) : null}
-
-      <div className={styles.section}>
-        <div className={styles.panelHeader}>
-          <AIExplainLabel aria-label="What the system did" />
-          <h3 className={styles.panelTitle}>What the system did</h3>
-          <span className={styles.panelMeta}>
-            {done} of {request.steps.length} done
+        <div className={styles.signature}>
+          <span className={styles.signatureMark} aria-hidden="true">
+            {initials(request.company)}
           </span>
-          {/* Where the AI got to with this email: the outcome of the steps below. */}
-          <InboxStatusTag request={request} size="sm" />
+          <div className={styles.signatureText}>
+            <p className={styles.signatureName}>{request.from.name}</p>
+            <p className={styles.signatureCompany}>{request.company}</p>
+            <p className={styles.signatureMeta}>{request.from.email}</p>
+          </div>
         </div>
-        <ol className={styles.steps}>
-          {request.steps.map((step) => (
-            <li key={step.label} className={step.done ? styles.stepDone : styles.stepPending}>
-              {step.done ? (
-                <CheckmarkFilled aria-label="Done" className={styles.stepIcon} />
-              ) : (
-                <CircleDash aria-label="Not done yet" className={styles.stepIcon} />
-              )}
-              <span className={styles.stepLabel}>{step.label}</span>
-              <span className={styles.stepTime}>
-                {step.at ? stepTimeLabel(step.at, request.receivedAt) : 'Now'}
-              </span>
-            </li>
-          ))}
-        </ol>
+
+        {file ? <Attachments request={request} file={file} /> : null}
       </div>
 
-      {file ? (
-        <div className={styles.section}>
-          <div className={styles.fileRow}>
-            <FileIcon kind={file.kind} />
-            <div>
-              <p className={styles.fileName}>{file.name}</p>
-              <p className={styles.panelMeta}>
-                {[file.size, file.pages ? `${file.pages} pages` : null, file.note]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </p>
+      {/* What the AI did with it, kept apart from the email. */}
+      <section className={styles.aiWork} aria-labelledby="ai-work-title">
+        {request.confirmations.length > 0 && request.status === 'brief_ready' ? (
+          <InlineNotification
+            kind="warning"
+            lowContrast
+            hideCloseButton
+            title={`${request.confirmations.length} things need confirming:`}
+            subtitle={request.confirmations.join(' · ')}
+          />
+        ) : null}
+        {request.status === 'cant_open' && file ? (
+          <InlineNotification
+            kind="error"
+            lowContrast
+            hideCloseButton
+            title="Can’t open the file:"
+            subtitle={`${file.name} is password-protected. We never try to open protected files. Ask ${first} for an unlocked copy.`}
+          />
+        ) : null}
+
+        {request.autoReply ? (
+          <div className={styles.section}>
+            <div className={styles.panelHeader}>
+              <AIExplainLabel aria-label="Automatic reply" />
+              <h3 className={styles.panelTitle}>AI replied automatically</h3>
             </div>
+            <p className={styles.autoReply}>{request.autoReply}</p>
           </div>
-          {file.progress != null ? (
-            <ProgressBar
-              label={
-                request.status === 'extracting' ? 'Extracting text (OCR)' : 'Reading the document'
-              }
-              helperText={`${file.progress}% done`}
-              value={file.progress}
-            />
-          ) : request.projectId && file.kind === 'pdf' ? (
-            <AttachmentPreview projectId={request.projectId} fileName={file.name} />
-          ) : null}
+        ) : null}
+
+        <div className={styles.section}>
+          <div className={styles.panelHeader}>
+            <AIExplainLabel aria-label="What the system did" />
+            <h3 id="ai-work-title" className={styles.panelTitle}>
+              What the system did
+            </h3>
+            <span className={styles.panelMeta}>
+              {done} of {request.steps.length} done
+            </span>
+            {/* Where the AI got to with this email: the outcome of the steps below. */}
+            <InboxStatusTag request={request} size="sm" />
+          </div>
+          <ol className={styles.steps}>
+            {request.steps.map((step) => (
+              <li key={step.label} className={step.done ? styles.stepDone : styles.stepPending}>
+                {step.done ? (
+                  <CheckmarkFilled aria-label="Done" className={styles.stepIcon} />
+                ) : (
+                  <CircleDash aria-label="Not done yet" className={styles.stepIcon} />
+                )}
+                <span className={styles.stepLabel}>{step.label}</span>
+                <span className={styles.stepTime}>
+                  {step.at ? stepTimeLabel(step.at, request.receivedAt) : 'Now'}
+                </span>
+              </li>
+            ))}
+          </ol>
         </div>
-      ) : null}
+      </section>
     </article>
   );
 }
 
-function AttachmentPreview({ projectId, fileName }: { projectId: string; fileName: string }) {
-  const project = useProject(projectId);
-  const [page, setPage] = useState(1);
-  if (!project.data) return null;
-  const { document } = project.data;
+type Attachment = NonNullable<InboxRequest['attachment']>;
+
+const KIND_CLASS: Record<Attachment['kind'], string | undefined> = {
+  pdf: styles.kindPdf,
+  docx: styles.kindDocx,
+  xlsx: styles.kindXlsx,
+};
+
+const FILE_KIND_LABELS: Record<Attachment['kind'], string> = {
+  pdf: 'PDF',
+  docx: 'Word',
+  xlsx: 'Excel',
+};
+
+/** Gmail-style attachments: a dotted rule, a count, then a card per file with a page preview. */
+function Attachments({ request, file }: { request: InboxRequest; file: Attachment }) {
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  // The page preview comes from the project the AI drafted from this file, when there is one.
+  const project = useProject(request.projectId ?? '', { enabled: Boolean(request.projectId) });
+  // The first page with some substance, so the thumbnail reads as a page of text.
+  const pages = request.projectId ? (project.data?.document.pages ?? []) : [];
+  const firstPage = pages.find((p) => p.blocks.length >= 4) ?? pages[0];
+  const isLocked = request.status === 'cant_open';
+  const isReading = file.progress != null;
+  const canPreview = Boolean(firstPage) && file.kind === 'pdf' && !isLocked && !isReading;
+  const meta = [file.size, file.pages ? `${file.pages} pages` : null, file.note]
+    .filter(Boolean)
+    .join(' · ');
+
+  const card = (
+    <>
+      <span className={styles.thumb} aria-hidden="true">
+        {canPreview && firstPage ? (
+          <span className={styles.page}>
+            {firstPage.blocks.slice(0, 9).map((block) =>
+              block.kind === 'heading' ? (
+                <span key={block.id} className={styles.pageHeading} />
+              ) : (
+                // One thin line per ~60 characters of text, like a page seen from afar.
+                Array.from({ length: Math.min(3, Math.ceil(block.text.length / 60)) }, (_, i) => (
+                  <span key={`${block.id}-${i}`} className={styles.pageLine} />
+                ))
+              ),
+            )}
+          </span>
+        ) : (
+          <span className={styles.thumbIcon}>
+            {isLocked ? <Locked size={32} /> : <FileIcon kind={file.kind} />}
+            <span className={styles.thumbNote}>
+              {isLocked
+                ? 'Password-protected'
+                : isReading
+                  ? `${request.status === 'extracting' ? 'Extracting text' : 'Reading'} · ${file.progress}%`
+                  : 'No preview'}
+            </span>
+            {isReading ? (
+              <span className={styles.thumbProgress}>
+                <span style={{ inlineSize: `${file.progress ?? 0}%` }} />
+              </span>
+            ) : null}
+          </span>
+        )}
+      </span>
+      <span className={styles.cardFooter}>
+        <span className={`${styles.kindBadge} ${KIND_CLASS[file.kind]}`}>
+          {FILE_KIND_LABELS[file.kind]}
+        </span>
+        <span className={styles.cardName}>{file.name}</span>
+      </span>
+    </>
+  );
+
   return (
-    <SourceDocument
-      title="Preview"
-      fileName={fileName}
-      pages={document.pages}
-      pageCount={document.pageCount}
-      page={page}
-      onPageChange={setPage}
-      embedded
-    />
+    <section className={styles.attachments} aria-labelledby="attachments-title">
+      <div className={styles.attachmentsHeader}>
+        <h3 id="attachments-title" className={styles.attachmentsTitle}>
+          One attachment
+        </h3>
+        <span className={styles.attachmentsMeta}>
+          <AIExplainLabel size="xs" aria-label="Attachment read by AI" />
+          {isLocked ? 'Not opened by AI' : isReading ? 'AI is reading it' : 'Read by AI'}
+        </span>
+      </div>
+      <div className={styles.cards}>
+        {canPreview ? (
+          <button
+            type="button"
+            className={styles.card}
+            aria-label={`Preview ${file.name}, ${meta}`}
+            onClick={() => setIsPreviewOpen(true)}
+          >
+            {card}
+          </button>
+        ) : (
+          <div className={styles.card} aria-label={`${file.name}, ${meta}`} role="group">
+            {card}
+          </div>
+        )}
+        <p className={styles.cardMeta}>{meta}</p>
+      </div>
+      {isPreviewOpen && project.data
+        ? createPortal(
+            <AttachmentPreview
+              fileName={file.name}
+              document={project.data.document}
+              onClose={() => setIsPreviewOpen(false)}
+            />,
+            document.body,
+          )
+        : null}
+    </section>
+  );
+}
+
+function AttachmentPreview({
+  fileName,
+  document,
+  onClose,
+}: {
+  fileName: string;
+  document: { pages: SourcePage[]; pageCount: number };
+  onClose: () => void;
+}) {
+  const [page, setPage] = useState(1);
+  return (
+    <Modal
+      open
+      passiveModal
+      size="lg"
+      modalLabel="Attachment"
+      modalHeading={fileName}
+      onRequestClose={onClose}
+    >
+      <SourceDocument
+        title="Preview"
+        fileName={fileName}
+        pages={document.pages}
+        pageCount={document.pageCount}
+        page={page}
+        onPageChange={setPage}
+        embedded
+      />
+    </Modal>
   );
 }

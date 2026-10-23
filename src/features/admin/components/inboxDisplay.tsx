@@ -94,6 +94,18 @@ export function stepTimeLabel(iso: string, emailIso: string): string {
   return sameDay(date, new Date(emailIso)) ? time.format(date) : dateTimeLabel(iso);
 }
 
+const longDay = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+/** The open email's date, as in Apple Mail: "22 October 2026 at 14:12". */
+export function longDateLabel(iso: string): string {
+  const date = new Date(iso);
+  return `${longDay.format(date)} at ${time.format(date)}`;
+}
+
 /** "Thursday 22 October 2026 at 14:12", for a hover title. */
 export function fullDateLabel(iso: string): string {
   return full.format(new Date(iso));

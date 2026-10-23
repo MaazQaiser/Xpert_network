@@ -120,9 +120,10 @@ export function useProjects() {
   });
 }
 
-export function useProject(id: string) {
+export function useProject(id: string, { enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: adminKeys.project(id),
+    enabled,
     queryFn: ({ signal }) => apiRequest(`/admin/projects/${id}`, { schema: projectSchema, signal }),
   });
 }

@@ -270,14 +270,11 @@
   }
 }
 
+// The open email, top to bottom: the Mail-style header band, the email on its own white page,
+// then the AI's work on a quiet band. Each part spans the pane; its contents keep one inset.
 .reading {
   display: flex;
   flex-direction: column;
-  gap: $spacing-05;
-
-  @include breakpoint(lg) {
-    padding: $spacing-02 $spacing-06 $spacing-07;
-  }
 }
 
 .back {
@@ -287,6 +284,7 @@
   align-self: flex-start;
   align-items: center;
   gap: $spacing-02;
+  margin-block-end: $spacing-04;
 
   @include breakpoint(lg) {
     display: none;
@@ -301,44 +299,45 @@
   gap: $spacing-04;
 }
 
-// Avatar | sender, subject, addresses | actions over the date. Below md the actions drop under
-// the sender so the subject keeps its width.
+// ——— Header band (Apple Mail) ———————————————————————————————————————————————————
+// Avatar | sender, domain, subject, To | mailbox and date over the actions. Below md the
+// right column drops under the sender.
 .mailHeader {
   display: grid;
   align-items: start;
-  gap: $spacing-04;
+  gap: $spacing-03 $spacing-05;
+  grid-template-areas:
+    'avatar from'
+    'subject subject'
+    'side side';
   grid-template-columns: auto minmax(0, 1fr);
-  padding-block: $spacing-05;
+  padding: $spacing-05;
   border-block-end: 1px solid $border-subtle-01;
+  background: $layer-01;
 
   @include breakpoint(md) {
+    grid-template-areas:
+      'avatar from side'
+      '. subject subject';
     grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: $spacing-06;
+  }
+
+  .avatar {
+    grid-area: avatar;
   }
 }
 
-.headerSide {
+.mailSubject {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: $spacing-03;
-  grid-column: 1 / -1;
-
-  @include breakpoint(md) {
-    flex-direction: column;
-    align-items: flex-end;
-    grid-column: auto;
-  }
-}
-
-.headerActions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: $spacing-03;
+  flex-direction: column;
+  gap: $spacing-02;
+  grid-area: subject;
+  min-inline-size: 0;
 }
 
 .avatar {
-  @include type-style('heading-compact-01');
+  @include type-style('heading-compact-02');
 
   display: inline-flex;
   flex: none;
@@ -361,7 +360,9 @@
 .mailFrom {
   display: flex;
   flex-direction: column;
+  align-self: center;
   gap: $spacing-02;
+  grid-area: from;
   min-inline-size: 0;
 }
 
@@ -369,47 +370,362 @@
   @include type-style('heading-compact-02');
 }
 
-.fromCompany {
-  @include type-style('body-compact-02');
+// "✓ helixcap.example · Helix Capital Partners": the sender's domain, matched to a client.
+.fromDomain {
+  @include type-style('label-01');
 
+  display: flex;
+  align-items: center;
+  gap: $spacing-02;
   color: $text-secondary;
+  overflow-wrap: anywhere;
+}
+
+.verified {
+  flex: none;
+  fill: $icon-secondary;
 }
 
 .subjectLarge {
-  @include type-style('body-compact-02');
+  @include type-style('heading-compact-02');
 }
 
-.mailMeta {
+.mailTo {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+  overflow-wrap: anywhere;
+}
+
+.mailToLabel {
+  color: $text-primary;
+}
+
+.headerSide {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03 $spacing-05;
+  grid-area: side;
+
+  @include breakpoint(md) {
+    flex-flow: column nowrap;
+    align-items: flex-end;
+  }
+}
+
+// "▭ Inbox · Projects   22 October 2026 at 14:12", as in Mail's top right.
+.mailWhere {
   @include type-style('label-01');
 
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: $spacing-01;
   color: $text-secondary;
-  overflow-wrap: anywhere;
-
-  div {
-    display: flex;
-    gap: $spacing-02;
-  }
-
-  dt {
-    flex: none;
-  }
-}
-
-.mailDate {
-  @include type-style('label-01');
-
-  color: $text-secondary;
   white-space: nowrap;
+
+  @include breakpoint(md) {
+    align-items: flex-end;
+  }
 }
 
-// The email itself, as plain text at a comfortable reading width.
+.mailbox {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-02;
+
+  svg {
+    fill: $icon-secondary;
+  }
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+// ——— The email (its own white page) ——————————————————————————————————————————————
+.paper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-07;
+  padding: $spacing-06 $spacing-05;
+  background: $background;
+
+  @include breakpoint(md) {
+    padding: $spacing-07 $spacing-06;
+  }
+}
+
+// The message, at a comfortable reading width.
 .body {
   @include type-style('body-02');
 
   max-inline-size: 42rem;
+  white-space: pre-line;
+}
+
+// Signature, as an email client renders one: a mark, the name, then a rule and the address.
+.signature {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-05;
+}
+
+.signatureMark {
+  @include type-style('heading-compact-02');
+
+  display: grid;
+  flex: none;
+  background: $background-inverse;
+  block-size: $spacing-10;
+  color: $text-inverse;
+  inline-size: $spacing-10;
+  place-items: center;
+}
+
+.signatureText {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-01;
+  min-inline-size: 0;
+}
+
+.signatureName {
+  @include type-style('heading-compact-02');
+
+  color: $link-primary;
+}
+
+.signatureCompany {
+  @include type-style('body-compact-01');
+
+  padding-block-end: $spacing-03;
+  border-block-end: 1px solid $border-subtle-01;
+}
+
+.signatureMeta {
+  @include type-style('label-01');
+
+  padding-block-start: $spacing-02;
+  color: $text-secondary;
+  overflow-wrap: anywhere;
+}
+
+// ——— Attachments (Gmail) ——————————————————————————————————————————————————————————
+.attachments {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  padding-block-start: $spacing-05;
+  border-block-start: 1px dashed $border-subtle-02;
+}
+
+.attachmentsHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03 $spacing-05;
+}
+
+.attachmentsTitle {
+  @include type-style('heading-compact-01');
+}
+
+.attachmentsMeta {
+  @include type-style('body-compact-01');
+
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-02;
+  color: $text-secondary;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+// A card: page thumbnail over a footer with the file type and name, and a folded corner.
+.card {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  padding: 0;
+  border: 1px solid $border-subtle-01;
+  background: $layer-01;
+  color: $text-primary;
+  font: inherit;
+  inline-size: 15rem;
+  text-align: start;
+  transition: border-color $duration-fast-02 motion(standard, productive);
+
+  // The folded corner: the page's corner turned over.
+  &::after {
+    position: absolute;
+    background: linear-gradient(to top left, $background 50%, $border-subtle-02 50%);
+    block-size: $spacing-06;
+    content: '';
+    inline-size: $spacing-06;
+    inset-block-end: 0;
+    inset-inline-end: 0;
+  }
+}
+
+button.card {
+  cursor: pointer;
+
+  &:hover {
+    border-color: $border-strong-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+}
+
+.thumb {
+  display: grid;
+  overflow: hidden;
+  padding: $spacing-04 $spacing-05 0;
+  background: $layer-02;
+  block-size: 8.5rem;
+  place-items: start center;
+}
+
+// A page seen from afar: heading bars and text lines drawn from the document's first page.
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  padding: $spacing-04;
+  background: $background;
+  block-size: 100%;
+  border: 1px solid $border-subtle-01;
+  border-block-end: 0;
+  inline-size: 78%;
+}
+
+.pageHeading,
+.pageLine {
+  display: block;
+  background: $border-subtle-02;
+  block-size: $spacing-02;
+}
+
+.pageHeading {
+  background: $text-secondary;
+  block-size: $spacing-03;
+  inline-size: 70%;
+  margin-block: $spacing-02 $spacing-01;
+}
+
+.pageLine:nth-child(3n) {
+  inline-size: 82%;
+}
+
+.thumbIcon {
+  @include type-style('label-01');
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: center;
+  gap: $spacing-03;
+  color: $text-secondary;
+
+  svg {
+    fill: $icon-secondary;
+  }
+}
+
+.thumbNote {
+  text-align: center;
+}
+
+.thumbProgress {
+  display: block;
+  overflow: hidden;
+  background: $border-subtle-01;
+  block-size: $spacing-02;
+  inline-size: 8rem;
+
+  span {
+    display: block;
+    background: $interactive;
+    block-size: 100%;
+  }
+}
+
+.cardFooter {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+  padding: $spacing-03 $spacing-07 $spacing-03 $spacing-03;
+  border-block-start: 1px solid $border-subtle-01;
+}
+
+.cardName {
+  overflow: hidden;
+  min-inline-size: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// The file type as a small coloured badge, as mail clients do.
+.kindBadge {
+  @include type-style('label-01');
+  @include font-weight('semibold');
+
+  flex: none;
+  padding: 0 $spacing-02;
+  color: $text-on-color;
+}
+
+.kindPdf {
+  background: $support-error;
+}
+
+.kindDocx {
+  background: $interactive;
+}
+
+.kindXlsx {
+  background: $support-success;
+}
+
+.cardMeta {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+// ——— The AI's work, below the email ——————————————————————————————————————————————————
+.aiWork {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  padding: $spacing-06 $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
+  background: $layer-01;
+
+  @include breakpoint(md) {
+    padding: $spacing-06;
+  }
+
+  > .section:first-of-type {
+    padding-block-start: 0;
+    border-block-start: 0;
+  }
 }
 
 .panelHeader {
@@ -474,14 +790,4 @@
   @include type-style('label-01');
 
   color: $text-secondary;
-}
-
-.fileRow {
-  display: flex;
-  align-items: center;
-  gap: $spacing-04;
-}
-
-.fileName {
-  @include type-style('heading-compact-01');
 }

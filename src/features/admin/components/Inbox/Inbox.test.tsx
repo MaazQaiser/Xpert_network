@@ -82,6 +82,14 @@ describe('Inbox (F12, screen 02)', () => {
     );
   });
 
+  it('shows the attachment as a card and previews it', async () => {
+    renderWithProviders(<Inbox selectedId="req_helix_ev" />, { persona: 'ops' });
+    expect(await screen.findByRole('heading', { name: 'One attachment' })).toBeInTheDocument();
+    await userEvent.click(await screen.findByRole('button', { name: /Preview Project_Brief/ }));
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByText('Page 1 of 14')).toBeInTheDocument();
+  });
+
   it('explains a password-protected file instead of opening it', async () => {
     renderWithProviders(<Inbox selectedId="req_corvid_fintech" />, { persona: 'ops' });
     expect(
