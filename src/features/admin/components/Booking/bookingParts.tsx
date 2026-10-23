@@ -34,7 +34,7 @@ export function slotLabel(iso: string): string {
   return `${dayLabel(iso)} · ${timeLabel(iso)}`;
 }
 
-/** "Lukas Brandt" → "LB", for when there is no portrait. */
+/** "Jake Morrison" → "JM", for when there is no portrait. */
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/);
   const first = parts[0]?.[0] ?? '';

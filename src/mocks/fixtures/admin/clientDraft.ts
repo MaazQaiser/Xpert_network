@@ -6,22 +6,9 @@ import type {
   Project,
   TimeSlot,
 } from '@/features/admin';
+import { PRJ_1042_TOPICS } from './prj1042';
 import { answerFor } from './responses';
 import { expertPerson } from './expertPeople';
-
-// Short topics for PRJ-1042's eight client questions; other projects fall back to "Question N".
-const PRJ_1042_TOPICS = [
-  'Market size',
-  'Black mass supply',
-  'Recovery costs',
-  'EU regulation',
-  'Leading players',
-  'OEM pricing',
-  'Scaling risks',
-  'Asian entrants',
-];
-
-const COUNTRY: Record<string, string> = { DE: 'DE', PL: 'PL', SE: 'SE', BE: 'BE', FR: 'FR' };
 
 /** Reply-by choices: the next three working days at 17:00 GMT. */
 function replyByOptions(from: Date): string[] {
@@ -62,7 +49,7 @@ export function buildClientDraft(
       ...expertPerson(expert.id),
       role: expert.role,
       years: expert.years,
-      country: COUNTRY[expert.country] ?? expert.country,
+      country: expert.country,
       quote: answerFor(expert.id, firstQuestion) ?? 'Answered the screening questions in depth.',
       bestFor: covers.map((q) => topics[q] ?? `Question ${q + 1}`),
       covers,

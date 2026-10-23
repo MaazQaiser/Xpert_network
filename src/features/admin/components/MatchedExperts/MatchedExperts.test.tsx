@@ -7,7 +7,7 @@ import { mockRouter } from '@/test/navigation';
 import { renderWithProviders } from '@/test/render';
 import { MatchedExperts } from './MatchedExperts';
 
-async function approveHelix() {
+async function approvePrj1042() {
   db.update((draft) => {
     draft.sessionUserId = 'usr_ops';
   });
@@ -16,7 +16,7 @@ async function approveHelix() {
 
 describe('MatchedExperts (F13, screen 04)', () => {
   it('lists the 146 matches and can generate a shortlist', async () => {
-    await approveHelix();
+    await approvePrj1042();
     const { container } = renderWithProviders(<MatchedExperts projectId="PRJ-1042" />, {
       persona: 'ops',
     });
@@ -34,7 +34,7 @@ describe('MatchedExperts (F13, screen 04)', () => {
   });
 
   it('pins a selected expert to the shortlist', async () => {
-    await approveHelix();
+    await approvePrj1042();
     renderWithProviders(<MatchedExperts projectId="PRJ-1042" />, { persona: 'ops' });
     await screen.findByText('Expert #4821');
     const table = screen.getByRole('table', { name: 'Matched experts' });

@@ -47,6 +47,18 @@ const FLAGS: Record<string, { name: string; art: ReactNode }> = {
       </>
     ),
   },
+  US: {
+    name: 'United States',
+    art: (
+      <>
+        <rect width="30" height="20" fill="#B22234" />
+        {[1, 3, 5, 7, 9, 11].map((stripe) => (
+          <rect key={stripe} width="30" height={20 / 13} y={(stripe * 20) / 13} fill="#FFF" />
+        ))}
+        <rect width="12" height={(7 * 20) / 13} fill="#3C3B6E" />
+      </>
+    ),
+  },
 };
 
 function vertical(a: string, b: string, c: string) {

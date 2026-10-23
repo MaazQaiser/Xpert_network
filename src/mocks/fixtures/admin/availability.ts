@@ -18,7 +18,7 @@ function workingDays(from: Date, count: number): Date[] {
   return days;
 }
 
-/** "Former VP Operations, EU battery recycler" → "VP Operations": what the client sees. */
+/** "Thru-hiker, Pacific Crest Trail" → "Thru-hiker": what the client sees. */
 function shortRole(role: string): string {
   return (
     role

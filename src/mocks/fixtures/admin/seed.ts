@@ -27,7 +27,7 @@ const minutesAgo = (now: Date, minutes: number) =>
 const step = (label: string, at: string | null): PipelineStep => ({ label, done: at !== null, at });
 
 // The two newest emails haven't been opened yet.
-const UNREAD = new Set(['req_helix_ev', 'req_northgate_mro', 'req_kite_coldstorage']);
+const UNREAD = new Set(['req_ridgeline_audio', 'req_northgate_mro', 'req_kite_coldstorage']);
 
 /** The mailboxes the AI watches. */
 export function seedMailAccounts(now = new Date()): MailAccount[] {
@@ -41,16 +41,16 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
   const t = (minutes: number) => minutesAgo(now, minutes);
   const requests: Omit<InboxRequest, 'read'>[] = [
     {
-      id: 'req_helix_ev',
-      from: { name: 'Sarah Lin', email: 'sarah.lin@helixcap.example' },
-      company: 'Helix Capital Partners',
+      id: 'req_ridgeline_audio',
+      from: { name: 'Jenna Cho', email: 'jenna.cho@ridgelineinsights.example' },
+      company: 'Ridgeline Consumer Insights',
       to: PROJECTS_INBOX,
-      subject: 'Expert calls needed — EV battery recycling, Europe',
-      body: 'Hi team — we’re doing diligence on a European battery recycler. Please find attached our brief with the profiles we need and the questions we want covered. Ideally first calls next week.',
+      subject: 'Feasibility and quote — sports headphones research, North America',
+      body: 'Hi team — we’re starting research on sports headphones in North America and would like you to check feasibility and send a quote. The brief attached has the participants we need (thru-hikers and trail runners in the US) and what we want to learn. Interviews would be AI-assisted, 50–60 minutes.',
       receivedAt: t(18),
       status: 'brief_ready',
       attachment: {
-        name: 'Project_Brief_EV_Recycling.pdf',
+        name: 'Sports_Headphones_NA_Brief.pdf',
         kind: 'pdf',
         pages: 14,
         size: '2.4 MB',
@@ -58,13 +58,13 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
         progress: null,
       },
       steps: [
-        step('Email received and sender matched to client “Helix Capital”', t(18)),
+        step('Email received and sender matched to client “Ridgeline Consumer Insights”', t(18)),
         step('Attachment saved to secure storage', t(18)),
         step('Text extracted from 14 pages (no OCR needed)', t(17)),
         step('Brief, requirements and 8 client questions extracted', t(16)),
         step('Waiting for your review before matching experts', null),
       ],
-      confirmations: ['budget not stated in the doc', '“early next month” deadline is ambiguous'],
+      confirmations: ['no budget: they want a quote', 'no timeline in the brief'],
       autoReply: null,
       projectId: 'PRJ-1042',
     },
@@ -316,11 +316,11 @@ export function seedProjects(now = new Date()): Record<string, Project> {
   const projects: Project[] = [
     makeProject({
       id: 'PRJ-1042',
-      name: 'EV battery recycling — Europe market diligence',
+      name: 'Sports headphones — North America outdoor research',
       status: 'draft',
-      client: { id: 'cli_helix', name: 'Helix Capital Partners' },
-      contact: { name: 'Sarah Lin', email: 'sarah.lin@helixcap.example' },
-      source: { requestId: 'req_helix_ev', fileName: 'Project_Brief_EV_Recycling.pdf' },
+      client: { id: 'cli_ridgeline', name: 'Ridgeline Consumer Insights' },
+      contact: { name: 'Jenna Cho', email: 'jenna.cho@ridgelineinsights.example' },
+      source: { requestId: 'req_ridgeline_audio', fileName: 'Sports_Headphones_NA_Brief.pdf' },
       createdAt: t(16),
       brief,
       requirements: PRJ_1042_REQUIREMENTS,
@@ -331,21 +331,21 @@ export function seedProjects(now = new Date()): Record<string, Project> {
         {
           id: 'c_budget',
           factId: 'f_budget',
-          text: 'Budget not mentioned in the document',
+          text: 'They ask for a quote; no budget given',
           proposal: null,
           state: 'open',
         },
         {
           id: 'c_deadline',
           factId: 'f_deadline',
-          text: '“Early next month”: assume 2 Nov?',
-          proposal: '2 Nov',
+          text: 'No timeline in the brief: aim to finish by 13 Nov?',
+          proposal: '13 Nov',
           state: 'open',
         },
       ],
       activity: [
         activity(t(16), 'ai', 'AI created project file v0.1'),
-        activity(t(16), 'ai', 'AI matched sender to client Helix Capital'),
+        activity(t(16), 'ai', 'AI matched sender to client Ridgeline Consumer Insights'),
         activity(t(18), 'system', 'Email received'),
       ],
       document: { pageCount: PRJ_1042_PAGES.length, pages: PRJ_1042_PAGES },

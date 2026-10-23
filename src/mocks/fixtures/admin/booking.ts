@@ -43,7 +43,7 @@ export function buildBooking(project: Project, draft: ClientDraft, now: Date): B
   const chosen = draft.experts.slice(0, count);
   const rest = draft.experts.slice(count);
   const noteFor = (index: number) =>
-    project.id === 'PRJ-1042' && index === 1 ? 'contract pricing in Poland' : null;
+    project.id === 'PRJ-1042' && index === 1 ? 'their night-hiking setup' : null;
 
   const picks: BookingPick[] = chosen.map((expert, index) => ({
     expertId: expert.expertId,
@@ -151,11 +151,13 @@ export function buildBooking(project: Project, draft: ClientDraft, now: Date): B
     briefing: {
       context:
         project.id === 'PRJ-1042'
-          ? 'An investor is studying the European EV battery recycling market: feedstock, recovery costs, regulation and the leading players.'
+          ? 'A consumer research firm is studying how US thru-hikers and trail runners use headphones: use cases, pain points, staying aware of their surroundings and an ear-clip design.'
           : `A client is researching ${project.name}.`,
       questions: project.questions.map((q) => q.text),
       doNotShare:
-        'Confidential information from current or former employers, or anything under NDA.',
+        project.id === 'PRJ-1042'
+          ? 'Details of unreleased products you have tested for a brand, or anything under NDA.'
+          : 'Confidential information from current or former employers, or anything under NDA.',
     },
   };
 }

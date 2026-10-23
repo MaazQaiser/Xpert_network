@@ -64,7 +64,7 @@ describe('Booking (F15, screens 11–13)', () => {
   it('waits for the client’s reply before showing picks', async () => {
     signIn();
     renderWithProviders(<ClientPick projectId="PRJ-1042" />, { persona: 'ops' });
-    expect(await screen.findByText('Sarah hasn’t replied yet')).toBeInTheDocument();
+    expect(await screen.findByText('Jenna hasn’t replied yet')).toBeInTheDocument();
   });
 
   it('puts the client’s reply in the inbox', async () => {
@@ -81,7 +81,7 @@ describe('Booking (F15, screens 11–13)', () => {
     });
     renderWithProviders(<ClientPick projectId="PRJ-1042" />, { persona: 'ops' });
     expect(
-      await screen.findByRole('heading', { name: 'Sarah picked 2 experts' }),
+      await screen.findByRole('heading', { name: 'Jenna picked 2 experts' }),
     ).toBeInTheDocument();
   });
 
@@ -91,11 +91,11 @@ describe('Booking (F15, screens 11–13)', () => {
       persona: 'ops',
     });
     expect(
-      await screen.findByRole('heading', { name: 'Sarah picked 2 experts' }),
+      await screen.findByRole('heading', { name: 'Jenna picked 2 experts' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('Lukas Brandt')).toBeInTheDocument();
+    expect(screen.getByText('Jake Morrison')).toBeInTheDocument();
     await expectNoAxeViolations(container);
-    await userEvent.click(screen.getByLabelText(/Conor Walsh/));
+    await userEvent.click(screen.getByLabelText(/Derek Hall/));
     await userEvent.click(screen.getByRole('button', { name: 'Sync with experts' }));
     await waitFor(() =>
       expect(mockRouter.push).toHaveBeenCalledWith('/admin/projects/PRJ-1042/sync'),
@@ -112,13 +112,13 @@ describe('Booking (F15, screens 11–13)', () => {
       persona: 'ops',
     });
     expect(
-      await screen.findByRole('heading', { name: 'Tell Sarah the calls are locked' }),
+      await screen.findByRole('heading', { name: 'Tell Jenna the calls are locked' }),
     ).toBeInTheDocument();
     expect(screen.getAllByText(/^Confirmed /)).toHaveLength(2);
     await expectNoAxeViolations(container);
     await userEvent.click(screen.getByRole('button', { name: 'Shorter' }));
-    expect(screen.getByLabelText('Opening')).toHaveValue('Hi Sarah, your calls are locked:');
-    await userEvent.click(screen.getByRole('button', { name: 'Send to Sarah & lock project' }));
+    expect(screen.getByLabelText('Opening')).toHaveValue('Hi Jenna, your calls are locked:');
+    await userEvent.click(screen.getByRole('button', { name: 'Send to Jenna & lock project' }));
     await waitFor(() =>
       expect(mockRouter.push).toHaveBeenCalledWith('/admin/projects/PRJ-1042/booking'),
     );
@@ -145,8 +145,8 @@ describe('Booking (F15, screens 11–13)', () => {
     expect(await screen.findByText('Project locked · v1.0')).toBeInTheDocument();
     expect(screen.getByText(/5 of 7 done automatically/)).toBeInTheDocument();
     await expectNoAxeViolations(container);
-    await userEvent.click(screen.getByRole('button', { name: /Lukas Brandt/ }));
-    expect(screen.getByRole('heading', { name: 'Call with Lukas Brandt' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Briefing pack for Lukas' })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /Jake Morrison/ }));
+    expect(screen.getByRole('heading', { name: 'Call with Jake Morrison' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Briefing pack for Jake' })).toBeInTheDocument();
   });
 });

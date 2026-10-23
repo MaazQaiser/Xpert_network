@@ -16,10 +16,10 @@ describe('ProjectFile (F12, screen 03)', () => {
     });
     expect(
       await screen.findByRole('heading', {
-        name: 'EV battery recycling — Europe market diligence',
+        name: 'Sports headphones — North America outdoor research',
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Helix is evaluating an investment/)).toBeInTheDocument();
+    expect(screen.getByText(/Ridgeline is researching sports headphones/)).toBeInTheDocument();
     // The sections live in tabs, each with its count.
     expect(screen.getByRole('tab', { name: /Expert profile needed\s*6/ })).toHaveAttribute(
       'aria-selected',
@@ -66,7 +66,7 @@ describe('ProjectFile (F12, screen 03)', () => {
     await userEvent.click(await screen.findByRole('tab', { name: /^Experts/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Start finding experts' }));
     expect(await screen.findByText(/8 experts found/)).toBeInTheDocument();
-    expect(screen.getAllByText('Germany').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('United States').length).toBeGreaterThan(0);
     await userEvent.click(screen.getAllByRole('button', { name: 'Send screening questions' })[0]!);
     expect(await screen.findByText('Sent')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Refresh screening status' }));
@@ -108,8 +108,8 @@ describe('ProjectFile (F12, screen 03)', () => {
   it('confirms the deadline the AI proposed', async () => {
     renderWithProviders(<ProjectFile projectId="PRJ-1042" />, { persona: 'ops' });
     await userEvent.click(await screen.findByRole('tab', { name: /Needs confirming/ }));
-    await userEvent.click(screen.getByRole('button', { name: 'Confirm 2 Nov' }));
-    expect(await screen.findByText('Confirmed: 2 Nov.')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Confirm 13 Nov' }));
+    expect(await screen.findByText('Confirmed: 13 Nov.')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Needs confirming (1)' })).toBeInTheDocument();
   });
 
@@ -123,8 +123,8 @@ describe('ProjectFile (F12, screen 03)', () => {
       ),
     );
     expect(db.get().adminMail).toHaveLength(0);
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Send to Sarah' }));
-    expect(await screen.findByText(/Email sent to Sarah Lin/)).toBeInTheDocument();
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Send to Jenna' }));
+    expect(await screen.findByText(/Email sent to Jenna Cho/)).toBeInTheDocument();
     expect(db.get().adminMail).toHaveLength(1);
   });
 

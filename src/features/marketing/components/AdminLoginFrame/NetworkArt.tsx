@@ -7,12 +7,12 @@ import styles from './AdminLoginFrame.module.scss';
 // from public/images/avatars/experts; the art is decorative and hidden from assistive tech.
 const HUB = { x: 240, y: 200 };
 const EXPERTS = [
-  { x: 96, y: 96, photo: 'lukas-brandt' },
-  { x: 256, y: 50, photo: 'freja-nielsen' },
-  { x: 404, y: 118, photo: 'erik-lindqvist' },
-  { x: 414, y: 290, photo: 'camille-laurent' },
-  { x: 250, y: 352, photo: 'conor-walsh' },
-  { x: 82, y: 286, photo: 'anna-schreiber' },
+  { x: 96, y: 96, photo: 'jake-morrison' },
+  { x: 256, y: 50, photo: 'ashley-turner' },
+  { x: 404, y: 118, photo: 'marcus-hayes' },
+  { x: 414, y: 290, photo: 'sophia-bell' },
+  { x: 250, y: 352, photo: 'derek-hall' },
+  { x: 82, y: 286, photo: 'emily-carter' },
 ] as const;
 // Experts also know each other: a few links around the ring.
 const RING = [

@@ -144,7 +144,7 @@ export function ExpertProfileCard({ project, onNotice }: ExpertProfileCardProps)
           <TextInput
             id="new-requirement"
             labelText="New requirement"
-            placeholder="e.g. Ran a black mass sourcing team"
+            placeholder="e.g. Thru-hiked the Pacific Crest Trail in 2025"
             value={text}
             onChange={(event) => setText(event.target.value)}
             onBlur={() => setTouched(true)}

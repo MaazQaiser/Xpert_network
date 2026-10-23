@@ -277,6 +277,32 @@ function withNewSeeds(saved: DemoState, fresh: DemoState): DemoState {
   return merged;
 }
 
+/**
+ * When the PRJ-1042 story changes (it was EV battery recycling, now sports headphones), a saved
+ * demo restarts the whole admin console from the seed so emails, experts and calls match.
+ */
+function withAdminStory(saved: DemoState, fresh: DemoState): DemoState {
+  const savedSource = saved.adminProjects?.['PRJ-1042']?.source.requestId;
+  const freshSource = fresh.adminProjects['PRJ-1042']?.source.requestId;
+  if (!savedSource || savedSource === freshSource) return saved;
+  return {
+    ...saved,
+    adminInbox: fresh.adminInbox,
+    adminMailAccounts: fresh.adminMailAccounts,
+    adminProjects: fresh.adminProjects,
+    adminMail: fresh.adminMail,
+    adminMatches: fresh.adminMatches,
+    adminShortlists: fresh.adminShortlists,
+    adminScreening: fresh.adminScreening,
+    adminScreeningSentAt: fresh.adminScreeningSentAt,
+    adminAvailability: fresh.adminAvailability,
+    adminClientDraft: fresh.adminClientDraft,
+    adminBooking: fresh.adminBooking,
+    adminCall: fresh.adminCall,
+    notifications: fresh.notifications,
+  };
+}
+
 function load(): DemoState {
   if (typeof window === 'undefined') return seed();
   try {
@@ -286,7 +312,10 @@ function load(): DemoState {
     // Slices added after a tester's data was saved fall back to the seed.
     if (parsed.version !== 2) return seed();
     const fresh = seed();
-    return withNewSeeds({ ...fresh, ...parsed, users: withPersonaIdentity(parsed.users) }, fresh);
+    return withNewSeeds(
+      withAdminStory({ ...fresh, ...parsed, users: withPersonaIdentity(parsed.users) }, fresh),
+      fresh,
+    );
   } catch {
     return seed();
   }

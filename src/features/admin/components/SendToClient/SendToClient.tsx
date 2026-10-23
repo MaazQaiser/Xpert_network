@@ -55,7 +55,7 @@ function slotLabel(slot: TimeSlot): string {
   return `${day} · ${time}`;
 }
 
-/** "Lukas Brandt" → "LB", for when an expert has no portrait. */
+/** "Jake Morrison" → "JM", for when an expert has no portrait. */
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/);
   const first = parts[0]?.[0] ?? '';

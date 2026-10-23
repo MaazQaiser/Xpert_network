@@ -103,9 +103,16 @@ function clarificationDraft(project: Project) {
     .map((c, index) => {
       const fact = project.facts.find((f) => f.id === c.factId);
       if (c.factId === 'f_budget') {
-        return `${index + 1}. Budget: the brief doesn’t mention one. Is there a range per call or for the project?`;
+        return fact?.value
+          ? `${index + 1}. Budget: you asked us for a quote. Is there a range we should work within?`
+          : `${index + 1}. Budget: the brief doesn’t mention one. Is there a range per call or for the project?`;
       }
-      return `${index + 1}. ${fact?.label ?? 'Detail'}: you mention ${fact?.value ?? 'this'}. ${
+      if (!fact?.value) {
+        return `${index + 1}. ${fact?.label ?? 'Detail'}: the brief doesn’t give one. ${
+          c.proposal ? `Shall we plan for ${c.proposal}?` : 'Could you confirm?'
+        }`;
+      }
+      return `${index + 1}. ${fact.label}: you mention ${fact.value}. ${
         c.proposal ? `Shall we plan for ${c.proposal}?` : 'Could you confirm?'
       }`;
     });

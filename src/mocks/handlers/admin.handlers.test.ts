@@ -57,7 +57,7 @@ describe('admin mock API (F11–F12)', () => {
       confirmationId: 'c_deadline',
     });
     expect(project().facts.find((f) => f.id === 'f_deadline')).toMatchObject({
-      value: '2 Nov',
+      value: '13 Nov',
       state: 'ok',
     });
     const refused = await call('/api/admin/projects/PRJ-1042/confirmations', 'POST', {
@@ -69,13 +69,13 @@ describe('admin mock API (F11–F12)', () => {
   it('sends the clarification email to the sandbox and marks open items as asked', async () => {
     logIn('usr_ops');
     const draft = await call('/api/admin/projects/PRJ-1042/clarification');
-    expect(draft.body.to).toBe('sarah.lin@helixcap.example');
+    expect(draft.body.to).toBe('jenna.cho@ridgelineinsights.example');
     expect(draft.body.body).toContain('Budget');
 
     await call('/api/admin/projects/PRJ-1042/clarification', 'POST', draft.body);
     expect(db.get().adminMail[0]).toMatchObject({
       projectId: 'PRJ-1042',
-      to: 'sarah.lin@helixcap.example',
+      to: 'jenna.cho@ridgelineinsights.example',
     });
     expect(project().confirmations.every((c) => c.state === 'asked')).toBe(true);
   });
@@ -85,7 +85,7 @@ describe('admin mock API (F11–F12)', () => {
     const { status } = await call('/api/admin/projects/PRJ-1042/approve', 'POST');
     expect(status).toBe(200);
     expect(project().status).toBe('matching');
-    expect(db.get().adminInbox.req_helix_ev?.status).toBe('converted');
+    expect(db.get().adminInbox.req_ridgeline_audio?.status).toBe('converted');
     expect((await call('/api/admin/projects/PRJ-1042/approve', 'POST')).status).toBe(409);
   });
 

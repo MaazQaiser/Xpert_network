@@ -35,7 +35,7 @@ describe('ConfirmAvailability (F15, screen 09)', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('04 / 05')).toBeInTheDocument();
     expect(screen.getByText('Compliance form not signed')).toBeInTheDocument();
-    expect(screen.getByText('Expert A · VP Operations')).toBeInTheDocument();
+    expect(screen.getByText('Expert A · Thru-hiker')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Send 5 experts to the client' })).toBeEnabled();
     await expectNoAxeViolations(container);
   });
@@ -130,7 +130,7 @@ describe('ConfirmAvailability (F15, screen 09)', () => {
     renderWithProviders(<ConfirmAvailability projectId="PRJ-1042" expertIds={FIVE} />, {
       persona: 'ops',
     });
-    expect(await screen.findByRole('link', { name: 'Open Sarah’s picks' })).toHaveAttribute(
+    expect(await screen.findByRole('link', { name: 'Open Jenna’s picks' })).toHaveAttribute(
       'href',
       '/admin/projects/PRJ-1042/pick',
     );

@@ -34,7 +34,7 @@ export function InboxStatusTag({
 // Placeholder portraits for the demo senders (randomuser.me, saved in /public/images/avatars).
 // They are stand-ins, not the real people; anyone else gets their initials.
 const SENDER_PHOTOS: Record<string, string> = {
-  'sarah.lin@helixcap.example': '/images/avatars/sarah-lin.jpg',
+  'jenna.cho@ridgelineinsights.example': '/images/avatars/jenna-cho.jpg',
   'omar.siddiqui@northgate.example': '/images/avatars/omar-siddiqui.jpg',
   'priya.raman@lakeview.example': '/images/avatars/priya-raman.jpg',
   'j.okafor@brightlinepe.example': '/images/avatars/james-okafor.jpg',

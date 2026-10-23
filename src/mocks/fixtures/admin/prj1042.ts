@@ -1,28 +1,46 @@
 import type { ClientQuestion, KeyFact, Requirement, SourcePage } from '@/features/admin';
 
-/** PRJ-1042: Sarah Lin's EV battery recycling brief (wireframes 02–03). */
+/** PRJ-1042: Jenna Cho's sports headphones brief, North America (wireframes 02–03). */
 
 export const PRJ_1042_BRIEFS = {
   standard: [
-    'Helix is evaluating an investment in a mid-size European lithium-ion battery recycler. They need 5–8 one-hour calls with former senior operators and industry specialists to validate market size, feedstock supply (black mass), unit economics of hydrometallurgical recovery and the impact of the EU Battery Regulation. First calls requested for the week of 26 Oct.',
-    'Helix Capital Partners is doing diligence on a European lithium-ion battery recycler with hydrometallurgical plants in Germany and Poland. They want 5–8 one-hour calls with former senior operators and specialists covering market size to 2030, who controls black mass supply, recovery rates and costs, and how the EU Battery Regulation shifts demand. First calls in the week of 26 Oct.',
+    'Ridgeline is researching sports headphones in the North American market and asks us to check feasibility and quote. They need 4 AI-assisted in-depth interviews (50–60 min) in the United States: 2 thru-hikers who carry overnight gear and 2 trail runners, all of whom wear headphones on the trail. Aim for about half Shokz bone-conduction users and both men and women. The interviews cover use cases, pain points, wearing conflicts, the need to hear surroundings and how people feel about an ear-clip design.',
+    'Ridgeline Consumer Insights wants to understand how outdoor athletes in the US use headphones, and is asking Xpert Network whether 4 AI-assisted interviews (50–60 min) are feasible and what they would cost. Participants are 2 thru-hikers and 2 trail runners with recent, provable activity and headphone use; about 50% should use Shokz bone-conduction headphones, with a mix of men and women. Topics: use cases, pain points, wearing conflicts, environmental awareness, and acceptance and feature priorities for an ear-clip form factor.',
   ],
   shorter: [
-    'Helix is assessing a European battery recycler and needs 5–8 one-hour calls with former senior operators on market size, black mass supply, hydrometallurgy economics and the EU Battery Regulation. First calls week of 26 Oct.',
+    'Ridgeline needs a feasibility check and quote for 4 AI-assisted interviews (50–60 min) in the US with 2 thru-hikers and 2 trail runners who wear headphones outdoors: about half Shokz users, men and women. Topics: use cases, pain points, awareness and an ear-clip design.',
   ],
 } as const;
 
+/** Short names for the eight questions, used in the client email, shortlist and call. */
+export const PRJ_1042_TOPICS = [
+  'Activity record',
+  'Longest outing',
+  'Current headphones',
+  'Use cases',
+  'Pain points',
+  'Wearing conflicts',
+  'Hearing surroundings',
+  'Ear-clip design',
+] as const;
+
 export const PRJ_1042_FACTS: KeyFact[] = [
-  { id: 'f_industry', label: 'Industry', value: 'Battery recycling', state: 'ok', page: 2 },
-  { id: 'f_geography', label: 'Geography', value: 'EU (DE, PL, Nordics)', state: 'ok', page: 2 },
-  { id: 'f_calls', label: 'Calls needed', value: '5–8 × 60 min', state: 'ok', page: 3 },
-  { id: 'f_deadline', label: 'Deadline', value: '“Early next month”', state: 'confirm', page: 3 },
-  { id: 'f_budget', label: 'Budget', value: null, state: 'missing', page: null },
-  { id: 'f_call_type', label: 'Call type', value: 'Phone / video', state: 'ok', page: 3 },
+  { id: 'f_industry', label: 'Industry', value: 'Sports headphones', state: 'ok', page: 2 },
+  { id: 'f_geography', label: 'Geography', value: 'United States', state: 'ok', page: 2 },
+  {
+    id: 'f_calls',
+    label: 'Interviews',
+    value: '4 × 50–60 min (2 hikers, 2 runners)',
+    state: 'ok',
+    page: 3,
+  },
+  { id: 'f_deadline', label: 'Deadline', value: null, state: 'missing', page: null },
+  { id: 'f_budget', label: 'Budget', value: 'Quote requested', state: 'confirm', page: 3 },
+  { id: 'f_call_type', label: 'Call type', value: 'AI-assisted interview', state: 'ok', page: 3 },
   {
     id: 'f_compliance',
-    label: 'Compliance',
-    value: 'No current employees of target',
+    label: 'Proof',
+    value: 'Route map, certificate or photos',
     state: 'ok',
     page: 8,
   },
@@ -30,43 +48,55 @@ export const PRJ_1042_FACTS: KeyFact[] = [
 ];
 
 export const PRJ_1042_REQUIREMENTS: Requirement[] = [
-  { id: 'r_vp', text: 'Former VP / Director, battery recycler' },
-  { id: 'r_black_mass', text: 'Black mass supply chain' },
-  { id: 'r_hydro', text: 'Hydrometallurgy operations' },
-  { id: 'r_regulation', text: 'EU Battery Regulation' },
-  { id: 'r_years', text: '10+ yrs experience' },
-  { id: 'r_left', text: 'Left company < 3 yrs ago' },
+  { id: 'r_hiker', text: 'Thru-hiker: 2+ overnight hikes in 6 months' },
+  { id: 'r_runner', text: 'Trail runner: 6+ trail runs in 6 months' },
+  { id: 'r_distance', text: 'Longest hike 3 days / 2 nights, or run 30 km+' },
+  { id: 'r_headphones', text: 'Wore headphones during the activity' },
+  { id: 'r_proof', text: 'Route map, certificate or photos' },
+  { id: 'r_mix', text: '~50% Shokz users, men and women' },
 ];
 
 export const PRJ_1042_QUESTIONS: ClientQuestion[] = [
   {
     id: 'q1',
-    text: 'How big is the EU recycling market for EV batteries today, and how fast will it grow to 2030?',
+    text: 'In the past 6 months, how many overnight hikes with your own gear, or trail runs, have you done? Can you share a route map, certificate or photos of the latest one?',
     page: 4,
   },
   {
     id: 'q2',
-    text: 'Where does feedstock (black mass) come from, and who controls supply?',
+    text: 'What was your longest hike (days and nights) or trail run (km), and what terrain do you mostly cover?',
     page: 4,
   },
   {
     id: 'q3',
-    text: 'What are typical recovery rates and costs for hydrometallurgical vs pyrometallurgical plants?',
+    text: 'Which headphones do you wear on the trail, and are they Shokz bone-conduction headphones?',
     page: 5,
   },
   {
     id: 'q4',
-    text: 'How will the EU Battery Regulation’s recycled-content targets change demand?',
+    text: 'When and why do you wear headphones outdoors: what do you listen to, and for how long?',
     page: 5,
   },
-  { id: 'q5', text: 'Who are the leading players and how are they differentiated?', page: 6 },
   {
-    id: 'q6',
-    text: 'What pricing do OEMs pay for recycling services, and how are contracts structured?',
+    id: 'q5',
+    text: 'What frustrates you about your headphones outdoors: fit, sweat, battery, sound or weight?',
     page: 6,
   },
-  { id: 'q7', text: 'What are the main operational risks when scaling a plant?', page: 7 },
-  { id: 'q8', text: 'How do you see the role of Asian recyclers entering Europe?', page: 7 },
+  {
+    id: 'q6',
+    text: 'Has wearing headphones ever caused a conflict, with other trail users, your safety or gear like hats, helmets and sunglasses?',
+    page: 6,
+  },
+  {
+    id: 'q7',
+    text: 'How much do you need to hear your surroundings (people, bikes, wildlife, weather), and how do you manage that today?',
+    page: 7,
+  },
+  {
+    id: 'q8',
+    text: 'Would you wear ear-clip headphones that sit outside the ear? Which features matter most to you?',
+    page: 7,
+  },
 ];
 
 const block = (
@@ -85,13 +115,13 @@ export const PRJ_1042_PAGES: SourcePage[] = [
   {
     page: 1,
     blocks: [
-      block('p1h', 'heading', 'Project brief: EV battery recycling, Europe'),
+      block('p1h', 'heading', 'Research brief: sports headphones, North America'),
       block(
         'p1a',
         'text',
-        'Prepared by Helix Capital Partners for Xpert Network. Confidential, October 2026.',
+        'Prepared by Ridgeline Consumer Insights for Xpert Network. Confidential, October 2026.',
       ),
-      block('p1b', 'text', 'Contact: Sarah Lin, Vice President, Industrials.'),
+      block('p1b', 'text', 'Contact: Jenna Cho, Research Director.'),
     ],
   },
   {
@@ -101,13 +131,13 @@ export const PRJ_1042_PAGES: SourcePage[] = [
       block(
         'p2a',
         'text',
-        'Helix is evaluating a minority investment in a mid-size European lithium-ion battery recycler operating hydrometallurgical recovery lines.',
+        'We are running a research project on sports headphones for outdoor athletes and invite Xpert Network to assess feasibility and provide a quote.',
         'f_industry',
       ),
       block(
         'p2b',
         'text',
-        'The target runs plants in Germany and Poland and is exploring a third site in the Nordics. We need views across all three markets.',
+        'Market: North America. Fieldwork in the United States only, 4 participants.',
         'f_geography',
       ),
     ],
@@ -115,37 +145,32 @@ export const PRJ_1042_PAGES: SourcePage[] = [
   {
     page: 3,
     blocks: [
-      block('p3h', 'heading', '2. What we need'),
+      block('p3h', 'heading', '2. Method and sample'),
       block(
         'p3a',
         'text',
-        'We would like 5–8 one-hour calls with former senior operators and industry specialists.',
+        '4 in-depth interviews of 50–60 minutes: 2 thru-hikers and 2 trail runners. Participants may qualify as both.',
         'f_calls',
       ),
-      block('p3b', 'text', 'Calls can be by phone or video.', 'f_call_type'),
-      block('p3c', 'text', 'All calls in English.', 'f_language'),
-      block(
-        'p3d',
-        'text',
-        'Ideally first calls next week, with all calls completed early next month.',
-        'f_deadline',
-      ),
+      block('p3b', 'text', 'Interviews are AI-assisted.', 'f_call_type'),
+      block('p3c', 'text', 'All interviews in English.', 'f_language'),
+      block('p3d', 'text', 'Please share feasibility and a quote for the full scope.', 'f_budget'),
     ],
   },
   {
     page: 4,
     blocks: [
-      block('p4h', 'heading', '3. Questions: market and supply'),
+      block('p4h', 'heading', '3. Screening: activity'),
       block(
         'p4a',
         'text',
-        'Market size: how big is the EU recycling market for EV batteries today, and what growth should we expect to 2030?',
+        'Thru-hikers: at least 2 hikes in the past 6 months carrying their own overnight gear. Trail runners: at least 6 runs on trails or natural terrain in the past 6 months. Proof of the latest activity is required.',
         'q1',
       ),
       block(
         'p4b',
         'text',
-        'Feedstock: where does black mass come from (production scrap vs end-of-life packs), and who controls supply?',
+        'Longest hike at least 3 days and 2 nights; longest trail run at least 30 km. Runners mainly run on trails, not only roads or treadmills.',
         'q2',
       ),
     ],
@@ -153,17 +178,17 @@ export const PRJ_1042_PAGES: SourcePage[] = [
   {
     page: 5,
     blocks: [
-      block('p5h', 'heading', '3. Questions: economics and regulation'),
+      block('p5h', 'heading', '3. Screening: headphones'),
       block(
         'p5a',
         'text',
-        'Unit economics: typical recovery rates and cost per tonne for hydrometallurgical vs pyrometallurgical plants.',
+        'All participants used headphones during the activity. About 50% should be Shokz bone-conduction users.',
         'q3',
       ),
       block(
         'p5b',
         'text',
-        'Regulation: how will the EU Battery Regulation’s recycled-content targets change demand for recycled material?',
+        'Objective 1: understand headphone use cases during outdoor activities.',
         'q4',
       ),
     ],
@@ -171,12 +196,17 @@ export const PRJ_1042_PAGES: SourcePage[] = [
   {
     page: 6,
     blocks: [
-      block('p6h', 'heading', '3. Questions: competition and pricing'),
-      block('p6a', 'text', 'Who are the leading players, and how are they differentiated?', 'q5'),
+      block('p6h', 'heading', '4. Objectives: pain points and conflicts'),
+      block(
+        'p6a',
+        'text',
+        'Objective 2: understand pain points when wearing headphones outdoors.',
+        'q5',
+      ),
       block(
         'p6b',
         'text',
-        'What do OEMs pay for recycling services, and how are contracts structured (tolling, offtake, gate fees)?',
+        'Objective 3: understand conflicts related to wearing headphones, with other people, safety and other gear.',
         'q6',
       ),
     ],
@@ -184,33 +214,43 @@ export const PRJ_1042_PAGES: SourcePage[] = [
   {
     page: 7,
     blocks: [
-      block('p7h', 'heading', '3. Questions: risks and outlook'),
-      block('p7a', 'text', 'What are the main operational risks when scaling a plant?', 'q7'),
-      block('p7b', 'text', 'How do you see the role of Asian recyclers entering Europe?', 'q8'),
+      block('p7h', 'heading', '4. Objectives: awareness and the ear-clip'),
+      block(
+        'p7a',
+        'text',
+        'Objective 4: understand the need to stay aware of the environment while listening.',
+        'q7',
+      ),
+      block(
+        'p7b',
+        'text',
+        'Objective 5: assess acceptance of the ear-clip form factor and which features to prioritise.',
+        'q8',
+      ),
     ],
   },
   {
     page: 8,
     blocks: [
-      block('p8h', 'heading', '4. Expert profile and compliance'),
+      block('p8h', 'heading', '5. Participant profile'),
       block(
         'p8a',
         'text',
-        'Former VPs or directors at battery recyclers, with hands-on black mass sourcing or hydrometallurgy operations, ideally 10+ years in the industry.',
+        'Include both male and female participants. Participants must have used headphones during their hikes or runs.',
       ),
       block(
         'p8b',
         'text',
-        'No current employees of the target. Former employees must have left more than 6 months ago.',
+        'Each participant provides a route map, completion or race certificate, or photos of their most recent activity.',
         'f_compliance',
       ),
     ],
   },
   ...[
-    'Appendix A: Target overview (redacted)',
+    'Appendix A: Product concept (redacted)',
     'Appendix B: Market data we already hold',
-    'Appendix C: EU Battery Regulation timeline',
-    'Appendix D: Plant locations',
+    'Appendix C: Discussion guide outline',
+    'Appendix D: Trail and race examples',
     'Appendix E: Glossary',
     'Appendix F: Contacts',
   ].map((title, index) => ({

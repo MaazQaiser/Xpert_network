@@ -86,14 +86,14 @@ describe('CallWorkspace (F16, screen 14)', () => {
     await endCall();
     renderWithProviders(<CallWorkspace projectId="PRJ-1042" />, { persona: 'ops' });
     expect(await screen.findByText('Client requests detected · 3')).toBeInTheDocument();
-    expect(screen.getByText('5 / 8')).toBeInTheDocument();
+    expect(screen.getByText('6 / 8')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Confirm delete' }));
     expect(await screen.findByText('Removed · project file v1.1')).toBeInTheDocument();
-    expect(screen.getByText('5 / 7')).toBeInTheDocument();
+    expect(screen.getByText('6 / 7')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Generate after call' }));
     const after = screen.getByRole('region', { name: 'After the call' });
     expect(await within(after).findByText('Updated project file v1.1')).toBeInTheDocument();
-    expect(within(after).getByText('Lukas’s bio (anonymised)')).toBeInTheDocument();
+    expect(within(after).getByText('Jake’s bio (anonymised)')).toBeInTheDocument();
   });
 
   it('ends the call, then sends the documents and pays the expert', async () => {
@@ -113,9 +113,9 @@ describe('CallWorkspace (F16, screen 14)', () => {
     expect(screen.queryByRole('dialog', { name: 'Your call has ended' })).not.toBeInTheDocument();
     expect(screen.getByText('Ended')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Send all to client' }));
-    expect(await screen.findByText(/Sent to Sarah at/)).toBeInTheDocument();
+    expect(await screen.findByText(/Sent to Jenna at/)).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Mark expert paid' }));
-    expect(await screen.findByText('Lukas marked paid')).toBeInTheDocument();
+    expect(await screen.findByText('Jake marked paid')).toBeInTheDocument();
     expect(db.get().adminCall['PRJ-1042']?.expertPaidAt).not.toBeNull();
   });
 });

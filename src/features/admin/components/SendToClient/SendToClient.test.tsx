@@ -55,7 +55,7 @@ describe('SendToClient (F15, screen 10)', () => {
     const list = screen.getByRole('list', { name: 'Experts in the email' });
     expect(list.querySelectorAll(':scope > li')).toHaveLength(3);
     expect(screen.getByLabelText('Hide expert names until booked')).toBeChecked();
-    expect(screen.getByText(/Q1 · Market size/)).toBeInTheDocument();
+    expect(screen.getByText(/Q1 · Activity record/)).toBeInTheDocument();
     expect(screen.queryByText('Not covered')).not.toBeInTheDocument();
     await expectNoAxeViolations(container);
   });
@@ -64,7 +64,7 @@ describe('SendToClient (F15, screen 10)', () => {
     await prepareDraft();
     renderWithProviders(<SendToClient projectId="PRJ-1042" />, { persona: 'ops' });
     await userEvent.click(
-      await screen.findByRole('button', { name: 'Remove Lukas Brandt from the email' }),
+      await screen.findByRole('button', { name: 'Remove Jake Morrison from the email' }),
     );
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/^Send 2 experts/);
     expect(screen.getAllByText('Not covered').length).toBeGreaterThan(0);
@@ -80,7 +80,7 @@ describe('SendToClient (F15, screen 10)', () => {
     await userEvent.clear(subject);
     expect(send).toBeDisabled();
     expect(screen.getByText('Add a subject.')).toBeInTheDocument();
-    await userEvent.type(subject, 'Experts for your battery recycling project');
+    await userEvent.type(subject, 'Experts for your headphones research');
     await userEvent.click(send);
     expect(await screen.findByText(/^Sent at /)).toBeInTheDocument();
     expect(db.get().adminMail).toHaveLength(1);

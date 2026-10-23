@@ -74,7 +74,7 @@ const SEEDS: Record<string, Seed[]> = {
     {
       event: 'brief_submitted',
       title: 'Project file ready for review',
-      body: 'Sarah Lin · Helix Capital Partners · EV battery recycling, Europe. 2 things need confirming.',
+      body: 'Jenna Cho · Ridgeline Consumer Insights · Sports headphones, North America. 2 things need confirming.',
       href: '/admin/projects/PRJ-1042/brief',
       read: false,
       hoursAgo: 1,

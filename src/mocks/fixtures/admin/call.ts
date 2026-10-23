@@ -15,14 +15,14 @@ export function buildCallSession(booking: Booking): CallSession {
     const index = topics.indexOf(topic);
     return index >= 0 ? [index] : [];
   };
-  const oem = topics.indexOf('OEM pricing');
+  const dropped = topics.indexOf('Current headphones');
 
   const lines: TranscriptLine[] = [
     {
       id: 'ln_1',
       at: t(20, 52),
       speaker: 'client',
-      text: 'So on recovery costs — what’s realistic per tonne for a hydro plant today?',
+      text: 'So on battery: how do you manage listening over a multi-day hike?',
       highlight: null,
       covers: [],
     },
@@ -30,9 +30,9 @@ export function buildCallSession(booking: Booking): CallSession {
       id: 'ln_2',
       at: t(21, 18),
       speaker: 'expert',
-      text: 'It depends a lot on feedstock quality. For a plant around 20 kt, you’re looking at roughly €1,000 to €1,400 per tonne, all in.',
+      text: 'I ration it. My Shokz last about ten hours, so on a five-night trip I only listen on the long climbs, and I carry a small power bank.',
       highlight: null,
-      covers: find('Recovery costs'),
+      covers: find('Pain points'),
     },
     {
       id: 'ln_3',
@@ -54,15 +54,15 @@ export function buildCallSession(booking: Booking): CallSession {
       id: 'ln_5',
       at: t(24, 10),
       speaker: 'expert',
-      text: 'On black mass, a handful of traders still control most of the flow into Germany and Poland.',
+      text: 'Mostly podcasts in the afternoon, when the miles get slow. Never at camp, and never near river crossings.',
       highlight: null,
-      covers: find('Black mass supply'),
+      covers: find('Use cases'),
     },
     {
       id: 'ln_6',
       at: t(25, 30),
       speaker: 'client',
-      text: 'And who are the players you’d watch most closely?',
+      text: 'Have headphones ever caused trouble with other people on the trail?',
       highlight: null,
       covers: [],
     },
@@ -70,33 +70,33 @@ export function buildCallSession(booking: Booking): CallSession {
       id: 'ln_7',
       at: t(26, 5),
       speaker: 'expert',
-      text: 'The two big hydro operators in the Nordics, plus a German OEM joint venture that’s scaling fast.',
+      text: 'Once, with a horse rider who had to call out twice before I heard her. Now I keep the volume low enough to hear voices.',
       highlight: null,
-      covers: find('Leading players'),
+      covers: find('Wearing conflicts'),
     },
     {
       id: 'ln_8',
       at: t(27, 5),
       speaker: 'client',
-      text: 'Actually, let’s drop the question on OEM pricing — it’s not relevant to us anymore.',
+      text: 'Actually, let’s drop the question on current headphones — we have that from the screener.',
       highlight:
-        'Actually, let’s drop the question on OEM pricing — it’s not relevant to us anymore.',
+        'Actually, let’s drop the question on current headphones — we have that from the screener.',
       covers: [],
     },
     {
       id: 'ln_9',
       at: t(27, 40),
       speaker: 'expert',
-      text: 'Sure. On the regulation side, the recycled-content targets in the EU Battery Regulation are what really drive demand.',
+      text: 'Sure. Hiking solo, hearing what’s around me matters most: rockfall, the weather turning, a rattlesnake on the path.',
       highlight: null,
-      covers: find('EU regulation'),
+      covers: find('Hearing surroundings'),
     },
     {
       id: 'ln_10',
       at: t(31, 12),
       speaker: 'client',
-      text: 'Could we also get someone who knows the Polish market specifically?',
-      highlight: 'Could we also get someone who knows the Polish market specifically?',
+      text: 'Could we also talk to a hiker who doesn’t use Shokz, for contrast?',
+      highlight: 'Could we also talk to a hiker who doesn’t use Shokz, for contrast?',
       covers: [],
     },
   ];
@@ -127,16 +127,16 @@ export function buildCallSession(booking: Booking): CallSession {
         matchNote: null,
         status: 'open',
       },
-      ...(oem >= 0
+      ...(dropped >= 0
         ? [
             {
               id: 'rq_drop',
               kind: 'remove_requirement' as const,
               at: t(27, 5),
               lineId: 'ln_8',
-              quote: 'Drop the question on OEM pricing.',
+              quote: 'Drop the question on current headphones.',
               documents: [],
-              questionIndex: oem,
+              questionIndex: dropped,
               matches: null,
               matchNote: null,
               status: 'open' as const,
@@ -148,7 +148,7 @@ export function buildCallSession(booking: Booking): CallSession {
         kind: 'new_requirement',
         at: t(31, 12),
         lineId: 'ln_10',
-        quote: 'Someone who knows the Polish market.',
+        quote: 'A hiker who doesn’t use Shokz.',
         documents: [],
         questionIndex: null,
         matches: 4,
@@ -157,7 +157,7 @@ export function buildCallSession(booking: Booking): CallSession {
       },
     ],
     questionTopics: topics,
-    coveredBefore: find('Market size'),
+    coveredBefore: [...find('Activity record'), ...find('Longest outing')],
     notes: [],
     endedAt: null,
     duration: null,

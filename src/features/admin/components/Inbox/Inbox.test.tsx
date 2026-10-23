@@ -9,17 +9,17 @@ import { Inbox } from './Inbox';
 
 describe('Inbox (F12, screen 02)', () => {
   it('lists client emails and opens the selected one', async () => {
-    const { container } = renderWithProviders(<Inbox selectedId="req_helix_ev" />, {
+    const { container } = renderWithProviders(<Inbox selectedId="req_ridgeline_audio" />, {
       persona: 'ops',
     });
     const list = await screen.findByRole('list', { name: 'Requests' });
     expect(within(list).getAllByRole('listitem')).toHaveLength(6);
-    expect(within(list).getByRole('link', { name: /Sarah Lin/ })).toHaveAttribute(
+    expect(within(list).getByRole('link', { name: /Jenna Cho/ })).toHaveAttribute(
       'aria-current',
       'true',
     );
 
-    const pane = screen.getByRole('article', { name: /EV battery recycling/ });
+    const pane = screen.getByRole('article', { name: /sports headphones/i });
     expect(within(pane).getByRole('link', { name: 'Open project file' })).toHaveAttribute(
       'href',
       '/admin/projects/PRJ-1042',
@@ -84,9 +84,9 @@ describe('Inbox (F12, screen 02)', () => {
   });
 
   it('shows the attachment as a card and previews it', async () => {
-    renderWithProviders(<Inbox selectedId="req_helix_ev" />, { persona: 'ops' });
+    renderWithProviders(<Inbox selectedId="req_ridgeline_audio" />, { persona: 'ops' });
     expect(await screen.findByRole('heading', { name: 'One attachment' })).toBeInTheDocument();
-    await userEvent.click(await screen.findByRole('button', { name: /Preview Project_Brief/ }));
+    await userEvent.click(await screen.findByRole('button', { name: /Preview Sports_Headphones/ }));
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByText('Page 1 of 14')).toBeInTheDocument();
   });

@@ -7,17 +7,9 @@ import {
   type ShortlistSize,
   type ShortlistedExpert,
 } from '@/features/admin';
+import { PRJ_1042_TOPICS } from '../../fixtures/admin/prj1042';
 
-const QUESTION_LABELS = [
-  'Market size',
-  'Black mass supply',
-  'Recovery rates',
-  'EU regulation',
-  'Leading players',
-  'OEM pricing',
-  'Operational risks',
-  'Asian entrants',
-] as const;
+const QUESTION_LABELS = PRJ_1042_TOPICS;
 
 function coverageFor(
   project: Project,

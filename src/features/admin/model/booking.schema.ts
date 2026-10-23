@@ -19,7 +19,7 @@ export const bookingPickSchema = bookingExpertSchema.extend({
   slot: timeSlotSchema,
   /** Indexes of the client's questions this expert covers. */
   covers: z.array(z.number().int().nonnegative()),
-  /** A request the client added for this call, e.g. "contract pricing in Poland". */
+  /** A request the client added for this call, e.g. "their night-hiking setup". */
   note: z.string().nullable(),
   /** When the expert re-confirmed the client's time (screen 12). */
   confirmedAt: z.string().nullable(),

@@ -21,7 +21,7 @@ export const matchedExpertSchema = z.object({
   /** How many of the project's client questions this expert can cover. */
   questionsCovered: z.number().int().nonnegative(),
   compliance: z.enum(['cleared', 'pending']),
-  /** Placeholder rate string, e.g. "€450". Null until set. */
+  /** Placeholder rate string, e.g. "$150". Null until set. */
   rateHint: z.string().nullable(),
 });
 export type MatchedExpert = z.infer<typeof matchedExpertSchema>;

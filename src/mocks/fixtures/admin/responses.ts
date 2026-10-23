@@ -11,43 +11,44 @@ import type {
 // experts don't read identically. Realistic content for usability tests (CLAUDE.md rule 11).
 const ANSWER_BANK: string[][] = [
   [
-    'Around 50–60 kt of EV packs reach end of life in the EU today; I’d expect 4–5× that by 2030.',
-    'Today it’s mostly production scrap, not end-of-life packs. Real volume growth starts around 2028.',
+    'Three overnight hikes since May, the longest on the PCT in August. I’ve attached my Gaia GPS route map.',
+    'Eleven trail runs since spring, plus a 50K in September. Race certificate and Strava map attached.',
   ],
   [
-    'Mostly gigafactory scrap. A few large traders control the flow into Germany and Poland.',
-    'Black mass comes from scrap first, packs second. Three or four aggregators set the price.',
+    'Six days and five nights on the PCT through Oregon, mostly forest trail with some lava rock.',
+    'A 52 km mountain race with about 2,400 m of climbing. Almost all my running is single-track.',
   ],
   [
-    'Hydro gets 90%+ recovery on Li, Ni, Co but needs scale to be cost-competitive.',
-    'Pyro is cheaper to run but loses lithium; hydro wins once you pass ~20 kt a year.',
+    'Shokz OpenRun Pro. I switched from AirPods after losing one on a descent.',
+    'Powerbeats Pro, so not Shokz. They stay in, but I take one out near other people.',
   ],
   [
-    'The recycled-content targets lock in demand from 2031; OEMs are already signing offtakes.',
-    'Targets help, but the real driver is OEMs wanting a traceable, local supply.',
+    'Podcasts on long climbs and music for the last hours of the day. Never at camp or near water crossings.',
+    'Music for tempo efforts, audiobooks on long easy runs. Usually three to five hours at a time.',
   ],
   [
-    'Two or three integrated players lead; most others are pre-processors selling black mass.',
-    'The leaders compete on recovery rate and on long feedstock contracts, not on price.',
+    'Battery is the big one: three days with no outlet means I ration listening. Sweat makes the band slip too.',
+    'Fit under a cap and sunglasses. Sound gets thin in wind, and the buds get gross with sweat.',
   ],
   [
-    'OEMs mostly pay per tonne with a metals-linked rebate; contracts run three to five years.',
-    'Pricing is a gate fee plus a share of recovered metal value, renegotiated yearly.',
+    'A horse rider once had to shout twice before I heard her. Since then I keep the volume really low.',
+    'Other runners think I can’t hear them, so I get the “on your left” yelled at me. The arms also clash with my visor.',
   ],
   [
-    'Feedstock consistency and permitting timelines were the two things that slowed us most.',
-    'Scaling a plant is about permits and steady feed. The chemistry is the easy part.',
+    'Hiking solo I need to hear rockfall, rattlesnakes and the weather turning. Open-ear is non-negotiable.',
+    'On shared trails I need to hear bikes coming. Today I just run with one bud in.',
   ],
   [
-    'Asian players bring cheap capital and process know-how; expect joint ventures, not greenfield.',
-    'They’ll enter through partnerships with European OEMs rather than building alone.',
+    'I’d try an ear-clip if it stays put on rough ground. Battery life and weight matter most, then sound.',
+    'Ear-clips look comfortable with a cap. I’d rank fit and stability first, then sweat resistance and simple buttons.',
   ],
 ];
 
 const SUMMARIES: Record<AnswerQuality, string> = {
-  strong: 'Deep, specific answers on market size, recovery costs and scaling risks.',
-  good: 'Solid answers on supply and recovery; lighter on pricing and competitors.',
-  weak: 'Broad, general answers with few specifics from direct experience.',
+  strong:
+    'Clear proof of activity and detailed stories on pain points, awareness and the ear-clip.',
+  good: 'Qualifies on activity and headphones; lighter on conflicts and feature priorities.',
+  weak: 'Short, general answers and no proof of recent activity yet.',
 };
 
 /** The same expert always gets the same status and answers (deterministic for demos and tests). */

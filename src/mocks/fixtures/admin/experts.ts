@@ -1,28 +1,29 @@
 import type { MatchedExpert, MatchResult } from '@/features/admin';
 
-const COUNTRIES = ['DE', 'PL', 'SE', 'BE', 'FI', 'NL', 'FR', 'AT', 'DK', 'IE'] as const;
+// The brief asks for US participants only.
+const COUNTRIES = ['US'] as const;
 const ROLES = [
-  'Former VP Operations, EU battery recycler',
-  'Ex-Director, hydrometallurgy plant',
-  'Former Head of Black Mass Sourcing',
-  'Ex-CTO, lithium-ion recycling',
-  'Former Plant Manager, Nordic recycler',
-  'Ex-VP Strategy, battery materials',
-  'Former Regulatory Lead, EU Battery Regulation',
-  'Ex-Director Supply Chain, OEM recycling',
-  'Former GM, pyrometallurgy operations',
-  'Ex-Head of Commercial, recycling services',
+  'Thru-hiker, Pacific Crest Trail',
+  'Trail runner, 50 km ultras',
+  'Backpacker, Appalachian Trail sections',
+  'Trail runner, mountain races',
+  'Thru-hiker, Colorado Trail',
+  'Trail runner and backpacker',
+  'Backpacker, John Muir Trail',
+  'Trail runner, desert ultras',
+  'Thru-hiker, Continental Divide Trail',
+  'Trail runner, Pacific Northwest',
 ] as const;
 
 const WHY = [
-  'Ran 2 hydrometallurgy plants in Germany',
-  'Led black mass procurement across DE and PL',
-  'Briefed investors on EU Battery Regulation targets',
-  'Negotiated OEM take-or-pay recycling contracts',
-  'Scaled a plant from pilot to 8 kt/year',
-  'Left target company 2 years ago — clear of conflicts',
-  'Strong on feedstock economics and Asian entrants',
-  'Rated 4.8 on past Xpert Network calls',
+  'Wears Shokz OpenRun on every long run',
+  'Finished a 5-night section hike in September',
+  'Shared a GPS route map and race certificate',
+  'Runs 40 km+ on trails most weekends',
+  'Switched from earbuds to bone conduction last year',
+  'Hikes solo and wants to hear wildlife and weather',
+  'Was asked to remove earbuds on a shared trail',
+  'Rated 4.8 on past Xpert Network interviews',
 ] as const;
 
 /** Deterministic 0–1 from a string so the same expert always ranks the same. */
@@ -48,7 +49,7 @@ function whyFor(id: string): string[] {
 }
 
 /**
- * Builds the 146 matches for PRJ-1042. Expert #4821 is always first so the
+ * Builds the 146 matches for PRJ-1042 (US thru-hikers and trail runners). Expert #4821 is always first so the
  * expert-app side of the demo has a stable person to follow.
  */
 export function seedPrj1042Matches(now: Date): MatchResult {
@@ -56,21 +57,21 @@ export function seedPrj1042Matches(now: Date): MatchResult {
   const head: MatchedExpert = {
     id: 'exp_4821',
     label: 'Expert #4821',
-    role: 'Former VP Operations, EU battery recycler',
-    years: 18,
-    country: 'DE',
+    role: 'Thru-hiker, Pacific Crest Trail',
+    years: 9,
+    country: 'US',
     matchPercent: 94,
     lastEngagedAt: new Date(now.getTime() - 21 * 24 * 60 * 60 * 1000).toISOString(),
     pinned: false,
     excluded: false,
     whyPicked: [
-      'Ran 2 hydrometallurgy plants in Germany',
-      'Led black mass procurement across DE and PL',
-      'Left a peer recycler 18 months ago — clear of the target',
+      'Hiked 6 nights on the PCT in August, with route map',
+      'Wears Shokz OpenRun for podcasts on long climbs',
+      'Has strong views on hearing other hikers and wildlife',
     ],
     questionsCovered: 7,
     compliance: 'cleared',
-    rateHint: '€450',
+    rateHint: '$150',
   };
   experts.push(head);
 
@@ -83,7 +84,7 @@ export function seedPrj1042Matches(now: Date): MatchResult {
       id,
       label: `Expert #${num}`,
       role: pick(ROLES, id),
-      years: 8 + Math.floor(hash(`${id}-y`) * 20),
+      years: 2 + Math.floor(hash(`${id}-y`) * 14),
       country: pick(COUNTRIES, id),
       matchPercent,
       lastEngagedAt:
@@ -95,7 +96,7 @@ export function seedPrj1042Matches(now: Date): MatchResult {
       whyPicked: whyFor(id),
       questionsCovered: 2 + Math.floor(hash(`${id}-q`) * 7),
       compliance: hash(`${id}-c`) > 0.15 ? 'cleared' : 'pending',
-      rateHint: `€${300 + Math.floor(hash(`${id}-r`) * 250)}`,
+      rateHint: `$${100 + Math.floor(hash(`${id}-r`) * 8) * 10}`,
     });
   }
 
@@ -107,12 +108,12 @@ export function seedPrj1042Matches(now: Date): MatchResult {
     searchedCount: 18_240,
     durationMs: 2100,
     filters: [
-      'Battery recycling',
-      'Director+',
-      'EU',
-      '10+ yrs',
-      'Hydrometallurgy',
-      'Not at target',
+      'Thru-hikers',
+      'Trail runners',
+      'United States',
+      'Active in last 6 months',
+      'Wears headphones',
+      'Proof of activity',
     ],
     experts,
   };
