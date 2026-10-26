@@ -37,7 +37,7 @@ describe('admin mock API (F11–F12)', () => {
     logIn('usr_ops');
     const { body } = await call('/api/admin/summary');
     expect(body).toMatchObject({
-      newProjectEmails: 2,
+      newProjectEmails: 3,
       expertsPendingReview: 4,
       activeProjects: 2,
     });

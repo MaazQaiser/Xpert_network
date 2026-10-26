@@ -16,18 +16,24 @@
 .email {
   display: flex;
   flex-direction: column;
-  padding: $spacing-05;
   border: 1px solid $border-subtle-01;
   animation: email-in $duration-moderate-01 motion(entrance, productive) both;
   background: $layer-01;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+// The email itself, under the canvas bar.
+.emailBody {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-05;
   gap: $spacing-05;
 
   @include breakpoint(md) {
     padding: $spacing-06;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
   }
 }
 
@@ -185,21 +191,13 @@
 // ——— The send step ————————————————————————————————————————————————————————————
 .foot {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: $spacing-04;
+  justify-content: flex-end;
 }
 
-.edit {
-  @include type-style('body-compact-01');
-
-  color: $link-primary;
-
-  &:focus-visible {
-    outline: 2px solid $focus;
-    outline-offset: 2px;
-  }
+// While editing, each expert can be taken out of the email.
+.remove {
+  flex: none;
+  margin-inline-start: auto;
 }
 
 .sent {

@@ -17,7 +17,7 @@ describe('AdminHome (F11, screen 01)', () => {
     expect(
       await screen.findByText(
         paragraph(
-          /We have 2 new project emails, 4 expert reviews are ready to review, and 2 active projects/,
+          /We have 3 new project emails, 4 expert reviews are ready to review, and 2 active projects/,
         ),
       ),
     ).toBeInTheDocument();
@@ -43,7 +43,7 @@ describe('AdminHome (F11, screen 01)', () => {
 
   it('new projects card: pick an email, get its brief on a canvas, open the project file', async () => {
     renderWithProviders(<AdminHome />, { persona: 'ops' });
-    await userEvent.click(await screen.findByRole('link', { name: /New project emails: 2/ }));
+    await userEvent.click(await screen.findByRole('link', { name: /New project emails: 3/ }));
     expect(
       await screen.findByText(paragraph(/Here are the 3 new projects that came in today/)),
     ).toBeInTheDocument();
@@ -82,7 +82,7 @@ describe('AdminHome (F11, screen 01)', () => {
 
   it('finds experts from the brief, sends several the questions, then extends the search', async () => {
     renderWithProviders(<AdminHome />, { persona: 'ops' });
-    await userEvent.click(await screen.findByRole('link', { name: /New project emails: 2/ }));
+    await userEvent.click(await screen.findByRole('link', { name: /New project emails: 3/ }));
     await userEvent.click(await screen.findByRole('button', { name: /Show brief: Omar Siddiqui/ }));
     expect(await screen.findByRole('article', { name: /UK MRO carve-out/ })).toBeInTheDocument();
     // Under the brief the AI asks to create the project file; the AI confirms and offers the next step.
@@ -198,6 +198,16 @@ describe('AdminHome (F11, screen 01)', () => {
     );
     expect(within(email).getAllByRole('listitem').length).toBeGreaterThanOrEqual(2);
     expect(screen.getByRole('heading', { name: 'Send 2 experts to Omar' })).toBeInTheDocument();
+    // Edit it right on the card, like the brief: change the subject, save, then send.
+    await userEvent.click(within(email).getByRole('button', { name: 'Edit email' }));
+    const subject = within(email).getByRole('textbox', { name: 'Subject' });
+    expect(screen.getByRole('button', { name: 'Send to Omar' })).toBeDisabled();
+    await userEvent.clear(subject);
+    await userEvent.type(subject, 'Two experts for your MRO carve-out');
+    await userEvent.click(within(email).getByRole('button', { name: 'Save' }));
+    expect(
+      await within(email).findByText('Two experts for your MRO carve-out'),
+    ).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Send to Omar' }));
     expect(
       await screen.findByText(
@@ -209,7 +219,7 @@ describe('AdminHome (F11, screen 01)', () => {
 
   it('new project emails card: lists drafted projects from today’s mail', async () => {
     renderWithProviders(<AdminHome />, { persona: 'ops' });
-    await userEvent.click(await screen.findByRole('link', { name: /New project emails: 2/ }));
+    await userEvent.click(await screen.findByRole('link', { name: /New project emails: 3/ }));
     const emails = await screen.findByRole('list', { name: 'Emails' });
     expect(within(emails).getAllByRole('listitem').length).toBeGreaterThanOrEqual(2);
     expect(screen.getByRole('button', { name: /Show brief: Omar Siddiqui/ })).toBeInTheDocument();

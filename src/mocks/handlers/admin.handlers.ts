@@ -572,12 +572,9 @@ export const adminHandlers = [
     const summary: HomeSummary = {
       newProjectEmails: empty
         ? 0
-        : Object.values(adminInbox).filter(
-            (r) =>
-              isToday(r.receivedAt, now) &&
-              r.status === 'brief_ready' &&
-              // Featured mail #1 (sports headphones) is opened from the tip; count the others.
-              r.id !== 'req_ridgeline_audio',
+        : // Every brief that came in today, so the card matches the projects the chat lists.
+          Object.values(adminInbox).filter(
+            (r) => isToday(r.receivedAt, now) && r.status === 'brief_ready',
           ).length,
       expertsPendingReview: projects.reduce((sum, p) => sum + p.pendingExpertReviews, 0),
       activeProjects: projects.filter(
