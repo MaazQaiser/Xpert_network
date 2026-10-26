@@ -4,6 +4,16 @@ import { z } from 'zod';
 export const shortlistSizeSchema = z.union([z.literal(10), z.literal(20), z.literal(30)]);
 export type ShortlistSize = z.infer<typeof shortlistSizeSchema>;
 
+/** Where the AI found an expert: our own network, LinkedIn, or a partner expert-network API. */
+export const expertOriginSchema = z.enum(['network', 'linkedin', 'api']);
+export type ExpertOrigin = z.infer<typeof expertOriginSchema>;
+
+export const EXPERT_ORIGIN_LABELS: Record<ExpertOrigin, string> = {
+  network: 'Xpert Network',
+  linkedin: 'LinkedIn',
+  api: 'Expert network API',
+};
+
 export const matchedExpertSchema = z.object({
   id: z.string(),
   /** Display name, e.g. "Expert #4821". Anonymised until booked. */
@@ -23,6 +33,13 @@ export const matchedExpertSchema = z.object({
   compliance: z.enum(['cleared', 'pending']),
   /** Placeholder rate string, e.g. "$150". Null until set. */
   rateHint: z.string().nullable(),
+  /** The expert's real name and portrait, for the PM only (clients see "Expert A"). */
+  name: z.string().optional(),
+  photoUrl: z.string().optional(),
+  /** Their LinkedIn profile, or null when they have none. */
+  linkedinUrl: z.string().url().nullable().optional(),
+  /** Where the AI found them. */
+  source: expertOriginSchema.optional(),
 });
 export type MatchedExpert = z.infer<typeof matchedExpertSchema>;
 

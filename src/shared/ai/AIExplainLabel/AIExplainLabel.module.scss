@@ -6,6 +6,9 @@
 // Slow on purpose: a living mark, not a distraction.
 $pt-mascot-bob: 4s;
 
+// One look-left, look-right, lean-in cycle while the AI researches.
+$pt-mascot-research: 2.4s;
+
 // ——— Mascot mark ——————————————————————————————————————————————————————————————
 // The assistant mascot marks AI content: a gentle bob, still for reduced motion. When edited,
 // a "Revert to AI draft" ghost button sits beside it.
@@ -29,5 +32,76 @@ $pt-mascot-bob: 4s;
 @keyframes mascot-bob {
   50% {
     transform: translateY(calc(-1 * #{$spacing-01}));
+  }
+}
+
+// ——— Researching —————————————————————————————————————————————————————————————————
+// While the AI searches or thinks, the mascot acts it out: it looks left, looks right, then
+// leans in as if it spotted something, sweeping a small magnifier with it. Reduced motion:
+// the mascot stands still holding the magnifier.
+.body {
+  position: relative;
+  display: inline-flex;
+}
+
+.mascotMark[data-working] .mascot {
+  animation: mascot-research $pt-mascot-research ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+.lens {
+  position: absolute;
+  fill: $interactive;
+  inset-block-end: 0;
+  inset-inline-end: calc(-1 * #{$spacing-02});
+  animation: lens-sweep $pt-mascot-research ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes mascot-research {
+  0%,
+  100% {
+    transform: rotate(0) translateX(0);
+  }
+
+  20%,
+  30% {
+    transform: rotate(-8deg) translateX(calc(-1 * #{$spacing-01}));
+  }
+
+  55%,
+  65% {
+    transform: rotate(8deg) translateX($spacing-01);
+  }
+
+  80% {
+    transform: rotate(0) translateY(calc(-1 * #{$spacing-02})) scale(1.06);
+  }
+}
+
+@keyframes lens-sweep {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0);
+  }
+
+  20%,
+  30% {
+    transform: translate(calc(-1 * #{$spacing-04}), calc(-1 * #{$spacing-01})) rotate(-20deg);
+  }
+
+  55%,
+  65% {
+    transform: translate(0, calc(-1 * #{$spacing-02})) rotate(15deg);
+  }
+
+  80% {
+    transform: translate(calc(-1 * #{$spacing-01}), calc(-1 * #{$spacing-03})) scale(1.1);
   }
 }

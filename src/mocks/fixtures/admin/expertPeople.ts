@@ -34,6 +34,8 @@ function slug(name: string): string {
 /** The same expert always gets the same person; Expert #4821 is always Jake Morrison. */
 export function expertPerson(expertId: string): { name: string; photoUrl: string } {
   const num = Number(expertId.replace(/\D/g, '')) || 0;
-  const name = expertId === 'exp_4821' ? PEOPLE[0] : (PEOPLE[num % PEOPLE.length] ?? PEOPLE[0]);
+  // PEOPLE[0] belongs to Expert #4821 alone, so the lead expert's name never shows up twice.
+  const index = num % PEOPLE.length || 1 + (num % (PEOPLE.length - 1));
+  const name = expertId === 'exp_4821' ? PEOPLE[0] : (PEOPLE[index] ?? PEOPLE[1]);
   return { name, photoUrl: `/images/avatars/experts/${slug(name)}.jpg` };
 }

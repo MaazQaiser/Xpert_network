@@ -3,15 +3,27 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button, InlineNotification, SkeletonText, Tag, TextArea } from '@carbon/react';
-import { ArrowRight, Attachment, Document, Edit, WarningAltFilled } from '@carbon/icons-react';
+import { Button, IconButton, InlineNotification, SkeletonText, Tag, TextArea } from '@carbon/react';
+import {
+  ArrowRight,
+  Checkmark,
+  CheckmarkFilled,
+  Document,
+  Edit,
+  Launch,
+  Search,
+  WarningAltFilled,
+} from '@carbon/icons-react';
+import { useSession } from '@/features/auth';
 import { AIExplainLabel } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
-import { useProject, useUpdateProject } from '../../api/queries';
+import { useApproveProject, useProject, useUpdateProject } from '../../api/queries';
 import type { ChatBlock, ChatChip, ChatEmail } from '../../model/home.schema';
 import { projectPatchSchema, PROJECT_STATUS_LABELS } from '../../model/project.schema';
 import { initials, receivedLabel, senderPhoto } from '../inboxDisplay';
+import { ExpertSearch } from './ExpertSearch';
+import { ScreeningAnswers } from './ScreeningAnswers';
 import styles from './ChatBlocks.module.scss';
 
 type AskFn = (prompt: string) => void;
@@ -21,10 +33,13 @@ export function ChatBlocks({
   blocks,
   onAsk,
   isBusy,
+  onWorking,
 }: {
   blocks: ChatBlock[];
   onAsk: AskFn;
   isBusy: boolean;
+  /** A block the AI is still working on (the expert search) reports it here. */
+  onWorking?: (working: boolean) => void;
 }) {
   return (
     <>
@@ -35,6 +50,48 @@ export function ChatBlocks({
             return <EmailPicks key={key} items={block.items} onAsk={onAsk} isBusy={isBusy} />;
           case 'brief':
             return <BriefCanvas key={key} projectId={block.projectId} />;
+          case 'expertSearch':
+            return (
+              <ExpertSearch
+                key={key}
+                projectId={block.projectId}
+                onWorking={onWorking}
+                onAsk={onAsk}
+              />
+            );
+          case 'screeningAnswers':
+            return <ScreeningAnswers key={key} projectId={block.projectId} onWorking={onWorking} />;
+          case 'createProject':
+            return (
+              <CreateProjectAsk
+                key={key}
+                projectId={block.projectId}
+                onAsk={onAsk}
+                isBusy={isBusy}
+              />
+            );
+          case 'requirements':
+            return (
+              <RequirementsReview
+                key={key}
+                projectId={block.projectId}
+                onAsk={onAsk}
+                isBusy={isBusy}
+              />
+            );
+          case 'action':
+            return (
+              <div key={key} className={styles.nextStep}>
+                <Button
+                  size="md"
+                  renderIcon={Search}
+                  disabled={isBusy}
+                  onClick={() => onAsk(block.prompt)}
+                >
+                  {block.label}
+                </Button>
+              </div>
+            );
           case 'emailSummary':
             return (
               <EmailSummary
@@ -103,7 +160,9 @@ function SenderAvatar({ name, email }: { name: string; email: string }) {
   );
 }
 
-/** Emails to pick from: who, when, the subject, why the AI picked it, and one action. */
+/**
+ * Emails to pick from, as plain lines: who sent it, the subject under it, and one small action.
+ */
 function EmailPicks({
   items,
   onAsk,
@@ -114,34 +173,18 @@ function EmailPicks({
   isBusy: boolean;
 }) {
   return (
-    <ul className={styles.picks} aria-label="Emails">
+    <ul className={styles.notes} aria-label="Emails">
       {items.map((email) => (
-        <li key={email.requestId} className={styles.pick}>
+        <li key={email.requestId} className={styles.note}>
           <SenderAvatar name={email.from.name} email={email.from.email} />
-          <div className={styles.pickBody}>
-            <p className={styles.pickTop}>
-              <span className={styles.pickFrom}>
-                {email.from.name}
-                <span className={styles.pickCompany}> · {email.company}</span>
-              </span>
-              <time dateTime={email.receivedAt} className={styles.pickTime}>
-                {receivedLabel(email.receivedAt)}
-              </time>
-            </p>
-            <p className={styles.pickSubject}>{email.subject}</p>
-            <p className={styles.pickMeta}>
-              <span className={styles.reason}>{email.reason}</span>
-              {email.attachment ? (
-                <span className={styles.file}>
-                  <Attachment aria-hidden={true} /> {email.attachment}
-                </span>
-              ) : null}
-            </p>
+          <div className={styles.noteBody}>
+            <span className={styles.noteFrom}>{email.from.name}</span>
+            <p className={styles.noteSubject}>{email.subject}</p>
           </div>
           <Button
             kind="tertiary"
             size="sm"
-            className={styles.pickAction}
+            className={styles.noteAction}
             disabled={isBusy}
             onClick={() => onAsk(email.prompt)}
             aria-label={`${email.action}: ${email.from.name}, ${email.subject}`}
@@ -155,8 +198,8 @@ function EmailPicks({
 }
 
 /**
- * The project brief as a document canvas in the chat. Read it, edit it in place (it saves to the
- * project file, the same one screen 03 shows), then open the full project file.
+ * The project brief as a document canvas in the chat. Read it and edit it in place (it saves to
+ * the project file, the same one screen 03 shows); the assistant asks to create it just below.
  */
 function BriefCanvas({ projectId }: { projectId: string }) {
   const project = useProject(projectId);
@@ -256,9 +299,26 @@ function BriefCanvas({ projectId }: { projectId: string }) {
               </Button>
             </>
           ) : (
-            <Button kind="tertiary" size="sm" renderIcon={Edit} onClick={startEditing}>
-              Edit
-            </Button>
+            <>
+              <IconButton
+                kind="ghost"
+                size="sm"
+                label="Edit brief"
+                align="bottom"
+                onClick={startEditing}
+              >
+                <Edit />
+              </IconButton>
+              <IconButton
+                kind="ghost"
+                size="sm"
+                label="Open project file"
+                align="bottom-right"
+                href={routes.admin.projectStep(p.id, 'brief')}
+              >
+                <Launch />
+              </IconButton>
+            </>
           )}
         </span>
       </header>
@@ -377,16 +437,129 @@ function BriefCanvas({ projectId }: { projectId: string }) {
           </section>
         ) : null}
       </div>
+    </article>
+  );
+}
 
-      <footer className={styles.canvasFooter}>
-        <p>Looks right? Open the project file to review it and start finding experts.</p>
+/**
+ * Under the brief, the assistant asks before acting: has the PM reviewed it, and can it create the
+ * project file? The button is the yes. Once created, it says so instead.
+ */
+function CreateProjectAsk({
+  projectId,
+  onAsk,
+  isBusy,
+}: {
+  projectId: string;
+  onAsk: AskFn;
+  isBusy: boolean;
+}) {
+  const project = useProject(projectId);
+  const approve = useApproveProject(projectId);
+  const session = useSession();
+  const firstName = session.data?.user?.name?.split(' ')[0];
+  if (!project.data) return null;
+  const p = project.data;
+  const isDraft = p.status === 'draft' || p.status === 'needs_client_info';
+  if (!isDraft) {
+    return (
+      <p className={styles.created}>
+        <CheckmarkFilled aria-hidden={true} />
+        Project file created.
+      </p>
+    );
+  }
+  const open = p.confirmations.filter((c) => c.state === 'open');
+  return (
+    <div className={styles.createAsk}>
+      <p>
+        <strong>{firstName ? `${firstName}, have you` : 'Have you'} reviewed the brief?</strong> If
+        nothing needs editing, can I create the project file?
+        {open.length > 0
+          ? ` ${open.length === 1 ? '1 thing still needs' : `${open.length} things still need`} confirming; you can confirm ${open.length === 1 ? 'it' : 'them'} later.`
+          : ''}
+      </p>
+      <p className={styles.reqHint}>Anything missing? Use the edit pencil on the brief first.</p>
+      {approve.isError ? (
+        <p className={styles.footerError} role="alert">
+          {toUserMessage(approve.error)}
+        </p>
+      ) : null}
+      <div>
         <Button
-          as={Link}
-          href={routes.admin.projectStep(p.id, 'brief')}
           size="md"
-          renderIcon={ArrowRight}
+          renderIcon={Checkmark}
+          disabled={isBusy || approve.isPending}
+          onClick={() =>
+            approve.mutate(undefined, {
+              onSuccess: () => onAsk(`Yes, create the project file for ${p.id}`),
+            })
+          }
         >
-          Open project file
+          {approve.isPending ? 'Creating…' : 'Create project file'}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * What the AI will search on, laid out for one last look: the expert profile it matches against
+ * and how many screening questions go with it. It reads the live project file, so edits made in
+ * the brief above show here. Then one button starts the search.
+ */
+function RequirementsReview({
+  projectId,
+  onAsk,
+  isBusy,
+}: {
+  projectId: string;
+  onAsk: AskFn;
+  isBusy: boolean;
+}) {
+  const project = useProject(projectId);
+  if (project.isPending) return <SkeletonText paragraph lineCount={4} />;
+  if (!project.data) {
+    return (
+      <InlineNotification
+        kind="error"
+        lowContrast
+        hideCloseButton
+        title="The requirements didn’t load."
+        subtitle={toUserMessage(project.error)}
+      />
+    );
+  }
+  const p = project.data;
+  return (
+    <article className={styles.card} aria-label={`Requirements for ${p.id}`}>
+      <header className={styles.reqHead}>
+        <p className={styles.reqIntro}>We have these requirements for the experts:</p>
+        <span className={styles.reqMeta}>
+          {p.requirements.length} expert requirements · {p.questions.length} screening questions
+        </span>
+      </header>
+      <ol className={styles.docNumbered}>
+        {p.requirements.map((r) => (
+          <li key={r.id}>{r.text}</li>
+        ))}
+      </ol>
+      <footer className={styles.reqFoot}>
+        <div className={styles.footerText}>
+          <p>
+            <strong>Should I find experts who match them?</strong>
+          </p>
+          <p className={styles.reqHint}>
+            Something missing? Edit the brief above and this list updates.
+          </p>
+        </div>
+        <Button
+          size="md"
+          renderIcon={Search}
+          disabled={isBusy}
+          onClick={() => onAsk(`Yes, find experts for ${p.id}`)}
+        >
+          Find experts
         </Button>
       </footer>
     </article>

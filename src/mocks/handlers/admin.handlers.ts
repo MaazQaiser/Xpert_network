@@ -143,11 +143,30 @@ export const adminHandlers = [
       return errorResponse(400, 'invalid', 'Check the search settings and try again.');
     }
     const pool = getControls().emptyData ? [] : searchPool(project);
-    const { offset, limit } = parsed.data;
-    const experts = pool.slice(offset, offset + limit);
+    const { offset, limit, criteria, excludeIds } = parsed.data;
+    // An extended search skips everyone already shown and keeps to the minimum experience.
+    const shown = new Set(excludeIds ?? []);
+    const candidates = (
+      excludeIds ? pool.filter((e) => !shown.has(e.id)) : pool.slice(offset)
+    ).filter((e) => !criteria || e.years >= criteria.minYears);
+    // Extended searches look outside the network: each new expert comes from a chosen source,
+    // and LinkedIn finds always have a profile.
+    const experts = candidates.slice(0, limit).map((expert, index) => {
+      const source = criteria ? criteria.sources[index % criteria.sources.length] : undefined;
+      if (!source) return expert;
+      const slug = (expert.name ?? expert.label).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      return {
+        ...expert,
+        source,
+        linkedinUrl:
+          source === 'linkedin'
+            ? (expert.linkedinUrl ?? `https://www.linkedin.com/in/${slug}`)
+            : expert.linkedinUrl,
+      };
+    });
     return HttpResponse.json({
       experts,
-      remaining: Math.max(0, pool.length - offset - experts.length),
+      remaining: Math.max(0, candidates.length - experts.length),
       screeningSent: db.get().adminScreening[project.id] ?? [],
     });
   }),
@@ -927,7 +946,9 @@ export const adminHandlers = [
     if ('response' in auth) return auth.response;
     const parsed = assistantInputSchema.safeParse(await request.json());
     if (!parsed.success) return errorResponse(400, 'invalid', 'Type a question first.');
-    return HttpResponse.json(assistantReply(parsed.data.text, db.get()));
+    return HttpResponse.json(
+      assistantReply(parsed.data.text, db.get(), new Date(), auth.user.name.split(' ')[0]),
+    );
   }),
 ];
 

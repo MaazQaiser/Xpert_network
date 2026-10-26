@@ -1,0 +1,32 @@
+@use '@carbon/react/scss/motion' as *;
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+// Names and counts the AI wants you to notice: semibold, same size as the sentence.
+.strong {
+  @include font-weight('semibold');
+
+  color: $text-primary;
+}
+
+// The count that needs the PM, in the brand blue.
+.key {
+  color: $link-primary;
+}
+
+// Streaming: each new word or mark comes into focus, from soft and clear to sharp.
+.fresh {
+  animation: word-in $duration-moderate-01 motion(entrance, productive) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes word-in {
+  from {
+    filter: blur($spacing-01);
+    opacity: 0;
+  }
+}

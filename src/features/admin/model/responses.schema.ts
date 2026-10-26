@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { expertOriginSchema } from './match.schema';
 
 /** Where an expert is with the screening questions (screen 08). */
 export const responseStatusSchema = z.enum(['answered', 'in_progress', 'not_opened', 'declined']);
@@ -33,6 +34,13 @@ export const expertResponseSchema = z.object({
   expertId: z.string(),
   label: z.string(),
   role: z.string(),
+  /** Who they are, for the PM only (clients see "Expert A"). */
+  name: z.string().optional(),
+  years: z.number().int().nonnegative().optional(),
+  country: z.string().min(2).max(2).optional(),
+  linkedinUrl: z.string().url().nullable().optional(),
+  /** Where the AI found them. */
+  source: expertOriginSchema.optional(),
   status: responseStatusSchema,
   answeredCount: z.number().int().nonnegative(),
   quality: answerQualitySchema.nullable(),

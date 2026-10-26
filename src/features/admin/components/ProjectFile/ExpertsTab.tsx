@@ -84,7 +84,11 @@ export function ExpertsTab({ project, onFound, onNotice }: ExpertsTabProps) {
   const run = (limit: number, criteria?: ExtendResearch) => {
     setPhase('searching');
     search.mutate(
-      { offset: experts.length, limit, ...(criteria ? { criteria } : {}) },
+      {
+        offset: experts.length,
+        limit,
+        ...(criteria ? { criteria, excludeIds: experts.map((e) => e.id) } : {}),
+      },
       {
         onSuccess: (result) => {
           setExperts((current) => [...current, ...result.experts]);

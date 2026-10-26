@@ -1,0 +1,117 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/motion' as *;
+
+// Extend research as a question card: the question, where you are, one step's fields, and the
+// way on. Same flat layer as the other chat cards.
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-05;
+}
+
+.question {
+  @include type-style('heading-compact-02');
+
+  padding-block-start: $spacing-02;
+
+  // Focus lands here only to announce the step; it isn't a control, so no ring.
+  &:focus {
+    outline: none;
+  }
+}
+
+.headSide {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: $spacing-02;
+}
+
+.page {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+  white-space: nowrap;
+}
+
+// Each step eases in when it appears (also when you come back to it).
+.step {
+  display: flex;
+  flex-direction: column;
+  animation: step-in $duration-moderate-02 motion(entrance, productive) both;
+  gap: $spacing-06;
+
+  &[hidden] {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateX($spacing-05);
+  }
+}
+
+.grid {
+  display: grid;
+  gap: $spacing-05;
+  grid-template-columns: 1fr;
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+// The preview: each answer on its own line with a way back to change it.
+.preview {
+  display: flex;
+  flex-direction: column;
+
+  > div {
+    display: grid;
+    align-items: start;
+    padding-block: $spacing-03;
+    gap: $spacing-02 $spacing-05;
+    grid-template-columns: 6rem minmax(0, 1fr) auto;
+  }
+
+  > div + div {
+    border-block-start: 1px solid $border-subtle-01;
+  }
+
+  // Text starts level with the middle of the 32px icon button beside it.
+  dt {
+    @include type-style('label-01');
+
+    color: $text-secondary;
+    padding-block-start: $spacing-03;
+  }
+
+  dd {
+    @include type-style('body-compact-01');
+
+    padding-block-start: $spacing-03;
+  }
+}
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: $spacing-03;
+}

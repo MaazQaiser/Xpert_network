@@ -1,4 +1,5 @@
 import type { MatchedExpert, MatchResult } from '@/features/admin';
+import { expertPerson } from './expertPeople';
 import type { ExpertStory } from './stories';
 
 /** Deterministic 0–1 from a string so the same expert always ranks the same. */
@@ -29,6 +30,17 @@ function whyFor(why: readonly string[], id: string): string[] {
   return a === b ? [a, pick(why, `${id}-c`)] : [a, b];
 }
 
+/** Name, portrait and LinkedIn for the PM; most experts in the network have a profile. */
+function identity(id: string, num: number) {
+  const person = expertPerson(id);
+  const slug = person.name.toLowerCase().replace(/\s+/g, '-');
+  return {
+    ...person,
+    linkedinUrl: hash(`${id}-li`) > 0.25 ? `https://www.linkedin.com/in/${slug}-${num}` : null,
+    source: 'network' as const,
+  };
+}
+
 /**
  * Builds a project's matches from its story. The story's head expert is always first so the
  * demo has a stable person to follow (Expert #4821 for PRJ-1042, which the expert app uses too).
@@ -50,6 +62,7 @@ export function seedMatches(story: ExpertStory, now: Date): MatchResult {
     questionsCovered: Math.max(1, story.topics.length - 1),
     compliance: 'cleared',
     rateHint: head.rateHint,
+    ...identity(`exp_${head.num}`, head.num),
   });
 
   for (let n = 1; n < story.matchCount; n += 1) {
@@ -74,6 +87,7 @@ export function seedMatches(story: ExpertStory, now: Date): MatchResult {
       questionsCovered: Math.min(story.topics.length, 2 + Math.floor(hash(`${id}-q`) * 7)),
       compliance: hash(`${id}-c`) > 0.15 ? 'cleared' : 'pending',
       rateHint: story.rate(hash(`${id}-r`)),
+      ...identity(id, num),
     });
   }
 

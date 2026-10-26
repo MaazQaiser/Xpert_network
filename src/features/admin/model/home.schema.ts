@@ -38,6 +38,16 @@ export const chatBlockSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('emails'), items: z.array(chatEmailSchema) }),
   /** The project brief as an editable document canvas. */
   z.object({ kind: z.literal('brief'), projectId: z.string() }),
+  /** The AI searching the network for a project, then its top-ranked experts to approach. */
+  z.object({ kind: z.literal('expertSearch'), projectId: z.string() }),
+  /** Who answered a project's screening questions, how well, and their answers to read. */
+  z.object({ kind: z.literal('screeningAnswers'), projectId: z.string() }),
+  /** The AI asking to create the project file from the brief above, with the button to say yes. */
+  z.object({ kind: z.literal('createProject'), projectId: z.string() }),
+  /** The requirements the AI will search on, for the PM to review before finding experts. */
+  z.object({ kind: z.literal('requirements'), projectId: z.string() }),
+  /** The one next step the assistant proposes, as a primary button that asks it to go on. */
+  z.object({ kind: z.literal('action'), label: z.string(), prompt: z.string() }),
   /** One email, summarised: what they asked, what came with it, what's missing. */
   z.object({
     kind: z.literal('emailSummary'),

@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button, ClickableTile, InlineLoading, SkeletonPlaceholder } from '@carbon/react';
+import { Button, ClickableTile, SkeletonPlaceholder } from '@carbon/react';
 import { ArrowUpRight } from '@carbon/icons-react';
 import { useSession } from '@/features/auth';
 import { FloatingComposer } from '@/features/goal-chat';
-import { AIExplainLabel } from '@/shared/ai';
+import { AIExplainLabel, EmphasisText } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
 import { ErrorState } from '@/shared/ui';
@@ -19,6 +19,7 @@ import {
   type HomeSummary,
 } from '../../model/home.schema';
 import { ChatBlocks, ChatChips } from './ChatBlocks';
+import { StreamedAnswer } from './StreamedAnswer';
 import styles from './AdminHome.module.scss';
 
 function partOfDay(now: Date = new Date()): string {
@@ -28,12 +29,14 @@ function partOfDay(now: Date = new Date()): string {
   return 'evening';
 }
 
+/** The greeting's one line, with the counts as pills. */
 function briefLede(summary: HomeSummary): string {
   const { newProjectEmails, expertsPendingReview, activeProjects } = summary;
   const emailWord = newProjectEmails === 1 ? 'email' : 'emails';
-  const reviewWord = expertsPendingReview === 1 ? 'review is' : 'reviews are';
-  const active = String(activeProjects).padStart(2, '0');
-  return `We have ${newProjectEmails} new project ${emailWord}, ${expertsPendingReview} expert ${reviewWord} ready to review, and ${active} active projects.`;
+  const reviews = expertsPendingReview === 1 ? 'review]] is' : 'reviews]] are';
+  const projectWord = activeProjects === 1 ? 'project' : 'projects';
+  // The expert reviews are what's waiting on the PM, so that count is the blue one.
+  return `We have [[${newProjectEmails} new project ${emailWord}]], [[!${expertsPendingReview} expert ${reviews} ready to review, and [[${activeProjects} active ${projectWord}]].`;
 }
 
 type Turn = { id: string; question: string; answer: AssistantReply | null; error: unknown };
@@ -43,6 +46,21 @@ type MascotMood = 'idle' | 'thinking' | 'happy' | 'oops';
 
 // How long a reaction plays before the mascot settles back to idle (matches the CSS).
 const REACTION_MS = 1200;
+const IS_TEST = process.env.NODE_ENV === 'test';
+// The shortest the assistant "thinks" before answering; none in tests.
+const THINK_MS = IS_TEST ? 0 : 1400;
+// The glide that brings a new question to the top, and where it stops (under the header).
+const SCROLL_MS = 700;
+const SCROLL_GAP_PX = 64;
+
+/** Reduced motion, tests and background tabs skip the choreography and act at once. */
+function actsAtOnce(): boolean {
+  return (
+    IS_TEST ||
+    document.hidden ||
+    Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+  );
+}
 
 type SummaryCardProps = {
   href: string;
@@ -146,6 +164,12 @@ export function AdminHome() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const turnCount = useRef(0);
   const [reaction, setReaction] = useState<'happy' | 'oops' | null>(null);
+  // Answers whose AI is still working (the expert search), so their mascot shows it.
+  const [working, setWorking] = useState<Record<string, boolean>>({});
+  const setTurnWorking = (id: string, isWorking: boolean) =>
+    setWorking((current) =>
+      current[id] === isWorking ? current : { ...current, [id]: isWorking },
+    );
   const name = session.data?.user?.name?.split(' ')[0];
 
   // A reaction plays once, then the mascot settles back to idle.
@@ -157,21 +181,45 @@ export function AdminHome() {
 
   const mood: MascotMood = ask.isPending || summary.isPending ? 'thinking' : (reaction ?? 'idle');
 
-  // Keep the newest question and its answer in view as the conversation grows.
+  // A new question glides to the top of the view (like ChatGPT / Claude), pushing earlier turns
+  // up; its answer then fills in below. Only on a new question, so reading isn't interrupted.
   const latest = useRef<HTMLLIElement>(null);
-  const lastTurn = turns.at(-1);
   useEffect(() => {
-    latest.current?.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
-  }, [turns.length, lastTurn?.answer]);
+    const element = latest.current;
+    if (!element || IS_TEST) return;
+    const from = window.scrollY;
+    const to = element.getBoundingClientRect().top + from - SCROLL_GAP_PX;
+    if (actsAtOnce()) {
+      window.scrollTo(0, to);
+      return;
+    }
+    const startedAt = performance.now();
+    let frame = 0;
+    const glide = (now: number) => {
+      const progress = Math.min(1, (now - startedAt) / SCROLL_MS);
+      const eased = 1 - (1 - progress) ** 3; // ease-out: quick start, soft landing
+      window.scrollTo(0, from + (to - from) * eased);
+      if (progress < 1) frame = window.requestAnimationFrame(glide);
+    };
+    frame = window.requestAnimationFrame(glide);
+    return () => window.cancelAnimationFrame(frame);
+  }, [turns.length]);
+
+  const isBusy = ask.isPending;
 
   const send = (question: string) => {
     turnCount.current += 1;
     const id = `turn_${turnCount.current}`;
+    const askedAt = Date.now();
     setTurns((current) => [...current, { id, question, answer: null, error: null }]);
     ask.mutate(question, {
       onSuccess: (answer) => {
-        setTurns((current) => current.map((t) => (t.id === id ? { ...t, answer } : t)));
-        setReaction('happy');
+        // The assistant takes a breath before it answers, so the reply reads as considered.
+        const wait = Math.max(0, THINK_MS - (Date.now() - askedAt));
+        window.setTimeout(() => {
+          setTurns((current) => current.map((t) => (t.id === id ? { ...t, answer } : t)));
+          setReaction('happy');
+        }, wait);
       },
       onError: (error) => {
         setTurns((current) => current.map((t) => (t.id === id ? { ...t, error } : t)));
@@ -205,9 +253,11 @@ export function AdminHome() {
               {name ? `Hey ${name}, good ${partOfDay()}.` : `Good ${partOfDay()}.`}
             </h1>
             <p className={styles.lede}>
-              {summary.data
-                ? briefLede(summary.data)
-                : 'Pulling together today’s emails, expert reviews and active projects…'}
+              {summary.data ? (
+                <EmphasisText text={briefLede(summary.data)} />
+              ) : (
+                'Pulling together today’s emails, expert reviews and active projects…'
+              )}
             </p>
           </header>
         )}
@@ -225,20 +275,26 @@ export function AdminHome() {
                 <p className={styles.question}>{turn.question}</p>
                 {turn.answer ? (
                   <div className={styles.answer}>
-                    <AIExplainLabel aria-label="AI answer" />
+                    <AIExplainLabel aria-label="AI answer" isWorking={working[turn.id] ?? false} />
                     <div className={styles.answerBody}>
-                      <p>{turn.answer.text}</p>
-                      <ChatBlocks blocks={turn.answer.blocks} onAsk={send} isBusy={ask.isPending} />
-                      <ChatChips chips={turn.answer.chips} onAsk={send} isBusy={ask.isPending} />
-                      {turn.answer.links.length > 0 ? (
-                        <ul className={styles.links}>
-                          {turn.answer.links.map((link) => (
-                            <li key={link.href}>
-                              <Link href={link.href}>{link.label}</Link>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : null}
+                      <StreamedAnswer text={turn.answer.text}>
+                        <ChatBlocks
+                          blocks={turn.answer.blocks}
+                          onAsk={send}
+                          isBusy={isBusy}
+                          onWorking={(isWorking) => setTurnWorking(turn.id, isWorking)}
+                        />
+                        <ChatChips chips={turn.answer.chips} onAsk={send} isBusy={isBusy} />
+                        {turn.answer.links.length > 0 ? (
+                          <ul className={styles.links}>
+                            {turn.answer.links.map((link) => (
+                              <li key={link.href}>
+                                <Link href={link.href}>{link.label}</Link>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+                      </StreamedAnswer>
                     </div>
                   </div>
                 ) : turn.error ? (
@@ -249,7 +305,10 @@ export function AdminHome() {
                     </Button>
                   </p>
                 ) : (
-                  <InlineLoading description="Thinking…" />
+                  <div className={`${styles.answer} ${styles.thinkingRow}`} role="status">
+                    <AIExplainLabel aria-label="Thinking" isWorking />
+                    <p className={styles.thinking}>Thinking…</p>
+                  </div>
                 )}
               </li>
             ))}
@@ -267,7 +326,7 @@ export function AdminHome() {
                   size="sm"
                   className={styles.prompt}
                   onClick={() => send(prompt)}
-                  disabled={ask.isPending}
+                  disabled={isBusy}
                 >
                   {prompt}
                 </Button>
@@ -280,7 +339,7 @@ export function AdminHome() {
           placeholder="Ask anything about your emails, projects or experts…"
           placement="inline"
           look="glow"
-          isBusy={ask.isPending}
+          isBusy={isBusy}
           onSend={send}
         />
         <p className={styles.disclaimer}>

@@ -9,10 +9,10 @@
 
 // Assistant start page, in Carbon's own visual language: a Tile for the briefing, ClickableTiles
 // for the counts, tertiary buttons for suggestions, flat layers (no glass or glow). One content
-// width shared by the briefing, the conversation and the docked ask field, so every edge lines up. The stage (mark, greeting, cards) sits in the
-// middle of the free space; suggestions, the field and the note dock at the bottom.
-$content-width: 52rem; // fits the three suggestions on one line
-
+// width shared by the briefing, the cards, the conversation and the docked ask field, so every
+// edge lines up with the ask bar. The stage (mark, greeting, cards) sits in the middle of the
+// free space; suggestions, the field and the note dock at the bottom.
+$home-width: 41rem;
 $pt-mascot-float: 6s;
 
 .root {
@@ -24,7 +24,7 @@ $pt-mascot-float: 6s;
 .stage,
 .ask {
   inline-size: 100%;
-  max-inline-size: $content-width;
+  max-inline-size: $home-width;
   margin-inline: auto;
 }
 
@@ -270,13 +270,18 @@ $pt-mascot-think: 1.4s;
   @include font-weight('semibold');
 }
 
+// The three counts sit as a compact, centred row rather than spanning the whole stage.
 .cards {
   display: grid;
   gap: $spacing-04;
   grid-template-columns: 1fr;
+  inline-size: 100%;
+  max-inline-size: $home-width;
+  margin-inline: auto;
 
+  // Equal columns, but never narrower than the longest label, so each label stays on one line.
   @include breakpoint(md) {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(max-content, 1fr));
   }
 }
 
@@ -292,13 +297,14 @@ $pt-mascot-think: 1.4s;
   flex-direction: column;
   gap: $spacing-01;
   block-size: 100%;
-  padding-inline-end: $spacing-08;
+  padding-inline-end: $spacing-09;
 }
 
 .cardLabel {
   @include type-style('body-compact-01');
 
   color: $text-secondary;
+  white-space: nowrap;
 }
 
 // The count leads: the display face, one size up from the label.
@@ -310,48 +316,110 @@ $pt-mascot-think: 1.4s;
 
 // ——— Conversation ———————————————————————————————————————————————————————————
 
+// Chat rhythm: 64px between exchanges, 24px from a question to its answer and from an answer's
+// text to what it shows, tighter spacing inside each item.
 .thread {
   display: flex;
   flex-direction: column;
-  gap: $spacing-05;
+  gap: $spacing-10;
 }
 
 .turn {
   display: flex;
   flex-direction: column;
-  gap: $spacing-03;
+  gap: $spacing-06;
 }
 
+// Your question, in the brand blue: it slides up into place from where you asked it.
 .question {
   @include type-style('body-01');
 
   align-self: flex-end;
   max-inline-size: 80%;
-  padding: $spacing-03 $spacing-04;
-  background: $layer-01;
+  padding: $spacing-03 $spacing-05;
+  animation: bubble-in $duration-moderate-02 motion(entrance, expressive) both;
+  background: $interactive;
+  color: $text-on-color;
+  transform-origin: 100% 100%;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 }
 
-.answer {
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY($spacing-05) scale(0.96);
+  }
+}
+
+// "Thinking…" and the answer's cards ease in rather than appear.
+.thinkingRow,
+.rise {
+  animation: rise-in $duration-moderate-02 motion(entrance, productive) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+.rise {
   display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY($spacing-03);
+  }
+}
+
+// The answer spans the same column as the ask bar, edge to edge. Its AI mark sits above it on
+// small screens and hangs in the margin to its left on wide ones, so it never indents the answer.
+.answer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   align-items: flex-start;
   gap: $spacing-03;
 
   p {
     @include type-style('body-01');
   }
+
+  @include breakpoint(lg) {
+    > :first-child {
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-end: calc(100% + #{$spacing-04});
+    }
+  }
 }
 
 // The answer's text, then its cards, canvas and next-step chips, one under another.
 .answerBody {
   display: flex;
-  flex: 1;
   flex-direction: column;
-  gap: $spacing-05;
+  align-self: stretch;
+  gap: $spacing-06;
   min-inline-size: 0;
 }
 
 .turn {
   scroll-margin-block-start: $spacing-09;
+}
+
+// The newest turn holds at least a screen's height (less the header and the docked ask field),
+// so it can always scroll to the top even before its answer arrives.
+.turn:last-child {
+  min-block-size: calc(100vh - #{$pt-shell-header-height} - #{$spacing-12});
+}
+
+.thinking {
+  color: $text-secondary;
 }
 
 .answerError {
@@ -388,14 +456,23 @@ $pt-mascot-think: 1.4s;
 
 // Suggestions are light Carbon ghost buttons on a $layer-01 fill with 8px corners (ADR 0015
 // exception, with the glow field below), sharing one row edge to edge; a narrow page wraps.
+// The ask bar keeps the cards' column width on Home and in the chat, so it never jumps.
+.root .ask {
+  max-inline-size: $home-width;
+}
+
+// Three suggestions in the same three columns (and gap) as the cards above, so edges line up.
 .prompts {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: $spacing-04;
+  grid-template-columns: 1fr;
 
   li {
     display: flex;
-    flex: 1 1 auto;
+  }
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -406,7 +483,11 @@ $pt-mascot-think: 1.4s;
   inline-size: 100%;
   max-inline-size: none;
   min-block-size: $spacing-08;
+  block-size: auto;
+  padding-block: $spacing-03;
   padding-inline: $spacing-05;
+  text-align: center;
+  white-space: normal;
 
   // No outline, as in the reference: the fill is quiet (~1.07:1 to the page), and the chip is
   // identified by its own label (text 15.7:1), which WCAG 1.4.11 accepts for buttons.

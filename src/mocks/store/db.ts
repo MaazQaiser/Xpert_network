@@ -38,16 +38,8 @@ import type {
 } from '@/features/admin';
 import { seedInbox, seedMailAccounts, seedProjects, type SentMail } from '../fixtures/admin/seed';
 
-/**
- * Bump when seeded admin inbox/project copy changes so saved demos pick up new briefs
- * (localStorage otherwise keeps the old PRJ-1043/1044 text forever).
- */
-export const ADMIN_FIXTURE_REV = 5;
-
 export type DemoState = {
   version: 2;
-  /** When behind {@link ADMIN_FIXTURE_REV}, draft fixture projects and their emails are refreshed. */
-  adminFixtureRev?: number;
   sessionUserId: string | null;
   /** Demo personas plus accounts created through sign-up (F0). */
   users: Record<string, User>;
@@ -142,7 +134,6 @@ function seed(): DemoState {
   const homeStories = seedHomeStories();
   const state: DemoState = {
     version: 2,
-    adminFixtureRev: ADMIN_FIXTURE_REV,
     sessionUserId: null,
     users: Object.fromEntries(Object.values(USERS).map((user) => [user.id, user])),
     verificationSentAt: {},
@@ -203,220 +194,39 @@ function withPersonaIdentity(saved: DemoState['users'] | undefined): DemoState['
   return users;
 }
 
-/** Draft fixture projects whose copy should refresh when {@link ADMIN_FIXTURE_REV} bumps. */
-const REFRESHABLE_DRAFT_IDS = new Set(['PRJ-1042', 'PRJ-1043', 'PRJ-1044']);
-
-/** Adds seeded requests and refreshes home-story chats a tester's saved data predates. */
-function withNewSeeds(saved: DemoState, fresh: DemoState): DemoState {
-  const missingRequests = Object.values(fresh.requests).filter((r) => !saved.requests?.[r.id]);
-  const storyBriefs = Object.values(fresh.briefs).filter((brief) => {
-    const savedCount = saved.messages?.[brief.id]?.length ?? 0;
-    const freshCount = fresh.messages[brief.id]?.length ?? 0;
-    return !saved.briefs?.[brief.id] || savedCount < freshCount;
-  });
-  const needsAdminSlices =
-    !saved.adminMatches ||
-    !saved.adminShortlists ||
-    !saved.adminScreening ||
-    !saved.adminScreeningSentAt ||
-    !saved.adminAvailability ||
-    !saved.adminClientDraft ||
-    !saved.adminBooking ||
-    !saved.adminCall ||
-    !saved.adminMailAccounts;
-  // Seeded admin projects a saved demo predates (e.g. today's PRJ-1043/1044), and the inbox
-  // emails they were drafted from, which change from "reading" to "brief ready".
-  const missingProjects = Object.values(fresh.adminProjects).filter(
-    (p) => !saved.adminProjects?.[p.id],
-  );
-  // Prefer the rev from the saved demo (may be missing on older localStorage).
-  const savedRev = saved.adminFixtureRev;
-  const fixtureRevBehind = (typeof savedRev === 'number' ? savedRev : 0) < ADMIN_FIXTURE_REV;
-  // Still-draft fixture projects: replace with fresh seed when the fixture pack was updated,
-  // or when the seeded name/brief no longer matches (content swap without a rev bump).
-  const refreshedDrafts = Object.values(fresh.adminProjects).filter((p) => {
-    if (!REFRESHABLE_DRAFT_IDS.has(p.id) || p.status !== 'draft') return false;
-    const existing = saved.adminProjects?.[p.id];
-    if (!existing) return false;
-    if (existing.status !== 'draft') return false;
-    return fixtureRevBehind || existing.name !== p.name || existing.brief !== p.brief;
-  });
-  if (
-    missingRequests.length === 0 &&
-    storyBriefs.length === 0 &&
-    !needsAdminSlices &&
-    missingProjects.length === 0 &&
-    refreshedDrafts.length === 0
-  ) {
-    return saved;
-  }
-  const reports = Object.fromEntries(
-    Object.entries(fresh.customReports).filter(([, report]) =>
-      missingRequests.some((r) => r.delivery?.reportId === report.item.id),
-    ),
-  );
-  const inboxFromRefreshed = Object.fromEntries(
-    refreshedDrafts
-      .map((p) => (p.source.requestId ? fresh.adminInbox[p.source.requestId] : undefined))
-      .filter((r): r is NonNullable<typeof r> => r !== undefined)
-      .map((r) => [r.id, r]),
-  );
-  const merged: DemoState = {
-    ...saved,
-    adminFixtureRev: ADMIN_FIXTURE_REV,
-    adminMatches: saved.adminMatches ?? {},
-    adminShortlists: saved.adminShortlists ?? {},
-    adminScreening: saved.adminScreening ?? {},
-    adminScreeningSentAt: saved.adminScreeningSentAt ?? {},
-    adminAvailability: saved.adminAvailability ?? {},
-    adminClientDraft: saved.adminClientDraft ?? {},
-    adminBooking: saved.adminBooking ?? {},
-    adminCall: saved.adminCall ?? {},
-    adminMailAccounts: saved.adminMailAccounts ?? fresh.adminMailAccounts,
-    // The second demo mailbox's emails arrive with the account list.
-    adminInbox: {
-      ...(saved.adminMailAccounts
-        ? saved.adminInbox
-        : { ...fresh.adminInbox, ...saved.adminInbox }),
-      ...Object.fromEntries(
-        missingProjects
-          .map((p) => (p.source.requestId ? fresh.adminInbox[p.source.requestId] : undefined))
-          .filter((r) => r !== undefined)
-          .map((r) => [r.id, r]),
-      ),
-      ...inboxFromRefreshed,
-    },
-    adminProjects: {
-      ...saved.adminProjects,
-      ...Object.fromEntries(missingProjects.map((p) => [p.id, p])),
-      ...Object.fromEntries(refreshedDrafts.map((p) => [p.id, p])),
-    },
-    requests: {
-      ...saved.requests,
-      ...Object.fromEntries(missingRequests.map((r) => [r.id, r])),
-    },
-    briefs: {
-      ...(saved.briefs ?? {}),
-      ...Object.fromEntries(storyBriefs.map((b) => [b.id, b])),
-    },
-    messages: {
-      ...(saved.messages ?? {}),
-      ...Object.fromEntries(storyBriefs.map((b) => [b.id, fresh.messages[b.id] ?? []])),
-    },
-    customReports: { ...saved.customReports, ...reports },
-    ownedReports: structuredClone(saved.ownedReports ?? {}),
-    reportPurchases: structuredClone(saved.reportPurchases ?? {}),
-  };
-  withCustomReports(merged, reports);
-  return merged;
-}
-
 /**
- * When the PRJ-1042 story changes (it was EV battery recycling, now sports headphones), a saved
- * demo restarts the whole admin console from the seed so emails, experts and calls match.
+ * Every page load starts the demo fresh: emails, projects, chats and anything sent go back to the
+ * seed, so testers always begin from the same story. Only who is signed in (and accounts made
+ * through sign-up) carry over, so a refresh doesn't log you out.
  */
-function withAdminStory(saved: DemoState, fresh: DemoState): DemoState {
-  const savedSource = saved.adminProjects?.['PRJ-1042']?.source.requestId;
-  const freshSource = fresh.adminProjects['PRJ-1042']?.source.requestId;
-  if (!savedSource || savedSource === freshSource) return saved;
-  return {
-    ...saved,
-    adminInbox: fresh.adminInbox,
-    adminMailAccounts: fresh.adminMailAccounts,
-    adminProjects: fresh.adminProjects,
-    adminMail: fresh.adminMail,
-    adminMatches: fresh.adminMatches,
-    adminShortlists: fresh.adminShortlists,
-    adminScreening: fresh.adminScreening,
-    adminScreeningSentAt: fresh.adminScreeningSentAt,
-    adminAvailability: fresh.adminAvailability,
-    adminClientDraft: fresh.adminClientDraft,
-    adminBooking: fresh.adminBooking,
-    adminCall: fresh.adminCall,
-    notifications: fresh.notifications,
-  };
-}
-
-const ISO_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
-const STALE_MS = 6 * 60 * 60 * 1000;
-
-function shiftTimes<T>(value: T, deltaMs: number): T {
-  if (typeof value === 'string') {
-    return (
-      ISO_TIME.test(value) ? new Date(new Date(value).getTime() + deltaMs).toISOString() : value
-    ) as T;
-  }
-  if (Array.isArray(value)) return value.map((item) => shiftTimes(item, deltaMs)) as T;
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(
-      Object.entries(value).map(([key, item]) => [key, shiftTimes(item, deltaMs)]),
-    ) as T;
-  }
-  return value;
-}
-
-/**
- * The admin story always happens today. A demo saved days ago would otherwise show no emails or
- * projects "today" on Home, so its admin timeline moves forward by how stale it is, measured on
- * the PRJ-1042 email; times stay in the same order and distance from each other.
- */
-function withFreshClock(saved: DemoState, fresh: DemoState): DemoState {
-  const anchorId = fresh.adminProjects['PRJ-1042']?.source.requestId;
-  const savedAt = anchorId ? saved.adminInbox?.[anchorId]?.receivedAt : undefined;
-  const freshAt = anchorId ? fresh.adminInbox[anchorId]?.receivedAt : undefined;
-  if (!savedAt || !freshAt) return saved;
-  const deltaMs = new Date(freshAt).getTime() - new Date(savedAt).getTime();
-  if (deltaMs < STALE_MS) return saved;
-  return {
-    ...saved,
-    adminInbox: shiftTimes(saved.adminInbox, deltaMs),
-    adminMailAccounts: shiftTimes(saved.adminMailAccounts, deltaMs),
-    adminProjects: shiftTimes(saved.adminProjects, deltaMs),
-    adminMail: shiftTimes(saved.adminMail, deltaMs),
-    adminMatches: shiftTimes(saved.adminMatches, deltaMs),
-    adminShortlists: shiftTimes(saved.adminShortlists, deltaMs),
-    adminScreeningSentAt: shiftTimes(saved.adminScreeningSentAt, deltaMs),
-    adminAvailability: shiftTimes(saved.adminAvailability, deltaMs),
-    adminClientDraft: shiftTimes(saved.adminClientDraft, deltaMs),
-    adminBooking: shiftTimes(saved.adminBooking, deltaMs),
-    adminCall: shiftTimes(saved.adminCall, deltaMs),
-  };
-}
-
 function load(): DemoState {
   if (typeof window === 'undefined') return seed();
+  const fresh = seed();
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return seed();
-    const parsed = JSON.parse(raw) as DemoState;
-    // Slices added after a tester's data was saved fall back to the seed.
-    if (parsed.version !== 2) return seed();
-    const fresh = seed();
-    // Keep the saved fixture rev (or undefined) — don't inherit fresh's rev before merge,
-    // or stale projects never refresh.
-    return withNewSeeds(
-      withFreshClock(
-        withAdminStory(
-          {
-            ...fresh,
-            ...parsed,
-            users: withPersonaIdentity(parsed.users),
-            adminFixtureRev: parsed.adminFixtureRev,
-          },
-          fresh,
-        ),
-        fresh,
-      ),
-      fresh,
-    );
+    if (!raw) return fresh;
+    const parsed = JSON.parse(raw) as Partial<DemoState>;
+    if (parsed.version !== 2) return fresh;
+    const users = withPersonaIdentity(parsed.users);
+    const sessionUserId =
+      parsed.sessionUserId && users[parsed.sessionUserId] ? parsed.sessionUserId : null;
+    return { ...fresh, users, sessionUserId };
   } catch {
-    return seed();
+    return fresh;
   }
 }
 
 let state: DemoState = load();
+// Save the fresh start straight away, so storage never holds the previous session's state.
+if (typeof window !== 'undefined') {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // Storage full or blocked: the demo still runs from memory.
+  }
+}
 
-/** In-memory store persisted to localStorage so a tester's session survives reloads. */
+/** In-memory store, saved to localStorage so who is signed in survives a reload. */
 export const db = {
   get(): DemoState {
     return state;

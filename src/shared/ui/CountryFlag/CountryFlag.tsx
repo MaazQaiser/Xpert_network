@@ -144,17 +144,29 @@ export function countryName(code: string): string {
   return FLAGS[code]?.name ?? code;
 }
 
-/** The country's flag and name, e.g. "🇩🇪 Germany"; unknown codes show the code alone. */
-export function CountryFlag({ code, showName = true }: { code: string; showName?: boolean }) {
+/**
+ * The country's flag and name, e.g. "🇩🇪 Germany"; unknown codes show the code alone. `sm` suits
+ * small label text (a smaller flag, sitting closer to the name).
+ */
+export function CountryFlag({
+  code,
+  showName = true,
+  size = 'md',
+}: {
+  code: string;
+  showName?: boolean;
+  size?: 'sm' | 'md';
+}) {
   const flag = FLAGS[code];
+  const isSmall = size === 'sm';
   return (
-    <span className={styles.root}>
+    <span className={isSmall ? `${styles.root} ${styles.small}` : styles.root}>
       {flag ? (
         <svg
           className={styles.flag}
           viewBox="0 0 30 20"
-          width="20"
-          height="14"
+          width={isSmall ? 15 : 20}
+          height={isSmall ? 10 : 14}
           aria-hidden="true"
           focusable="false"
         >

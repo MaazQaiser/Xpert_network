@@ -8,6 +8,69 @@
 // Rich answers in the Home chat: emails to pick from, the brief as a document, summaries and
 // next-step chips. Flat Carbon layers, hairlines, no nested cards.
 
+// ——— Emails as notifications ———————————————————————————————————————————————————————
+// Like a phone's lock screen: the face, the name with the time at the far end, the subject
+// under it, and one small action. Nothing else competes.
+.notes {
+  display: flex;
+  flex-direction: column;
+}
+
+.note {
+  display: grid;
+  align-items: center;
+  gap: $spacing-03 $spacing-05;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding-block: $spacing-05;
+
+  // Plain lines between emails, no card around them.
+  & + & {
+    border-block-start: 1px solid $border-subtle-01;
+  }
+
+  @include breakpoint(md) {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+}
+
+.noteBody {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  min-inline-size: 0;
+}
+
+.noteFrom {
+  @include type-style('heading-compact-01');
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// One line, like a notification; the full subject is in the action's label.
+.noteSubject {
+  @include type-style('body-compact-01');
+
+  overflow: hidden;
+  color: $text-secondary;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// On phones the action sits under the subject, lined up with it. Carbon keeps room on the right
+// for an icon; with no icon here, even padding lets the button hug its label.
+.noteAction.noteAction {
+  justify-content: center;
+  grid-column: 2;
+  justify-self: start;
+  padding-inline: $spacing-04;
+
+  @include breakpoint(md) {
+    grid-column: auto;
+  }
+}
+
 // ——— Email picks ———————————————————————————————————————————————————————————————
 .picks {
   display: flex;
@@ -21,8 +84,9 @@
   align-items: center;
   gap: $spacing-04;
   grid-template-columns: auto minmax(0, 1fr);
-  padding: $spacing-04 $spacing-05;
+  padding-block: $spacing-04;
 
+  // Plain lines between emails, no card around them.
   & + & {
     border-block-start: 1px solid $border-subtle-01;
   }
@@ -60,13 +124,6 @@
   min-inline-size: 0;
 }
 
-.pickTop {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: $spacing-03;
-}
-
 .pickFrom {
   @include type-style('heading-compact-01');
 }
@@ -97,21 +154,6 @@
   flex-wrap: wrap;
   gap: $spacing-02 $spacing-04;
   color: $text-secondary;
-}
-
-.reason {
-  color: $text-primary;
-}
-
-.file {
-  display: inline-flex;
-  overflow-wrap: anywhere;
-  align-items: center;
-  gap: $spacing-02;
-
-  svg {
-    fill: $icon-secondary;
-  }
 }
 
 // On phones the action takes its own row under the email.
@@ -205,7 +247,7 @@
 .docSection {
   display: flex;
   flex-direction: column;
-  gap: $spacing-03;
+  gap: $spacing-04;
 }
 
 .docHeading {
@@ -297,12 +339,88 @@
   }
 }
 
+.footerText {
+  display: flex;
+  flex: 1 1 18rem;
+  flex-direction: column;
+  gap: $spacing-02;
+  max-inline-size: 40rem;
+}
+
+.footerError {
+  color: $text-error;
+}
+
+// After the project is created: a quiet confirmation beside the next step.
+.created {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-03;
+
+  svg {
+    flex: none;
+    fill: $support-success;
+  }
+}
+
+// The assistant's question under the brief, then the button that answers it.
+.createAsk {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+
+  p {
+    @include type-style('body-01');
+  }
+}
+
+.reqIntro {
+  @include type-style('body-01');
+}
+
+// The requirements review: what the AI will search on, then the button that starts it.
+.reqHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $spacing-02 $spacing-05;
+}
+
+.reqMeta {
+  @include type-style('body-compact-01');
+  @include font-weight('semibold');
+
+  color: $text-primary;
+}
+
+.reqFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+  padding-block-start: $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
+}
+
+.reqHint {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+// The assistant's one proposed next step, as a primary button under its answer.
+.nextStep {
+  display: flex;
+}
+
 // ——— Summary and draft cards ——————————————————————————————————————————————————————
 .card {
   display: flex;
   flex-direction: column;
-  gap: $spacing-05;
-  padding: $spacing-05;
+  gap: $spacing-06;
+  padding: $spacing-06;
   border: 1px solid $border-subtle-01;
   background: $layer-01;
 }

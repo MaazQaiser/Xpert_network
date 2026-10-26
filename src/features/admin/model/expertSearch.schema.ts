@@ -46,6 +46,8 @@ export const expertSearchInputSchema = z.object({
   offset: z.number().int().nonnegative(),
   limit: z.number().int().min(1).max(50),
   criteria: extendResearchSchema.optional(),
+  /** Experts already shown, so an extended search only returns new people. */
+  excludeIds: z.array(z.string()).max(500).optional(),
 });
 export type ExpertSearchInput = z.infer<typeof expertSearchInputSchema>;
 

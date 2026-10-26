@@ -185,7 +185,7 @@ describe('admin mock API (F11–F12)', () => {
     const { body } = await call('/api/admin/assistant', 'POST', {
       text: 'Which experts need my review?',
     });
-    expect(body.text).toContain('4 expert answers are waiting');
+    expect(body.text).toContain('[[!4 expert answers]] are waiting');
     expect((body.blocks as unknown[])[0]).toMatchObject({
       kind: 'experts',
       items: [{ projectId: 'PRJ-1040', count: 4, href: '/admin/projects/PRJ-1040' }],

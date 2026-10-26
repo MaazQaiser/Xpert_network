@@ -1,0 +1,277 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/motion' as *;
+
+// Home chat: the AI finding experts in the open. Steps tick off, the ranked list arrives,
+// then the way on. Flat Carbon layers and hairlines, like the other chat blocks.
+
+.search {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+.round {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+// What the PM asked for when extending, set like their own question in the thread.
+.request {
+  @include type-style('body-01');
+
+  align-self: flex-end;
+  max-inline-size: 80%;
+  padding: $spacing-03 $spacing-04;
+  background: $layer-01;
+}
+
+// ——— Steps ——————————————————————————————————————————————————————————————————————
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-01;
+
+  // Carbon's InlineLoading sets its own height; keep the rows tight like a checklist.
+  li {
+    display: flex;
+    align-items: center;
+    min-block-size: $spacing-07;
+  }
+}
+
+.stepPending {
+  @include type-style('label-02');
+
+  display: inline-flex;
+  align-items: center;
+  color: $text-secondary;
+  gap: $spacing-03;
+
+  svg {
+    flex: none;
+    fill: $icon-secondary;
+  }
+}
+
+.summary {
+  @include type-style('body-01');
+}
+
+// Where the chat scrolls to when the experts arrive, clear of the header.
+.outcome {
+  scroll-margin-block-start: $spacing-10;
+}
+
+// ——— Ranked list ——————————————————————————————————————————————————————————————————
+// ——— Ranked experts, as a table (like a ChatGPT answer) ——————————————————————————
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+}
+
+.resultTitle {
+  @include type-style('heading-03');
+  @include font-weight('semibold');
+}
+
+.resultIntro {
+  @include type-style('body-01');
+
+  max-inline-size: 44rem;
+}
+
+// Wide tables scroll inside their own box on small screens, never the page.
+.tableScroll {
+  overflow-x: auto;
+}
+
+.table {
+  @include type-style('body-01');
+
+  border-collapse: collapse;
+  inline-size: 100%;
+  min-inline-size: 40rem;
+
+  thead th {
+    @include type-style('heading-compact-01');
+
+    padding: $spacing-04;
+    border-block-end: 1px solid $border-strong-01;
+    text-align: start;
+    vertical-align: bottom;
+  }
+
+  tbody td,
+  tbody th {
+    padding: $spacing-05 $spacing-04;
+    border-block-end: 1px solid $border-subtle-01;
+    text-align: start;
+    vertical-align: top;
+  }
+
+  // The one moment: rows arrive in rank order.
+  tbody tr {
+    animation: arrive $duration-moderate-01 motion(entrance, productive) both;
+    animation-delay: calc(var(--i, 0) * #{$duration-fast-01});
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY($spacing-03);
+  }
+}
+
+.pickCol {
+  inline-size: $spacing-07;
+}
+
+.rankCol {
+  color: $text-secondary;
+  inline-size: $spacing-06;
+}
+
+// One cell per expert: the name leads, the role and facts sit quietly under it.
+.table .expertCell {
+  @include font-weight('regular');
+
+  min-inline-size: 11rem;
+}
+
+.expertName {
+  @include type-style('heading-compact-01');
+
+  display: block;
+}
+
+// What they do, in its own column so it can be scanned down the table.
+.expertiseCell {
+  @include type-style('body-compact-01');
+
+  color: $text-primary;
+  max-inline-size: 13rem;
+}
+
+// Experience is the fact the PM weighs most, so it reads bold; the country stays quiet.
+.expertYears {
+  @include font-weight('semibold');
+
+  color: $text-primary;
+}
+
+.expertMeta {
+  @include type-style('label-01');
+
+  display: flex;
+  align-items: center;
+  color: $text-secondary;
+  gap: $spacing-03;
+  margin-block-start: $spacing-03;
+  white-space: nowrap;
+}
+
+// The AI's reason, as a calm sentence beside the name.
+.fitCell {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+  max-inline-size: 18rem;
+}
+
+.nameLink {
+  color: $text-primary;
+  text-decoration: underline dotted;
+  text-decoration-color: $border-strong-01;
+  text-underline-offset: $spacing-02;
+
+  &:hover {
+    color: $link-primary;
+    text-decoration-color: $link-primary;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+}
+
+.matchCol {
+  inline-size: 5rem;
+}
+
+.match {
+  display: inline-flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  inline-size: 100%;
+}
+
+.matchTrack {
+  display: block;
+  overflow: hidden;
+  background: $border-subtle-02;
+  block-size: $spacing-02;
+}
+
+.matchFill {
+  display: block;
+  background: $interactive;
+  block-size: 100%;
+}
+
+.sentMark {
+  display: inline-flex;
+
+  svg {
+    fill: $support-success;
+  }
+}
+
+// ——— The way on ——————————————————————————————————————————————————————————————————
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.sentNote {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+
+  svg {
+    flex: none;
+    fill: $support-success;
+  }
+}
+
+// ——— Extend research, as a card in the thread ————————————————————————————————————
+.extendCard {
+  // Room for the docked ask bar below it, and the header above it, when scrolled into view.
+  scroll-margin-block: $spacing-10 $spacing-13;
+  padding: $spacing-05;
+  border: 1px solid $border-subtle-01;
+  background: $layer-01;
+  animation: arrive $duration-moderate-01 motion(entrance, productive) both;
+
+  @include breakpoint(md) {
+    padding: $spacing-06;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}

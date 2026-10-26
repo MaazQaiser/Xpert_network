@@ -8,6 +8,11 @@
   white-space: nowrap;
 }
 
+// Beside small label text: the flag sits closer to the name.
+.small {
+  gap: $spacing-02;
+}
+
 // A hairline keeps white flag edges visible on light rows.
 .flag {
   flex: none;

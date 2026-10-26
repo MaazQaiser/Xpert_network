@@ -71,6 +71,8 @@ export function assistantReply(
   text: string,
   state: Pick<DemoState, 'adminInbox' | 'adminProjects'>,
   now = new Date(),
+  /** The PM's first name, so the assistant can speak to them. */
+  pmName?: string,
 ): AssistantReply {
   const q = text.toLowerCase();
   const projects = Object.values(state.adminProjects);
@@ -90,8 +92,35 @@ export function assistantReply(
   const ask = (label: string, prompt: string): ChatChip => ({ label, prompt, href: null });
   const go = (label: string, href: string): ChatChip => ({ label, prompt: null, href });
 
-  // ——— A project's brief, on the canvas ————————————————————————————————————————————
+  // ——— A project created from its brief: confirm it, then offer the next step ——————————
   const named = projects.find((p) => q.includes(p.id.toLowerCase()));
+  if (named && q.includes('create the project')) {
+    return reply(
+      `Done${pmName ? `, ${pmName}` : ''}. Your project file for **${named.name}** has been created successfully. Should we now find experts for this project?`,
+      `${named.id} project file`,
+      { blocks: [{ kind: 'requirements', projectId: named.id }] },
+    );
+  }
+
+  // ——— Find experts for a project: the search runs in the chat ———————————————————————
+  if (named && q.includes('find experts')) {
+    return reply(
+      `On it. I’m searching the network for experts who match **${named.id}, ${named.name}**.`,
+      `${named.id} brief, expert profile and screening questions`,
+      { blocks: [{ kind: 'expertSearch', projectId: named.id }] },
+    );
+  }
+
+  // ——— A project's screening answers: who answered, read in the chat ——————————————————
+  if (named && q.includes('screening answer')) {
+    return reply(
+      `Let me check who answered the screening questions for **${named.id}, ${named.name}**.`,
+      `${named.id} screening answers`,
+      { blocks: [{ kind: 'screeningAnswers', projectId: named.id }] },
+    );
+  }
+
+  // ——— A project's brief, on the canvas ————————————————————————————————————————————
   if (named && (q.includes('brief') || q.includes('show') || q.includes('open'))) {
     return briefReply(named);
   }
@@ -107,14 +136,16 @@ export function assistantReply(
       .map((e) => ({
         ...toChatEmail(e),
         prompt: `Give me the brief for ${e.projectId}`,
-        action: 'Show the brief',
+        action: 'Show brief',
         reason: `${e.projectId} · ${reasonFor(e)}`,
       }));
     if (emails.length === 0) {
       return reply('No new projects came in today yet.', 'Projects created in the last 24 hours');
     }
     return reply(
-      `${emails.length === 1 ? 'One new project' : `${emails.length} new projects`} came in today, each drafted from a client’s email. Which project brief do you need?`,
+      emails.length === 1
+        ? 'Here’s the [[1 new project]] that came in today, drafted from a client’s email. Do you want its brief?'
+        : `Here are the [[${emails.length} new projects]] that came in today, each drafted from a client’s email. Which project brief do you need?`,
       'Projects created in the last 24 hours',
       { blocks: [{ kind: 'emails', items: emails }] },
     );
@@ -134,7 +165,7 @@ export function assistantReply(
       return reply('No emails came in today.', 'Emails received in the last 24 hours');
     }
     return reply(
-      `${today.length} ${today.length === 1 ? 'email' : 'emails'} came in today. ${top.length === 1 ? 'This one needs' : `These ${top.length} need`} you most. Which one do you want to look at?`,
+      `[[${today.length} ${today.length === 1 ? 'email' : 'emails'}]] came in today. ${top.length === 1 ? '[[!This one]] needs you most.' : `[[!These ${top.length}]] need you most.`} Which one do you want to look at?`,
       'Emails received in the last 24 hours, ranked by what needs you',
       {
         blocks: [{ kind: 'emails', items: top.map(toChatEmail) }],
@@ -171,7 +202,7 @@ export function assistantReply(
     }
     chips.push(go('Open in Inbox', `/admin/inbox/${fromEmail.id}`));
     return reply(
-      `Here’s ${firstName(fromEmail.from.name)}’s email in short.`,
+      `Here’s **${firstName(fromEmail.from.name)}’s email** in short.`,
       `${fromEmail.from.name}’s email and its attachment`,
       {
         blocks: [
@@ -197,7 +228,7 @@ export function assistantReply(
         : (replyTo.autoReply ??
           `Hi ${name}, thanks for your email. Could you send your brief, the questions you want answered and when you need the calls? — Palto, Xpert Network`);
     return reply(
-      `Here’s a reply for ${name}. Check it, then send it from the Inbox.`,
+      `Here’s a reply for **${name}**. Check it, then send it from the Inbox.`,
       `${replyTo.from.name}’s email`,
       {
         blocks: [
@@ -221,7 +252,7 @@ export function assistantReply(
     }
     const total = waiting.reduce((sum, p) => sum + p.pendingExpertReviews, 0);
     return reply(
-      `${total} expert ${total === 1 ? 'answer is' : 'answers are'} waiting for your review. Open a project to read them.`,
+      `[[!${total} expert ${total === 1 ? 'answer' : 'answers'}]] ${total === 1 ? 'is' : 'are'} waiting for your review. Open a project to read them.`,
       'Expert responses across all projects',
       {
         blocks: [
@@ -247,7 +278,7 @@ export function assistantReply(
       return reply('Every email has what it needs. Nothing to reply to.', 'Projects inbox');
     }
     return reply(
-      `${stuck.length} ${stuck.length === 1 ? 'email is' : 'emails are'} missing what I need to draft a brief. Pick one and I’ll draft the reply.`,
+      `[[!${stuck.length} ${stuck.length === 1 ? 'email' : 'emails'}]] ${stuck.length === 1 ? 'is' : 'are'} missing what I need to draft a brief. Pick one and I’ll draft the reply.`,
       'Emails marked “Needs client info” in the inbox',
       {
         blocks: [
@@ -273,9 +304,9 @@ export function assistantReply(
       today
         .map(
           (p) =>
-            `${p.id}: ${p.name} for ${p.client.name}, ${PROJECT_STATUS_LABELS[p.status].toLowerCase()}${
+            `**${p.id}**: ${p.name} for ${p.client.name}, ${PROJECT_STATUS_LABELS[p.status].toLowerCase()}${
               p.confirmations.some((c) => c.state === 'open')
-                ? `, ${p.confirmations.filter((c) => c.state === 'open').length} things to confirm`
+                ? `, [[!${p.confirmations.filter((c) => c.state === 'open').length} things to confirm]]`
                 : ''
             }.`,
         )
@@ -294,10 +325,13 @@ export function assistantReply(
 
   function briefReply(project: Project): AssistantReply {
     return reply(
-      `Here’s the brief for ${project.id}, ${project.name}. Edit anything here; it saves to the project file.`,
+      `Here’s the brief for **${project.id}, ${project.name}**. Edit anything here; it saves to the project file.`,
       `${project.id} project file, drafted from ${project.source.fileName ?? 'the client’s email'}`,
       {
-        blocks: [{ kind: 'brief', projectId: project.id }],
+        blocks: [
+          { kind: 'brief', projectId: project.id },
+          { kind: 'createProject', projectId: project.id },
+        ],
         chips: [ask('Show me today’s other new project emails', CARD_PROMPTS.emails)],
       },
     );
