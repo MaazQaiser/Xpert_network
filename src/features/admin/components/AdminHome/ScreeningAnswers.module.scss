@@ -17,10 +17,16 @@
 .table.table {
   min-inline-size: 38rem;
 
+  // Roomier than the ranked list: each row has fewer facts, so it breathes more.
   thead th,
   tbody td,
   tbody th {
-    padding-inline: $spacing-03;
+    padding-inline: $spacing-04;
+  }
+
+  tbody td,
+  tbody th {
+    padding-block: $spacing-06;
   }
 
   thead th {

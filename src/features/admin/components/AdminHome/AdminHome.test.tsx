@@ -1,8 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { db, setControls } from '@/test/mockBackend';
-import { mockRouter } from '@/test/navigation';
 import { expectNoAxeViolations } from '@/test/axe';
 import { renderWithProviders } from '@/test/render';
 import { AdminHome } from './AdminHome';
@@ -189,9 +188,23 @@ describe('AdminHome (F11, screen 01)', () => {
       screen.getByRole('checkbox', { name: 'Hold these slots with the experts for 48 hours' }),
     ).toBeChecked();
     await userEvent.click(screen.getByRole('button', { name: /^Send these experts to / }));
-    await vi.waitFor(() =>
-      expect(mockRouter.push).toHaveBeenCalledWith('/admin/projects/PRJ-1043/client'),
+
+    // The AI drafts the client email in short, in the chat; Send to Omar sends it.
+    expect(await screen.findByText(/Drafting the email to Omar/)).toBeInTheDocument();
+    const email = await screen.findByRole(
+      'article',
+      { name: /^Email to Omar Siddiqui/ },
+      { timeout: 10_000 },
     );
+    expect(within(email).getAllByRole('listitem').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByRole('heading', { name: 'Send 2 experts to Omar' })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Send to Omar' }));
+    expect(
+      await screen.findByText(
+        paragraph(/Sent to Omar Siddiqui\. Omar’s reply with the picks is in your Inbox/),
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Sent 2 experts to Omar' })).toBeInTheDocument();
   }, 40_000);
 
   it('new project emails card: lists drafted projects from today’s mail', async () => {

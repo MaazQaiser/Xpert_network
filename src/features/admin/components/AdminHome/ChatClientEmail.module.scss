@@ -1,0 +1,225 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/motion' as *;
+
+// Home chat: the client email in short. One card for the email (envelope, note, experts, what
+// the client sees), then the send step. Flat Carbon layer and hairlines, like the other cards.
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+}
+
+.email {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-05;
+  border: 1px solid $border-subtle-01;
+  animation: email-in $duration-moderate-01 motion(entrance, productive) both;
+  background: $layer-01;
+  gap: $spacing-05;
+
+  @include breakpoint(md) {
+    padding: $spacing-06;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes email-in {
+  from {
+    opacity: 0;
+    transform: translateY($spacing-03);
+  }
+}
+
+// Label and value rows: To, Subject; and below the experts, what the client sees.
+.envelope,
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+
+  > div {
+    display: grid;
+    gap: $spacing-02 $spacing-05;
+    grid-template-columns: 1fr;
+
+    @include breakpoint(md) {
+      grid-template-columns: 6rem minmax(0, 1fr);
+    }
+  }
+
+  dt {
+    @include type-style('label-01');
+
+    color: $text-secondary;
+    padding-block-start: $spacing-01;
+  }
+
+  dd {
+    @include type-style('body-compact-01');
+  }
+}
+
+.envelope .subject {
+  @include font-weight('semibold');
+}
+
+.intro {
+  @include type-style('body-01');
+
+  padding-block-end: $spacing-05;
+  border-block-end: 1px solid $border-subtle-01;
+}
+
+.experts {
+  display: flex;
+  flex-direction: column;
+}
+
+.expert {
+  display: flex;
+  align-items: flex-start;
+  padding-block: $spacing-05;
+  gap: $spacing-04;
+
+  & + & {
+    border-block-start: 1px solid $border-subtle-01;
+  }
+
+  &:first-child {
+    padding-block-start: 0;
+  }
+}
+
+// Circular portrait, as in the header and inbox; initials when there is no photo.
+.avatar {
+  @include type-style('label-01');
+  @include font-weight('semibold');
+
+  overflow: hidden;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: $layer-accent-01;
+  block-size: $spacing-07;
+  inline-size: $spacing-07;
+}
+
+.photo {
+  display: block;
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: cover;
+}
+
+.expertBody {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  min-inline-size: 0;
+}
+
+.expertTitle {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: $spacing-02 $spacing-03;
+
+  strong {
+    @include type-style('heading-compact-01');
+  }
+}
+
+.role {
+  @include type-style('label-02');
+
+  color: $text-secondary;
+}
+
+.quote {
+  @include type-style('body-01');
+
+  margin-block: $spacing-03 $spacing-02;
+}
+
+// Label, then value; a long value wraps under itself, never under the label.
+.line {
+  @include type-style('label-02');
+
+  display: grid;
+  gap: $spacing-03;
+  grid-template-columns: 4rem minmax(0, 1fr);
+}
+
+.muted {
+  color: $text-secondary;
+}
+
+.facts {
+  padding-block-start: $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
+}
+
+.coverage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+  margin-block-start: $spacing-04;
+
+  strong {
+    @include font-weight('semibold');
+  }
+}
+
+// ——— The send step ————————————————————————————————————————————————————————————
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+}
+
+.edit {
+  @include type-style('body-compact-01');
+
+  color: $link-primary;
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+}
+
+.sent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+}
+
+.sentNote {
+  @include type-style('body-01');
+
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-03;
+
+  svg {
+    flex: none;
+    fill: $support-success;
+    margin-block-start: $spacing-01;
+  }
+}

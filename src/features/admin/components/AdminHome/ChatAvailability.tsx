@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   ActionableNotification,
   Button,
@@ -23,6 +22,7 @@ import {
 } from '../../model/availability.schema';
 import type { Project } from '../../model/project.schema';
 import type { ExpertResponse } from '../../model/responses.schema';
+import { ChatClientEmail } from './ChatClientEmail';
 import { StreamedAnswer } from './StreamedAnswer';
 import search from './ExpertSearch.module.scss';
 import styles from './ScreeningAnswers.module.scss';
@@ -47,7 +47,7 @@ function slotLabel(slot: TimeSlot): string {
 /**
  * Home chat, after the PM confirms who moves forward: the AI asks those experts for their times
  * in the open, then shows the times they offered. The PM leaves out any time, then sends the
- * experts to the client; the client email is drafted on the next screen.
+ * experts to the client; the AI then drafts the client email below, in the thread.
  */
 export function ChatAvailability({
   project,
@@ -137,13 +137,14 @@ function OfferedTimes({
   data: Availability;
   people: ExpertResponse[];
 }) {
-  const router = useRouter();
   const action = useAvailabilityAction(project.id);
   // Every offered slot starts as a client option; clicking a slot takes it out or back in.
   const [chosen, setChosen] = useState<Record<string, string[]>>(() =>
     Object.fromEntries(data.experts.map((e) => [e.expertId, e.slots.map((s) => s.id)])),
   );
   const [holdSlots, setHoldSlots] = useState(true);
+  // Handed to the client: the email is drafted below, in the thread, and the times are fixed.
+  const [isPrepared, setIsPrepared] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const sentAt = data.sentToClientAt;
   const client = data.clientName;
@@ -176,7 +177,7 @@ function OfferedTimes({
       },
       {
         // The AI drafts the client email on the next screen; nothing is sent yet.
-        onSuccess: () => router.push(routes.admin.projectStep(project.id, 'client')),
+        onSuccess: () => setIsPrepared(true),
         onError: setError,
       },
     );
@@ -229,7 +230,7 @@ function OfferedTimes({
                                 text={slotLabel(slot)}
                                 size="md"
                                 selected={chosen[expert.expertId]?.includes(slot.id) ?? false}
-                                disabled={sentAt !== null}
+                                disabled={sentAt !== null || isPrepared}
                                 onChange={(isOn: boolean) =>
                                   toggleSlot(expert.expertId, slot.id, isOn)
                                 }
@@ -272,6 +273,7 @@ function OfferedTimes({
                 id={`hold-slots-${project.id}`}
                 labelText="Hold these slots with the experts for 48 hours"
                 checked={holdSlots}
+                disabled={isPrepared}
                 onChange={(_, { checked }) => setHoldSlots(checked)}
               />
             )}
@@ -284,29 +286,40 @@ function OfferedTimes({
                 onClose={() => setError(null)}
               />
             ) : null}
-            <div className={styles.readyFoot}>
-              {sentAt ? (
-                <Button
-                  as={Link}
-                  href={routes.admin.projectStep(project.id, 'client')}
-                  renderIcon={ArrowRight}
-                >
-                  View the client email
-                </Button>
-              ) : (
-                <Button
-                  renderIcon={ArrowRight}
-                  className={styles.sendButton}
-                  disabled={ready.length === 0 || action.isPending}
-                  onClick={send}
-                >
-                  {action.isPending
-                    ? 'Sending…'
-                    : `Send ${ready.length === 1 ? 'this expert' : 'these experts'} to ${client}`}
-                </Button>
-              )}
-            </div>
+            {isPrepared ? null : (
+              <div className={styles.readyFoot}>
+                {sentAt ? (
+                  <Button
+                    as={Link}
+                    href={routes.admin.projectStep(project.id, 'client')}
+                    renderIcon={ArrowRight}
+                  >
+                    View the client email
+                  </Button>
+                ) : (
+                  <Button
+                    renderIcon={ArrowRight}
+                    className={styles.sendButton}
+                    disabled={ready.length === 0 || action.isPending}
+                    onClick={send}
+                  >
+                    {action.isPending
+                      ? 'Preparing…'
+                      : `Send ${ready.length === 1 ? 'this expert' : 'these experts'} to ${client}`}
+                  </Button>
+                )}
+              </div>
+            )}
           </article>
+
+          {isPrepared ? (
+            <>
+              <p className={search.request}>
+                Send {ready.length === 1 ? 'this expert' : 'these experts'} to {client}
+              </p>
+              <ChatClientEmail project={project} />
+            </>
+          ) : null}
         </div>
       </StreamedAnswer>
     </div>

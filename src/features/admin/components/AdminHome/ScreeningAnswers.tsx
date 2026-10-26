@@ -15,7 +15,6 @@ import { toUserMessage } from '@/shared/api';
 import { formatTime } from '@/shared/lib/dates';
 import { CountryFlag } from '@/shared/ui';
 import { useProject, useResponses } from '../../api/queries';
-import { EXPERT_ORIGIN_LABELS } from '../../model/match.schema';
 import type { Project } from '../../model/project.schema';
 import {
   ANSWER_QUALITY_LABELS,
@@ -306,25 +305,12 @@ function AnswerTable({
                   >
                     {name}
                   </button>
-                  <span className={search.expertMeta}>
-                    {response.years !== undefined ? (
-                      <strong className={search.expertYears}>
-                        {response.years} {response.years === 1 ? 'year' : 'years'}
-                      </strong>
-                    ) : null}
-                    {response.country ? (
-                      <>
-                        <span aria-hidden="true">·</span>
-                        <CountryFlag code={response.country} size="sm" />
-                      </>
-                    ) : null}
-                    {response.source && response.source !== 'network' ? (
-                      <>
-                        <span aria-hidden="true">·</span>
-                        via {EXPERT_ORIGIN_LABELS[response.source]}
-                      </>
-                    ) : null}
-                  </span>
+                  {/* Who they are at a glance: the name, then the country. */}
+                  {response.country ? (
+                    <span className={search.expertMeta}>
+                      <CountryFlag code={response.country} size="sm" />
+                    </span>
+                  ) : null}
                 </th>
                 <td className={search.expertiseCell}>{response.role}</td>
                 <td className={styles.count}>
