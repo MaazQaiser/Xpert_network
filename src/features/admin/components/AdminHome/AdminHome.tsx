@@ -3,13 +3,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  Button,
-  ClickableTile,
-  InlineLoading,
-  Link as CarbonLink,
-  SkeletonPlaceholder,
-} from '@carbon/react';
+import { Button, ClickableTile, InlineLoading, SkeletonPlaceholder } from '@carbon/react';
 import { ArrowUpRight } from '@carbon/icons-react';
 import { useSession } from '@/features/auth';
 import { FloatingComposer } from '@/features/goal-chat';
@@ -32,6 +26,14 @@ function partOfDay(now: Date = new Date()): string {
   if (hour < 12) return 'morning';
   if (hour < 18) return 'afternoon';
   return 'evening';
+}
+
+function briefLede(summary: HomeSummary): string {
+  const { newProjectEmails, expertsPendingReview, activeProjects } = summary;
+  const emailWord = newProjectEmails === 1 ? 'email' : 'emails';
+  const reviewWord = expertsPendingReview === 1 ? 'review is' : 'reviews are';
+  const active = String(activeProjects).padStart(2, '0');
+  return `We have ${newProjectEmails} new project ${emailWord}, ${expertsPendingReview} expert ${reviewWord} ready to review, and ${active} active projects.`;
 }
 
 type Turn = { id: string; question: string; answer: AssistantReply | null; error: unknown };
@@ -85,24 +87,24 @@ function SummaryCards({ summary, onAsk }: { summary: HomeSummary; onAsk: (q: str
     <ul className={styles.cards}>
       <SummaryCard
         href={routes.admin.inbox}
-        label="Emails received today"
-        value={summary.emailsToday}
-        action="Ask the assistant for the most important emails"
+        label="New project emails"
+        value={summary.newProjectEmails}
+        action="Ask the assistant about today’s new project emails"
         onAsk={() => onAsk(CARD_PROMPTS.emails)}
       />
       <SummaryCard
         href={routes.admin.projects}
-        label="Experts pending review"
+        label="Expert reviews ready"
         value={summary.expertsPendingReview}
-        action="Ask the assistant which experts need review"
+        action="Ask the assistant which expert reviews need sign-off"
         onAsk={() => onAsk(CARD_PROMPTS.experts)}
       />
       <SummaryCard
         href={routes.admin.projects}
-        label="New projects today"
-        value={summary.newProjectsToday}
-        action="Ask the assistant for today’s new projects"
-        onAsk={() => onAsk(CARD_PROMPTS.projects)}
+        label="Active projects"
+        value={summary.activeProjects}
+        action="Ask the assistant which active projects need you"
+        onAsk={() => onAsk(CARD_PROMPTS.active)}
       />
     </ul>
   );
@@ -113,19 +115,10 @@ type TodayProps = {
   onAsk: (question: string) => void;
 };
 
-/** Today's tip as one line, then the three counts as Carbon ClickableTiles ($layer-01). */
+/** The three counts as Carbon ClickableTiles ($layer-01). */
 function Today({ summary, onAsk }: TodayProps) {
-  const tip = summary.data?.tip;
   return (
     <section className={styles.today} aria-label="Today’s summary">
-      {tip ? (
-        <p className={styles.tip}>
-          <CarbonLink as={Link} href={tip.href} inline className={styles.tipLead}>
-            {tip.lead}
-          </CarbonLink>{' '}
-          · {tip.detail}
-        </p>
-      ) : null}
       {summary.isPending ? (
         <div aria-busy="true" aria-label="Loading today’s summary" className={styles.cards}>
           {[0, 1, 2].map((i) => (
@@ -153,7 +146,7 @@ export function AdminHome() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const turnCount = useRef(0);
   const [reaction, setReaction] = useState<'happy' | 'oops' | null>(null);
-  const name = session.data?.user?.name;
+  const name = session.data?.user?.name?.split(' ')[0];
 
   // A reaction plays once, then the mascot settles back to idle.
   useEffect(() => {
@@ -187,36 +180,41 @@ export function AdminHome() {
     });
   };
 
-  // Assistant start page: mascot, greeting and intro, today's tip and three count cards, the conversation,
-  // then suggestions and the ask field docked at the bottom.
+  // Once a question is asked, the page becomes the conversation: the greeting, the count cards
+  // and the suggestions leave, and the thread plus the ask field stay.
+  const chatting = turns.length > 0;
+
   return (
-    <div className={styles.root}>
+    <div className={chatting ? `${styles.root} ${styles.chatting}` : styles.root}>
       <div className={styles.stage}>
-        <header className={styles.intro}>
-          {/* Decorative: the line below names the assistant. Its mood mirrors the assistant:
+        {chatting ? null : (
+          <header className={styles.intro}>
+            {/* Decorative: the line below names the assistant. Its mood mirrors the assistant:
               resting, perking up while you type, thinking, or reacting to an answer. */}
-          <span className={styles.mascot} data-mood={mood} aria-hidden={true}>
-            <Image
-              src="/images/assistant-mascot.png"
-              alt=""
-              width={81}
-              height={96}
-              priority
-              className={styles.mascotImage}
-            />
-          </span>
-          <h1 className={styles.greeting}>
-            {name ? `Hey ${name}, good ${partOfDay()}.` : `Good ${partOfDay()}.`}
-          </h1>
-          <p className={styles.lede}>
-            Here’s what came in while you were away. I’ve already read the emails and drafted
-            project files. They just need your eyes.
-          </p>
-        </header>
+            <span className={styles.mascot} data-mood={mood} aria-hidden={true}>
+              <Image
+                src="/images/assistant-mascot.png"
+                alt=""
+                width={81}
+                height={96}
+                priority
+                className={styles.mascotImage}
+              />
+            </span>
+            <h1 className={styles.greeting}>
+              {name ? `Hey ${name}, good ${partOfDay()}.` : `Good ${partOfDay()}.`}
+            </h1>
+            <p className={styles.lede}>
+              {summary.data
+                ? briefLede(summary.data)
+                : 'Pulling together today’s emails, expert reviews and active projects…'}
+            </p>
+          </header>
+        )}
 
-        <Today summary={summary} onAsk={send} />
+        {chatting ? null : <Today summary={summary} onAsk={send} />}
 
-        {turns.length > 0 ? (
+        {chatting ? (
           <ol className={styles.thread} aria-label="Conversation with your AI assistant">
             {turns.map((turn, index) => (
               <li
@@ -260,21 +258,23 @@ export function AdminHome() {
       </div>
 
       <div className={styles.ask}>
-        <ul className={styles.prompts} aria-label="Suggested questions">
-          {SUGGESTED_PROMPTS.map((prompt) => (
-            <li key={prompt}>
-              <Button
-                kind="ghost"
-                size="sm"
-                className={styles.prompt}
-                onClick={() => send(prompt)}
-                disabled={ask.isPending}
-              >
-                {prompt}
-              </Button>
-            </li>
-          ))}
-        </ul>
+        {chatting ? null : (
+          <ul className={styles.prompts} aria-label="Suggested questions">
+            {SUGGESTED_PROMPTS.map((prompt) => (
+              <li key={prompt}>
+                <Button
+                  kind="ghost"
+                  size="sm"
+                  className={styles.prompt}
+                  onClick={() => send(prompt)}
+                  disabled={ask.isPending}
+                >
+                  {prompt}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
         <FloatingComposer
           label="Ask your AI assistant"
           placeholder="Ask anything about your emails, projects or experts…"

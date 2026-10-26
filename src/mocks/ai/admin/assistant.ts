@@ -236,7 +236,7 @@ export function assistantReply(
             })),
           },
         ],
-        chips: [ask('Show me today’s new projects', CARD_PROMPTS.projects)],
+        chips: [ask('Show me today’s new project emails', CARD_PROMPTS.emails)],
       },
     );
   }
@@ -298,7 +298,7 @@ export function assistantReply(
       `${project.id} project file, drafted from ${project.source.fileName ?? 'the client’s email'}`,
       {
         blocks: [{ kind: 'brief', projectId: project.id }],
-        chips: [ask('Show me today’s other new projects', CARD_PROMPTS.projects)],
+        chips: [ask('Show me today’s other new project emails', CARD_PROMPTS.emails)],
       },
     );
   }

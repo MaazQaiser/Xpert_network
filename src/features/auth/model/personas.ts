@@ -32,7 +32,7 @@ export const DEMO_ACCOUNTS: {
   {
     personaId: 'ops',
     role: 'admin',
-    name: 'Palto Kersion',
+    name: 'Umer',
     email: 'paltu@xpertnetwork.example',
     summary: 'Project manager',
   },

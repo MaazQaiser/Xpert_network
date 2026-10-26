@@ -10,7 +10,7 @@ import { PRJ_1043, PRJ_1044, type DraftProjectContent } from './newProjects';
 
 export const PROJECTS_INBOX = 'projects@xpertnetwork.example';
 export const PARTNERS_INBOX = 'partners@xpertnetwork.example';
-export const PM_NAME = 'Palto Kersion';
+export const PM_NAME = 'Umer';
 
 export type SentMail = {
   id: string;
@@ -98,29 +98,29 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
     },
     {
       id: 'req_lakeview_semis',
-      from: { name: 'Priya Raman', email: 'priya.raman@lakeview.example' },
-      company: 'Lakeview Consulting',
+      from: { name: 'Priya Raman', email: 'priya.raman@sintel.example' },
+      company: 'Sintel',
       to: PROJECTS_INBOX,
-      subject: 'Need 3 experts: semiconductor supply chain',
-      body: 'Hi, our RFP is attached (sorry, it’s a scan). We need 3 experts on advanced packaging capacity in Taiwan and Malaysia, ideally this month.',
+      subject: 'Market study — soil & groundwater remediation (BE / NL / DE)',
+      body: 'Hi — Sintel needs a commercial market assessment of in situ and on-site soil/groundwater remediation in Belgium, the Netherlands and Germany, including PFAS. Brief attached: ~15 expert interviews (~5 per country), questionnaire ahead of each call, and a do-not-contact list. Please review and quote.',
       receivedAt: t(42),
       status: 'brief_ready',
       attachment: {
-        name: 'RFP.pdf',
+        name: 'Sintel_Remediation_Market_Brief.pdf',
         kind: 'pdf',
         pages: 4,
-        size: '5.8 MB',
-        note: 'scanned, read with OCR',
+        size: '1.2 MB',
+        note: 'text layer found',
         progress: null,
       },
       steps: [
-        step('Email received and sender matched to client “Lakeview Consulting”', t(42)),
+        step('Email received and sender matched to client “Sintel”', t(42)),
         step('Attachment saved to secure storage', t(42)),
-        step('No text layer, so read 4 scanned pages with OCR', t(40)),
+        step('Text extracted from 4 pages', t(40)),
         step('Brief, requirements and 5 client questions extracted', t(38)),
         step('Waiting for your review before matching experts', null),
       ],
-      confirmations: ['“ideally this month” deadline is vague'],
+      confirmations: ['budget / interview fee not stated in the brief'],
       autoReply: null,
       projectId: 'PRJ-1044',
     },
@@ -194,7 +194,7 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
         step('Attachment saved to secure storage', t(60 * 27)),
         step('Criteria read from 3 sheets', t(60 * 27)),
         step('Brief, requirements and 6 client questions extracted', t(60 * 27)),
-        step('Approved by Palto Kersion and converted to PRJ-1039', t(60 * 25)),
+        step('Approved by Umer and converted to PRJ-1039', t(60 * 25)),
       ],
       confirmations: [],
       autoReply: null,
@@ -361,11 +361,14 @@ export function seedProjects(now = new Date()): Record<string, Project> {
     }),
     draftProject(PRJ_1044, {
       id: 'PRJ-1044',
-      name: 'Advanced packaging capacity — Taiwan and Malaysia',
+      name: 'Soil & groundwater remediation — BE / NL / DE',
       status: 'draft',
-      client: { id: 'cli_lakeview', name: 'Lakeview Consulting' },
-      contact: { name: 'Priya Raman', email: 'priya.raman@lakeview.example' },
-      source: { requestId: 'req_lakeview_semis', fileName: 'RFP.pdf' },
+      client: { id: 'cli_sintel', name: 'Sintel' },
+      contact: { name: 'Priya Raman', email: 'priya.raman@sintel.example' },
+      source: {
+        requestId: 'req_lakeview_semis',
+        fileName: 'Sintel_Remediation_Market_Brief.pdf',
+      },
       createdAt: t(38),
     }),
     makeProject({

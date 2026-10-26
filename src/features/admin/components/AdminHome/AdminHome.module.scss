@@ -37,6 +37,11 @@ $pt-mascot-float: 6s;
   padding-block: $spacing-07;
 }
 
+// A started conversation reads from the top. The ask field stays docked at the bottom.
+.chatting .stage {
+  justify-content: flex-start;
+}
+
 // ——— Mark and greeting ————————————————————————————————————————————————————
 
 .intro {

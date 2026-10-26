@@ -1,11 +1,9 @@
 import { z } from 'zod';
 
 export const homeSummarySchema = z.object({
-  emailsToday: z.number().int().min(0),
+  newProjectEmails: z.number().int().min(0),
   expertsPendingReview: z.number().int().min(0),
-  newProjectsToday: z.number().int().min(0),
-  /** One AI suggestion for where to start, with the record it points at. */
-  tip: z.object({ lead: z.string(), detail: z.string(), href: z.string() }).nullable(),
+  activeProjects: z.number().int().min(0),
 });
 export type HomeSummary = z.infer<typeof homeSummarySchema>;
 
@@ -82,9 +80,9 @@ export type AssistantReply = z.output<typeof assistantReplySchema>;
 
 /** What each Home summary card asks the assistant. */
 export const CARD_PROMPTS = {
-  emails: 'Show me the most important emails from today',
-  experts: 'Which experts need my review?',
-  projects: 'Show me today’s new projects',
+  emails: 'Show me today’s new project emails',
+  experts: 'Which expert reviews need my sign-off?',
+  active: 'Which active projects need me today?',
 } as const;
 
 export const assistantInputSchema = z.object({ text: z.string().trim().min(1).max(500) });

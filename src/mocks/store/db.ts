@@ -38,8 +38,16 @@ import type {
 } from '@/features/admin';
 import { seedInbox, seedMailAccounts, seedProjects, type SentMail } from '../fixtures/admin/seed';
 
+/**
+ * Bump when seeded admin inbox/project copy changes so saved demos pick up new briefs
+ * (localStorage otherwise keeps the old PRJ-1043/1044 text forever).
+ */
+export const ADMIN_FIXTURE_REV = 5;
+
 export type DemoState = {
   version: 2;
+  /** When behind {@link ADMIN_FIXTURE_REV}, draft fixture projects and their emails are refreshed. */
+  adminFixtureRev?: number;
   sessionUserId: string | null;
   /** Demo personas plus accounts created through sign-up (F0). */
   users: Record<string, User>;
@@ -134,6 +142,7 @@ function seed(): DemoState {
   const homeStories = seedHomeStories();
   const state: DemoState = {
     version: 2,
+    adminFixtureRev: ADMIN_FIXTURE_REV,
     sessionUserId: null,
     users: Object.fromEntries(Object.values(USERS).map((user) => [user.id, user])),
     verificationSentAt: {},
@@ -194,6 +203,9 @@ function withPersonaIdentity(saved: DemoState['users'] | undefined): DemoState['
   return users;
 }
 
+/** Draft fixture projects whose copy should refresh when {@link ADMIN_FIXTURE_REV} bumps. */
+const REFRESHABLE_DRAFT_IDS = new Set(['PRJ-1042', 'PRJ-1043', 'PRJ-1044']);
+
 /** Adds seeded requests and refreshes home-story chats a tester's saved data predates. */
 function withNewSeeds(saved: DemoState, fresh: DemoState): DemoState {
   const missingRequests = Object.values(fresh.requests).filter((r) => !saved.requests?.[r.id]);
@@ -217,11 +229,24 @@ function withNewSeeds(saved: DemoState, fresh: DemoState): DemoState {
   const missingProjects = Object.values(fresh.adminProjects).filter(
     (p) => !saved.adminProjects?.[p.id],
   );
+  // Prefer the rev from the saved demo (may be missing on older localStorage).
+  const savedRev = saved.adminFixtureRev;
+  const fixtureRevBehind = (typeof savedRev === 'number' ? savedRev : 0) < ADMIN_FIXTURE_REV;
+  // Still-draft fixture projects: replace with fresh seed when the fixture pack was updated,
+  // or when the seeded name/brief no longer matches (content swap without a rev bump).
+  const refreshedDrafts = Object.values(fresh.adminProjects).filter((p) => {
+    if (!REFRESHABLE_DRAFT_IDS.has(p.id) || p.status !== 'draft') return false;
+    const existing = saved.adminProjects?.[p.id];
+    if (!existing) return false;
+    if (existing.status !== 'draft') return false;
+    return fixtureRevBehind || existing.name !== p.name || existing.brief !== p.brief;
+  });
   if (
     missingRequests.length === 0 &&
     storyBriefs.length === 0 &&
     !needsAdminSlices &&
-    missingProjects.length === 0
+    missingProjects.length === 0 &&
+    refreshedDrafts.length === 0
   ) {
     return saved;
   }
@@ -230,8 +255,15 @@ function withNewSeeds(saved: DemoState, fresh: DemoState): DemoState {
       missingRequests.some((r) => r.delivery?.reportId === report.item.id),
     ),
   );
+  const inboxFromRefreshed = Object.fromEntries(
+    refreshedDrafts
+      .map((p) => (p.source.requestId ? fresh.adminInbox[p.source.requestId] : undefined))
+      .filter((r): r is NonNullable<typeof r> => r !== undefined)
+      .map((r) => [r.id, r]),
+  );
   const merged: DemoState = {
     ...saved,
+    adminFixtureRev: ADMIN_FIXTURE_REV,
     adminMatches: saved.adminMatches ?? {},
     adminShortlists: saved.adminShortlists ?? {},
     adminScreening: saved.adminScreening ?? {},
@@ -252,10 +284,12 @@ function withNewSeeds(saved: DemoState, fresh: DemoState): DemoState {
           .filter((r) => r !== undefined)
           .map((r) => [r.id, r]),
       ),
+      ...inboxFromRefreshed,
     },
     adminProjects: {
       ...saved.adminProjects,
       ...Object.fromEntries(missingProjects.map((p) => [p.id, p])),
+      ...Object.fromEntries(refreshedDrafts.map((p) => [p.id, p])),
     },
     requests: {
       ...saved.requests,
@@ -358,9 +392,19 @@ function load(): DemoState {
     // Slices added after a tester's data was saved fall back to the seed.
     if (parsed.version !== 2) return seed();
     const fresh = seed();
+    // Keep the saved fixture rev (or undefined) — don't inherit fresh's rev before merge,
+    // or stale projects never refresh.
     return withNewSeeds(
       withFreshClock(
-        withAdminStory({ ...fresh, ...parsed, users: withPersonaIdentity(parsed.users) }, fresh),
+        withAdminStory(
+          {
+            ...fresh,
+            ...parsed,
+            users: withPersonaIdentity(parsed.users),
+            adminFixtureRev: parsed.adminFixtureRev,
+          },
+          fresh,
+        ),
         fresh,
       ),
       fresh,

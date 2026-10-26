@@ -36,6 +36,7 @@ export function InboxStatusTag({
 const SENDER_PHOTOS: Record<string, string> = {
   'jenna.cho@ridgelineinsights.example': '/images/avatars/jenna-cho.jpg',
   'omar.siddiqui@northgate.example': '/images/avatars/omar-siddiqui.jpg',
+  'priya.raman@sintel.example': '/images/avatars/priya-raman.jpg',
   'priya.raman@lakeview.example': '/images/avatars/priya-raman.jpg',
   'j.okafor@brightlinepe.example': '/images/avatars/james-okafor.jpg',
   'elena@corvidpartners.example': '/images/avatars/elena-duarte.jpg',

@@ -85,19 +85,6 @@ function toSummary(project: Project): ProjectSummary {
   return { id, name, status, client, owner, createdAt, pendingExpertReviews };
 }
 
-function draftTip(project: Project): NonNullable<HomeSummary['tip']> {
-  const open = project.confirmations.filter((c) => c.state === 'open').length;
-  const next =
-    open === 0
-      ? 'The project file is ready to approve.'
-      : `${open === 1 ? '1 thing needs' : `${open} things need`} confirming before matching.`;
-  return {
-    lead: `Start with ${project.id}`,
-    detail: `${project.contact.name} at ${project.client.name} is waiting on experts. ${next}`,
-    href: `/admin/projects/${project.id}/brief`,
-  };
-}
-
 function clarificationDraft(project: Project) {
   const asks = project.confirmations
     .filter((c) => c.state !== 'confirmed')
@@ -563,16 +550,20 @@ export const adminHandlers = [
     const { adminInbox, adminProjects } = db.get();
     const empty = getControls().emptyData;
     const projects = empty ? [] : Object.values(adminProjects);
-    const draft = projects
-      .filter((p) => p.status === 'draft')
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
     const summary: HomeSummary = {
-      emailsToday: empty
+      newProjectEmails: empty
         ? 0
-        : Object.values(adminInbox).filter((r) => isToday(r.receivedAt, now)).length,
+        : Object.values(adminInbox).filter(
+            (r) =>
+              isToday(r.receivedAt, now) &&
+              r.status === 'brief_ready' &&
+              // Featured mail #1 (sports headphones) is opened from the tip; count the others.
+              r.id !== 'req_ridgeline_audio',
+          ).length,
       expertsPendingReview: projects.reduce((sum, p) => sum + p.pendingExpertReviews, 0),
-      newProjectsToday: projects.filter((p) => isToday(p.createdAt, now)).length,
-      tip: draft ? draftTip(draft) : null,
+      activeProjects: projects.filter(
+        (p) => (p.status === 'matching' || p.status === 'pitching') && p.id !== 'PRJ-1039',
+      ).length,
     };
     return HttpResponse.json(summary);
   }),

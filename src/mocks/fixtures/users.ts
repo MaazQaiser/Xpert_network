@@ -38,7 +38,7 @@ export const USERS: Record<PersonaId, User> = {
     id: 'usr_ops',
     personaId: 'ops',
     role: 'admin',
-    name: 'Palto Kersion',
+    name: 'Umer',
     title: 'Project manager',
     organisation: 'Xpert Network',
     email: 'paltu@xpertnetwork.example',

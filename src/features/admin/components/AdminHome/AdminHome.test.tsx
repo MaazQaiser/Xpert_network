@@ -7,20 +7,19 @@ import { renderWithProviders } from '@/test/render';
 import { AdminHome } from './AdminHome';
 
 describe('AdminHome (F11, screen 01)', () => {
-  it('greets the PM, shows the summary and the AI tip', async () => {
+  it('greets the PM with a brief lede and summary counts', async () => {
     const { container } = renderWithProviders(<AdminHome />, { persona: 'ops' });
+    expect(await screen.findByRole('heading', { name: /Hey Umer, good/ })).toBeInTheDocument();
     expect(
-      await screen.findByRole('heading', { name: /Hey Palto Kersion, good/ }),
+      await screen.findByText(
+        /We have 2 new project emails, 4 expert reviews are ready to review, and 02 active projects/,
+      ),
     ).toBeInTheDocument();
     expect(
       await screen.findByRole('link', {
-        name: 'Experts pending review: 4. Ask the assistant which experts need review',
+        name: 'Expert reviews ready: 4. Ask the assistant which expert reviews need sign-off',
       }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Start with PRJ-1042' })).toHaveAttribute(
-      'href',
-      '/admin/projects/PRJ-1042/brief',
-    );
     await expectNoAxeViolations(container);
   });
 
@@ -38,8 +37,14 @@ describe('AdminHome (F11, screen 01)', () => {
 
   it('new projects card: pick an email, get its brief on a canvas, open the project file', async () => {
     renderWithProviders(<AdminHome />, { persona: 'ops' });
-    await userEvent.click(await screen.findByRole('link', { name: /New projects today: 3/ }));
+    await userEvent.click(await screen.findByRole('link', { name: /New project emails: 2/ }));
     expect(await screen.findByText(/3 new projects came in today/)).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /Hey Umer/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Expert reviews ready/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: 'Suggested questions' })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('list', { name: 'Conversation with your AI assistant' }),
+    ).toBeInTheDocument();
     const emails = screen.getByRole('list', { name: 'Emails' });
     expect(within(emails).getAllByRole('listitem')).toHaveLength(3);
     await userEvent.click(
@@ -67,15 +72,13 @@ describe('AdminHome (F11, screen 01)', () => {
     expect(db.get().adminProjects['PRJ-1043']?.brief).toMatch(/^Northgate needs 4–5 calls/);
   });
 
-  it('emails card: the top 3 emails, then a summary with next steps', async () => {
+  it('new project emails card: lists drafted projects from today’s mail', async () => {
     renderWithProviders(<AdminHome />, { persona: 'ops' });
-    await userEvent.click(await screen.findByRole('link', { name: /Emails received today/ }));
+    await userEvent.click(await screen.findByRole('link', { name: /New project emails: 2/ }));
     const emails = await screen.findByRole('list', { name: 'Emails' });
-    expect(within(emails).getAllByRole('listitem')).toHaveLength(3);
-    await userEvent.click(within(emails).getAllByRole('button', { name: /Summarise it/ })[0]!);
-    expect(await screen.findByRole('article', { name: /Summary of/ })).toBeInTheDocument();
+    expect(within(emails).getAllByRole('listitem').length).toBeGreaterThanOrEqual(2);
     expect(
-      screen.getAllByRole('list', { name: 'Suggested next steps' }).at(-1),
+      screen.getByRole('button', { name: /Show the brief: Omar Siddiqui/ }),
     ).toBeInTheDocument();
   });
 
@@ -84,12 +87,12 @@ describe('AdminHome (F11, screen 01)', () => {
     const mascot = () => container.querySelector('[data-mood]');
     expect(mascot()).toHaveAttribute('data-mood', 'thinking');
     await screen.findByRole('link', {
-      name: 'Experts pending review: 4. Ask the assistant which experts need review',
+      name: 'Expert reviews ready: 4. Ask the assistant which expert reviews need sign-off',
     });
     expect(mascot()).toHaveAttribute('data-mood', 'idle');
     await userEvent.click(screen.getByRole('button', { name: 'Which experts need my review?' }));
     expect(await screen.findByText(/4 expert answers are waiting/)).toBeInTheDocument();
-    expect(mascot()).toHaveAttribute('data-mood', 'happy');
+    expect(mascot()).not.toBeInTheDocument();
   });
 
   it('shows an error with retry when the summary fails', async () => {

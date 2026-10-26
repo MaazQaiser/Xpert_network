@@ -36,8 +36,11 @@ describe('admin mock API (F11–F12)', () => {
   it('summarises today from the store', async () => {
     logIn('usr_ops');
     const { body } = await call('/api/admin/summary');
-    expect(body).toMatchObject({ emailsToday: 5, expertsPendingReview: 4, newProjectsToday: 3 });
-    expect(body.tip).toMatchObject({ lead: 'Start with PRJ-1042' });
+    expect(body).toMatchObject({
+      newProjectEmails: 2,
+      expertsPendingReview: 4,
+      activeProjects: 2,
+    });
   });
 
   it('edits and resets the client questions to the AI draft', async () => {
@@ -131,7 +134,7 @@ describe('admin mock API (F11–F12)', () => {
       topic: 'Own approval',
       drop: 'Customer reaction',
     },
-    { id: 'PRJ-1044', count: 38, head: 'exp_6207', topic: 'New capacity', drop: 'Line cost' },
+    { id: 'PRJ-1044', count: 38, head: 'exp_6207', topic: 'Market sizing', drop: 'Cost & margins' },
   ])('runs $id from approval to the call with its own experts', async (story) => {
     logIn('usr_ops');
     const base = `/api/admin/projects/${story.id}`;
