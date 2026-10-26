@@ -46,7 +46,7 @@ const PAGE_SIZES = [7, 14, 21];
 const HEADERS = [
   { key: 'expert', header: 'Expert' },
   { key: 'role', header: 'Relevant role' },
-  { key: 'years', header: 'Yrs' },
+  { key: 'years', header: 'Experience' },
   { key: 'country', header: 'Country' },
   { key: 'match', header: 'Match' },
   { key: 'lastEngaged', header: 'Last engaged' },
@@ -158,7 +158,7 @@ function MatchesPanel({ project, matches }: { project: Project; matches: MatchRe
     id: expert.id,
     expert: expert.label,
     role: expert.role,
-    years: String(expert.years),
+    years: `${expert.years} ${expert.years === 1 ? 'year' : 'years'}`,
     country: expert.country,
     match: `${expert.matchPercent}%`,
     lastEngaged: expert.lastEngagedAt ? formatRelative(expert.lastEngagedAt) : 'Never',

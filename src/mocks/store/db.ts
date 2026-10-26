@@ -303,6 +303,52 @@ function withAdminStory(saved: DemoState, fresh: DemoState): DemoState {
   };
 }
 
+const ISO_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
+const STALE_MS = 6 * 60 * 60 * 1000;
+
+function shiftTimes<T>(value: T, deltaMs: number): T {
+  if (typeof value === 'string') {
+    return (
+      ISO_TIME.test(value) ? new Date(new Date(value).getTime() + deltaMs).toISOString() : value
+    ) as T;
+  }
+  if (Array.isArray(value)) return value.map((item) => shiftTimes(item, deltaMs)) as T;
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, shiftTimes(item, deltaMs)]),
+    ) as T;
+  }
+  return value;
+}
+
+/**
+ * The admin story always happens today. A demo saved days ago would otherwise show no emails or
+ * projects "today" on Home, so its admin timeline moves forward by how stale it is, measured on
+ * the PRJ-1042 email; times stay in the same order and distance from each other.
+ */
+function withFreshClock(saved: DemoState, fresh: DemoState): DemoState {
+  const anchorId = fresh.adminProjects['PRJ-1042']?.source.requestId;
+  const savedAt = anchorId ? saved.adminInbox?.[anchorId]?.receivedAt : undefined;
+  const freshAt = anchorId ? fresh.adminInbox[anchorId]?.receivedAt : undefined;
+  if (!savedAt || !freshAt) return saved;
+  const deltaMs = new Date(freshAt).getTime() - new Date(savedAt).getTime();
+  if (deltaMs < STALE_MS) return saved;
+  return {
+    ...saved,
+    adminInbox: shiftTimes(saved.adminInbox, deltaMs),
+    adminMailAccounts: shiftTimes(saved.adminMailAccounts, deltaMs),
+    adminProjects: shiftTimes(saved.adminProjects, deltaMs),
+    adminMail: shiftTimes(saved.adminMail, deltaMs),
+    adminMatches: shiftTimes(saved.adminMatches, deltaMs),
+    adminShortlists: shiftTimes(saved.adminShortlists, deltaMs),
+    adminScreeningSentAt: shiftTimes(saved.adminScreeningSentAt, deltaMs),
+    adminAvailability: shiftTimes(saved.adminAvailability, deltaMs),
+    adminClientDraft: shiftTimes(saved.adminClientDraft, deltaMs),
+    adminBooking: shiftTimes(saved.adminBooking, deltaMs),
+    adminCall: shiftTimes(saved.adminCall, deltaMs),
+  };
+}
+
 function load(): DemoState {
   if (typeof window === 'undefined') return seed();
   try {
@@ -313,7 +359,10 @@ function load(): DemoState {
     if (parsed.version !== 2) return seed();
     const fresh = seed();
     return withNewSeeds(
-      withAdminStory({ ...fresh, ...parsed, users: withPersonaIdentity(parsed.users) }, fresh),
+      withFreshClock(
+        withAdminStory({ ...fresh, ...parsed, users: withPersonaIdentity(parsed.users) }, fresh),
+        fresh,
+      ),
       fresh,
     );
   } catch {

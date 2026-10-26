@@ -123,6 +123,60 @@ describe('admin mock API (F11–F12)', () => {
     expect(ids).toHaveLength(10);
   });
 
+  it.each([
+    {
+      id: 'PRJ-1043',
+      count: 64,
+      head: 'exp_5310',
+      topic: 'Own approval',
+      drop: 'Customer reaction',
+    },
+    { id: 'PRJ-1044', count: 38, head: 'exp_6207', topic: 'New capacity', drop: 'Line cost' },
+  ])('runs $id from approval to the call with its own experts', async (story) => {
+    logIn('usr_ops');
+    const base = `/api/admin/projects/${story.id}`;
+    expect((await call(`${base}/approve`, 'POST')).status).toBe(200);
+    const matches = await call(`${base}/matches`);
+    const experts = matches.body.experts as { id: string }[];
+    expect(experts).toHaveLength(story.count);
+    expect(experts[0]?.id).toBe(story.head);
+
+    const three = experts.slice(0, 3).map((e) => e.id);
+    const availability = await call(`${base}/availability?experts=${three.join(',')}`);
+    await call(`${base}/availability`, 'POST', {
+      action: 'prepare_client',
+      holdSlots: true,
+      experts: (availability.body.experts as { expertId: string; slots: { id: string }[] }[]).map(
+        (e) => ({ expertId: e.expertId, slotIds: e.slots.map((slot) => slot.id) }),
+      ),
+    });
+    const draft = await call(`${base}/client-draft`);
+    expect(draft.body.questionTopics).toContain(story.topic);
+    await call(`${base}/client-draft`, 'POST', {
+      action: 'send',
+      subject: draft.body.subject,
+      intro: draft.body.intro,
+      expertIds: three,
+      settings: draft.body.settings,
+    });
+    await call(`${base}/booking`, 'POST', { action: 'sync', standbyIds: [] });
+    const booking = db.get().adminBooking[story.id]!;
+    expect(booking.picks[1]?.note).toBeTruthy();
+    await call(`${base}/booking`, 'POST', {
+      action: 'lock',
+      message: { ...booking.message, attachInvites: true, revealNames: true },
+    });
+
+    const session = await call(`${base}/call`);
+    const topics = session.body.questionTopics as string[];
+    const requests = session.body.requests as { kind: string; questionIndex: number | null }[];
+    expect(requests.find((r) => r.kind === 'remove_requirement')?.questionIndex).toBe(
+      topics.indexOf(story.drop),
+    );
+    const lines = session.body.lines as { text: string }[];
+    expect(lines.some((line) => /headphone|Shokz|hike/i.test(line.text))).toBe(false);
+  });
+
   it('the assistant answers from the store', async () => {
     logIn('usr_ops');
     const { body } = await call('/api/admin/assistant', 'POST', {

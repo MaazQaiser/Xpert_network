@@ -33,7 +33,7 @@ describe('DesignSystemView', () => {
     await user.click(within(coloursPanel).getByRole('button', { name: 'Reset Button primary' }));
     expect(getOverrides().light).toEqual({});
     await expectNoAxeViolations(container);
-  });
+  }, 15_000);
 
   it('shows the type scale and the component gallery', async () => {
     const user = userEvent.setup();

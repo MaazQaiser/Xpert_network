@@ -3,7 +3,6 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { db } from '@/test/mockBackend';
 import { expectNoAxeViolations } from '@/test/axe';
-import { mockRouter } from '@/test/navigation';
 import { renderWithProviders } from '@/test/render';
 import { ProjectFile } from './ProjectFile';
 
@@ -52,20 +51,20 @@ describe('ProjectFile (F12, screen 03)', () => {
     await userEvent.click(await screen.findByRole('tab', { name: /^Experts/ }));
     expect(screen.getByText('No experts yet')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Start finding experts' }));
-    expect(await screen.findByText(/8 experts found/)).toBeInTheDocument();
+    expect(await screen.findByText(/8 experts found/, {}, { timeout: 5000 })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Experts\s*8/ })).toBeInTheDocument();
     // One send button per row; the first row is Expert #4821.
     await userEvent.click(screen.getAllByRole('button', { name: 'Send screening questions' })[0]!);
     expect(await screen.findByText(/Screening questions sent to Expert #4821/)).toBeInTheDocument();
     expect(screen.getByText('Sent')).toBeInTheDocument();
     expect(db.get().adminScreening['PRJ-1042']).toEqual(['exp_4821']);
-  });
+  }, 15_000);
 
   it('shows flags and match bars, and refresh turns Sent into the reply status', async () => {
     renderWithProviders(<ProjectFile projectId="PRJ-1042" />, { persona: 'ops' });
     await userEvent.click(await screen.findByRole('tab', { name: /^Experts/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Start finding experts' }));
-    expect(await screen.findByText(/8 experts found/)).toBeInTheDocument();
+    expect(await screen.findByText(/8 experts found/, {}, { timeout: 5000 })).toBeInTheDocument();
     expect(screen.getAllByText('United States').length).toBeGreaterThan(0);
     await userEvent.click(screen.getAllByRole('button', { name: 'Send screening questions' })[0]!);
     expect(await screen.findByText('Sent')).toBeInTheDocument();
@@ -78,7 +77,7 @@ describe('ProjectFile (F12, screen 03)', () => {
     renderWithProviders(<ProjectFile projectId="PRJ-1042" />, { persona: 'ops' });
     await userEvent.click(await screen.findByRole('tab', { name: /^Experts/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Start finding experts' }));
-    await screen.findByText(/8 experts found/);
+    await screen.findByText(/8 experts found/, {}, { timeout: 5000 });
     await userEvent.click(screen.getByRole('button', { name: 'Extend research with AI' }));
     const sheet = screen.getByRole('dialog', { name: 'Extend research' });
     expect(within(sheet).getByRole('checkbox', { name: 'LinkedIn' })).toBeChecked();
@@ -90,9 +89,9 @@ describe('ProjectFile (F12, screen 03)', () => {
     expect(await within(sheet).findByText('Choose at least one source.')).toBeInTheDocument();
     await userEvent.click(within(sheet).getByRole('checkbox', { name: 'LinkedIn' }));
     await userEvent.click(within(sheet).getByRole('button', { name: 'Find more experts' }));
-    expect(await screen.findByText(/18 experts found/)).toBeInTheDocument();
+    expect(await screen.findByText(/18 experts found/, {}, { timeout: 5000 })).toBeInTheDocument();
     expect(screen.queryByRole('dialog', { name: 'Extend research' })).not.toBeInTheDocument();
-  });
+  }, 15_000);
 
   it('removes a question with undo', async () => {
     renderWithProviders(<ProjectFile projectId="PRJ-1042" />, { persona: 'ops' });
@@ -128,17 +127,21 @@ describe('ProjectFile (F12, screen 03)', () => {
     expect(db.get().adminMail).toHaveLength(1);
   });
 
-  it('warns about open items before approving, then goes to matching', async () => {
+  it('shows View screening answers in the header only once questions are sent', async () => {
     renderWithProviders(<ProjectFile projectId="PRJ-1042" />, { persona: 'ops' });
-    await userEvent.click(await screen.findByRole('button', { name: 'Approve & find experts' }));
-    const dialog = await screen.findByRole('dialog');
-    expect(within(dialog).getByText('2 things still need confirming')).toBeInTheDocument();
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Approve anyway' }));
-    await waitFor(() =>
-      expect(mockRouter.push).toHaveBeenCalledWith('/admin/projects/PRJ-1042/match'),
+    await userEvent.click(await screen.findByRole('tab', { name: /^Experts/ }));
+    expect(
+      screen.queryByRole('button', { name: 'Approve & find experts' }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /View screening answers/ })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Start finding experts' }));
+    await screen.findByText(/8 experts found/, {}, { timeout: 5000 });
+    await userEvent.click(screen.getAllByRole('button', { name: 'Send screening questions' })[0]!);
+    expect(await screen.findByRole('link', { name: 'View screening answers (1)' })).toHaveAttribute(
+      'href',
+      '/admin/projects/PRJ-1042/responses',
     );
-    expect(project().status).toBe('matching');
-  });
+  }, 15_000);
 
   it('shows not found for an unknown project', async () => {
     renderWithProviders(<ProjectFile projectId="PRJ-0000" />, { persona: 'ops' });

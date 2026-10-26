@@ -340,16 +340,3 @@
   color: $text-secondary;
   gap: $spacing-03;
 }
-
-.modalText {
-  @include type-style('body-01');
-
-  margin-block-end: $spacing-04;
-}
-
-.modalList {
-  @include type-style('body-01');
-
-  padding-inline-start: $spacing-05;
-  list-style: disc;
-}

@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import {
   Button,
@@ -18,7 +17,6 @@ import {
   Tag,
 } from '@carbon/react';
 import {
-  ArrowRight,
   CheckmarkFilled,
   CircleDash,
   InProgress,
@@ -29,7 +27,6 @@ import {
   Send,
 } from '@carbon/icons-react';
 import { CountryFlag } from '@/shared/ui';
-import { routes } from '@/shared/config/routes';
 import { useExpertSearch, useResponses, useSendScreening } from '../../api/queries';
 import { RESPONSE_STATUS_LABELS, type ResponseStatus } from '../../model/responses.schema';
 import type { ExtendResearch } from '../../model/expertSearch.schema';
@@ -39,7 +36,7 @@ import { ExtendResearchSheet } from './ExtendResearchSheet';
 import type { ProjectNotice } from './ProjectFile';
 import styles from './ExpertsTab.module.scss';
 
-const HEADERS = ['Expert', 'Relevant role', 'Yrs', 'Country', 'Match', 'Screening'] as const;
+const HEADERS = ['Expert', 'Relevant role', 'Experience', 'Country', 'Match', 'Screening'] as const;
 const FIRST_BATCH = 8;
 // Found experts join the table one at a time, so the search reads as work in progress.
 const REVEAL_MS = process.env.NODE_ENV === 'test' ? 0 : 450;
@@ -163,7 +160,9 @@ export function ExpertsTab({ project, onFound, onNotice }: ExpertsTabProps) {
               ? 'Searching the expert network…'
               : phase === 'revealing'
                 ? `Found ${shown} of ${experts.length}…`
-                : `${experts.length} experts found${sent.length > 0 ? ` · ${sent.length} sent screening questions` : ''}.`}
+                : experts.length === 0
+                  ? 'No matching experts found yet.'
+                  : `${experts.length} experts found${sent.length > 0 ? ` · ${sent.length} sent screening questions` : ''}.`}
         </p>
       </div>
 
@@ -197,7 +196,9 @@ export function ExpertsTab({ project, onFound, onNotice }: ExpertsTabProps) {
                         {expert.role}
                       </Tag>
                     </TableCell>
-                    <TableCell>{expert.years}</TableCell>
+                    <TableCell>
+                      {expert.years} {expert.years === 1 ? 'year' : 'years'}
+                    </TableCell>
                     <TableCell>
                       <CountryFlag code={expert.country} />
                     </TableCell>
@@ -262,6 +263,19 @@ export function ExpertsTab({ project, onFound, onNotice }: ExpertsTabProps) {
                   </TableCell>
                 </TableRow>
               ) : null}
+              {phase === 'done' && experts.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={HEADERS.length}>
+                    <div className={styles.empty}>
+                      <p className={styles.emptyTitle}>No matching experts yet</p>
+                      <p className={styles.emptyText}>
+                        No one in the current pool fits this expert profile. Extend the research to
+                        look further, for example on LinkedIn.
+                      </p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : null}
             </TableBody>
           </Table>
         </TableContainer>
@@ -271,7 +285,7 @@ export function ExpertsTab({ project, onFound, onNotice }: ExpertsTabProps) {
         <InlineLoading description="Adding experts as they’re found…" />
       ) : null}
 
-      {phase === 'done' && remaining === 0 ? (
+      {phase === 'done' && remaining === 0 && experts.length > 0 ? (
         <InlineNotification
           kind="info"
           lowContrast
@@ -292,18 +306,6 @@ export function ExpertsTab({ project, onFound, onNotice }: ExpertsTabProps) {
           >
             Extend research with AI
           </Button>
-          {/* Once questions are out, the next step is reading who answered (screen 08). */}
-          {sent.length > 0 ? (
-            <Button
-              as={Link}
-              href={routes.admin.projectStep(project.id, 'responses')}
-              kind="tertiary"
-              size="lg"
-              renderIcon={ArrowRight}
-            >
-              View screening answers ({sent.length})
-            </Button>
-          ) : null}
         </div>
       ) : null}
 

@@ -9,6 +9,7 @@ import type {
   TimeSlot,
 } from '@/features/admin';
 import { PM_NAME, PROJECTS_INBOX } from './seed';
+import { storyFor } from './stories';
 
 const PLATFORM = 'Xpert Network';
 
@@ -35,7 +36,7 @@ const at = (iso: string, deltaMs: number) =>
 
 /**
  * Screen 11: the client's scripted reply to the email sent from screen 10. They pick the first
- * one or two experts, and for PRJ-1042 add a note for Expert B.
+ * one or two experts, and for projects with a story add a note for Expert B.
  */
 export function buildBooking(project: Project, draft: ClientDraft, now: Date): Booking {
   const first = draft.to.name.split(' ')[0] ?? draft.to.name;
@@ -43,7 +44,7 @@ export function buildBooking(project: Project, draft: ClientDraft, now: Date): B
   const chosen = draft.experts.slice(0, count);
   const rest = draft.experts.slice(count);
   const noteFor = (index: number) =>
-    project.id === 'PRJ-1042' && index === 1 ? 'their night-hiking setup' : null;
+    index === 1 ? (storyFor(project.id)?.noteForB ?? null) : null;
 
   const picks: BookingPick[] = chosen.map((expert, index) => ({
     expertId: expert.expertId,
@@ -149,15 +150,11 @@ export function buildBooking(project: Project, draft: ClientDraft, now: Date): B
       reminders: '24 h + 1 h before',
     },
     briefing: {
-      context:
-        project.id === 'PRJ-1042'
-          ? 'A consumer research firm is studying how US thru-hikers and trail runners use headphones: use cases, pain points, staying aware of their surroundings and an ear-clip design.'
-          : `A client is researching ${project.name}.`,
+      context: storyFor(project.id)?.briefing ?? `A client is researching ${project.name}.`,
       questions: project.questions.map((q) => q.text),
       doNotShare:
-        project.id === 'PRJ-1042'
-          ? 'Details of unreleased products you have tested for a brand, or anything under NDA.'
-          : 'Confidential information from current or former employers, or anything under NDA.',
+        storyFor(project.id)?.doNotShare ??
+        'Confidential information from current or former employers, or anything under NDA.',
     },
   };
 }

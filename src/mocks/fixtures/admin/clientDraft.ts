@@ -6,7 +6,7 @@ import type {
   Project,
   TimeSlot,
 } from '@/features/admin';
-import { PRJ_1042_TOPICS } from './prj1042';
+import { storyFor } from './stories';
 import { answerFor } from './responses';
 import { expertPerson } from './expertPeople';
 
@@ -34,8 +34,7 @@ export function buildClientDraft(
   now: Date,
 ): ClientDraft {
   const topics = project.questions.map(
-    (_, index) =>
-      (project.id === 'PRJ-1042' ? PRJ_1042_TOPICS[index] : undefined) ?? `Question ${index + 1}`,
+    (_, index) => storyFor(project.id)?.topics[index] ?? `Question ${index + 1}`,
   );
   const count = chosen.length;
   // Questions are spread round-robin so every question is covered by at least one expert.
@@ -50,7 +49,9 @@ export function buildClientDraft(
       role: expert.role,
       years: expert.years,
       country: expert.country,
-      quote: answerFor(expert.id, firstQuestion) ?? 'Answered the screening questions in depth.',
+      quote:
+        answerFor(project.id, expert.id, firstQuestion) ??
+        'Answered the screening questions in depth.',
       bestFor: covers.map((q) => topics[q] ?? `Question ${q + 1}`),
       covers,
       rateHint: expert.rateHint,

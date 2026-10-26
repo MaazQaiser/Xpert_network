@@ -25,7 +25,8 @@ import { createId } from '@/shared/lib/id';
 import { getControls } from '../controls';
 import { assistantReply } from '../ai/admin/assistant';
 import { buildShortlist, swapOrRemove } from '../ai/admin/shortlist';
-import { emptyMatches, seedPrj1042Matches } from '../fixtures/admin/experts';
+import { emptyMatches, seedMatches } from '../fixtures/admin/experts';
+import { storyFor } from '../fixtures/admin/stories';
 import { buildResponses } from '../fixtures/admin/responses';
 import { buildAvailability } from '../fixtures/admin/availability';
 import { buildClientDraft } from '../fixtures/admin/clientDraft';
@@ -821,7 +822,10 @@ export const adminHandlers = [
     }
     const now = new Date();
     const existing = db.get().adminMatches[project.id];
-    if (existing) return HttpResponse.json(matchResultSchema.parse(existing));
+    // A match list saved empty before this project had an expert pool is rebuilt.
+    if (existing && (existing.experts.length > 0 || !storyFor(project.id))) {
+      return HttpResponse.json(matchResultSchema.parse(existing));
+    }
     const matches = ensureMatches(project, now);
     db.update((draft) => {
       draft.adminMatches[project.id] = matches;
@@ -937,6 +941,6 @@ export const adminHandlers = [
 ];
 
 function ensureMatches(project: Project, now: Date): MatchResult {
-  if (project.id === 'PRJ-1042') return seedPrj1042Matches(now);
-  return emptyMatches(project.id, now);
+  const story = storyFor(project.id);
+  return story ? seedMatches(story, now) : emptyMatches(project.id, now);
 }

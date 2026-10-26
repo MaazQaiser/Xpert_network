@@ -251,6 +251,7 @@ export function useExpertSearch(id: string) {
 
 /** Sends the client questions to one expert as screening questions (email sandbox). */
 export function useSendScreening(id: string) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (expertId: string) =>
       apiRequest(`/admin/projects/${id}/screening`, {
@@ -258,6 +259,8 @@ export function useSendScreening(id: string) {
         body: { expertId },
         schema: screeningResultSchema,
       }),
+    // The project file's "View screening answers" counts who was sent the questions.
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.responses(id) }),
   });
 }
 

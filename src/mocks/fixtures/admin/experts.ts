@@ -1,30 +1,5 @@
 import type { MatchedExpert, MatchResult } from '@/features/admin';
-
-// The brief asks for US participants only.
-const COUNTRIES = ['US'] as const;
-const ROLES = [
-  'Thru-hiker, Pacific Crest Trail',
-  'Trail runner, 50 km ultras',
-  'Backpacker, Appalachian Trail sections',
-  'Trail runner, mountain races',
-  'Thru-hiker, Colorado Trail',
-  'Trail runner and backpacker',
-  'Backpacker, John Muir Trail',
-  'Trail runner, desert ultras',
-  'Thru-hiker, Continental Divide Trail',
-  'Trail runner, Pacific Northwest',
-] as const;
-
-const WHY = [
-  'Wears Shokz OpenRun on every long run',
-  'Finished a 5-night section hike in September',
-  'Shared a GPS route map and race certificate',
-  'Runs 40 km+ on trails most weekends',
-  'Switched from earbuds to bone conduction last year',
-  'Hikes solo and wants to hear wildlife and weather',
-  'Was asked to remove earbuds on a shared trail',
-  'Rated 4.8 on past Xpert Network interviews',
-] as const;
+import type { ExpertStory } from './stories';
 
 /** Deterministic 0–1 from a string so the same expert always ranks the same. */
 function hash(seed: string): number {
@@ -33,6 +8,12 @@ function hash(seed: string): number {
     h ^= seed.charCodeAt(i);
     h = Math.imul(h, 16777619);
   }
+  // Final avalanche so neighbouring ids (exp_6001, exp_6002) land far apart.
+  h ^= h >>> 16;
+  h = Math.imul(h, 0x85ebca6b);
+  h ^= h >>> 13;
+  h = Math.imul(h, 0xc2b2ae35);
+  h ^= h >>> 16;
   return (h >>> 0) / 2 ** 32;
 }
 
@@ -42,50 +23,46 @@ function pick<T>(list: readonly T[], seed: string): T {
   return item;
 }
 
-function whyFor(id: string): string[] {
-  const a = pick(WHY, `${id}-a`);
-  const b = pick(WHY, `${id}-b`);
-  return a === b ? [a, pick(WHY, `${id}-c`)] : [a, b];
+function whyFor(why: readonly string[], id: string): string[] {
+  const a = pick(why, `${id}-a`);
+  const b = pick(why, `${id}-b`);
+  return a === b ? [a, pick(why, `${id}-c`)] : [a, b];
 }
 
 /**
- * Builds the 146 matches for PRJ-1042 (US thru-hikers and trail runners). Expert #4821 is always first so the
- * expert-app side of the demo has a stable person to follow.
+ * Builds a project's matches from its story. The story's head expert is always first so the
+ * demo has a stable person to follow (Expert #4821 for PRJ-1042, which the expert app uses too).
  */
-export function seedPrj1042Matches(now: Date): MatchResult {
+export function seedMatches(story: ExpertStory, now: Date): MatchResult {
   const experts: MatchedExpert[] = [];
-  const head: MatchedExpert = {
-    id: 'exp_4821',
-    label: 'Expert #4821',
-    role: 'Thru-hiker, Pacific Crest Trail',
-    years: 9,
-    country: 'US',
-    matchPercent: 94,
+  const { head } = story;
+  experts.push({
+    id: `exp_${head.num}`,
+    label: `Expert #${head.num}`,
+    role: head.role,
+    years: head.years,
+    country: head.country,
+    matchPercent: head.matchPercent,
     lastEngagedAt: new Date(now.getTime() - 21 * 24 * 60 * 60 * 1000).toISOString(),
     pinned: false,
     excluded: false,
-    whyPicked: [
-      'Hiked 6 nights on the PCT in August, with route map',
-      'Wears Shokz OpenRun for podcasts on long climbs',
-      'Has strong views on hearing other hikers and wildlife',
-    ],
-    questionsCovered: 7,
+    whyPicked: head.whyPicked,
+    questionsCovered: Math.max(1, story.topics.length - 1),
     compliance: 'cleared',
-    rateHint: '$150',
-  };
-  experts.push(head);
+    rateHint: head.rateHint,
+  });
 
-  for (let n = 1; n < 146; n += 1) {
-    const num = 4000 + n;
+  for (let n = 1; n < story.matchCount; n += 1) {
+    const num = story.idBase + n;
     const id = `exp_${num}`;
     const matchPercent = Math.max(42, Math.round(93 - n * 0.35 - hash(id) * 3));
     const weeksAgo = Math.floor(hash(`${id}-w`) * 80);
     experts.push({
       id,
       label: `Expert #${num}`,
-      role: pick(ROLES, id),
-      years: 2 + Math.floor(hash(`${id}-y`) * 14),
-      country: pick(COUNTRIES, id),
+      role: pick(story.roles, id),
+      years: story.years.min + Math.floor(hash(`${id}-y`) * story.years.span),
+      country: pick(story.countries, id),
       matchPercent,
       lastEngagedAt:
         hash(`${id}-e`) > 0.22
@@ -93,28 +70,21 @@ export function seedPrj1042Matches(now: Date): MatchResult {
           : null,
       pinned: false,
       excluded: false,
-      whyPicked: whyFor(id),
-      questionsCovered: 2 + Math.floor(hash(`${id}-q`) * 7),
+      whyPicked: whyFor(story.why, id),
+      questionsCovered: Math.min(story.topics.length, 2 + Math.floor(hash(`${id}-q`) * 7)),
       compliance: hash(`${id}-c`) > 0.15 ? 'cleared' : 'pending',
-      rateHint: `$${100 + Math.floor(hash(`${id}-r`) * 8) * 10}`,
+      rateHint: story.rate(hash(`${id}-r`)),
     });
   }
 
   experts.sort((a, b) => b.matchPercent - a.matchPercent || a.id.localeCompare(b.id));
 
   return {
-    projectId: 'PRJ-1042',
+    projectId: story.projectId,
     searchedAt: now.toISOString(),
     searchedCount: 18_240,
     durationMs: 2100,
-    filters: [
-      'Thru-hikers',
-      'Trail runners',
-      'United States',
-      'Active in last 6 months',
-      'Wears headphones',
-      'Proof of activity',
-    ],
+    filters: story.filters,
     experts,
   };
 }

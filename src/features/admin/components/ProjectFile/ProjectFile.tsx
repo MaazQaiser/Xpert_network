@@ -1,16 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   ActionableNotification,
   Breadcrumb,
   BreadcrumbItem,
   Button,
   InlineNotification,
-  Modal,
   SkeletonText,
   Tab,
   TabList,
@@ -25,7 +22,7 @@ import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
 import { formatRelative } from '@/shared/lib/dates';
 import { AsyncBoundary, NotFoundState, StatusTag } from '@/shared/ui';
-import { useApproveProject, useConfirmFact, useProject } from '../../api/queries';
+import { useConfirmFact, useProject, useResponses } from '../../api/queries';
 import { openConfirmations, PROJECT_STATUS_LABELS, type Project } from '../../model/project.schema';
 import { BriefCard } from './BriefCard';
 import { ClarificationModal } from './ClarificationModal';
@@ -73,28 +70,20 @@ export function ProjectFile({ projectId }: { projectId: string }) {
 }
 
 function ProjectFileView({ project }: { project: Project }) {
-  const router = useRouter();
-  const approve = useApproveProject(project.id);
   const confirm = useConfirmFact(project.id);
   const [notice, setNotice] = useState<ProjectNotice | null>(null);
   const [isEmailOpen, setIsEmailOpen] = useState(false);
   // The brief editor opens from the header's Edit button (wireframe 03).
   const [briefDraft, setBriefDraft] = useState<string | null>(null);
-  const [isApproveOpen, setIsApproveOpen] = useState(false);
   const open = openConfirmations(project);
   const isDraft = project.status === 'draft' || project.status === 'needs_client_info';
 
   const [tab, setTab] = useState(0);
   const [expertsFound, setExpertsFound] = useState(0);
   const counts = [project.requirements.length, project.questions.length, open.length, expertsFound];
-
-  const runApprove = () => {
-    setIsApproveOpen(false);
-    approve.mutate(undefined, {
-      onSuccess: () => router.push(routes.admin.projectStep(project.id, 'match')),
-      onError: (error) => setNotice({ kind: 'error', error }),
-    });
-  };
+  // The header's way on appears once screening questions have gone to at least one expert.
+  const responses = useResponses(project.id);
+  const sentCount = responses.data?.responses.length ?? 0;
 
   return (
     <div className={styles.root}>
@@ -128,35 +117,41 @@ function ProjectFileView({ project }: { project: Project }) {
               {project.source.fileName ? ` · Source: ${project.source.fileName}` : ''}
             </p>
           </div>
-          {/* Actions only while the file is a draft. Once approved, the next step lives in the
-              Experts tab (search, screening, then "View screening answers"). */}
-          {isDraft ? (
+          {/* Edit and the clarification email only while the file is a draft; "View screening
+              answers" once questions have gone to experts from the Experts tab. */}
+          {isDraft || sentCount > 0 ? (
             <div className={styles.actions}>
-              <Button
-                kind="tertiary"
-                size="md"
-                className={styles.compactButton}
-                disabled={briefDraft !== null}
-                onClick={() => setBriefDraft(project.brief)}
-              >
-                Edit
-              </Button>
-              <Button
-                kind="tertiary"
-                size="md"
-                className={styles.compactButton}
-                onClick={() => setIsEmailOpen(true)}
-              >
-                Draft clarification email
-              </Button>
-              <Button
-                size="md"
-                renderIcon={ArrowRight}
-                disabled={approve.isPending}
-                onClick={() => (open.length > 0 ? setIsApproveOpen(true) : runApprove())}
-              >
-                {approve.isPending ? 'Approving…' : 'Approve & find experts'}
-              </Button>
+              {isDraft ? (
+                <>
+                  <Button
+                    kind="tertiary"
+                    size="md"
+                    className={styles.compactButton}
+                    disabled={briefDraft !== null}
+                    onClick={() => setBriefDraft(project.brief)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    kind="tertiary"
+                    size="md"
+                    className={styles.compactButton}
+                    onClick={() => setIsEmailOpen(true)}
+                  >
+                    Draft clarification email
+                  </Button>
+                </>
+              ) : null}
+              {sentCount > 0 ? (
+                <Button
+                  as={Link}
+                  href={routes.admin.projectStep(project.id, 'responses')}
+                  size="md"
+                  renderIcon={ArrowRight}
+                >
+                  View screening answers ({sentCount})
+                </Button>
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -296,31 +291,6 @@ function ProjectFileView({ project }: { project: Project }) {
           }}
         />
       ) : null}
-
-      {isApproveOpen
-        ? createPortal(
-            <Modal
-              open
-              modalHeading={`${open.length === 1 ? '1 thing still needs' : `${open.length} things still need`} confirming`}
-              modalLabel={project.id}
-              primaryButtonText="Approve anyway"
-              secondaryButtonText="Go back"
-              onRequestClose={() => setIsApproveOpen(false)}
-              onRequestSubmit={runApprove}
-            >
-              <p className={styles.modalText}>
-                The AI can start matching now and you can confirm these later. Experts are matched
-                on the brief, profile and questions as they are.
-              </p>
-              <ul className={styles.modalList}>
-                {open.map((item) => (
-                  <li key={item.id}>{item.text}</li>
-                ))}
-              </ul>
-            </Modal>,
-            document.body,
-          )
-        : null}
     </div>
   );
 }

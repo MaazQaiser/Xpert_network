@@ -59,6 +59,54 @@ const FLAGS: Record<string, { name: string; art: ReactNode }> = {
       </>
     ),
   },
+  TW: {
+    name: 'Taiwan',
+    art: (
+      <>
+        <rect width="30" height="20" fill="#FE0000" />
+        <rect width="15" height="10" fill="#000095" />
+        <circle cx="7.5" cy="5" r="2.6" fill="#FFF" />
+        <circle cx="7.5" cy="5" r="1.7" fill="#000095" />
+        <circle cx="7.5" cy="5" r="1.4" fill="#FFF" />
+      </>
+    ),
+  },
+  MY: {
+    name: 'Malaysia',
+    art: (
+      <>
+        <rect width="30" height="20" fill="#FFF" />
+        {[0, 2, 4, 6, 8, 10, 12].map((stripe) => (
+          <rect key={stripe} width="30" height={20 / 14} y={(stripe * 20) / 14} fill="#CC0001" />
+        ))}
+        <rect width="15" height={(8 * 20) / 14} fill="#010066" />
+        <circle cx="5.6" cy="5.7" r="3.6" fill="#FC0" />
+        <circle cx="6.8" cy="5.7" r="3" fill="#010066" />
+        <circle cx="11" cy="5.7" r="1.6" fill="#FC0" />
+      </>
+    ),
+  },
+  SG: {
+    name: 'Singapore',
+    art: (
+      <>
+        <rect width="30" height="20" fill="#FFF" />
+        <rect width="30" height="10" fill="#EF3340" />
+        <circle cx="6.5" cy="5" r="3.4" fill="#FFF" />
+        <circle cx="7.8" cy="5" r="3.2" fill="#EF3340" />
+        <circle cx="10.5" cy="5" r="1.4" fill="#FFF" />
+      </>
+    ),
+  },
+  JP: {
+    name: 'Japan',
+    art: (
+      <>
+        <rect width="30" height="20" fill="#FFF" />
+        <circle cx="15" cy="10" r="6" fill="#BC002D" />
+      </>
+    ),
+  },
 };
 
 function vertical(a: string, b: string, c: string) {

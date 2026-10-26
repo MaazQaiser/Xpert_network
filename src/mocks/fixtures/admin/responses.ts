@@ -6,50 +6,25 @@ import type {
   ResponsesResult,
   ResponseStatus,
 } from '@/features/admin';
+import { storyFor } from './stories';
 
-// Answers for PRJ-1042's eight screening questions, by question position, two voices each so
-// experts don't read identically. Realistic content for usability tests (CLAUDE.md rule 11).
-const ANSWER_BANK: string[][] = [
-  [
-    'Three overnight hikes since May, the longest on the PCT in August. I’ve attached my Gaia GPS route map.',
-    'Eleven trail runs since spring, plus a 50K in September. Race certificate and Strava map attached.',
-  ],
-  [
-    'Six days and five nights on the PCT through Oregon, mostly forest trail with some lava rock.',
-    'A 52 km mountain race with about 2,400 m of climbing. Almost all my running is single-track.',
-  ],
-  [
-    'Shokz OpenRun Pro. I switched from AirPods after losing one on a descent.',
-    'Powerbeats Pro, so not Shokz. They stay in, but I take one out near other people.',
-  ],
-  [
-    'Podcasts on long climbs and music for the last hours of the day. Never at camp or near water crossings.',
-    'Music for tempo efforts, audiobooks on long easy runs. Usually three to five hours at a time.',
-  ],
-  [
-    'Battery is the big one: three days with no outlet means I ration listening. Sweat makes the band slip too.',
-    'Fit under a cap and sunglasses. Sound gets thin in wind, and the buds get gross with sweat.',
-  ],
-  [
-    'A horse rider once had to shout twice before I heard her. Since then I keep the volume really low.',
-    'Other runners think I can’t hear them, so I get the “on your left” yelled at me. The arms also clash with my visor.',
-  ],
-  [
-    'Hiking solo I need to hear rockfall, rattlesnakes and the weather turning. Open-ear is non-negotiable.',
-    'On shared trails I need to hear bikes coming. Today I just run with one bud in.',
-  ],
-  [
-    'I’d try an ear-clip if it stays put on rough ground. Battery life and weight matter most, then sound.',
-    'Ear-clips look comfortable with a cap. I’d rank fit and stability first, then sweat resistance and simple buttons.',
-  ],
-];
-
-const SUMMARIES: Record<AnswerQuality, string> = {
-  strong:
-    'Clear proof of activity and detailed stories on pain points, awareness and the ear-clip.',
-  good: 'Qualifies on activity and headphones; lighter on conflicts and feature priorities.',
-  weak: 'Short, general answers and no proof of recent activity yet.',
+const FALLBACK_SUMMARIES: Record<AnswerQuality, string> = {
+  strong: 'Deep, specific answers from direct experience.',
+  good: 'Solid answers on most questions; lighter on a few.',
+  weak: 'Broad, general answers with few specifics from direct experience.',
 };
+
+/** The project's answers by question position; projects without a story answer generically. */
+function answerBank(projectId: string): string[][] {
+  return (
+    storyFor(projectId)?.answers ?? [
+      [
+        'From my time running this, the answer depends mostly on scale and timing.',
+        'In my experience the main driver is the customer mix, not the technology.',
+      ],
+    ]
+  );
+}
 
 /** The same expert always gets the same status and answers (deterministic for demos and tests). */
 function hash(text: string): number {
@@ -57,8 +32,13 @@ function hash(text: string): number {
 }
 
 /** The answer an expert gave to one question (same text the screening answers screen shows). */
-export function answerFor(expertId: string, questionIndex: number): string | null {
-  const bank = ANSWER_BANK[questionIndex % ANSWER_BANK.length] ?? [];
+export function answerFor(
+  projectId: string,
+  expertId: string,
+  questionIndex: number,
+): string | null {
+  const answers = answerBank(projectId);
+  const bank = answers[questionIndex % answers.length] ?? [];
   return bank[(hash(expertId) + questionIndex) % bank.length] ?? null;
 }
 
@@ -83,6 +63,8 @@ export function buildResponses(
   now: Date,
 ): ResponsesResult {
   const questions = project.questions;
+  const answers = answerBank(project.id);
+  const summaries = storyFor(project.id)?.summaries ?? FALLBACK_SUMMARIES;
   const responses: ExpertResponse[] = sentExperts.map((expert, index) => {
     const status = statusFor(index);
     const seed = hash(expert.id);
@@ -106,9 +88,9 @@ export function buildResponses(
       submittedAt: answered
         ? new Date(now.getTime() - (index + 1) * 37 * 60_000).toISOString()
         : null,
-      summary: answered ? SUMMARIES[quality] : null,
+      summary: answered ? summaries[quality] : null,
       answers: questions.map((question, qIndex) => {
-        const bank = ANSWER_BANK[qIndex % ANSWER_BANK.length] ?? [];
+        const bank = answers[qIndex % answers.length] ?? [];
         return {
           questionId: question.id,
           question: question.text,

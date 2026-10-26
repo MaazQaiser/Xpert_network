@@ -7,9 +7,7 @@ import {
   type ShortlistSize,
   type ShortlistedExpert,
 } from '@/features/admin';
-import { PRJ_1042_TOPICS } from '../../fixtures/admin/prj1042';
-
-const QUESTION_LABELS = PRJ_1042_TOPICS;
+import { storyFor } from '../../fixtures/admin/stories';
 
 function coverageFor(
   project: Project,
@@ -20,7 +18,7 @@ function coverageFor(
     const coveredBy = experts.filter((e) => e.questionsCovered > index).length;
     return {
       questionId: q.id,
-      label: QUESTION_LABELS[index] ?? `Q${index + 1}`,
+      label: storyFor(project.id)?.topics[index] ?? `Q${index + 1}`,
       coveredBy,
       of: experts.length || 1,
     };
