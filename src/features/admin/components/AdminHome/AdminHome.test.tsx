@@ -55,9 +55,7 @@ describe('AdminHome (F11, screen 01)', () => {
     ).toBeInTheDocument();
     const emails = screen.getByRole('list', { name: 'Emails' });
     expect(within(emails).getAllByRole('listitem')).toHaveLength(3);
-    await userEvent.click(
-      within(emails).getByRole('button', { name: /Show brief: Omar Siddiqui/ }),
-    );
+    await userEvent.click(within(emails).getByRole('button', { name: /Show brief: Amy Wang/ }));
     const canvas = await screen.findByRole('article', { name: /UK MRO carve-out/ });
     expect(within(canvas).getByText(/EASA Part 145 and UK CAA approvals/)).toBeInTheDocument();
     expect(within(canvas).getByRole('link', { name: 'Open project file' })).toHaveAttribute(
@@ -83,37 +81,63 @@ describe('AdminHome (F11, screen 01)', () => {
   it('finds experts from the brief, sends several the questions, then extends the search', async () => {
     renderWithProviders(<AdminHome />, { persona: 'ops' });
     await userEvent.click(await screen.findByRole('link', { name: /New project emails: 3/ }));
-    await userEvent.click(await screen.findByRole('button', { name: /Show brief: Omar Siddiqui/ }));
+    await userEvent.click(await screen.findByRole('button', { name: /Show brief: Amy Wang/ }));
     expect(await screen.findByRole('article', { name: /UK MRO carve-out/ })).toBeInTheDocument();
     // Under the brief the AI asks to create the project file; the AI confirms and offers the next step.
-    expect(screen.getByText(/Umer, have you reviewed the brief\?/)).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Create project file' }));
+    expect(screen.getByText(/Should we proceed to create the project/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Create project' }));
+    // The AI creates the file in the open, then hands over the project and its requirements.
+    expect(await screen.findByText(/Creating the project file/)).toBeInTheDocument();
     expect(
-      await screen.findByText(
-        paragraph(
-          /Done, Umer\. Your project file for UK MRO carve-out, Part 145 readiness has been created successfully/,
-        ),
-      ),
+      await screen.findByText(/has been created successfully/, {}, { timeout: 6_000 }),
     ).toBeInTheDocument();
+    expect(screen.queryByText(/Creating the project file/)).toBeNull();
     expect(db.get().adminProjects['PRJ-1043']?.status).toBe('matching');
-    expect(screen.getByText(/Project file created/)).toBeInTheDocument();
     const reqs = screen.getByRole('article', { name: 'Requirements for PRJ-1043' });
     expect(within(reqs).getByText(/EASA Part 145 and UK CAA approvals/)).toBeInTheDocument();
-    expect(within(reqs).getByText(/6 screening questions/)).toBeInTheDocument();
+    expect(within(reqs).getByText(/5 expert\s+requirements/)).toBeInTheDocument();
+    expect(within(reqs).queryByText(/screening questions/)).toBeNull();
+    // The requirements edit in place, from the pencil at the card's top right.
+    await userEvent.click(within(reqs).getByRole('button', { name: 'Edit requirements' }));
+    const field = within(reqs).getByRole('textbox', { name: 'Expert requirements' });
+    await userEvent.type(field, '{End}{Enter}Speaks English fluently');
+    await userEvent.click(within(reqs).getByRole('button', { name: 'Save' }));
+    expect(await within(reqs).findByText('Speaks English fluently')).toBeInTheDocument();
     const findButtons = screen.getAllByRole('button', { name: 'Find experts' });
     await userEvent.click(findButtons[findButtons.length - 1]!);
 
     // The AI works in the open, then the top 10 arrive ranked.
-    expect(await screen.findByText(/Finding experts across the network/)).toBeInTheDocument();
     expect(
-      await screen.findByText(paragraph(/ranks the top 10 of 64 matches/), {}, { timeout: 10_000 }),
+      await screen.findByText(paragraph(/Searching the Xpert Network database/)),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { name: /Top 10 experts for UK MRO carve-out/ }),
+      await screen.findByRole(
+        'heading',
+        { name: /These are the top 10 experts for UK MRO carve-out/ },
+        { timeout: 10_000 },
+      ),
     ).toBeInTheDocument();
     const ranked = screen.getByRole('table', { name: 'Ranked experts' });
     // A header row, then one row per expert.
     expect(within(ranked).getAllByRole('row')).toHaveLength(11);
+    // No Expertise column: a row opens the expert's profile in the side panel instead.
+    expect(within(ranked).queryByRole('columnheader', { name: 'Expertise' })).toBeNull();
+    const [firstName] = within(ranked).getAllByRole('button', { name: /^Open .*’s profile$/ });
+    await userEvent.click(firstName!);
+    const profile = await screen.findByRole('dialog', { name: /’s profile$/ });
+    // The AI's reasons sit behind the mascot, shown on hover or focus.
+    expect(
+      within(profile).getByRole('button', { name: /^Why the AI picked / }),
+    ).toBeInTheDocument();
+    expect(within(profile).getByText('1 of 10')).toBeInTheDocument();
+    // Their LinkedIn-style experience, and a button (not a toggle) to pick them.
+    expect(within(profile).getByRole('heading', { name: 'Experience' })).toBeInTheDocument();
+    expect(within(profile).queryByText('Compliance')).toBeNull();
+    await userEvent.click(within(profile).getByRole('button', { name: 'Select for screening' }));
+    expect(within(profile).getByRole('button', { name: 'Selected' })).toBeInTheDocument();
+    await userEvent.click(within(profile).getByRole('button', { name: 'Selected' }));
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).toBeNull();
 
     // Pick two and send them the screening questions together.
     await userEvent.click(
@@ -123,9 +147,11 @@ describe('AdminHome (F11, screen 01)', () => {
       within(ranked).getAllByRole('checkbox', { name: /^Select .* rank 2,/ })[0]!,
     );
     await userEvent.click(screen.getByRole('button', { name: 'Send screening questions to 2' }));
+    // Sent: the AI says it'll report back, and invites any other question meanwhile.
     expect(
-      await screen.findByRole('button', { name: 'View screening answers (2)' }),
+      await screen.findByText(/I’ll let you know as soon as their answers come in/),
     ).toBeInTheDocument();
+    expect(screen.getByText(/ask me anything else about these experts/)).toBeInTheDocument();
     expect(db.get().adminScreening['PRJ-1043']).toHaveLength(2);
 
     // Not enough? Extend the research from a card in the thread.
@@ -147,13 +173,17 @@ describe('AdminHome (F11, screen 01)', () => {
       await screen.findByText(paragraph(/more experts found on/), {}, { timeout: 10_000 }),
     ).toBeInTheDocument();
 
-    // The screening answers open in the chat: the AI looks, then lists who answered.
-    await userEvent.click(
-      await screen.findByRole('button', { name: 'View screening answers (2)' }),
+    // A few seconds on, a toast says the first expert answered; the chat has no link of its own.
+    const toast = await screen.findByRole(
+      'button',
+      { name: /answered the screening questions/ },
+      { timeout: 10_000 },
     );
-    expect(
-      await screen.findByText(/Finding which experts answered the screening questions/),
-    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /View screening answers/ })).toBeNull();
+
+    // Clicking it opens that expert's answers in the chat: the AI looks, then lists who answered.
+    await userEvent.click(toast);
+    expect(await screen.findByText(/Finding .*’s screening answers/)).toBeInTheDocument();
     const answers = await screen.findByRole(
       'table',
       { name: 'Experts who answered' },
@@ -162,59 +192,58 @@ describe('AdminHome (F11, screen 01)', () => {
     const [, ...answerRows] = within(answers).getAllByRole('row');
     expect(answerRows).toHaveLength(2);
 
-    // An expert's report opens below the table, and Read all shows every answer.
-    const [firstExpert] = within(answers).getAllByRole('button', { name: /^Read .*’s report$/ });
-    await userEvent.click(firstExpert!);
-    const report = await screen.findByRole('article', { name: /’s report$/ });
-    expect(within(report).getByText('AI summary')).toBeInTheDocument();
-    expect(within(report).getAllByRole('listitem')).toHaveLength(4);
-    await userEvent.click(within(report).getByRole('button', { name: /^Read all \d+ answers$/ }));
-    expect(within(report).getAllByRole('listitem').length).toBeGreaterThan(4);
+    // An expert's answers open in a side panel: free times first, then every answer.
+    const panel = await screen.findByRole('dialog', { name: /’s report$/ }, { timeout: 5_000 });
+    // The AI summary sits behind the mascot, as on the expert profile.
+    expect(within(panel).getByRole('button', { name: /^AI summary of / })).toBeInTheDocument();
+    const answerList = within(panel).getByRole('list', { name: /’s answers$/ });
+    expect(within(answerList).getAllByRole('listitem').length).toBeGreaterThan(4);
+    const times = within(panel).getByRole('region', { name: /’s free times$/ });
+    expect(within(times).getAllByRole('listitem').length).toBeGreaterThan(0);
+    // Next steps to the other expert; Esc closes the panel.
+    await userEvent.click(within(panel).getByRole('button', { name: 'Next' }));
+    expect(within(screen.getByRole('dialog')).getByText('2 of 2')).toBeInTheDocument();
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).toBeNull();
 
-    // Pick who moves forward, then confirm their availability on the next screen.
+    // Under the answers, the picks are ready for the client: no separate availability step.
     for (const box of within(answers).getAllByRole('checkbox')) {
       if (!(box as HTMLInputElement).checked) await userEvent.click(box);
     }
-    await userEvent.click(screen.getByRole('button', { name: 'Confirm availability for 2' }));
-
-    // Their offered times load in the chat; then they go to the client.
-    expect(
-      await screen.findByText(/Asking the 2 experts for their free times/),
-    ).toBeInTheDocument();
-    const times = await screen.findByRole('table', { name: 'Offered times' }, { timeout: 10_000 });
-    expect(within(times).getAllByRole('row')).toHaveLength(3);
+    expect(screen.queryByRole('button', { name: /Confirm availability/ })).toBeNull();
     expect(screen.getByRole('heading', { name: 'Ready for the client' })).toBeInTheDocument();
+    expect(screen.getByText(/2 experts have/)).toBeInTheDocument();
     expect(
       screen.getByRole('checkbox', { name: 'Hold these slots with the experts for 48 hours' }),
     ).toBeChecked();
     await userEvent.click(screen.getByRole('button', { name: /^Send these experts to / }));
 
-    // The AI drafts the client email in short, in the chat; Send to Omar sends it.
-    expect(await screen.findByText(/Drafting the email to Omar/)).toBeInTheDocument();
+    // The AI drafts the client email in short, in the chat; Send to Amy sends it.
+    expect(await screen.findByText(/Drafting the email to Amy/)).toBeInTheDocument();
     const email = await screen.findByRole(
       'article',
-      { name: /^Email to Omar Siddiqui/ },
+      { name: /^Email to Amy Wang/ },
       { timeout: 10_000 },
     );
     expect(within(email).getAllByRole('listitem').length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByRole('heading', { name: 'Send 2 experts to Omar' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Send 2 experts to Amy' })).toBeInTheDocument();
     // Edit it right on the card, like the brief: change the subject, save, then send.
     await userEvent.click(within(email).getByRole('button', { name: 'Edit email' }));
     const subject = within(email).getByRole('textbox', { name: 'Subject' });
-    expect(screen.getByRole('button', { name: 'Send to Omar' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Send to Amy' })).toBeDisabled();
     await userEvent.clear(subject);
     await userEvent.type(subject, 'Two experts for your MRO carve-out');
     await userEvent.click(within(email).getByRole('button', { name: 'Save' }));
     expect(
       await within(email).findByText('Two experts for your MRO carve-out'),
     ).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Send to Omar' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Send to Amy' }));
     expect(
       await screen.findByText(
-        paragraph(/Sent to Omar Siddiqui\. Omar’s reply with the picks is in your Inbox/),
+        paragraph(/Sent to Amy Wang\. Amy’s reply with the picks is in your Inbox/),
       ),
     ).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Sent 2 experts to Omar' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Sent 2 experts to Amy' })).toBeInTheDocument();
   }, 40_000);
 
   it('new project emails card: lists drafted projects from today’s mail', async () => {
@@ -222,7 +251,7 @@ describe('AdminHome (F11, screen 01)', () => {
     await userEvent.click(await screen.findByRole('link', { name: /New project emails: 3/ }));
     const emails = await screen.findByRole('list', { name: 'Emails' });
     expect(within(emails).getAllByRole('listitem').length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByRole('button', { name: /Show brief: Omar Siddiqui/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Show brief: Amy Wang/ })).toBeInTheDocument();
   });
 
   it('the mascot thinks while loading, rests, then reacts to an answer', async () => {

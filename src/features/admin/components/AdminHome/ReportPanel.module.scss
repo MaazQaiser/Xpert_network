@@ -1,0 +1,828 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/motion' as *;
+
+// An expert's report as a side panel: under the 3rem UI Shell header, from the right edge,
+// full width on a phone. Header and footer stay put; the answers scroll between them.
+
+.layer {
+  position: fixed;
+  z-index: 8000;
+  inset: $spacing-09 0 0;
+}
+
+.scrim {
+  position: absolute;
+  animation: fade-in $duration-moderate-01 motion(entrance, productive) both;
+  background: $overlay;
+  inset: 0;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+.panel {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  animation: slide-in $duration-moderate-02 motion(entrance, expressive) both;
+  background: $background;
+  border-inline-start: 1px solid $border-subtle-01;
+  box-shadow: 0 0 $spacing-07 $shadow;
+  inline-size: 100%;
+  inset-block: 0;
+  inset-inline-end: 0;
+
+  @include breakpoint(md) {
+    inline-size: 32rem;
+  }
+
+  @include breakpoint(lg) {
+    inline-size: 36rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+// ——— Who: portrait, name and verdict, then what they do and the facts ————————————————
+.head {
+  display: grid;
+  align-items: start;
+  padding: $spacing-06 $spacing-05 $spacing-05;
+  border-block-end: 1px solid $border-subtle-01;
+  gap: $spacing-04;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+
+  @include breakpoint(md) {
+    padding-inline: $spacing-07 $spacing-05;
+  }
+}
+
+// Initials in a circle, as in the header and inbox.
+.avatar {
+  @include type-style('heading-compact-01');
+  @include font-weight('semibold');
+
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: $layer-accent-01;
+  block-size: $spacing-09;
+  color: $text-primary;
+  inline-size: $spacing-09;
+}
+
+.photo {
+  display: block;
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: cover;
+}
+
+// The close sits level with the portrait's top, nudged out to the panel's edge.
+.close.close {
+  margin-block-start: calc(-1 * #{$spacing-03});
+
+  // Our Close icon at 24px; Carbon sizes button icons to 16px.
+  svg {
+    block-size: $spacing-06;
+    inline-size: $spacing-06;
+  }
+}
+
+.headText {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  min-inline-size: 0;
+}
+
+.nameRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-02 $spacing-03;
+}
+
+.name {
+  @include type-style('heading-03');
+}
+
+.role.role {
+  @include type-style('body-compact-01');
+
+  color: $text-primary;
+}
+
+// Country, years, when they answered: one quiet line, dot-separated.
+.facts.facts {
+  @include type-style('label-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  color: $text-secondary;
+  gap: $spacing-02 $spacing-04;
+  margin-block-start: $spacing-02;
+
+  @include breakpoint(md) {
+    column-gap: $spacing-03;
+  }
+}
+
+// The dots only read on one line; a phone wraps the facts with space instead.
+* + .fact::before {
+  @include breakpoint(md) {
+    content: '·';
+    margin-inline-end: $spacing-03;
+  }
+}
+
+// ——— What they said ——————————————————————————————————————————————————————————————
+.body {
+  display: flex;
+  overflow-y: auto;
+  flex: 1;
+  flex-direction: column;
+  padding: $spacing-06 $spacing-05;
+  gap: $spacing-07;
+  overscroll-behavior: contain;
+
+  @include breakpoint(md) {
+    padding-inline: $spacing-07;
+  }
+}
+
+.times {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.timesLabel.timesLabel {
+  @include type-style('heading-compact-01');
+  @include font-weight('semibold');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+
+  svg {
+    fill: $icon-primary;
+  }
+}
+
+.zone {
+  @include type-style('label-01');
+  @include font-weight('regular');
+
+  color: $text-secondary;
+}
+
+.slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+// Each time reads like a calendar chip: the day bold, the time beside it in blue.
+.slot {
+  display: inline-flex;
+  align-items: baseline;
+  padding: $spacing-02 $spacing-03;
+  border: 1px solid $border-interactive;
+  background: $highlight;
+  gap: $spacing-02;
+}
+
+.slotDay {
+  @include type-style('label-02');
+  @include font-weight('semibold');
+}
+
+.slotTime {
+  @include type-style('label-02');
+  @include font-weight('semibold');
+
+  color: $link-primary;
+}
+
+.muted {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.warning {
+  @include type-style('label-01');
+
+  color: $text-error;
+}
+
+.answersHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
+
+.answersTitle {
+  @include type-style('heading-compact-02');
+  @include font-weight('semibold');
+
+  display: flex;
+  align-items: baseline;
+  gap: $spacing-03;
+}
+
+.answers {
+  display: flex;
+  flex-direction: column;
+}
+
+.answer {
+  display: flex;
+  flex-direction: column;
+  padding-block: $spacing-05;
+  gap: $spacing-03;
+
+  & + & {
+    border-block-start: 1px solid $border-subtle-01;
+  }
+}
+
+// The question bold, the answer regular under it.
+// The Q number hangs in a fixed gutter, so the question and its answer share one left edge.
+.question.question {
+  @include type-style('heading-compact-01');
+  @include font-weight('semibold');
+
+  display: flex;
+}
+
+.qNumber {
+  flex: none;
+  color: $link-primary;
+  inline-size: $spacing-07;
+}
+
+.reply.reply {
+  @include type-style('body-01');
+  @include font-weight('regular');
+
+  color: $text-secondary;
+  padding-inline-start: $spacing-07;
+}
+
+// ——— Step through the experts ——————————————————————————————————————————————————————
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-03 $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
+  background: $background;
+
+  @include breakpoint(md) {
+    padding-inline: $spacing-07;
+  }
+}
+
+.count {
+  @include type-style('label-02');
+
+  color: $text-secondary;
+}
+
+.panel:focus {
+  outline: none;
+}
+
+// ——— The ranked experts table and profile (ExpertProfilePanel) ——————————————————————
+.rowAvatar {
+  @include type-style('label-01');
+  @include font-weight('semibold');
+
+  overflow: hidden;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: $layer-accent-01;
+  block-size: $spacing-07;
+  inline-size: $spacing-07;
+}
+
+.why {
+  @include type-style('body-01');
+
+  display: flex;
+  flex-direction: column;
+  padding-inline-start: $spacing-05;
+  gap: $spacing-02;
+  list-style: disc;
+}
+
+.linkedinMark {
+  fill: $interactive;
+}
+
+.sentLine.sentLine {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+
+  svg {
+    fill: $support-success;
+  }
+}
+
+// ——— The profile header (ExpertPanel variant="profile"): portrait beside the name ——————
+.profileHead {
+  display: grid;
+  align-items: start;
+  padding: $spacing-06 $spacing-05 0;
+  gap: $spacing-03 $spacing-05;
+  grid-template-areas:
+    'avatar text close'
+    'avatar meta meta';
+  grid-template-columns: auto minmax(0, 1fr) auto;
+
+  @include breakpoint(md) {
+    padding-inline: $spacing-07 $spacing-05;
+  }
+
+  > .bigAvatar {
+    grid-area: avatar;
+  }
+}
+
+.profileText {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  grid-area: text;
+  min-inline-size: 0;
+}
+
+.profileClose.profileClose {
+  grid-area: close;
+}
+
+.profileMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-05;
+  grid-area: meta;
+
+  // The facts wrap within their side; the button sits at the start, under the role.
+  .facts {
+    flex: 1 1 0;
+    margin-block-start: 0;
+    min-inline-size: 0;
+  }
+
+  > :last-child:not(.facts) {
+    flex: none;
+  }
+}
+
+.bigAvatar {
+  @include type-style('heading-03');
+
+  overflow: hidden;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: $layer-accent-01;
+  block-size: 4.5rem;
+  inline-size: 4.5rem;
+}
+
+// Even padding on both sides, with any icon just before the label. Doubled class outranks
+// Carbon's button root rule, which keeps room on the right for a trailing icon.
+.inlineButton.inlineButton {
+  align-items: center;
+  padding-inline: $spacing-04;
+  gap: $spacing-03;
+
+  svg {
+    flex: none;
+  }
+}
+
+.profileName {
+  @include type-style('heading-03');
+  @include font-weight('semibold');
+}
+
+// ——— The numbers, side by side with hairlines between ————————————————————————————
+.stats {
+  display: grid;
+  padding-block: $spacing-05;
+
+  // The same inset hairlines as the rows below, rather than an edge-to-edge rule.
+  border-block: 1px solid $border-subtle-01;
+  gap: $spacing-05 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    padding-inline: $spacing-05;
+    gap: $spacing-02;
+
+    &:first-child,
+    &:nth-child(3) {
+      padding-inline-start: 0;
+    }
+
+    & + div {
+      border-inline-start: 1px solid $border-subtle-01;
+    }
+
+    // Two by two on a phone: the second row starts flush, with no rule before it.
+    &:nth-child(3) {
+      border-inline-start: 0;
+
+      @include breakpoint(md) {
+        padding-inline-start: $spacing-05;
+        border-inline-start: 1px solid $border-subtle-01;
+      }
+    }
+  }
+
+  dt {
+    @include type-style('label-01');
+
+    color: $text-secondary;
+  }
+
+  dd {
+    @include type-style('heading-02');
+
+    white-space: nowrap;
+  }
+}
+
+.statSource {
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.statAccent {
+  color: $link-primary;
+}
+
+.statOf {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+// ——— Label and note on the left, the value on the right —————————————————————————————
+.rows {
+  display: flex;
+  flex-direction: column;
+  border-block-start: 1px solid $border-subtle-01;
+}
+
+.settingRow {
+  display: grid;
+  align-items: start;
+  padding-block: $spacing-05;
+  border-block-end: 1px solid $border-subtle-01;
+  gap: $spacing-04;
+  grid-template-columns: 1fr;
+
+  @include breakpoint(md) {
+    gap: $spacing-06;
+    grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+  }
+
+  > :last-child {
+    justify-self: start;
+
+    @include breakpoint(md) {
+      justify-self: end;
+    }
+  }
+
+  // The reasons read as a list, so they take the room they need.
+  > .why {
+    justify-self: stretch;
+  }
+}
+
+.rowLabel {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+}
+
+.rowTitle {
+  @include type-style('heading-compact-01');
+  @include font-weight('semibold');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.rowNote.rowNote {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.rate {
+  @include font-weight('semibold');
+
+  color: $text-primary;
+}
+
+.rowValue.rowValue {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+// ——— Experience, as on LinkedIn: a logo tile, the role, the employer, the dates ————————
+.history {
+  display: flex;
+  flex-direction: column;
+  margin-block-start: $spacing-05;
+}
+
+// Each role hangs off a dot; a line runs down from it to the next role's dot, as on LinkedIn.
+.job {
+  display: flex;
+  align-items: stretch;
+  gap: $spacing-05;
+}
+
+.jobRail {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  padding-block-start: $spacing-01;
+}
+
+.jobDot {
+  flex: none;
+  border: 2px solid $interactive;
+  border-radius: 50%;
+  background: $background;
+  block-size: $spacing-04;
+  inline-size: $spacing-04;
+}
+
+// The current or most recent role: a filled dot.
+.job:first-child .jobDot {
+  background: $interactive;
+}
+
+.jobLine {
+  flex: 1;
+  background: $border-strong-01;
+  inline-size: 2px;
+  margin-block-start: $spacing-02;
+}
+
+.job:last-child .jobLine {
+  display: none;
+}
+
+// Room under each role, so the line has length; none after the last.
+.job:not(:last-child) .jobText {
+  padding-block-end: $spacing-06;
+}
+
+.jobText {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-01;
+  min-inline-size: 0;
+}
+
+.jobTitle.jobTitle {
+  @include type-style('heading-compact-01');
+  @include font-weight('semibold');
+}
+
+.jobOrg.jobOrg {
+  @include type-style('body-compact-01');
+}
+
+.jobMeta.jobMeta {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+// ——— The AI's reasons, from the mascot beside the match ——————————————————————————————
+.whyTrigger {
+  display: inline-flex;
+  align-items: center;
+  padding: $spacing-02 $spacing-03 $spacing-02 $spacing-02;
+  border: 0;
+  background: $highlight;
+  cursor: help;
+  gap: $spacing-03;
+  transition: background-color $duration-fast-02 motion(standard, productive);
+
+  &:hover,
+  &:focus-visible {
+    background: $layer-selected-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+}
+
+// One beat every few seconds: often enough to be noticed, rare enough not to nag.
+$mascot-cycle: 3.6s;
+
+// The mascot is alive: it bobs, then every few seconds crouches, hops with a little spin and
+// lands with a squash, while a ripple rings out behind it to say "there's more here". On hover
+// it jumps and turns to face you. Reduced motion keeps it still.
+.whyMascot {
+  position: relative;
+  display: inline-flex;
+  isolation: isolate;
+  animation: mascot-hop $mascot-cycle motion(standard, expressive) infinite;
+  transform-origin: 50% 100%;
+
+  // The ripple.
+  &::before {
+    position: absolute;
+    z-index: -1;
+    border: 2px solid $interactive;
+    border-radius: 50%;
+    animation: mascot-ripple $mascot-cycle motion(exit, expressive) infinite;
+    content: '';
+    inset: calc(-1 * #{$spacing-01});
+    opacity: 0;
+  }
+
+  .whyTrigger:hover &,
+  .whyTrigger:focus-visible & {
+    animation: mascot-hello $duration-slow-01 motion(entrance, expressive) forwards;
+
+    &::before {
+      animation: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+
+    &::before {
+      display: none;
+    }
+
+    .whyTrigger:hover &,
+    .whyTrigger:focus-visible & {
+      animation: none;
+    }
+  }
+}
+
+@keyframes mascot-hop {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1) rotate(0);
+  }
+
+  // A slow breath while it waits.
+  30% {
+    transform: translateY(calc(-1 * #{$spacing-01})) scale(1, 1) rotate(0);
+  }
+
+  60% {
+    transform: translateY(0) scale(1, 1) rotate(0);
+  }
+
+  // Crouch, spring up with a spin, land with a squash.
+  66% {
+    transform: translateY(0) scale(1.15, 0.85) rotate(0);
+  }
+
+  74% {
+    transform: translateY(calc(-1 * #{$spacing-03})) scale(0.9, 1.12) rotate(-180deg);
+  }
+
+  82% {
+    transform: translateY(calc(-1 * #{$spacing-02})) scale(1, 1) rotate(-360deg);
+  }
+
+  88% {
+    transform: translateY(0) scale(1.12, 0.88) rotate(-360deg);
+  }
+
+  94% {
+    transform: translateY(0) scale(0.97, 1.04) rotate(-360deg);
+  }
+}
+
+@keyframes mascot-ripple {
+  0%,
+  84% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+
+  88% {
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+@keyframes mascot-hello {
+  0% {
+    transform: translateY(0) scale(1) rotate(0);
+  }
+
+  40% {
+    transform: translateY(calc(-1 * #{$spacing-02})) scale(1.2) rotate(-12deg);
+  }
+
+  70% {
+    transform: translateY(0) scale(1.15) rotate(8deg);
+  }
+
+  100% {
+    transform: translateY(0) scale(1.15) rotate(-4deg);
+  }
+}
+
+.whyHint {
+  @include type-style('label-01');
+
+  color: $link-primary;
+  white-space: nowrap;
+}
+
+.whyTip {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  text-align: start;
+}
+
+.whyTipTitle {
+  @include font-weight('semibold');
+}
+
+.whyTipList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+}
+
+.whyTipNote {
+  @include type-style('label-01');
+
+  opacity: 0.75;
+}

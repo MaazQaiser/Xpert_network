@@ -39,6 +39,8 @@ export const expertResponseSchema = z.object({
   years: z.number().int().nonnegative().optional(),
   country: z.string().min(2).max(2).optional(),
   linkedinUrl: z.string().url().nullable().optional(),
+  /** Portrait for the report panel. */
+  photoUrl: z.string().optional(),
   /** Where the AI found them. */
   source: expertOriginSchema.optional(),
   status: responseStatusSchema,

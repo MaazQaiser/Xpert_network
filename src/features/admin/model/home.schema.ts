@@ -18,7 +18,7 @@ export const chatEmailSchema = z.object({
   /** Why the AI put it here, in a few words ("Brief ready to review"). */
   reason: z.string(),
   projectId: z.string().nullable(),
-  /** What picking it asks the assistant, e.g. "Give me the brief for PRJ-1043". */
+  /** What picking it asks the assistant, e.g. "Give me the brief for UK MRO carve-out, Part 145 readiness". */
   prompt: z.string(),
   /** The label on the pick button. */
   action: z.string(),
@@ -41,7 +41,13 @@ export const chatBlockSchema = z.discriminatedUnion('kind', [
   /** The AI searching the network for a project, then its top-ranked experts to approach. */
   z.object({ kind: z.literal('expertSearch'), projectId: z.string() }),
   /** Who answered a project's screening questions, how well, and their answers to read. */
-  z.object({ kind: z.literal('screeningAnswers'), projectId: z.string() }),
+  z.object({
+    kind: z.literal('screeningAnswers'),
+    projectId: z.string(),
+    /** One expert's answers: their report opens straight away. */
+    expertId: z.string().optional(),
+    expertName: z.string().optional(),
+  }),
   /** The AI asking to create the project file from the brief above, with the button to say yes. */
   z.object({ kind: z.literal('createProject'), projectId: z.string() }),
   /** The requirements the AI will search on, for the PM to review before finding experts. */
@@ -90,7 +96,7 @@ export type AssistantReply = z.output<typeof assistantReplySchema>;
 
 /** What each Home summary card asks the assistant. */
 export const CARD_PROMPTS = {
-  emails: 'Show me today’s new project emails',
+  emails: 'Share today’s new project email details',
   experts: 'Which expert reviews need my sign-off?',
   active: 'Which active projects need me today?',
 } as const;

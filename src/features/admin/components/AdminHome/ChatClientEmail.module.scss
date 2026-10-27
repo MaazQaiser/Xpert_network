@@ -25,16 +25,14 @@
   }
 }
 
-// The email itself, under the canvas bar.
+// The email itself, under the grey canvas bar: a white page whose left edge lines up with the
+// bar's envelope icon, so the card reads as one column.
 .emailBody {
   display: flex;
   flex-direction: column;
-  padding: $spacing-05;
+  padding: $spacing-06 $spacing-05;
+  background: $background;
   gap: $spacing-05;
-
-  @include breakpoint(md) {
-    padding: $spacing-06;
-  }
 }
 
 @keyframes email-in {
@@ -44,8 +42,90 @@
   }
 }
 
-// Label and value rows: To, Subject; and below the experts, what the client sees.
-.envelope,
+// The envelope, as in a mail app: each field on its own ruled line, the label first.
+.envelope {
+  display: flex;
+  flex-direction: column;
+  margin-block-start: calc(-1 * #{$spacing-03});
+}
+
+.mailRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding-block: $spacing-03;
+  border-block-end: 1px solid $border-subtle-01;
+  gap: $spacing-03 $spacing-04;
+  min-block-size: $spacing-09;
+}
+
+.mailLabel {
+  @include type-style('body-compact-01');
+
+  flex: none;
+  color: $text-secondary;
+  min-inline-size: 3.5rem;
+}
+
+// The recipient as a chip: portrait, name, then their address in a quieter tone. Carbon's own
+// tag shape, so it reads like a token rather than a box.
+.recipient {
+  display: inline-flex;
+  align-items: center;
+  padding: $spacing-01 $spacing-04 $spacing-01 $spacing-01;
+  border: 1px solid $border-subtle-01;
+  border-radius: $spacing-06;
+  background: $background;
+  gap: $spacing-03;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.recipientAvatar {
+  @include type-style('label-01');
+  @include font-weight('semibold');
+
+  overflow: hidden;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: $layer-accent-01;
+  block-size: $spacing-06;
+  inline-size: $spacing-06;
+}
+
+.recipientName {
+  @include type-style('body-compact-01');
+  @include font-weight('semibold');
+
+  white-space: nowrap;
+}
+
+.recipientEmail {
+  @include type-style('label-01');
+
+  overflow: hidden;
+  color: $text-secondary;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subject {
+  @include type-style('body-compact-01');
+  @include font-weight('semibold');
+
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.subjectField {
+  flex: 1;
+  min-inline-size: 12rem;
+}
+
+// Below the experts: what the client sees, as label and value rows.
 .facts {
   display: flex;
   flex-direction: column;
@@ -71,10 +151,6 @@
   dd {
     @include type-style('body-compact-01');
   }
-}
-
-.envelope .subject {
-  @include font-weight('semibold');
 }
 
 .intro {

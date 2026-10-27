@@ -40,7 +40,21 @@ export const matchedExpertSchema = z.object({
   linkedinUrl: z.string().url().nullable().optional(),
   /** Where the AI found them. */
   source: expertOriginSchema.optional(),
+  /** Their work history, newest first, as on LinkedIn. */
+  history: z
+    .array(
+      z.object({
+        title: z.string(),
+        org: z.string(),
+        startYear: z.number().int(),
+        /** Null while they still work there. */
+        endYear: z.number().int().nullable(),
+        location: z.string(),
+      }),
+    )
+    .optional(),
 });
+export type WorkRole = NonNullable<MatchedExpert['history']>[number];
 export type MatchedExpert = z.infer<typeof matchedExpertSchema>;
 
 export const matchResultSchema = z.object({

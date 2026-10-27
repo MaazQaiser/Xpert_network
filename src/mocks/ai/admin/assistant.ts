@@ -59,6 +59,9 @@ function toChatEmail(email: InboxRequest): ChatEmail {
   };
 }
 
+/** An expert who was sent a project's screening questions. */
+export type ScreenedExpert = { projectId: string; expertId: string; name: string };
+
 const firstName = (name: string) => name.split(' ')[0] ?? name;
 
 /**
@@ -73,6 +76,8 @@ export function assistantReply(
   now = new Date(),
   /** The PM's first name, so the assistant can speak to them. */
   pmName?: string,
+  /** Experts sent screening questions, so the PM can ask for one by name. */
+  screened: ScreenedExpert[] = [],
 ): AssistantReply {
   const q = text.toLowerCase();
   const projects = Object.values(state.adminProjects);
@@ -93,28 +98,66 @@ export function assistantReply(
   const go = (label: string, href: string): ChatChip => ({ label, prompt: null, href });
 
   // ——— A project created from its brief: confirm it, then offer the next step ——————————
-  const named = projects.find((p) => q.includes(p.id.toLowerCase()));
+  // A project named by its ID or, as the chat now asks, by its name.
+  const named = projects.find(
+    (p) => q.includes(p.id.toLowerCase()) || q.includes(p.name.toLowerCase()),
+  );
   if (named && q.includes('create the project')) {
-    return reply(
-      `Done${pmName ? `, ${pmName}` : ''}. Your project file for **${named.name}** has been created successfully. Should we now find experts for this project?`,
-      `${named.id} project file`,
-      { blocks: [{ kind: 'requirements', projectId: named.id }] },
-    );
+    return reply('', `${named.id} project file`, {
+      blocks: [{ kind: 'requirements', projectId: named.id }],
+    });
   }
 
   // ——— Find experts for a project: the search runs in the chat ———————————————————————
   if (named && q.includes('find experts')) {
     return reply(
-      `On it. I’m searching the network for experts who match **${named.id}, ${named.name}**.`,
+      `Searching the [[!Xpert Network database]] for experts for **${named.name}**.`,
       `${named.id} brief, expert profile and screening questions`,
       { blocks: [{ kind: 'expertSearch', projectId: named.id }] },
+    );
+  }
+
+  // ——— One expert's screening answers, asked for by name ————————————————————————————
+  const expert = screened.find((e) => q.includes(e.name.toLowerCase()));
+  if (expert && (q.includes('answer') || q.includes('screening'))) {
+    const project = state.adminProjects[expert.projectId];
+    return reply(
+      `Let me pull up **${expert.name}**’s screening answers${project ? ` for **${project.name}**` : ''}.`,
+      `${expert.projectId} screening answers`,
+      {
+        blocks: [
+          {
+            kind: 'screeningAnswers',
+            projectId: expert.projectId,
+            expertId: expert.expertId,
+            expertName: expert.name,
+          },
+        ],
+      },
+    );
+  }
+
+  // ——— Screening answers, no project named: the one whose questions went out last ——————
+  const asksForAnswers = q.includes('screening') || (q.includes('answer') && q.includes('expert'));
+  if (!named && asksForAnswers) {
+    const latest = screened[0] ? state.adminProjects[screened[0].projectId] : undefined;
+    if (!latest) {
+      return reply(
+        'No screening questions have gone out yet. Find experts for a project, pick a few and send them the questions; I’ll show their answers here as they come in.',
+        'Screening questions sent',
+      );
+    }
+    return reply(
+      `Here are the experts who have answered the screening questions so far for **${latest.name}**. Their details are below.`,
+      `${latest.id} screening answers`,
+      { blocks: [{ kind: 'screeningAnswers', projectId: latest.id }] },
     );
   }
 
   // ——— A project's screening answers: who answered, read in the chat ——————————————————
   if (named && q.includes('screening answer')) {
     return reply(
-      `Let me check who answered the screening questions for **${named.id}, ${named.name}**.`,
+      `Let me check who answered the screening questions for **${named.name}**.`,
       `${named.id} screening answers`,
       { blocks: [{ kind: 'screeningAnswers', projectId: named.id }] },
     );
@@ -135,7 +178,7 @@ export function assistantReply(
       .filter((e): e is InboxRequest => e !== undefined)
       .map((e) => ({
         ...toChatEmail(e),
-        prompt: `Give me the brief for ${e.projectId}`,
+        prompt: `Give me the brief for ${(e.projectId && state.adminProjects[e.projectId]?.name) ?? e.projectId}`,
         action: 'Show brief',
         reason: `${e.projectId} · ${reasonFor(e)}`,
       }));
@@ -144,8 +187,8 @@ export function assistantReply(
     }
     return reply(
       emails.length === 1
-        ? 'Here’s the [[1 new project]] that came in today, drafted from a client’s email. Do you want its brief?'
-        : `Here are the [[${emails.length} new projects]] that came in today, each drafted from a client’s email. Which project brief do you need?`,
+        ? 'Here’s the [[1 new project]] that came in today. Should we move its brief forward?'
+        : `Here are the [[${emails.length} new projects]] that came in today. Which project brief should we move forward?`,
       'Projects created in the last 24 hours',
       { blocks: [{ kind: 'emails', items: emails }] },
     );
@@ -195,7 +238,12 @@ export function assistantReply(
     ];
     const chips: ChatChip[] = [];
     if (fromEmail.projectId) {
-      chips.push(ask('Give me the project brief', `Give me the brief for ${fromEmail.projectId}`));
+      chips.push(
+        ask(
+          'Give me the project brief',
+          `Give me the brief for ${state.adminProjects[fromEmail.projectId]?.name ?? fromEmail.projectId}`,
+        ),
+      );
     }
     if (fromEmail.status === 'needs_client_info' || fromEmail.status === 'cant_open') {
       chips.push(ask('Draft a reply', `Draft a reply to ${fromEmail.from.name}`));
@@ -267,7 +315,7 @@ export function assistantReply(
             })),
           },
         ],
-        chips: [ask('Show me today’s new project emails', CARD_PROMPTS.emails)],
+        chips: [ask('Share today’s new project email details', CARD_PROMPTS.emails)],
       },
     );
   }
@@ -304,7 +352,7 @@ export function assistantReply(
       today
         .map(
           (p) =>
-            `**${p.id}**: ${p.name} for ${p.client.name}, ${PROJECT_STATUS_LABELS[p.status].toLowerCase()}${
+            `**${p.name}** for ${p.client.name}, ${PROJECT_STATUS_LABELS[p.status].toLowerCase()}${
               p.confirmations.some((c) => c.state === 'open')
                 ? `, [[!${p.confirmations.filter((c) => c.state === 'open').length} things to confirm]]`
                 : ''
@@ -312,7 +360,7 @@ export function assistantReply(
         )
         .join(' '),
       'Projects created today',
-      { chips: today.map((p) => ask(`Brief for ${p.id}`, `Give me the brief for ${p.id}`)) },
+      { chips: today.map((p) => ask(`Brief for ${p.name}`, `Give me the brief for ${p.name}`)) },
     );
   }
 
@@ -325,14 +373,13 @@ export function assistantReply(
 
   function briefReply(project: Project): AssistantReply {
     return reply(
-      `Here’s the brief for **${project.id}, ${project.name}**. Edit anything here; it saves to the project file.`,
+      `Here is the project brief for **${project.name}**.`,
       `${project.id} project file, drafted from ${project.source.fileName ?? 'the client’s email'}`,
       {
         blocks: [
           { kind: 'brief', projectId: project.id },
           { kind: 'createProject', projectId: project.id },
         ],
-        chips: [ask('Show me today’s other new project emails', CARD_PROMPTS.emails)],
       },
     );
   }

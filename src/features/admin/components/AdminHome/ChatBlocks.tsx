@@ -1,25 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button, IconButton, InlineNotification, SkeletonText, Tag, TextArea } from '@carbon/react';
+import {
+  Button,
+  IconButton,
+  InlineLoading,
+  InlineNotification,
+  SkeletonText,
+  Tag,
+  TextArea,
+} from '@carbon/react';
 import {
   ArrowRight,
-  Checkmark,
-  CheckmarkFilled,
   Document,
   Edit,
   Launch,
   Search,
+  UserMultiple,
   WarningAltFilled,
 } from '@carbon/icons-react';
-import { useSession } from '@/features/auth';
 import { AIExplainLabel } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
 import { useApproveProject, useProject, useUpdateProject } from '../../api/queries';
-import type { ChatBlock, ChatChip, ChatEmail } from '../../model/home.schema';
+import {
+  CARD_PROMPTS,
+  type ChatBlock,
+  type ChatChip,
+  type ChatEmail,
+} from '../../model/home.schema';
 import { projectPatchSchema, PROJECT_STATUS_LABELS } from '../../model/project.schema';
 import { initials, receivedLabel, senderPhoto } from '../inboxDisplay';
 import { ExpertSearch } from './ExpertSearch';
@@ -60,7 +71,15 @@ export function ChatBlocks({
               />
             );
           case 'screeningAnswers':
-            return <ScreeningAnswers key={key} projectId={block.projectId} onWorking={onWorking} />;
+            return (
+              <ScreeningAnswers
+                key={key}
+                projectId={block.projectId}
+                expertId={block.expertId}
+                expertName={block.expertName}
+                onWorking={onWorking}
+              />
+            );
           case 'createProject':
             return (
               <CreateProjectAsk
@@ -280,7 +299,7 @@ function BriefCanvas({ projectId }: { projectId: string }) {
       <header className={styles.canvasBar}>
         <span className={styles.canvasLabel}>
           <Document aria-hidden={true} />
-          Project brief · {p.id} · {p.version}
+          Project brief · {p.version}
         </span>
         <AIExplainLabel size="xs" aria-label={`${p.id} brief`} />
         <span className={styles.canvasActions}>
@@ -456,57 +475,67 @@ function CreateProjectAsk({
 }) {
   const project = useProject(projectId);
   const approve = useApproveProject(projectId);
-  const session = useSession();
-  const firstName = session.data?.user?.name?.split(' ')[0];
   if (!project.data) return null;
   const p = project.data;
   const isDraft = p.status === 'draft' || p.status === 'needs_client_info';
-  if (!isDraft) {
-    return (
-      <p className={styles.created}>
-        <CheckmarkFilled aria-hidden={true} />
-        Project file created.
-      </p>
-    );
-  }
-  const open = p.confirmations.filter((c) => c.state === 'open');
+  // Once the file exists the ask has done its job; the reply below says it was created.
+  if (!isDraft) return null;
   return (
     <div className={styles.createAsk}>
       <p>
-        <strong>{firstName ? `${firstName}, have you` : 'Have you'} reviewed the brief?</strong> If
-        nothing needs editing, can I create the project file?
-        {open.length > 0
-          ? ` ${open.length === 1 ? '1 thing still needs' : `${open.length} things still need`} confirming; you can confirm ${open.length === 1 ? 'it' : 'them'} later.`
-          : ''}
+        Should we proceed to create the project <strong>{p.name}</strong> from this brief, or look
+        at another project brief?
       </p>
-      <p className={styles.reqHint}>Anything missing? Use the edit pencil on the brief first.</p>
       {approve.isError ? (
         <p className={styles.footerError} role="alert">
           {toUserMessage(approve.error)}
         </p>
       ) : null}
-      <div>
+      {/* The two answers to the question, side by side: go ahead, or look at another brief. */}
+      <div className={styles.createActions}>
         <Button
           size="md"
-          renderIcon={Checkmark}
+          className={styles.createButton}
           disabled={isBusy || approve.isPending}
           onClick={() =>
             approve.mutate(undefined, {
-              onSuccess: () => onAsk(`Yes, create the project file for ${p.id}`),
+              onSuccess: () => onAsk(`Yes, create the project file for ${p.name}`),
             })
           }
         >
-          {approve.isPending ? 'Creating…' : 'Create project file'}
+          {approve.isPending ? 'Creating…' : 'Create project'}
+        </Button>
+        <Button
+          kind="tertiary"
+          size="md"
+          className={styles.createButton}
+          disabled={isBusy || approve.isPending}
+          onClick={() => onAsk(CARD_PROMPTS.emails)}
+        >
+          Show other briefs
         </Button>
       </div>
     </div>
   );
 }
 
+/** How long each step of creating the project file shows before its check mark. */
+const CREATE_STEP_MS = 1600;
+const CREATE_STEPS = [
+  'Creating the project file',
+  'Pulling the expert requirements from the brief',
+];
+
+/** The brief's opening sentence, as a one-line description of the project. */
+function firstSentence(text: string): string {
+  const match = text.match(/^.*?[.!?](\s|$)/);
+  return (match ? match[0] : text).trim();
+}
+
 /**
- * What the AI will search on, laid out for one last look: the expert profile it matches against
- * and how many screening questions go with it. It reads the live project file, so edits made in
- * the brief above show here. Then one button starts the search.
+ * After Create project: the AI creates the file in the open, then hands over the project (its
+ * name, a line on what it is, done) and the expert requirements it will search on, in a card the
+ * PM can edit. Below the card, one question and the button that starts the search.
  */
 function RequirementsReview({
   projectId,
@@ -518,33 +547,152 @@ function RequirementsReview({
   isBusy: boolean;
 }) {
   const project = useProject(projectId);
-  if (project.isPending) return <SkeletonText paragraph lineCount={4} />;
-  if (!project.data) {
+  const update = useUpdateProject(projectId);
+  const [step, setStep] = useState(0);
+  const [draft, setDraft] = useState<string | null>(null);
+
+  // Tick the steps off (the last one waits for the project file); the answer then replaces them.
+  useEffect(() => {
+    if (step >= CREATE_STEPS.length) return undefined;
+    if (step === CREATE_STEPS.length - 1 && !project.data) return undefined;
+    const timer = window.setTimeout(() => setStep((s) => s + 1), CREATE_STEP_MS);
+    return () => window.clearTimeout(timer);
+  }, [step, project.data]);
+
+  const steps = (
+    <ol className={styles.createSteps} aria-live="polite">
+      {CREATE_STEPS.map((label, index) => (
+        <li key={label}>
+          <InlineLoading
+            status={index < step ? 'finished' : index === step ? 'active' : 'inactive'}
+            description={index < step ? label : `${label}…`}
+          />
+        </li>
+      ))}
+    </ol>
+  );
+
+  if (project.isError) {
     return (
       <InlineNotification
         kind="error"
         lowContrast
         hideCloseButton
-        title="The requirements didn’t load."
+        title="The project file didn’t load."
         subtitle={toUserMessage(project.error)}
       />
     );
   }
+  if (step < CREATE_STEPS.length || !project.data) return steps;
+
   const p = project.data;
+  const lines = draft
+    ?.split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const patch = lines
+    ? {
+        requirements: lines.map((text, i) => ({
+          id: p.requirements[i]?.id ?? `r_chat_${i}`,
+          text,
+        })),
+      }
+    : null;
+  const check = patch ? projectPatchSchema.safeParse(patch) : null;
+  const draftError =
+    lines && lines.length === 0
+      ? 'Add at least one requirement.'
+      : check && !check.success
+        ? check.error.issues[0]?.message
+        : undefined;
+  const save = () => {
+    if (!patch || draftError) return;
+    update.mutate(patch, { onSuccess: () => setDraft(null) });
+  };
+
   return (
-    <article className={styles.card} aria-label={`Requirements for ${p.id}`}>
-      <header className={styles.reqHead}>
-        <p className={styles.reqIntro}>We have these requirements for the experts:</p>
-        <span className={styles.reqMeta}>
-          {p.requirements.length} expert requirements · {p.questions.length} screening questions
-        </span>
-      </header>
-      <ol className={styles.docNumbered}>
-        {p.requirements.map((r) => (
-          <li key={r.id}>{r.text}</li>
-        ))}
-      </ol>
-      <footer className={styles.reqFoot}>
+    // The steps make way for the result once it's in.
+    <div className={styles.createdFlow}>
+      <p className={styles.createdLead}>
+        Your project <strong>{p.name}</strong> has been created successfully. Now review the
+        experts’ requirements below; if you need to change any, you can edit them.
+      </p>
+
+      {/* The requirements as a document card, like the brief: bar, then the page. */}
+      <article className={styles.canvas} aria-label={`Requirements for ${p.id}`}>
+        <header className={styles.canvasBar}>
+          <span className={styles.canvasLabel}>
+            <UserMultiple aria-hidden={true} />
+            Expert requirements
+          </span>
+          <AIExplainLabel size="xs" aria-label={`${p.id} expert requirements`} />
+          <span className={styles.canvasActions}>
+            {draft !== null ? (
+              <>
+                <Button kind="ghost" size="sm" onClick={() => setDraft(null)}>
+                  Cancel
+                </Button>
+                <Button
+                  kind="primary"
+                  size="sm"
+                  disabled={Boolean(draftError) || update.isPending}
+                  onClick={save}
+                >
+                  {update.isPending ? 'Saving…' : 'Save'}
+                </Button>
+              </>
+            ) : (
+              <IconButton
+                kind="ghost"
+                size="sm"
+                label="Edit requirements"
+                align="bottom-right"
+                onClick={() => setDraft(p.requirements.map((r) => r.text).join('\n'))}
+              >
+                <Edit />
+              </IconButton>
+            )}
+          </span>
+        </header>
+
+        <div className={styles.canvasPage}>
+          <div className={styles.docHead}>
+            <Tag type="blue" size="sm">
+              {p.requirements.length} expert{' '}
+              {p.requirements.length === 1 ? 'requirement' : 'requirements'}
+            </Tag>
+            <h3 id={`created-${p.id}`} className={styles.docTitle}>
+              {p.name}
+            </h3>
+            <p className={styles.docMeta}>{firstSentence(p.brief)}</p>
+          </div>
+
+          <section className={styles.docSection}>
+            <h4 className={styles.docHeading}>Expert profile needed ({p.requirements.length})</h4>
+            {draft !== null ? (
+              <TextArea
+                id={`requirements-${p.id}`}
+                labelText="Expert requirements"
+                helperText="One requirement per line."
+                rows={Math.max(4, (lines?.length ?? 0) + 1)}
+                value={draft}
+                invalid={Boolean(draftError)}
+                invalidText={draftError}
+                onChange={(event) => setDraft(event.target.value)}
+              />
+            ) : (
+              <ul className={styles.docList}>
+                {p.requirements.map((r) => (
+                  <li key={r.id}>{r.text}</li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+      </article>
+
+      {/* The way on, outside the card: one question, one button. */}
+      <div className={styles.reqFoot}>
         <div className={styles.footerText}>
           <p>
             <strong>Should I find experts who match them?</strong>
@@ -556,13 +704,13 @@ function RequirementsReview({
         <Button
           size="md"
           renderIcon={Search}
-          disabled={isBusy}
-          onClick={() => onAsk(`Yes, find experts for ${p.id}`)}
+          disabled={isBusy || draft !== null}
+          onClick={() => onAsk(`Yes, find experts for ${p.name}`)}
         >
           Find experts
         </Button>
-      </footer>
-    </article>
+      </div>
+    </div>
   );
 }
 

@@ -95,7 +95,11 @@
 
   border-collapse: collapse;
   inline-size: 100%;
-  min-inline-size: 40rem;
+
+  // Three columns fit a phone: no sideways scroll, the expert's facts wrap instead.
+  @include breakpoint(md) {
+    min-inline-size: 28rem;
+  }
 
   thead th {
     @include type-style('heading-compact-01');
@@ -134,18 +138,76 @@
 
 .pickCol {
   inline-size: $spacing-07;
-}
 
-.rankCol {
-  color: $text-secondary;
-  inline-size: $spacing-06;
+  // Quieter boxes: a touch smaller, and the brand blue instead of near-black when ticked.
+  // Carbon draws the box from this token, so we set it rather than restyle its parts.
+  --cds-icon-primary: #{$interactive};
+
+  zoom: 0.875;
 }
 
 // One cell per expert: the name leads, the role and facts sit quietly under it.
 .table .expertCell {
   @include font-weight('regular');
 
-  min-inline-size: 11rem;
+  inline-size: auto;
+
+  @include breakpoint(md) {
+    min-inline-size: 11rem;
+  }
+}
+
+// The whole row opens the expert's profile; the open one stays marked.
+.row {
+  cursor: pointer;
+  transition: background-color $duration-fast-02 motion(standard, productive);
+
+  &:hover {
+    background: $layer-hover-01;
+  }
+}
+
+.rowOpen,
+.rowOpen:hover {
+  background: $highlight;
+}
+
+// Portrait, then the name and facts beside it.
+.person {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-04;
+}
+
+.personText {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.nameButton {
+  @include type-style('heading-compact-01');
+
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: $text-primary;
+  cursor: pointer;
+  text-align: start;
+  text-decoration: underline dotted;
+  text-decoration-color: $border-strong-01;
+  text-underline-offset: $spacing-02;
+
+  &:hover {
+    color: $link-primary;
+    text-decoration-color: $link-primary;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
 }
 
 .expertName {
@@ -154,12 +216,11 @@
   display: block;
 }
 
-// What they do, in its own column so it can be scanned down the table.
+// What they do (the screening answers table), in its own column so it can be scanned down it.
 .expertiseCell {
   @include type-style('body-compact-01');
 
   color: $text-primary;
-  max-inline-size: 13rem;
 }
 
 // Experience is the fact the PM weighs most, so it reads bold; the country stays quiet.
@@ -176,37 +237,58 @@
   align-items: center;
   color: $text-secondary;
   gap: $spacing-03;
+  flex-wrap: wrap;
   margin-block-start: $spacing-03;
-  white-space: nowrap;
-}
 
-// The AI's reason, as a calm sentence beside the name.
-.fitCell {
-  @include type-style('body-compact-01');
-
-  color: $text-secondary;
-  max-inline-size: 18rem;
-}
-
-.nameLink {
-  color: $text-primary;
-  text-decoration: underline dotted;
-  text-decoration-color: $border-strong-01;
-  text-underline-offset: $spacing-02;
-
-  &:hover {
-    color: $link-primary;
-    text-decoration-color: $link-primary;
+  @include breakpoint(md) {
+    flex-wrap: nowrap;
+    white-space: nowrap;
   }
+}
 
-  &:focus-visible {
-    outline: 2px solid $focus;
-    outline-offset: 2px;
+// Where the expert came from: the source's own logo, bare, at the size of the flag.
+.source {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  line-height: 0;
+
+  svg {
+    display: block;
+    block-size: $spacing-05;
+    inline-size: $spacing-05;
+  }
+}
+
+// LinkedIn's logo in its own blue; the API glyph stays quiet.
+.sourceLinkedin svg {
+  fill: $interactive;
+}
+
+.sourceLink:focus-visible {
+  outline: 2px solid $focus;
+  outline-offset: 2px;
+}
+
+.sourceApi svg {
+  fill: $icon-secondary;
+}
+
+// The separators only make sense on one line; a phone wraps the facts instead.
+.dot {
+  display: none;
+
+  @include breakpoint(md) {
+    display: inline;
   }
 }
 
 .matchCol {
-  inline-size: 5rem;
+  inline-size: 4rem;
+
+  @include breakpoint(md) {
+    inline-size: 6rem;
+  }
 }
 
 .match {
@@ -248,14 +330,28 @@
   @include type-style('body-compact-01');
 
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: $spacing-03;
 
   svg {
     flex: none;
     fill: $support-success;
+    margin-block-start: $spacing-01;
   }
+}
+
+// Sent: the confirmation, the way to the answers once they're in, and an open invitation.
+.sentBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-04;
+}
+
+.followUp {
+  @include type-style('body-01');
+
+  color: $text-secondary;
 }
 
 // ——— Extend research, as a card in the thread ————————————————————————————————————

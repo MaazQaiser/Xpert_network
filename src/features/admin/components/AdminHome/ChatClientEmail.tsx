@@ -34,6 +34,7 @@ import {
   type ClientExpert,
 } from '../../model/clientDraft.schema';
 import type { Project } from '../../model/project.schema';
+import { senderPhoto } from '../inboxDisplay';
 import { StreamedAnswer } from './StreamedAnswer';
 import chat from './ChatBlocks.module.scss';
 import search from './ExpertSearch.module.scss';
@@ -100,22 +101,25 @@ export function ChatClientEmail({ project }: { project: Project }) {
 
   return (
     <section className={search.round} aria-label={`Email to ${clientFirst}`}>
-      <ol className={search.steps} aria-live="polite">
-        {steps.map((label, index) => (
-          <li key={index}>
-            {index < step ? (
-              <InlineLoading status="finished" description={label} />
-            ) : index === step && !draft.isError ? (
-              <InlineLoading status="active" description={`${label}…`} />
-            ) : (
-              <span className={search.stepPending}>
-                <CircleDash aria-hidden={true} />
-                {label}
-              </span>
-            )}
-          </li>
-        ))}
-      </ol>
+      {/* The steps make way for the answer once it's in. */}
+      {isDone ? null : (
+        <ol className={search.steps} aria-live="polite">
+          {steps.map((label, index) => (
+            <li key={index}>
+              {index < step ? (
+                <InlineLoading status="finished" description={label} />
+              ) : index === step && !draft.isError ? (
+                <InlineLoading status="active" description={`${label}…`} />
+              ) : (
+                <span className={search.stepPending}>
+                  <CircleDash aria-hidden={true} />
+                  {label}
+                </span>
+              )}
+            </li>
+          ))}
+        </ol>
+      )}
 
       {draft.isError ? (
         <ActionableNotification
@@ -204,12 +208,16 @@ function EmailSummary({ project, draft }: { project: Project; draft: ClientDraft
   return (
     <div className={search.result}>
       <h4 className={search.resultTitle}>
-        {isSent ? `Sent ${count} experts to ${first}` : `Send ${count} experts to ${first}`}
+        {`${isSent ? 'Sent' : 'Send'} ${count} ${count === 1 ? 'expert' : 'experts'} to ${first}`}
       </h4>
       <StreamedAnswer
         className={search.resultIntro}
         pauseMs={500}
-        text={`${first} gets one email with all **${count} profiles**, a short summary of their answers and their free times. They pick ${settings.pickUpToTwo ? '1 or 2 experts' : 'an expert'} on a private page.`}
+        text={
+          count === 1
+            ? `${first} gets one email with **the expert’s profile**, a short summary of their answers and their free times. They confirm the call on a private page.`
+            : `${first} gets one email with all **${count} profiles**, a short summary of their answers and their free times. They pick ${settings.pickUpToTwo ? '1 or 2 experts' : 'an expert'} on a private page.`
+        }
       >
         <div className={styles.stack}>
           <article className={styles.email} aria-label={`Email to ${draft.to.name}`}>
@@ -263,31 +271,52 @@ function EmailSummary({ project, draft }: { project: Project; draft: ClientDraft
             </header>
 
             <div className={styles.emailBody}>
-              {/* The envelope: who, and what it says. */}
-              <dl className={styles.envelope}>
-                <div>
-                  <dt>To</dt>
-                  <dd>
-                    {draft.to.name} · {draft.to.email}
-                  </dd>
+              {/* The envelope, as in a mail app: a To line with the recipient as a chip, then the
+                  subject, each on its own ruled line. */}
+              <div className={styles.envelope}>
+                <div className={styles.mailRow}>
+                  <span className={styles.mailLabel}>To</span>
+                  <span className={styles.recipient} title={draft.to.email}>
+                    <span className={styles.recipientAvatar} aria-hidden="true">
+                      {senderPhoto(draft.to.email) ? (
+                        <Image
+                          src={senderPhoto(draft.to.email) ?? ''}
+                          alt=""
+                          width={24}
+                          height={24}
+                          className={styles.photo}
+                        />
+                      ) : (
+                        initials(draft.to.name)
+                      )}
+                    </span>
+                    <span className={styles.recipientName}>{draft.to.name}</span>
+                    <span className={styles.recipientEmail}>{draft.to.email}</span>
+                  </span>
                 </div>
-                {edit ? null : (
-                  <div>
-                    <dt>Subject</dt>
-                    <dd className={styles.subject}>{draft.subject}</dd>
-                  </div>
-                )}
-              </dl>
+                <div className={styles.mailRow}>
+                  <span className={styles.mailLabel} id={`email-subject-label-${project.id}`}>
+                    Subject
+                  </span>
+                  {edit ? (
+                    <TextInput
+                      id={`email-subject-${project.id}`}
+                      labelText="Subject"
+                      hideLabel
+                      size="sm"
+                      className={styles.subjectField}
+                      value={edit.subject}
+                      onChange={(event) => setEdit({ ...edit, subject: event.target.value })}
+                      invalid={Boolean(fieldError('subject'))}
+                      invalidText={fieldError('subject')}
+                    />
+                  ) : (
+                    <span className={styles.subject}>{draft.subject}</span>
+                  )}
+                </div>
+              </div>
               {edit ? (
                 <>
-                  <TextInput
-                    id={`email-subject-${project.id}`}
-                    labelText="Subject"
-                    value={edit.subject}
-                    onChange={(event) => setEdit({ ...edit, subject: event.target.value })}
-                    invalid={Boolean(fieldError('subject'))}
-                    invalidText={fieldError('subject')}
-                  />
                   <TextArea
                     id={`email-intro-${project.id}`}
                     labelText="Message"

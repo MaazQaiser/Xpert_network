@@ -42,6 +42,8 @@ export type ExpertStory = {
   };
   countries: readonly string[];
   roles: readonly string[];
+  /** Where these experts worked and what they did earlier, for their LinkedIn-style history. */
+  career: { employers: readonly string[]; earlier: readonly string[] };
   why: readonly string[];
   filters: string[];
   /** Fewest years of experience, and the spread above it. */
@@ -94,6 +96,22 @@ const PRJ_1042: ExpertStory = {
     'Thru-hiker, Continental Divide Trail',
     'Trail runner, Pacific Northwest',
   ],
+  career: {
+    employers: [
+      'REI Co-op',
+      'Patagonia',
+      'Garmin',
+      'Pacific Crest Trail Association',
+      'Salomon',
+      'Backcountry.com',
+    ],
+    earlier: [
+      'Outdoor guide',
+      'Gear tester',
+      'Retail associate, outdoor gear',
+      'Trail crew volunteer',
+    ],
+  },
   why: [
     'Wears Shokz OpenRun on every long run',
     'Finished a 5-night section hike in September',
@@ -223,6 +241,22 @@ const PRJ_1043: ExpertStory = {
     'Former Separation Lead, MRO carve-out',
     'Ex-Maintenance Systems Lead, MRO',
   ],
+  career: {
+    employers: [
+      'Monarch Aircraft Engineering',
+      'FL Technics',
+      'Lufthansa Technik',
+      'SR Technics',
+      'Air Atlanta Icelandic',
+      'Babcock Aerospace',
+    ],
+    earlier: [
+      'Quality Engineer',
+      'Licensed Aircraft Engineer (B1)',
+      'Compliance Auditor',
+      'Technical Records Lead',
+    ],
+  },
   why: [
     'Wrote the exposition for a new Part 145 approval',
     'Led quality through an airline MRO carve-out',
@@ -350,6 +384,15 @@ const PRJ_1044: ExpertStory = {
     'Former Operations Manager, pump & treat',
     'Ex-Procurement Lead, industrial site remediation',
   ],
+  career: {
+    employers: ['Arcadis', 'Tauw', 'Witteveen+Bos', 'Royal HaskoningDHV', 'Sweco', 'Antea Group'],
+    earlier: [
+      'Remediation Engineer',
+      'Environmental Consultant',
+      'Site Manager, soil works',
+      'Project Engineer',
+    ],
+  },
   why: [
     'Ran biological and chemical in situ programmes in Flanders',
     'Negotiated risk-based contracts with liability takeover',

@@ -44,7 +44,7 @@ describe('Inbox (F12, screen 02)', () => {
     renderWithProviders(<Inbox selectedId="req_northgate_mro" />, { persona: 'ops' });
     const list = await screen.findByRole('list', { name: 'Requests' });
     expect(screen.getByRole('button', { name: /^Unread/ })).toHaveAttribute('aria-pressed', 'true');
-    // Two unread to start; opening Omar's email reads it.
+    // Two unread to start; opening Amy's email reads it.
     await waitFor(() => expect(within(list).getAllByRole('listitem')).toHaveLength(1));
     expect(db.get().adminInbox['req_northgate_mro']?.read).toBe(true);
   });

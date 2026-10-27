@@ -10,19 +10,27 @@ import {
   SkeletonText,
   Tag,
 } from '@carbon/react';
-import { ArrowRight, CircleDash } from '@carbon/icons-react';
+import { ArrowRight, CircleDash, SendAlt } from '@carbon/icons-react';
+import { AIExplainLabel } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
-import { formatTime } from '@/shared/lib/dates';
 import { CountryFlag } from '@/shared/ui';
-import { useProject, useResponses } from '../../api/queries';
+import {
+  useAvailability,
+  useAvailabilityAction,
+  useProject,
+  useResponses,
+} from '../../api/queries';
+import type { Availability } from '../../model/availability.schema';
 import type { Project } from '../../model/project.schema';
 import {
   ANSWER_QUALITY_LABELS,
   type ExpertResponse,
   type ResponsesResult,
 } from '../../model/responses.schema';
-import { ChatAvailability } from './ChatAvailability';
+import { ChatClientEmail } from './ChatClientEmail';
+import { ReportPanel } from './ReportPanel';
 import { StreamedAnswer } from './StreamedAnswer';
+import chat from './ChatBlocks.module.scss';
 import search from './ExpertSearch.module.scss';
 import styles from './ScreeningAnswers.module.scss';
 
@@ -30,10 +38,11 @@ import styles from './ScreeningAnswers.module.scss';
 const STEP_MS = 1600;
 /** The paragraph streams first; the table follows after this beat. */
 const TABLE_PAUSE_MS = 500;
-/** A report opens on its first answers; Read all shows the rest. */
-const PREVIEW_ANSWERS = 4;
 
-const STEPS = ['Finding which experts answered the screening questions', 'Reading their answers'];
+const STEPS = [
+  'Finding which experts answered the screening questions',
+  'Reading their answers and free times',
+];
 
 const nameOf = (response: ExpertResponse) => response.name ?? response.label;
 
@@ -45,9 +54,14 @@ const nameOf = (response: ExpertResponse) => response.name ?? response.label;
  */
 export function ScreeningAnswers({
   projectId,
+  expertId,
+  expertName,
   onWorking,
 }: {
   projectId: string;
+  /** Asked for one expert: their report opens as soon as the answers are in. */
+  expertId?: string;
+  expertName?: string;
   /** Tells the answer's mascot whether the AI is still looking. */
   onWorking?: (working: boolean) => void;
 }) {
@@ -55,18 +69,21 @@ export function ScreeningAnswers({
   const responses = useResponses(projectId);
   const [step, setStep] = useState(0);
   const outcome = useRef<HTMLDivElement>(null);
+  const steps = expertName
+    ? [`Finding ${expertName}’s screening answers`, 'Reading their answers and free times']
+    : STEPS;
 
   // Tick the steps off; the last one waits for the answers to arrive.
   useEffect(() => {
     if (responses.isError) return;
-    if (step < STEPS.length - 1 || (step === STEPS.length - 1 && responses.data)) {
+    if (step < steps.length - 1 || (step === steps.length - 1 && responses.data)) {
       const timer = window.setTimeout(() => setStep((s) => s + 1), STEP_MS);
       return () => window.clearTimeout(timer);
     }
     return undefined;
-  }, [step, responses.data, responses.isError]);
+  }, [step, steps.length, responses.data, responses.isError]);
 
-  const isDone = step >= STEPS.length && responses.data !== undefined;
+  const isDone = step >= steps.length && responses.data !== undefined;
 
   // The mascot works while the AI is looking, and settles once the answers are in.
   const reportWorking = useRef(onWorking);
@@ -100,22 +117,25 @@ export function ScreeningAnswers({
 
   return (
     <section className={search.round} aria-label={`Screening answers for ${project.data.id}`}>
-      <ol className={search.steps} aria-live="polite">
-        {STEPS.map((label, index) => (
-          <li key={label}>
-            {index < step ? (
-              <InlineLoading status="finished" description={label} />
-            ) : index === step && !responses.isError ? (
-              <InlineLoading status="active" description={`${label}…`} />
-            ) : (
-              <span className={search.stepPending}>
-                <CircleDash aria-hidden={true} />
-                {label}
-              </span>
-            )}
-          </li>
-        ))}
-      </ol>
+      {/* The steps make way for the answer once it's in. */}
+      {isDone ? null : (
+        <ol className={search.steps} aria-live="polite">
+          {steps.map((label, index) => (
+            <li key={label}>
+              {index < step ? (
+                <InlineLoading status="finished" description={label} />
+              ) : index === step && !responses.isError ? (
+                <InlineLoading status="active" description={`${label}…`} />
+              ) : (
+                <span className={search.stepPending}>
+                  <CircleDash aria-hidden={true} />
+                  {label}
+                </span>
+              )}
+            </li>
+          ))}
+        </ol>
+      )}
 
       {responses.isError ? (
         <ActionableNotification
@@ -132,22 +152,36 @@ export function ScreeningAnswers({
       ) : null}
 
       <div ref={outcome} className={search.outcome}>
-        {isDone ? <ScreeningReview project={project.data} data={responses.data} /> : null}
+        {isDone ? (
+          <ScreeningReview project={project.data} data={responses.data} expertId={expertId} />
+        ) : null}
       </div>
     </section>
   );
 }
 
-function ScreeningReview({ project, data }: { project: Project; data: ResponsesResult }) {
+function ScreeningReview({
+  project,
+  data,
+  expertId,
+}: {
+  project: Project;
+  data: ResponsesResult;
+  expertId?: string;
+}) {
   const answered = data.responses.filter((r) => r.status === 'answered');
   const waiting = data.responses.filter(
     (r) => r.status === 'in_progress' || r.status === 'not_opened',
   ).length;
   const picks = answered.filter((r) => r.aiPick).map((r) => r.expertId);
   const [selected, setSelected] = useState<string[]>(picks);
-  const [openId, setOpenId] = useState<string | null>(null);
-  // Who the PM confirmed to move forward; their times then load below, in the thread.
-  const [confirmed, setConfirmed] = useState<string[] | null>(null);
+  const [openId, setOpenId] = useState<string | null>(expertId ?? null);
+  // Every expert who answered also gave their free times; the PM sends the picks to the client.
+  const availability = useAvailability(
+    project.id,
+    answered.map((r) => r.expertId),
+  );
+  const [isPrepared, setIsPrepared] = useState(false);
   const open = answered.find((r) => r.expertId === openId) ?? null;
 
   const toggle = (id: string, on: boolean) =>
@@ -174,8 +208,8 @@ function ScreeningReview({ project, data }: { project: Project; data: ResponsesR
     `**${answered.length} of ${data.responses.length} experts** answered the ${data.questionCount} screening questions`,
     waiting > 0 ? `, and ${waiting} ${waiting === 1 ? 'is' : 'are'} still answering. ` : '. ',
     picks.length > 0
-      ? `I’ve selected the [[!${picks.length} with the strongest answers]] to move forward. Open any expert to read their report.`
-      : 'Open any expert to read their report, then pick who to move forward.',
+      ? `I’ve selected the [[!${picks.length} with the strongest answers]] to move forward. Open any expert to read their answers and free times.`
+      : 'Open any expert to read their answers and free times, then pick who to move forward.',
   ].join('');
 
   return (
@@ -189,38 +223,58 @@ function ScreeningReview({ project, data }: { project: Project; data: ResponsesR
             answered={answered}
             selected={selected}
             openId={openId}
-            isLocked={confirmed !== null}
+            isLocked={isPrepared}
             onToggle={toggle}
             onOpen={setOpenId}
           />
 
           {open ? (
-            <ExpertReport key={open.expertId} response={open} questionCount={data.questionCount} />
+            <ReportPanel
+              key={open.expertId}
+              response={open}
+              questionCount={data.questionCount}
+              times={availability.data}
+              position={answered.indexOf(open)}
+              total={answered.length}
+              onStep={(step) =>
+                setOpenId(answered[answered.indexOf(open) + step]?.expertId ?? null)
+              }
+              onClose={() => setOpenId(null)}
+            />
           ) : null}
 
-          {confirmed ? null : (
-            <div className={styles.confirm}>
-              <p className={styles.confirmNote} aria-live="polite">
-                <strong>{selected.length}</strong> of {answered.length} selected to move forward
-              </p>
-              <Button
-                size="md"
-                renderIcon={ArrowRight}
-                disabled={selected.length === 0}
-                onClick={() => setConfirmed(selected)}
-              >
-                Confirm availability for {selected.length}
-              </Button>
-            </div>
+          {availability.data ? (
+            <ReadyForClient
+              project={project}
+              data={availability.data}
+              people={answered}
+              selected={selected}
+              isPrepared={isPrepared}
+              onPrepared={() => setIsPrepared(true)}
+            />
+          ) : availability.isError ? (
+            <ActionableNotification
+              inline
+              kind="error"
+              lowContrast
+              hideCloseButton
+              hasFocus={false}
+              title="Their free times didn’t load."
+              subtitle={toUserMessage(availability.error)}
+              actionButtonLabel="Try again"
+              onActionButtonClick={() => void availability.refetch()}
+            />
+          ) : (
+            <SkeletonText paragraph lineCount={2} />
           )}
 
-          {confirmed ? (
+          {isPrepared ? (
             <>
               <p className={search.request}>
-                Confirm availability for {confirmed.length}{' '}
-                {confirmed.length === 1 ? 'expert' : 'experts'}
+                Send {selected.length === 1 ? 'this expert' : 'these experts'} to{' '}
+                {availability.data?.clientName}
               </p>
-              <ChatAvailability project={project} expertIds={confirmed} people={answered} />
+              <ChatClientEmail project={project} />
             </>
           ) : null}
         </div>
@@ -308,7 +362,7 @@ function AnswerTable({
                   {/* Who they are at a glance: the name, then the country. */}
                   {response.country ? (
                     <span className={search.expertMeta}>
-                      <CountryFlag code={response.country} size="sm" />
+                      <CountryFlag code={response.country} size="sm" short />
                     </span>
                   ) : null}
                 </th>
@@ -346,92 +400,123 @@ function AnswerTable({
 }
 
 /**
- * One expert's report in the thread, written like the AI handing it over: who they are, the AI's
- * one-line read, then their answers question by question. Read all shows every answer.
+ * Under the answers: the experts picked, with their times, are ready to go to the client. One
+ * hold option and the one step to take; sending drafts the client email below, in the thread.
  */
-function ExpertReport({
-  response,
-  questionCount,
+function ReadyForClient({
+  project,
+  data,
+  people,
+  selected,
+  isPrepared,
+  onPrepared,
 }: {
-  response: ExpertResponse;
-  questionCount: number;
+  project: Project;
+  data: Availability;
+  /** The experts who answered, for their names. */
+  people: ExpertResponse[];
+  selected: string[];
+  isPrepared: boolean;
+  onPrepared: () => void;
 }) {
-  const [showAll, setShowAll] = useState(false);
-  const report = useRef<HTMLElement>(null);
-  const name = nameOf(response);
-  const given = response.answers.filter((a) => a.answer !== null);
-  const shown = showAll ? given : given.slice(0, PREVIEW_ANSWERS);
+  const action = useAvailabilityAction(project.id);
+  const [holdSlots, setHoldSlots] = useState(true);
+  const [error, setError] = useState<unknown>(null);
+  const client = data.clientName;
+  const ready = data.experts.filter(
+    (e) => selected.includes(e.expertId) && e.status === 'confirmed' && e.slots.length > 0,
+  );
 
-  // Opening a report brings it into view under the table.
-  useEffect(() => {
-    const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    report.current?.scrollIntoView?.({ block: 'start', behavior: still ? 'auto' : 'smooth' });
-  }, []);
-
-  const meta = [
-    response.role,
-    response.years !== undefined ? `${response.years} years` : null,
-    response.submittedAt ? `submitted ${formatTime(response.submittedAt)}` : null,
-  ]
-    .filter(Boolean)
-    .join(' · ');
+  const send = () => {
+    setError(null);
+    action.mutate(
+      {
+        action: 'prepare_client',
+        holdSlots,
+        experts: ready.map((e) => ({ expertId: e.expertId, slotIds: e.slots.map((s) => s.id) })),
+      },
+      { onSuccess: onPrepared, onError: setError },
+    );
+  };
 
   return (
-    <article
-      ref={report}
-      id={`report-${response.expertId}`}
-      className={styles.report}
-      aria-label={`${name}’s report`}
-    >
-      <StreamedAnswer
-        className={styles.reportIntro}
-        text={`Here’s **${name}**’s report. Their answers to the ${questionCount} screening questions are given below.`}
-      >
-        <div className={styles.reportBody}>
-          <header className={styles.reportHead}>
-            <div>
-              <h5 className={styles.reportName}>{name}</h5>
-              <p className={styles.reportMeta}>{meta}</p>
-            </div>
-            {response.quality ? (
-              <span className={styles.reportTag}>
-                <Tag type="gray" size="sm">
-                  {ANSWER_QUALITY_LABELS[response.quality]} answers
-                </Tag>
-              </span>
-            ) : null}
-          </header>
+    <article className={chat.canvas} aria-labelledby={`ready-${project.id}`}>
+      {/* A document card, like the brief: the bar says what it is, the page says what's next. */}
+      <header className={chat.canvasBar}>
+        <span className={chat.canvasLabel}>
+          <SendAlt aria-hidden={true} />
+          Ready for the client · {client}
+        </span>
+        <AIExplainLabel size="xs" aria-label={`${project.id} hand-off to the client`} />
+      </header>
 
-          {response.summary ? (
-            <div className={styles.summary}>
-              <p className={styles.summaryLabel}>AI summary</p>
-              <p>{response.summary}</p>
-            </div>
-          ) : null}
-
-          <ol className={styles.answers} aria-label={`${name}’s answers`}>
-            {shown.map((answer) => {
-              const index = response.answers.indexOf(answer);
-              return (
-                <li key={answer.questionId} className={styles.answer}>
-                  <p className={styles.question}>
-                    Q{index + 1} · {answer.question}
-                  </p>
-                  <p>{answer.answer}</p>
-                </li>
-              );
-            })}
-          </ol>
-
-          {given.length > PREVIEW_ANSWERS ? (
-            <div className={styles.reportFoot}>
-              <Button kind="tertiary" size="md" onClick={() => setShowAll((all) => !all)}>
-                {showAll ? 'Show fewer answers' : `Read all ${given.length} answers`}
-              </Button>
-            </div>
-          ) : null}
+      <div className={chat.canvasPage}>
+        <div className={chat.docHead}>
+          <Tag type="blue" size="sm">
+            {ready.length} {ready.length === 1 ? 'expert' : 'experts'} ready
+          </Tag>
+          <h3 id={`ready-${project.id}`} className={chat.docTitle}>
+            Ready for the client
+          </h3>
+          <p className={chat.docMeta} aria-live="polite">
+            {ready.length > 0 ? (
+              <>
+                <strong>
+                  {ready.length} {ready.length === 1 ? 'expert has' : 'experts have'}
+                </strong>{' '}
+                times to offer. Next, send them to {client} with their answers and free slots.
+              </>
+            ) : (
+              'Pick at least one expert above to send to the client.'
+            )}
+          </p>
         </div>
-      </StreamedAnswer>
+
+        {ready.length > 0 ? (
+          <section className={chat.docSection}>
+            <h4 className={chat.docHeading}>Going to {client.split(' ')[0]}</h4>
+            <ul className={chat.docList}>
+              {ready.map((e) => (
+                <li key={e.expertId}>
+                  {people.find((p) => p.expertId === e.expertId)?.name ?? e.label} ·{' '}
+                  {e.slots.length} free {e.slots.length === 1 ? 'time' : 'times'}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        <Checkbox
+          id={`hold-slots-${project.id}`}
+          labelText="Hold these slots with the experts for 48 hours"
+          checked={holdSlots}
+          disabled={isPrepared}
+          onChange={(_, { checked }) => setHoldSlots(checked)}
+        />
+        {error ? (
+          <InlineNotification
+            kind="error"
+            lowContrast
+            title="That didn’t send."
+            subtitle={toUserMessage(error)}
+            onClose={() => setError(null)}
+          />
+        ) : null}
+        {isPrepared ? null : (
+          <div className={styles.readyFoot}>
+            <Button
+              renderIcon={ArrowRight}
+              className={styles.sendButton}
+              disabled={ready.length === 0 || action.isPending}
+              onClick={send}
+            >
+              {action.isPending
+                ? 'Preparing…'
+                : `Send ${ready.length === 1 ? 'this expert' : 'these experts'} to ${client}`}
+            </Button>
+          </div>
+        )}
+      </div>
     </article>
   );
 }

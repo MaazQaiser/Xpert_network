@@ -84,6 +84,7 @@ export function buildResponses(
       years: expert.years,
       country: expert.country,
       linkedinUrl: expert.linkedinUrl,
+      photoUrl: expert.photoUrl,
       source: expert.source,
       status,
       answeredCount: reached,

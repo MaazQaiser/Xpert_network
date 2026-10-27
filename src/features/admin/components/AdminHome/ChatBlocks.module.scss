@@ -215,16 +215,14 @@
 }
 
 // The page itself: white, generous margins, a readable measure.
+// The page under a card's bar: its left edge lines up with the bar's icon, so every card (brief,
+// requirements, ready for the client) reads as one column.
 .canvasPage {
   display: flex;
   flex-direction: column;
   gap: $spacing-06;
   padding: $spacing-06 $spacing-05;
   background: $background;
-
-  @include breakpoint(md) {
-    padding: $spacing-07 $spacing-08;
-  }
 }
 
 .docHead {
@@ -352,16 +350,6 @@
 }
 
 // After the project is created: a quiet confirmation beside the next step.
-.created {
-  display: inline-flex;
-  align-items: center;
-  gap: $spacing-03;
-
-  svg {
-    flex: none;
-    fill: $support-success;
-  }
-}
 
 // The assistant's question under the brief, then the button that answers it.
 .createAsk {
@@ -374,25 +362,36 @@
   }
 }
 
-.reqIntro {
+.createActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+// No icon, so no room kept for one: Carbon pads a button's end for its icon. Doubled class
+// outranks Carbon's button root rule.
+.createButton.createButton {
+  padding-inline-end: $spacing-05;
+}
+
+// ——— After Create project: the steps, the project handed over, its requirements ——————————
+.createdFlow {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+.createSteps {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+}
+
+.createdLead.createdLead {
   @include type-style('body-01');
 }
 
 // The requirements review: what the AI will search on, then the button that starts it.
-.reqHead {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: $spacing-02 $spacing-05;
-}
-
-.reqMeta {
-  @include type-style('body-compact-01');
-  @include font-weight('semibold');
-
-  color: $text-primary;
-}
 
 .reqFoot {
   display: flex;
@@ -400,8 +399,6 @@
   align-items: center;
   justify-content: space-between;
   gap: $spacing-04;
-  padding-block-start: $spacing-05;
-  border-block-start: 1px solid $border-subtle-01;
 }
 
 .reqHint {

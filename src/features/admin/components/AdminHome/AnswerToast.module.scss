@@ -1,0 +1,132 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/motion' as *;
+
+// How long the toast waits before it leaves, unless the PM is pointing at or focused on it.
+$toast-life: 10s;
+
+// Top right, just under the 3rem UI Shell header; full width with gutters on a phone.
+.region {
+  position: fixed;
+  z-index: 8000;
+  inset-block-start: $spacing-10;
+  inset-inline: $spacing-05;
+
+  @include breakpoint(md) {
+    inset-inline: auto $spacing-06;
+    inline-size: 22rem;
+  }
+}
+
+// A white card: the icon in its own column behind a hairline, the message, then the timer bar.
+.toast {
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  animation: toast-in $duration-moderate-02 motion(entrance, expressive) both;
+  border: 1px solid $border-subtle-01;
+  background: $background;
+  box-shadow: 0 $spacing-03 $spacing-07 $shadow;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-1 * #{$spacing-05}));
+  }
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  padding-inline: $spacing-04;
+  border-inline-end: 1px solid $border-subtle-01;
+
+  svg {
+    fill: $support-success;
+  }
+}
+
+// The message is the button: one large target that opens the answers.
+.body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: $spacing-04 $spacing-02 $spacing-04 $spacing-04;
+  border: 0;
+  background: none;
+  color: $text-primary;
+  cursor: pointer;
+  gap: $spacing-03;
+  text-align: start;
+  transition: background-color $duration-fast-02 motion(standard, productive);
+
+  &:hover {
+    background: $layer-hover-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: -2px;
+  }
+}
+
+.title {
+  @include type-style('heading-compact-01');
+}
+
+.cta {
+  @include type-style('body-compact-01');
+
+  display: inline-flex;
+  align-items: center;
+  color: $link-primary;
+  gap: $spacing-02;
+
+  svg {
+    fill: $link-primary;
+    transition: transform $duration-fast-02 motion(standard, productive);
+  }
+
+  .body:hover & svg {
+    transform: translateX($spacing-01);
+  }
+}
+
+.close {
+  align-self: start;
+  margin: $spacing-01;
+}
+
+// Time left, running down along the bottom edge; it holds while the PM is on the toast.
+.timer {
+  position: absolute;
+  background: $interactive;
+  block-size: $spacing-01;
+  inset-block-end: 0;
+  inset-inline: 0;
+  transform-origin: left;
+  animation: run-down $toast-life linear forwards;
+
+  .toast:hover &,
+  .toast:focus-within & {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes run-down {
+  to {
+    transform: scaleX(0);
+  }
+}

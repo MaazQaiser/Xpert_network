@@ -70,7 +70,7 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
     },
     {
       id: 'req_northgate_mro',
-      from: { name: 'Omar Siddiqui', email: 'omar.siddiqui@northgate.example' },
+      from: { name: 'Amy Wang', email: 'amy.wang@northgate.example' },
       company: 'Northgate Advisory',
       to: PROJECTS_INBOX,
       subject: 'Looking for MRO / aviation compliance experts',
@@ -355,7 +355,7 @@ export function seedProjects(now = new Date()): Record<string, Project> {
       name: 'UK MRO carve-out, Part 145 readiness',
       status: 'draft',
       client: { id: 'cli_northgate', name: 'Northgate Advisory' },
-      contact: { name: 'Omar Siddiqui', email: 'omar.siddiqui@northgate.example' },
+      contact: { name: 'Amy Wang', email: 'amy.wang@northgate.example' },
       source: { requestId: 'req_northgate_mro', fileName: 'Scope_v2.docx' },
       createdAt: t(27),
     }),

@@ -28,7 +28,7 @@ const block = (
   sourceFor,
 });
 
-/** PRJ-1043: Omar Siddiqui (Northgate Advisory) — UK MRO carve-out, from Scope_v2.docx. */
+/** PRJ-1043: Amy Wang (Northgate Advisory) — UK MRO carve-out, from Scope_v2.docx. */
 export const PRJ_1043: DraftProjectContent = {
   brief:
     'Northgate Advisory is advising on the carve-out of a UK aircraft maintenance (MRO) business. They need 4–5 one-hour calls with former quality and compliance leads who know EASA Part 145 and UK CAA oversight, to test how ready the business is to hold its own approvals after separation. First calls before 6 Nov.',

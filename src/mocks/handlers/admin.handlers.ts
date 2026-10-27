@@ -23,7 +23,7 @@ import {
 } from '@/features/admin';
 import { createId } from '@/shared/lib/id';
 import { getControls } from '../controls';
-import { assistantReply } from '../ai/admin/assistant';
+import { assistantReply, type ScreenedExpert } from '../ai/admin/assistant';
 import { buildShortlist, swapOrRemove } from '../ai/admin/shortlist';
 import { emptyMatches, seedMatches } from '../fixtures/admin/experts';
 import { storyFor } from '../fixtures/admin/stories';
@@ -127,6 +127,26 @@ function clarificationDraft(project: Project) {
 /** Experts the screen 03 search can find for a project, best match first. */
 function searchPool(project: Project) {
   return ensureMatches(project, new Date()).experts;
+}
+
+/**
+ * Every expert sent screening questions, by name, so the assistant can find one asked for.
+ * The project whose questions went out last comes first.
+ */
+function screenedExperts(): ScreenedExpert[] {
+  const sentAt = db.get().adminScreeningSentAt;
+  const projects = Object.entries(db.get().adminScreening).sort(([a], [b]) =>
+    (sentAt[b] ?? '').localeCompare(sentAt[a] ?? ''),
+  );
+  return projects.flatMap(([projectId, ids]) => {
+    const project = findProject(projectId);
+    if (!project) return [];
+    const pool = searchPool(project);
+    return ids.flatMap((id) => {
+      const expert = pool.find((e) => e.id === id);
+      return expert?.name ? [{ projectId: project.id, expertId: id, name: expert.name }] : [];
+    });
+  });
 }
 
 export const adminHandlers = [
@@ -944,7 +964,13 @@ export const adminHandlers = [
     const parsed = assistantInputSchema.safeParse(await request.json());
     if (!parsed.success) return errorResponse(400, 'invalid', 'Type a question first.');
     return HttpResponse.json(
-      assistantReply(parsed.data.text, db.get(), new Date(), auth.user.name.split(' ')[0]),
+      assistantReply(
+        parsed.data.text,
+        db.get(),
+        new Date(),
+        auth.user.name.split(' ')[0],
+        screenedExperts(),
+      ),
     );
   }),
 ];

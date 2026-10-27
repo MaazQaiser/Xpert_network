@@ -144,17 +144,27 @@ export function countryName(code: string): string {
   return FLAGS[code]?.name ?? code;
 }
 
+/** The short form people write, e.g. "UK" for GB; otherwise the ISO code itself. */
+const SHORT_NAMES: Record<string, string> = { GB: 'UK' };
+
+export function countryShortName(code: string): string {
+  return SHORT_NAMES[code] ?? code;
+}
+
 /**
  * The country's flag and name, e.g. "🇩🇪 Germany"; unknown codes show the code alone. `sm` suits
- * small label text (a smaller flag, sitting closer to the name).
+ * small label text (a smaller flag, sitting closer to the name). `short` writes the short form
+ * ("UK"), with the full name kept for hover and screen readers.
  */
 export function CountryFlag({
   code,
   showName = true,
+  short = false,
   size = 'md',
 }: {
   code: string;
   showName?: boolean;
+  short?: boolean;
   size?: 'sm' | 'md';
 }) {
   const flag = FLAGS[code];
@@ -173,7 +183,16 @@ export function CountryFlag({
           {flag.art}
         </svg>
       ) : null}
-      {showName ? <span>{flag?.name ?? code}</span> : null}
+      {showName ? (
+        short ? (
+          <span title={flag?.name ?? code}>
+            <span aria-hidden="true">{countryShortName(code)}</span>
+            <span className={styles.visuallyHidden}>{flag?.name ?? code}</span>
+          </span>
+        ) : (
+          <span>{flag?.name ?? code}</span>
+        )
+      ) : null}
     </span>
   );
 }
