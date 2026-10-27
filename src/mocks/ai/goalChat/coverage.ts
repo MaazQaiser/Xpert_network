@@ -109,7 +109,7 @@ export function computeCoverage(brief: ResearchBrief, options: Options): Coverag
       questionId: question.id,
       coverage: isFull ? 'full' : 'partial',
       reason: isFull
-        ? `Answered in “${best.section.title}”${isNational ? ' — the rules apply nationwide' : ''}.`
+        ? `Answered in “${best.section.title}”${isNational ? '; the rules apply nationwide' : ''}.`
         : `Partly: “${best.section.title}” ${best.fit.note}.`,
       matches: [
         {

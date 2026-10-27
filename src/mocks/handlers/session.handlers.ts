@@ -189,7 +189,7 @@ export const authHandlers = [
       return errorResponse(
         410,
         'link_expired',
-        'This reset link has expired. Links work for 1 hour — request a new one.',
+        'This reset link has expired. Links work for 1 hour. Request a new one.',
       );
     }
     return HttpResponse.json({ ok: true });

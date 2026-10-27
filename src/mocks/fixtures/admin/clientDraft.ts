@@ -70,8 +70,8 @@ export function buildClientDraft(
   return {
     projectId: project.id,
     to: { name: project.contact.name, email: project.contact.email },
-    subject: `${count} experts for ${project.name.split(' — ')[0]} — pick 1 or 2`,
-    intro: `Hi ${first} — we screened ${matchedCount} matches and these ${count} answered your questions best. Each one is free for a 60-minute call next week. Pick 1 or 2 and we’ll book it.`,
+    subject: `${count} experts for ${project.name.split(', ')[0]}: pick 1 or 2`,
+    intro: `Hi ${first}, we screened ${matchedCount} matches and these ${count} answered your questions best. Each one is free for a 60-minute call next week. Pick 1 or 2 and we’ll book it.`,
     experts,
     questionTopics: topics,
     settings,

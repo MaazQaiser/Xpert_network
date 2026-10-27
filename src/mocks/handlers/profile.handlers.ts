@@ -133,7 +133,7 @@ export const profileHandlers = [
       return errorResponse(
         422,
         'invalid_code',
-        'That code didn’t work. Codes change every 30 seconds — enter the newest one.',
+        'That code didn’t work. Codes change every 30 seconds. Enter the newest one.',
       );
     }
     return HttpResponse.json(

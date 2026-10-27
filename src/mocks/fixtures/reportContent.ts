@@ -58,7 +58,7 @@ export const REPORT_CONTENT: Record<string, MockReport> = {
         quotes: [
           {
             id: 'q1',
-            text: 'Everyone starts with the roaster who visits them first. By month nine, half have switched — usually over consistency, not price.',
+            text: 'Everyone starts with the roaster who visits them first. By month nine, half have switched, usually over consistency, not price.',
             expert: expert('Procurement manager, café group', 9, 'Riyadh'),
           },
         ],

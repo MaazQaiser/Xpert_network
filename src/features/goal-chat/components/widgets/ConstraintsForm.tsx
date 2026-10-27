@@ -107,7 +107,7 @@ export function ConstraintsForm({ brief, isDisabled, onSubmit, onSkip }: Constra
             key={option}
             id={`depth-${option}`}
             value={option}
-            labelText={`${DEPTH_LABELS[option].label} — ${DEPTH_LABELS[option].hint}`}
+            labelText={`${DEPTH_LABELS[option].label}: ${DEPTH_LABELS[option].hint}`}
           />
         ))}
       </RadioButtonGroup>

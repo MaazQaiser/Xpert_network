@@ -186,11 +186,11 @@ export function BriefSummaryCard({ brief, isInteractive, onConfirm }: BriefSumma
         <dl className={styles.definitions}>
           <div>
             <dt>Goal</dt>
-            <dd>{brief.goalType ? GOAL_TYPE_LABELS[brief.goalType] : '—'}</dd>
+            <dd>{brief.goalType ? GOAL_TYPE_LABELS[brief.goalType] : 'Not set'}</dd>
           </div>
           <div>
             <dt>Objective</dt>
-            <dd>{brief.objective ?? '—'}</dd>
+            <dd>{brief.objective ?? 'Not set'}</dd>
           </div>
           <div>
             <dt>Subjects</dt>
@@ -222,7 +222,7 @@ export function BriefSummaryCard({ brief, isInteractive, onConfirm }: BriefSumma
                 : 'budget not set'}{' '}
               · {constraints.depth ? DEPTH_LABELS[constraints.depth].label : 'Standard'}
               {brief.stepStatus.constraints === 'attention' ? (
-                <span className={styles.attention}> — we’ll suggest these in any quote</span>
+                <span className={styles.attention}>; we’ll suggest these in any quote</span>
               ) : null}
             </dd>
           </div>

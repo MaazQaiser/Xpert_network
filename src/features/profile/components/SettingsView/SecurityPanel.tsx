@@ -250,7 +250,7 @@ function TwoFactorSection({ security }: { security: Security }) {
         <Stack gap={5}>
           <p className={styles.help}>
             Scan the QR code with an authenticator app, then enter the 6-digit code it shows.
-            (Prototype: no QR code — any 6 digits work, except 000000.)
+            (Prototype: there’s no QR code. Any 6 digits work, except 000000.)
           </p>
           {setTwoFactor.isError ? (
             <InlineNotification

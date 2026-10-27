@@ -88,7 +88,7 @@ function BookedView({ project, booking }: { project: Project; booking: Booking }
             </Tag>
           </div>
           <h1 className={styles.title}>
-            {first} picked {count} expert{count > 1 ? 's' : ''} — call{count > 1 ? 's' : ''}{' '}
+            {first} picked {count} expert{count > 1 ? 's' : ''}: call{count > 1 ? 's' : ''}{' '}
             {daysText}
           </h1>
           <p className={styles.subtitle}>

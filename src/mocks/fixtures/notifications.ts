@@ -12,7 +12,7 @@ const SEEDS: Record<string, Seed[]> = {
     {
       event: 'report_published',
       title: 'New report matches your interests',
-      body: 'GCC specialty coffee: store economics 2026 — built from 4 expert interviews.',
+      body: 'GCC specialty coffee: store economics 2026, built from 4 expert interviews.',
       href: '/library',
       read: false,
       hoursAgo: 2,
@@ -38,7 +38,7 @@ const SEEDS: Record<string, Seed[]> = {
     {
       event: 'report_published',
       title: 'New report: Riyadh café supply chain',
-      body: 'Supplier lead times and cold-chain costs for KSA cafés — 3 expert interviews.',
+      body: 'Supplier lead times and cold-chain costs for KSA cafés, from 3 expert interviews.',
       href: '/library',
       read: false,
       hoursAgo: 5,

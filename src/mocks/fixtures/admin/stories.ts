@@ -179,7 +179,7 @@ const PRJ_1042: ExpertStory = {
     },
     drop: {
       topic: 'Current headphones',
-      line: 'Actually, let’s drop the question on current headphones — we have that from the screener.',
+      line: 'Actually, let’s drop the question on current headphones. We have that from the screener.',
       quote: 'Drop the question on current headphones.',
     },
     next: {
@@ -306,7 +306,7 @@ const PRJ_1043: ExpertStory = {
     },
     drop: {
       topic: 'Customer reaction',
-      line: 'Actually, let’s drop the question on customer reaction — we’re covering that with the lessors directly.',
+      line: 'Actually, let’s drop the question on customer reaction. We’re covering that with the lessors directly.',
       quote: 'Drop the question on customer reaction.',
     },
     next: {
@@ -428,7 +428,7 @@ const PRJ_1044: ExpertStory = {
     },
     drop: {
       topic: 'Cost & margins',
-      line: 'Let’s skip the margin deep-dive — we already have supplier benchmarks.',
+      line: 'Let’s skip the margin deep-dive. We already have supplier benchmarks.',
       quote: 'Skip the margin deep-dive.',
     },
     next: {

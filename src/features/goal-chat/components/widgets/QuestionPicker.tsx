@@ -81,7 +81,7 @@ export function QuestionPicker({
 
   const submit = () => {
     if (selectedCount < MIN || selectedCount > MAX) {
-      setError(`Choose between ${MIN} and ${MAX} questions — you have ${selectedCount}.`);
+      setError(`Choose between ${MIN} and ${MAX} questions. You have ${selectedCount}.`);
       return;
     }
     setError(null);

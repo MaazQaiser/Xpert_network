@@ -142,7 +142,7 @@ export function SubjectPicker({
             ))}
           </div>
         ) : (
-          <p className={styles.muted}>Nothing yet — add at least one.</p>
+          <p className={styles.muted}>Nothing yet. Add at least one.</p>
         )}
       </div>
 

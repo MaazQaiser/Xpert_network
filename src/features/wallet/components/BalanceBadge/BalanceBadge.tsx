@@ -23,7 +23,7 @@ export function BalanceBadge() {
       }
     >
       <WalletIcon size={20} aria-hidden="true" />
-      <span className={styles.amount}>{balance === undefined ? '—' : formatCredits(balance)}</span>
+      <span className={styles.amount}>{balance === undefined ? '…' : formatCredits(balance)}</span>
     </Link>
   );
 }

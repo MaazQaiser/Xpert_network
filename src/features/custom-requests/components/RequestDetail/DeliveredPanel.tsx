@@ -61,7 +61,7 @@ export function DeliveredPanel({ request }: { request: CustomRequest }) {
       </RadioButtonGroup>
       {delivery.rating ? (
         <p className={styles.help} role="status">
-          Thanks — you rated this {delivery.rating} out of 5.
+          Thanks, you rated this {delivery.rating} out of 5.
         </p>
       ) : null}
       {rate.isError ? (

@@ -134,7 +134,7 @@ export const INDUSTRIES: Subject[] = [
 
 export const TIMEFRAMES: Subject[] = [
   { id: 'tf_last_3y', kind: 'timeframe', label: 'Last 3 years', detail: '2023–2026' },
-  { id: 'tf_next_12m', kind: 'timeframe', label: 'Next 12 months', detail: 'Oct 2026 – Oct 2027' },
+  { id: 'tf_next_12m', kind: 'timeframe', label: 'Next 12 months', detail: 'Oct 2026 to Oct 2027' },
   { id: 'tf_next_3y', kind: 'timeframe', label: 'Next 3 years', detail: '2026–2029' },
 ];
 

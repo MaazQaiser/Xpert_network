@@ -91,7 +91,7 @@ describe('AdminHome (F11, screen 01)', () => {
     expect(
       await screen.findByText(
         paragraph(
-          /Done, Umer\. Your project file for UK MRO carve-out .* has been created successfully/,
+          /Done, Umer\. Your project file for UK MRO carve-out, Part 145 readiness has been created successfully/,
         ),
       ),
     ).toBeInTheDocument();

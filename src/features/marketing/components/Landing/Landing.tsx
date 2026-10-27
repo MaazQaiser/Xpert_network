@@ -32,7 +32,7 @@ export function Landing() {
           <p className={styles.eyebrow}>Expert-backed research library</p>
           <h1 className={styles.title}>Decide with answers from people who have done it.</h1>
           <p className={styles.lead}>
-            Xpert Network helps investors and growing businesses get answers from industry experts —
+            Xpert Network helps investors and growing businesses get answers from industry experts:
             from our library in minutes, or as custom research in days.
           </p>
           <div className={styles.actions}>

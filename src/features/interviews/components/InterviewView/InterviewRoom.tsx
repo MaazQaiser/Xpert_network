@@ -288,7 +288,7 @@ export function InterviewRoom({ interview }: { interview: Interview }) {
                       send({ turnId: createId('turn'), action: 'confidential', text: '' })
                     }
                   >
-                    I can’t answer — confidential
+                    I can’t answer, it’s confidential
                   </Button>
                 </div>
               </Form>
@@ -444,7 +444,7 @@ function PausedPanel({
       </h2>
       <p className={styles.help}>
         {long
-          ? `You’ve been paused for more than 10 minutes. Everything is saved — pick up at ${section?.title.toLowerCase() ?? 'the next question'} whenever you’re ready.`
+          ? `You’ve been paused for more than 10 minutes. Everything is saved. Pick up at ${section?.title.toLowerCase() ?? 'the next question'} whenever you’re ready.`
           : `Your answers are saved and the clock is stopped. You’ll pick up at ${section?.title.toLowerCase() ?? 'the next question'}.`}
       </p>
       <div>

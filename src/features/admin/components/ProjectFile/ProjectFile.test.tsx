@@ -15,7 +15,7 @@ describe('ProjectFile (F12, screen 03)', () => {
     });
     expect(
       await screen.findByRole('heading', {
-        name: 'Sports headphones — North America outdoor research',
+        name: 'Sports headphones, North America outdoor research',
       }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Ridgeline is researching sports headphones/)).toBeInTheDocument();

@@ -80,9 +80,11 @@ describe('Interview room (F9)', () => {
     ).toBeInTheDocument();
     expect(within(transcript).getByText(/that covers background/)).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: 'I can’t answer — confidential' }));
+    await userEvent.click(
+      screen.getByRole('button', { name: 'I can’t answer, it’s confidential' }),
+    );
     expect(
-      await within(transcript).findByText('No problem at all — we’ll leave that one.'),
+      await within(transcript).findByText('No problem at all, we’ll leave that one.'),
     ).toBeInTheDocument();
   });
 
@@ -121,7 +123,7 @@ describe('Interview room (F9)', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Submit interview' }));
     expect(
-      await screen.findByRole('heading', { name: 'Under review — usually within 48 hours' }),
+      await screen.findByRole('heading', { name: 'Under review, usually within 48 hours' }),
     ).toBeInTheDocument();
   });
 });

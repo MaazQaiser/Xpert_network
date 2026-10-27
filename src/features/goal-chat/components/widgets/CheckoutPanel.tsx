@@ -114,7 +114,7 @@ export function CheckoutPanel({
               <InlineNotification
                 kind="warning"
                 title="Not enough credits"
-                subtitle={`You need ${formatCredits(shortfall)} more. Top up below — your order is kept.`}
+                subtitle={`You need ${formatCredits(shortfall)} more. Top up below. Your order is kept.`}
                 lowContrast
                 hideCloseButton
               />

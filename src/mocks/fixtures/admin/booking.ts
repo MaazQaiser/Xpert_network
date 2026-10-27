@@ -73,7 +73,7 @@ export function buildBooking(project: Project, draft: ClientDraft, now: Date): B
 
   const choices = picks.map((p) => `Expert ${p.letter} on ${spoken(p.slot)}`).join(' and ');
   const noted = picks.find((p) => p.note);
-  const body = `Thanks — I choose ${choices}.${noted ? ` Please make sure Expert ${noted.letter} can talk about ${noted.note}.` : ''}`;
+  const body = `Thanks, I choose ${choices}.${noted ? ` Please make sure Expert ${noted.letter} can talk about ${noted.note}.` : ''}`;
   const letters = picks.map((p) => `Expert ${p.letter}`).join(' and ');
   const plural = picks.length > 1;
 

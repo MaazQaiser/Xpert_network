@@ -494,9 +494,9 @@ export function scriptedReply(text: string): string {
     return 'The fastest we can do is 7 working days with 4 experts. Interviews usually start within 2 days of acceptance.';
   }
   if (/expert|who|background|qualif/.test(q)) {
-    return 'We recruit former operators, suppliers and landlords who worked in the market in the last 3 years. You’ll see each expert’s role, experience and region — never their name.';
+    return 'We recruit former operators, suppliers and landlords who worked in the market in the last 3 years. You’ll see each expert’s role, experience and region, never their name.';
   }
-  return 'Thanks — an analyst will reply within one working day. (Prototype: this is a scripted reply.)';
+  return 'Thanks, an analyst will reply within one working day. (Prototype: this is a scripted reply.)';
 }
 
 /** The first library section whose topic matches the question's topic. */

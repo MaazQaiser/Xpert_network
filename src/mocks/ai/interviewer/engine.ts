@@ -76,7 +76,7 @@ export function openingTurn(
     entry(
       'ai',
       'greeting',
-      `Hello, and thanks for joining. I’m the Xpert Network interviewer. We’ll go through ${guide.length} short sections on “${interview.topic}”. ${how} You can skip any question, and please don’t share confidential figures — ranges and estimates are perfect.`,
+      `Hello, and thanks for joining. I’m the Xpert Network interviewer. We’ll go through ${guide.length} short sections on “${interview.topic}”. ${how} You can skip any question, and please don’t share confidential figures. Ranges and estimates are perfect.`,
       first.id,
     ),
     entry('ai', 'question', question.text, first.id),
@@ -106,11 +106,11 @@ export function takeTurn(
     // Compliance deflection: keep the exact figure out of the record and ask for a range.
     if (isExactFigure(text)) {
       entries.push(
-        entry('expert', 'removed', 'Shared an exact figure — removed from the record.', section.id),
+        entry('expert', 'removed', 'Shared an exact figure, removed from the record.', section.id),
         entry(
           'ai',
           'deflection',
-          'Thank you — I’ve left that exact figure out of the record, because it may be confidential. Could you give a range or a rough estimate instead? Something like “between 30 and 40 riyals a kilo” is ideal.',
+          'Thank you, I’ve left that exact figure out of the record, because it may be confidential. Could you give a range or a rough estimate instead? Something like “between 30 and 40 riyals a kilo” is ideal.',
           section.id,
         ),
       );
@@ -126,9 +126,9 @@ export function takeTurn(
   } else if (input.action === 'skip') {
     entries.push(entry('expert', 'skipped', `Skipped: ${text || 'no reason given'}`, section.id));
   } else {
-    entries.push(entry('expert', 'confidential', 'Can’t answer — confidential.', section.id));
+    entries.push(entry('expert', 'confidential', 'Can’t answer, it’s confidential.', section.id));
     entries.push(
-      entry('ai', 'acknowledgement', 'No problem at all — we’ll leave that one.', section.id),
+      entry('ai', 'acknowledgement', 'No problem at all, we’ll leave that one.', section.id),
     );
   }
 
@@ -163,7 +163,7 @@ function advance(interview: StoredInterview, guide: GuideSection[]): TranscriptE
       entry(
         'ai',
         'section_complete',
-        `That covers ${section.title.toLowerCase()} — and that’s everything. Thank you. Next you’ll see a short summary of each section to check before you submit.`,
+        `That covers ${section.title.toLowerCase()}, and that’s everything. Thank you. Next you’ll see a short summary of each section to check before you submit.`,
         section.id,
       ),
     );
@@ -175,7 +175,7 @@ function advance(interview: StoredInterview, guide: GuideSection[]): TranscriptE
     entry(
       'ai',
       'section_complete',
-      `Thanks — that covers ${section.title.toLowerCase()}. Next: ${nextSection.title.toLowerCase()}.`,
+      `Thanks, that covers ${section.title.toLowerCase()}. Next: ${nextSection.title.toLowerCase()}.`,
       section.id,
     ),
     entry('ai', 'question', nextSection.questions[0]?.text ?? '', nextSection.id),

@@ -48,7 +48,7 @@ const GOAL_DESCRIPTIONS: Record<GoalType, string> = {
   invest: 'Sales trajectory, competitors and risks before you invest.',
   expand: 'Suppliers, costs, lead times and regulation in a new region.',
   market: 'Size, players and trends in an industry or region.',
-  other: 'Something else — describe it in your own words.',
+  other: 'Something else. Describe it in your own words.',
 };
 
 /** F1 client onboarding: About you → What you research → First goal. Skippable. */

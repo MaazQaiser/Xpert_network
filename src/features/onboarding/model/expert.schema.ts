@@ -66,7 +66,7 @@ export const workHistorySchema = z.object({
   positions: z
     .array(positionSchema)
     .min(1, 'Add at least one role.')
-    .max(6, 'Add up to 6 roles — the most relevant ones.'),
+    .max(6, 'Add up to 6 roles: the most relevant ones.'),
 });
 export type WorkHistory = z.infer<typeof workHistorySchema>;
 

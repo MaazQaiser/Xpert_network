@@ -94,8 +94,8 @@ function deliver(request: StoredRequest, now: Date, partial: boolean): StoredReq
     event: 'request_update',
     title: partial ? 'Your research is delivered (partial)' : 'Your research is delivered',
     body: partial
-      ? `${request.title} — ${done} of ${planned} interviews; ${refund} credits refunded.`
-      : `${request.title} — read it now and ask it questions.`,
+      ? `${request.title}: ${done} of ${planned} interviews; ${refund} credits refunded.`
+      : `${request.title}: read it now and ask it questions.`,
     href: `/requests/${request.id}`,
     read: false,
     createdAt: now.toISOString(),
@@ -168,7 +168,7 @@ export const scenarios = {
       id: createId('ntf'),
       event: 'report_published',
       title: 'A report you own was updated',
-      body: `${title} — new figures for 2026.`,
+      body: `${title}: new figures for 2026.`,
       href: `/library/${itemId}/read`,
       read: false,
       createdAt: now.toISOString(),
@@ -191,7 +191,7 @@ export const scenarios = {
           id: createId('ntf'),
           event: 'quote_ready',
           title: 'Your quote is ready',
-          body: `${request.title} — review the scope, timeline and credits.`,
+          body: `${request.title}: review the scope, timeline and credits.`,
           href: `/requests/${request.id}`,
           read: false,
           createdAt: now.toISOString(),

@@ -360,7 +360,7 @@ function ShortlistView({
 }
 
 function shortProjectName(name: string) {
-  const dash = name.indexOf('—');
+  const dash = name.indexOf(', ');
   if (dash > 0) return name.slice(0, dash).trim();
   return name;
 }

@@ -154,7 +154,7 @@ export const requestsHandlers = [
     if (request.status !== 'quote_ready' && request.status !== 'expired') {
       return errorResponse(409, 'invalid_state', 'This quote can’t be declined any more.');
     }
-    const reason = [parsed.data.reason, parsed.data.comment].filter(Boolean).join(' — ');
+    const reason = [parsed.data.reason, parsed.data.comment].filter(Boolean).join('. ');
     return save({ ...withStatus(request, 'declined', new Date(), reason), declineReason: reason });
   }),
 

@@ -334,7 +334,7 @@ export function runTurn(
       return showSummary(
         done,
         'Constraints set',
-        complete ? 'Thanks.' : 'Noted — we’ll suggest a deadline and budget in any quote.',
+        complete ? 'Thanks.' : 'Noted, we’ll suggest a deadline and budget in any quote.',
       );
     }
 
@@ -345,7 +345,7 @@ export function runTurn(
       return showSummary(
         done,
         'Skip for now',
-        'No problem — we’ll suggest a deadline and budget in any quote.',
+        'No problem, we’ll suggest a deadline and budget in any quote.',
       );
     }
 
@@ -358,7 +358,7 @@ export function runTurn(
       const reportCount = coverage.reports.length;
       let reply: string;
       if (counts.full === counts.total) {
-        reply = `Good news: all ${counts.total} questions are answered by ${reportCount} library ${reportCount === 1 ? 'report' : 'reports'}. You can buy them now — no custom research needed.`;
+        reply = `Good news: all ${counts.total} questions are answered by ${reportCount} library ${reportCount === 1 ? 'report' : 'reports'}. You can buy them now. No custom research needed.`;
       } else if (counts.full === 0 && counts.partial === 0) {
         reply = `None of your ${counts.total} questions are answered by the library yet. Custom research with expert interviews would cover all of them.`;
       } else {
@@ -391,7 +391,7 @@ export function runTurn(
       const replies = {
         library: 'Here’s your order. Credits are only taken when you confirm.',
         custom:
-          'Review what we’ll quote for. Requesting a quote is free — nothing is charged until you accept it.',
+          'Review what we’ll quote for. Requesting a quote is free. Nothing is charged until you accept it.',
         mix: 'You’ll buy the reports that answer covered questions now, and we’ll quote custom research for the rest.',
       };
       return result(withStep(next, 'checkout'), labels[action.option], replies[action.option], {
@@ -497,7 +497,7 @@ function handleText(brief: ResearchBrief, text: string, ctx: EngineContext): Eng
       return result(
         brief,
         text,
-        `I couldn’t find “${text}” in our coverage. Pick a close match, or keep it as a custom subject — experts can still research it.`,
+        `I couldn’t find “${text}” in our coverage. Pick a close match, or keep it as a custom subject. Experts can still research it.`,
         subjectsWidget(brief, resolution.candidates, text),
       );
     }
@@ -527,7 +527,7 @@ function handleText(brief: ResearchBrief, text: string, ctx: EngineContext): Eng
         brief,
         text,
         step === 'summary'
-          ? 'To change the brief, use Edit on the summary card — your changes update every step.'
+          ? 'To change the brief, use Edit on the summary card. Your changes update every step.'
           : `Let’s finish ${STEP_LABELS[step].label.toLowerCase()} first using the options above.`,
         currentWidget(brief, ctx),
       );

@@ -126,7 +126,7 @@ export function Preflight({ interview }: { interview: Interview }) {
                   <InlineNotification
                     kind="warning"
                     title="We can’t use your microphone"
-                    subtitle="Your browser didn’t allow it. You can do this interview by text — the questions are the same."
+                    subtitle="Your browser didn’t allow it. You can do this interview by text. The questions are the same."
                     lowContrast
                     hideCloseButton
                   />
@@ -174,7 +174,7 @@ export function Preflight({ interview }: { interview: Interview }) {
               <p className={styles.help}>
                 Share what you know from experience, not documents or numbers your employer or
                 clients keep private. Ranges and estimates are perfect. If a question asks for
-                something you can’t share, say so — it won’t count against you.
+                something you can’t share, say so. It won’t count against you.
               </p>
               <Controller
                 control={control}

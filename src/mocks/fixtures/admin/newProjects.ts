@@ -183,7 +183,7 @@ export const PRJ_1044: DraftProjectContent = {
     },
     {
       id: 'r44_level',
-      text: 'Project manager level and above — contractor, consultancy/specifier, or customer',
+      text: 'Project manager level and above: contractor, consultancy/specifier, or customer',
     },
     {
       id: 'r44_commercial',
@@ -279,7 +279,7 @@ export const PRJ_1044: DraftProjectContent = {
     {
       page: 1,
       blocks: [
-        block('p44_1a', 'heading', 'Project brief: Soil & groundwater remediation — BE / NL / DE'),
+        block('p44_1a', 'heading', 'Project brief: Soil & groundwater remediation (BE / NL / DE)'),
         block(
           'p44_1b',
           'text',

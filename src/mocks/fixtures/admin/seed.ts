@@ -45,8 +45,8 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
       from: { name: 'Jenna Cho', email: 'jenna.cho@ridgelineinsights.example' },
       company: 'Ridgeline Consumer Insights',
       to: PROJECTS_INBOX,
-      subject: 'Feasibility and quote — sports headphones research, North America',
-      body: 'Hi team — we’re starting research on sports headphones in North America and would like you to check feasibility and send a quote. The brief attached has the participants we need (thru-hikers and trail runners in the US) and what we want to learn. Interviews would be AI-assisted, 50–60 minutes.',
+      subject: 'Feasibility and quote: sports headphones research, North America',
+      body: 'Hi team, we’re starting research on sports headphones in North America and would like you to check feasibility and send a quote. The brief attached has the participants we need (thru-hikers and trail runners in the US) and what we want to learn. Interviews would be AI-assisted, 50–60 minutes.',
       receivedAt: t(18),
       status: 'brief_ready',
       attachment: {
@@ -74,7 +74,7 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
       company: 'Northgate Advisory',
       to: PROJECTS_INBOX,
       subject: 'Looking for MRO / aviation compliance experts',
-      body: 'Hello — we’re advising on a carve-out of an MRO business in the UK. Scope attached. We’d like 4–5 calls with former quality and compliance leads who know EASA Part 145.',
+      body: 'Hello, we’re advising on a carve-out of an MRO business in the UK. Scope attached. We’d like 4–5 calls with former quality and compliance leads who know EASA Part 145.',
       receivedAt: t(29),
       status: 'brief_ready',
       attachment: {
@@ -101,8 +101,8 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
       from: { name: 'Priya Raman', email: 'priya.raman@sintel.example' },
       company: 'Sintel',
       to: PROJECTS_INBOX,
-      subject: 'Market study — soil & groundwater remediation (BE / NL / DE)',
-      body: 'Hi — Sintel needs a commercial market assessment of in situ and on-site soil/groundwater remediation in Belgium, the Netherlands and Germany, including PFAS. Brief attached: ~15 expert interviews (~5 per country), questionnaire ahead of each call, and a do-not-contact list. Please review and quote.',
+      subject: 'Market study: soil & groundwater remediation (BE / NL / DE)',
+      body: 'Hi, Sintel needs a commercial market assessment of in situ and on-site soil/groundwater remediation in Belgium, the Netherlands and Germany, including PFAS. Brief attached: ~15 expert interviews (~5 per country), questionnaire ahead of each call, and a do-not-contact list. Please review and quote.',
       receivedAt: t(42),
       status: 'brief_ready',
       attachment: {
@@ -130,7 +130,7 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
       company: 'Brightline PE',
       to: PROJECTS_INBOX,
       subject: 'Re: expert for cold-chain logistics',
-      body: 'Following our call — can you find us someone on cold-chain logistics in the GCC? Happy to discuss.',
+      body: 'Following our call, can you find us someone on cold-chain logistics in the GCC? Happy to discuss.',
       receivedAt: t(65),
       status: 'needs_client_info',
       attachment: null,
@@ -142,7 +142,7 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
       ],
       confirmations: [],
       autoReply:
-        'Hi James, thanks for getting in touch. To find the right expert, could you send your brief: the decision you’re making, the questions you want answered, the profile you have in mind, and when you need the calls? A document or a few lines in a reply both work. — Xpert Network',
+        'Hi James, thanks for getting in touch. To find the right expert, could you send your brief: the decision you’re making, the questions you want answered, the profile you have in mind, and when you need the calls? A document or a few lines in a reply both work. Thanks, the Xpert Network team',
       projectId: null,
     },
     {
@@ -150,7 +150,7 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
       from: { name: 'Elena Duarte', email: 'elena@corvidpartners.example' },
       company: 'Corvid Partners',
       to: PROJECTS_INBOX,
-      subject: 'Fintech payments — 5 calls this week',
+      subject: 'Fintech payments: 5 calls this week',
       body: 'Requirements attached. We need 5 calls this week with people who’ve run merchant acquiring in Iberia.',
       receivedAt: t(60 * 26),
       status: 'cant_open',
@@ -247,7 +247,7 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
       ],
       confirmations: [],
       autoReply:
-        'Hi Daniel, thanks for reaching out. Happy to support your portfolio teams. To get started, could you send a first brief: the company, the decision, the questions and the expert profile? — Xpert Network',
+        'Hi Daniel, thanks for reaching out. Happy to support your portfolio teams. To get started, could you send a first brief: the company, the decision, the questions and the expert profile? Thanks, the Xpert Network team',
       projectId: null,
     },
   ];
@@ -316,7 +316,7 @@ export function seedProjects(now = new Date()): Record<string, Project> {
   const projects: Project[] = [
     makeProject({
       id: 'PRJ-1042',
-      name: 'Sports headphones — North America outdoor research',
+      name: 'Sports headphones, North America outdoor research',
       status: 'draft',
       client: { id: 'cli_ridgeline', name: 'Ridgeline Consumer Insights' },
       contact: { name: 'Jenna Cho', email: 'jenna.cho@ridgelineinsights.example' },
@@ -352,7 +352,7 @@ export function seedProjects(now = new Date()): Record<string, Project> {
     }),
     draftProject(PRJ_1043, {
       id: 'PRJ-1043',
-      name: 'UK MRO carve-out — Part 145 readiness',
+      name: 'UK MRO carve-out, Part 145 readiness',
       status: 'draft',
       client: { id: 'cli_northgate', name: 'Northgate Advisory' },
       contact: { name: 'Omar Siddiqui', email: 'omar.siddiqui@northgate.example' },
@@ -361,7 +361,7 @@ export function seedProjects(now = new Date()): Record<string, Project> {
     }),
     draftProject(PRJ_1044, {
       id: 'PRJ-1044',
-      name: 'Soil & groundwater remediation — BE / NL / DE',
+      name: 'Soil & groundwater remediation, BE / NL / DE',
       status: 'draft',
       client: { id: 'cli_sintel', name: 'Sintel' },
       contact: { name: 'Priya Raman', email: 'priya.raman@sintel.example' },
@@ -373,7 +373,7 @@ export function seedProjects(now = new Date()): Record<string, Project> {
     }),
     makeProject({
       id: 'PRJ-1041',
-      name: 'Specialty coffee sourcing — GCC',
+      name: 'Specialty coffee sourcing, GCC',
       status: 'matching',
       client: { id: 'cli_meridian', name: 'Meridian Gulf Capital' },
       contact: { name: 'Ayesha Rahman', email: 'ayesha.rahman@meridiangulf.example' },
@@ -382,7 +382,7 @@ export function seedProjects(now = new Date()): Record<string, Project> {
     }),
     makeProject({
       id: 'PRJ-1040',
-      name: 'Cold-chain capacity — UAE',
+      name: 'Cold-chain capacity, UAE',
       status: 'pitching',
       client: { id: 'cli_haddad', name: 'Haddad Hospitality' },
       contact: { name: 'Bilal Haddad', email: 'bilal@haddadhospitality.example' },
@@ -392,7 +392,7 @@ export function seedProjects(now = new Date()): Record<string, Project> {
     }),
     makeProject({
       id: 'PRJ-1039',
-      name: 'Industrial automation — Germany',
+      name: 'Industrial automation, Germany',
       status: 'matching',
       client: { id: 'cli_halden', name: 'Halden Group' },
       contact: { name: 'Tom Becker', email: 'tom.becker@halden.example' },

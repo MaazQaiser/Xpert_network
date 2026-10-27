@@ -8,7 +8,7 @@ export const LIBRARY_ITEMS: LibraryItem[] = [
     id: 'lib_gcc_coffee_2026',
     title: 'GCC specialty coffee 2026: growth, pricing and competition',
     summary:
-      'How the Gulf specialty coffee market is growing, who is winning share, and how chains price against each other — from 9 operators, roasters and landlords.',
+      'How the Gulf specialty coffee market is growing, who is winning share, and how chains price against each other, from 9 operators, roasters and landlords.',
     category: { industry: 'Food & beverage', subIndustry: 'Specialty coffee' },
     regionIds: ['rg_ksa', 'rg_uae', 'rg_gcc'],
     companyIds: ['co_qahwa_house', 'co_qahwa_lane'],
@@ -68,7 +68,7 @@ export const LIBRARY_ITEMS: LibraryItem[] = [
     id: 'lib_riyadh_cafe_supply',
     title: 'Supplying a café in Riyadh: suppliers, lead times and costs',
     summary:
-      'Who supplies coffee, dairy and equipment to Riyadh cafés, how long things take, and what a fit-out really costs — from 7 operators and suppliers.',
+      'Who supplies coffee, dairy and equipment to Riyadh cafés, how long things take, and what a fit-out really costs, from 7 operators and suppliers.',
     category: { industry: 'Food & beverage', subIndustry: 'F&B franchising' },
     regionIds: ['rg_riyadh'],
     companyIds: [],

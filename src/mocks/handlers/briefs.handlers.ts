@@ -235,8 +235,7 @@ export const briefsHandlers = [
         send({
           type: 'error',
           code: 'stream_interrupted',
-          message:
-            'The connection dropped while we were replying. Your answer is safe — try again.',
+          message: 'The connection dropped while we were replying. Your answer is safe. Try again.',
         });
         return;
       }
@@ -307,7 +306,7 @@ export const briefsHandlers = [
     }
     if (requestId) {
       parts.push(
-        'Your quote request is in. Expect a quote within 24 hours — we’ll notify you, and you can track it in Requests.',
+        'Your quote request is in. Expect a quote within 24 hours. We’ll notify you, and you can track it in Requests.',
       );
     }
     parts.push('This brief is saved in your workspace.');

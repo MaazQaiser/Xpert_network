@@ -312,7 +312,7 @@ function ResponsesView({ project, data }: { project: Project; data: ResponsesDat
                             />
                           </span>
                         ) : (
-                          <span className={styles.muted}>—</span>
+                          <span className={styles.muted}>Not yet</span>
                         )}
                       </TableCell>
                     </TableRow>

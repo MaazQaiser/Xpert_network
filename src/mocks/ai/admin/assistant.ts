@@ -224,9 +224,9 @@ export function assistantReply(
     const name = firstName(replyTo.from.name);
     const body =
       replyTo.status === 'cant_open' && replyTo.attachment
-        ? `Hi ${name}, thanks for sending ${replyTo.attachment.name}. It’s password-protected, so we couldn’t open it. Could you send an unlocked copy, or share the password separately? Then we’ll get your experts lined up. — Palto, Xpert Network`
+        ? `Hi ${name}, thanks for sending ${replyTo.attachment.name}. It’s password-protected, so we couldn’t open it. Could you send an unlocked copy, or share the password separately? Then we’ll get your experts lined up., Palto, Xpert Network`
         : (replyTo.autoReply ??
-          `Hi ${name}, thanks for your email. Could you send your brief, the questions you want answered and when you need the calls? — Palto, Xpert Network`);
+          `Hi ${name}, thanks for your email. Could you send your brief, the questions you want answered and when you need the calls? Thanks, Palto at Xpert Network`);
     return reply(
       `Here’s a reply for **${name}**. Check it, then send it from the Inbox.`,
       `${replyTo.from.name}’s email`,

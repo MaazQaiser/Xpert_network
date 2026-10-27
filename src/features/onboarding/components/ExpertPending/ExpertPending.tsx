@@ -61,7 +61,7 @@ function Pending({ profile }: { profile: ExpertOnboarding }) {
       <Time className={styles.pictogram} aria-hidden="true" />
       <div>
         <StatusTag tone="info" label="In review" />
-        <h1 className={styles.title}>Thanks — we’re reviewing your profile</h1>
+        <h1 className={styles.title}>Thanks, we’re reviewing your profile</h1>
         <p className={styles.body}>
           Submitted {formatDate(submitted.toISOString())}. You’ll hear from us by{' '}
           <strong>{formatDate(eta)}</strong>, by email and in your notifications.
@@ -73,7 +73,7 @@ function Pending({ profile }: { profile: ExpertOnboarding }) {
         </h2>
         <ol className={styles.steps}>
           <li>
-            We check your work history and conflicts. We may email you a question — reply to keep
+            We check your work history and conflicts. We may email you a question. Reply to keep
             your review moving.
           </li>
           <li>Once approved, open calls that match your expertise appear on your home page.</li>

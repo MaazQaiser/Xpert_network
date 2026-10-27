@@ -153,8 +153,8 @@ export function PrototypeToolbar() {
               id="prototype-demo-autoplay"
               size="sm"
               labelText="Play on open"
-              labelA="Off — the brief waits until you press Play"
-              labelB="On — the brief types itself when opened"
+              labelA="Off: the brief waits until you press Play"
+              labelB="On: the brief types itself when opened"
               toggled={controls.demoAutoplay}
               onToggle={(checked: boolean) => update({ demoAutoplay: checked })}
             />

@@ -251,7 +251,7 @@ export const libraryHandlers = [
           type: 'error',
           code: 'stream_interrupted',
           message:
-            'The answer was cut off by a connection problem. Your question is still here — try again.',
+            'The answer was cut off by a connection problem. Your question is still here. Try again.',
         });
         return;
       }

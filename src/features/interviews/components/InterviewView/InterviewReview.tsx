@@ -207,7 +207,7 @@ export function InterviewSubmitted({ interview }: { interview: Interview }) {
             ? `${formatUsd(interview.feeUsd)} is ready to pay out`
             : rejected
               ? 'This one wasn’t accepted'
-              : 'Under review — usually within 48 hours'}
+              : 'Under review, usually within 48 hours'}
         </h2>
         <p className={styles.body}>
           {accepted
