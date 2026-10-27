@@ -33,6 +33,7 @@ import { buildClientDraft } from '../fixtures/admin/clientDraft';
 import { expertPerson } from '../fixtures/admin/expertPeople';
 import { buildBooking, buildChecklist, replyInboxRequest } from '../fixtures/admin/booking';
 import { buildCallSession } from '../fixtures/admin/call';
+import { buildSchedule } from '../fixtures/admin/schedule';
 import { PM_NAME } from '../fixtures/admin/seed';
 import { PRJ_1042_BRIEFS } from '../fixtures/admin/prj1042';
 import { db } from '../store/db';
@@ -150,6 +151,14 @@ function screenedExperts(): ScreenedExpert[] {
 }
 
 export const adminHandlers = [
+  // Scheduling: the PM's calendar of booked calls and held slots across projects.
+  http.get('/api/admin/schedule', async () => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const schedule = buildSchedule(new Date());
+    return HttpResponse.json(getControls().emptyData ? { ...schedule, meetings: [] } : schedule);
+  }),
+
   // Screen 03 Experts tab: returns the next batch of matching experts. Unlike /matches it works
   // on a draft project file, so the PM can look before approving. Nothing about the project
   // changes; the "Extend research" criteria are accepted and shape only the batch size here.

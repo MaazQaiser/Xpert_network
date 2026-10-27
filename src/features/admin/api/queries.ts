@@ -17,6 +17,7 @@ import {
 import { clientDraftSchema, type ClientDraftInput } from '../model/clientDraft.schema';
 import { bookingSchema, type BookingAction } from '../model/booking.schema';
 import { callSessionSchema, type CallAction } from '../model/call.schema';
+import { scheduleSchema } from '../model/schedule.schema';
 import {
   inboxRequestSchema,
   mailAccountSchema,
@@ -60,6 +61,7 @@ export const adminKeys = {
   availability: (id: string, experts: string) =>
     [...adminKeys.all, 'project', id, 'availability', experts] as const,
   shortlist: (id: string) => [...adminKeys.all, 'project', id, 'shortlist'] as const,
+  schedule: () => [...adminKeys.all, 'schedule'] as const,
 };
 
 export function useHomeSummary() {
@@ -389,5 +391,13 @@ export function useAskAssistant() {
         body: { text },
         schema: assistantReplySchema,
       }),
+  });
+}
+
+/** Scheduling: every booked call and held slot on the PM's calendar. */
+export function useSchedule() {
+  return useQuery({
+    queryKey: adminKeys.schedule(),
+    queryFn: ({ signal }) => apiRequest('/admin/schedule', { schema: scheduleSchema, signal }),
   });
 }

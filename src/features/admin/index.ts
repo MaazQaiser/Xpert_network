@@ -8,6 +8,7 @@ export * from './model/availability.schema';
 export * from './model/clientDraft.schema';
 export * from './model/booking.schema';
 export * from './model/call.schema';
+export * from './model/schedule.schema';
 export {
   adminKeys,
   useInbox,
@@ -19,6 +20,7 @@ export {
 } from './api/queries';
 export { AdminHome } from './components/AdminHome/AdminHome';
 export { Inbox } from './components/Inbox/Inbox';
+export { Scheduling } from './components/Scheduling/Scheduling';
 export { ProjectFile } from './components/ProjectFile/ProjectFile';
 export { ProjectsList } from './components/ProjectsList/ProjectsList';
 export { ProjectSteps } from './components/ProjectSteps/ProjectSteps';

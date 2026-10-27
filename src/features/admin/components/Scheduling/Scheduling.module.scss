@@ -1,0 +1,865 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/motion' as *;
+
+// Scheduling: the PM's calendar, after Google Calendar. A sidebar (mini month, project
+// filters, key) beside the calendar (toolbar, then the week/day time grid or the month grid).
+// Each project wears one of Carbon's tag colours, so the palette holds in both themes.
+
+.root {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-05;
+
+  // As in Google Calendar: the frame (bar and side panel) on a soft grey that runs edge to
+  // edge (it cancels the page's padding), the calendar on its own white panel.
+  margin: calc(-1 * #{$spacing-07}) calc(-1 * #{$spacing-05});
+  background: $layer-01;
+  gap: $spacing-05;
+  min-block-size: calc(100vh - #{$spacing-09});
+
+  @include breakpoint(md) {
+    padding: $spacing-05 $spacing-06 $spacing-06;
+    margin-inline: calc(-1 * #{$spacing-07});
+  }
+}
+
+// ——— The one bar: title, Today, arrows, the period, the view menu ————————————————————
+.topBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03 $spacing-06;
+}
+
+.titleGroup {
+  // The side-panel icon a touch larger than Carbon's 16px (20px), to match the title beside it.
+  svg {
+    block-size: 1.25rem;
+    inline-size: 1.25rem;
+  }
+
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: $spacing-02;
+  margin-inline-start: calc(-1 * #{$spacing-03});
+}
+
+// With the side panel open on a wide screen, the title takes the panel's width, so Today
+// starts exactly at the white calendar's left edge (15rem panel, plus the button's nudge).
+.topBarAligned .titleGroup {
+  @include breakpoint(lg) {
+    inline-size: 15.5rem;
+  }
+}
+
+.pageTitle {
+  @include type-style('heading-04');
+}
+
+.todayButton.todayButton {
+  padding-inline: $spacing-05;
+}
+
+.viewMenu.viewMenu {
+  margin-inline-start: auto;
+  inline-size: 8rem;
+}
+
+// ——— Project colours ————————————————————————————————————————————————————————————
+// Each project wears one of Carbon's tag colours: a tint for the block, the strong shade for
+// its edge, dot and swatch. Held slots (below) swap the tint for white.
+/* stylelint-disable carbon/theme-use -- Carbon tag palette tokens, theme-aware (as in UserPanel) */
+.blue.event,
+.blue.chip {
+  border-color: var(--cds-tag-color-blue);
+  background: var(--cds-tag-background-blue);
+  outline-color: var(--cds-tag-color-blue);
+}
+
+.blue .swatch {
+  background: var(--cds-tag-color-blue);
+}
+
+.teal.event,
+.teal.chip {
+  border-color: var(--cds-tag-color-teal);
+  background: var(--cds-tag-background-teal);
+  outline-color: var(--cds-tag-color-teal);
+}
+
+.teal .swatch {
+  background: var(--cds-tag-color-teal);
+}
+
+.purple.event,
+.purple.chip {
+  border-color: var(--cds-tag-color-purple);
+  background: var(--cds-tag-background-purple);
+  outline-color: var(--cds-tag-color-purple);
+}
+
+.purple .swatch {
+  background: var(--cds-tag-color-purple);
+}
+
+.magenta.event,
+.magenta.chip {
+  border-color: var(--cds-tag-color-magenta);
+  background: var(--cds-tag-background-magenta);
+  outline-color: var(--cds-tag-color-magenta);
+}
+
+.magenta .swatch {
+  background: var(--cds-tag-color-magenta);
+}
+
+.cyan.event,
+.cyan.chip {
+  border-color: var(--cds-tag-color-cyan);
+  background: var(--cds-tag-background-cyan);
+  outline-color: var(--cds-tag-color-cyan);
+}
+
+.cyan .swatch {
+  background: var(--cds-tag-color-cyan);
+}
+
+.green.event,
+.green.chip {
+  border-color: var(--cds-tag-color-green);
+  background: var(--cds-tag-background-green);
+  outline-color: var(--cds-tag-color-green);
+}
+
+.green .swatch {
+  background: var(--cds-tag-color-green);
+}
+
+/* stylelint-enable carbon/theme-use */
+
+.swatch {
+  display: inline-block;
+  flex: none;
+  block-size: $spacing-04;
+  inline-size: $spacing-04;
+}
+
+// ——— Layout —————————————————————————————————————————————————————————————————————
+.layout {
+  display: grid;
+  align-items: start;
+  gap: $spacing-06;
+  grid-template-columns: minmax(0, 1fr);
+
+  @include breakpoint(lg) {
+    grid-template-columns: 15rem minmax(0, 1fr);
+  }
+}
+
+// Side panel folded away: the calendar takes the full width.
+.layout.layoutWide {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.sidebar[hidden] {
+  display: none;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+// ——— Mini month ————————————————————————————————————————————————————————————————
+.mini {
+  display: none;
+  flex-direction: column;
+  gap: $spacing-03;
+
+  // A phone has Today and the arrows; the mini month is for wider screens.
+  @include breakpoint(md) {
+    display: flex;
+  }
+}
+
+.miniHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.miniTitle {
+  @include type-style('heading-compact-01');
+}
+
+.miniGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  row-gap: $spacing-01;
+}
+
+.miniWeekday {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+  padding-block: $spacing-02;
+  text-align: center;
+}
+
+.miniDay {
+  @include type-style('label-02');
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  aspect-ratio: 1;
+  background: none;
+  color: $text-primary;
+  cursor: pointer;
+
+  &:hover {
+    background: $layer-hover-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: -2px;
+  }
+}
+
+.miniDayOut {
+  color: $text-placeholder;
+}
+
+.miniDayInView {
+  border-radius: 0;
+  background: $highlight;
+}
+
+.miniDayToday,
+.miniDayToday:hover {
+  border-radius: 50%;
+  background: $interactive;
+  color: $text-on-color;
+}
+
+.miniDot {
+  position: absolute;
+  border-radius: 50%;
+  background: $interactive;
+  block-size: $spacing-01;
+  inline-size: $spacing-01;
+  inset-block-end: $spacing-01;
+
+  .miniDayToday & {
+    background: $text-on-color;
+  }
+}
+
+// ——— Filters ——————————————————————————————————————————————————————————————
+.filters {
+  display: flex;
+  flex-direction: column;
+  padding-block-start: $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
+  gap: $spacing-02;
+}
+
+.filtersTitle {
+  @include type-style('heading-compact-01');
+
+  margin-block-end: $spacing-03;
+}
+
+// Project checkboxes in their own colour, as in Google Calendar: Carbon draws the box from
+// this token, so it's set rather than its parts restyled.
+/* stylelint-disable carbon/theme-use -- Carbon tag palette tokens, theme-aware (as in UserPanel) */
+.filter.blue {
+  --cds-icon-primary: var(--cds-tag-color-blue);
+}
+
+.filter.teal {
+  --cds-icon-primary: var(--cds-tag-color-teal);
+}
+
+.filter.purple {
+  --cds-icon-primary: var(--cds-tag-color-purple);
+}
+
+.filter.magenta {
+  --cds-icon-primary: var(--cds-tag-color-magenta);
+}
+
+.filter.cyan {
+  --cds-icon-primary: var(--cds-tag-color-cyan);
+}
+
+.filter.green {
+  --cds-icon-primary: var(--cds-tag-color-green);
+}
+/* stylelint-enable carbon/theme-use */
+
+.filterLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+// ——— Calendar and toolbar —————————————————————————————————————————————————————————
+.calendar {
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  border: 1px solid $border-subtle-01;
+  background: $background;
+  min-inline-size: 0;
+
+  // On smaller screens the calendar comes first; the filters follow it.
+  order: -1;
+
+  @include breakpoint(lg) {
+    order: 0;
+  }
+}
+
+.toolbarNav {
+  display: flex;
+  align-items: center;
+  gap: $spacing-02;
+}
+
+.toolbarTitle {
+  @include type-style('heading-03');
+
+  margin-inline-start: $spacing-03;
+  white-space: nowrap;
+}
+
+.summary {
+  @include type-style('body-compact-01');
+
+  padding: $spacing-04 $spacing-05;
+  border-block-end: 1px solid $border-subtle-01;
+  color: $text-secondary;
+}
+
+.calendarBody {
+  overflow: auto;
+  background: $background;
+  max-block-size: calc(100vh - #{$spacing-13});
+}
+
+// ——— Week and Day: the time grid ——————————————————————————————————————————————————
+.timeGrid {
+  display: grid;
+}
+
+// Seven days need room; on a narrow screen the week scrolls sideways rather than squeezing.
+.timeGridWide {
+  min-inline-size: 40rem;
+}
+
+.cornerCell,
+.dayHead {
+  position: sticky;
+  z-index: 2;
+  background: $background;
+  border-block-end: 1px solid $border-subtle-01;
+  inset-block-start: 0;
+}
+
+.cornerCell {
+  @include type-style('label-01');
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: $spacing-03;
+  color: $text-secondary;
+}
+
+.dayHead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block: $spacing-03;
+  border-inline-start: 1px solid $border-subtle-01;
+  gap: $spacing-01;
+}
+
+.dayName {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+  text-transform: uppercase;
+}
+
+.dayNumber {
+  @include type-style('heading-03');
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  block-size: $spacing-08;
+  inline-size: $spacing-08;
+}
+
+.dayHeadToday {
+  .dayName {
+    color: $link-primary;
+  }
+
+  .dayNumber {
+    background: $interactive;
+    color: $text-on-color;
+  }
+}
+
+.hourGutter {
+  display: flex;
+  flex-direction: column;
+}
+
+.hourLabel {
+  @include type-style('label-01');
+
+  display: block;
+  padding-inline: $spacing-03;
+  color: $text-secondary;
+  text-align: end;
+
+  // Centre the label on its hour line: lift it by half a line, not half the hour.
+  transform: translateY(calc(-1 * #{$spacing-03}));
+}
+
+.dayColumn {
+  position: relative;
+  border-inline-start: 1px solid $border-subtle-01;
+}
+
+.hourLine {
+  position: absolute;
+  border-block-start: 1px solid $border-subtle-01;
+  inset-inline: 0;
+}
+
+// Now: a red line across today, with a dot at its start.
+.nowLine {
+  position: absolute;
+  z-index: 1;
+  border-block-start: 2px solid $support-error;
+  inset-inline: 0;
+
+  &::before {
+    position: absolute;
+    border-radius: 50%;
+    background: $support-error;
+    block-size: $spacing-04;
+    content: '';
+    inline-size: $spacing-04;
+    inset-block-start: calc(-1 * #{$spacing-03});
+    inset-inline-start: calc(-1 * #{$spacing-03});
+  }
+}
+
+// A meeting: its project's tint with a solid edge; a held slot is dashed and white.
+.event {
+  position: absolute;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: $spacing-02 $spacing-03;
+  border-width: 0;
+  border-style: solid;
+  color: $text-primary;
+  cursor: pointer;
+  gap: $spacing-01;
+  margin-inline-start: $spacing-01;
+  text-align: start;
+  transition: box-shadow $duration-fast-02 motion(standard, productive);
+
+  &:hover {
+    box-shadow: 0 $spacing-01 $spacing-03 $shadow;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 1px;
+  }
+}
+
+.event.eventHeld {
+  border-width: 1px;
+  border-style: dashed;
+  background: $background;
+  color: $text-secondary;
+}
+
+.eventOpen.eventOpen {
+  box-shadow: 0 $spacing-02 $spacing-05 $shadow;
+  outline-offset: 1px;
+  outline-style: solid;
+  outline-width: 2px;
+}
+
+.eventShort.eventShort {
+  justify-content: center;
+  padding-block: 0;
+}
+
+.eventLine {
+  @include type-style('label-01');
+
+  overflow: hidden;
+  max-inline-size: 100%;
+  color: $text-secondary;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  strong {
+    @include font-weight('semibold');
+
+    color: $text-primary;
+  }
+}
+
+.eventTitle {
+  @include type-style('label-02');
+  @include font-weight('semibold');
+
+  // Two lines before it cuts, so names in narrow side-by-side blocks still read.
+  display: -webkit-box;
+  overflow: hidden;
+  max-inline-size: 100%;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+.eventMeta {
+  @include type-style('label-01');
+
+  overflow: hidden;
+  max-inline-size: 100%;
+  color: $text-secondary;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ——— Month ——————————————————————————————————————————————————————————————————————
+.monthGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  min-inline-size: 40rem;
+}
+
+.monthHead {
+  @include type-style('label-01');
+
+  padding: $spacing-03;
+  border-block-end: 1px solid $border-subtle-01;
+  color: $text-secondary;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.monthCell {
+  display: flex;
+  flex-direction: column;
+  container: month-cell / inline-size;
+  padding: $spacing-02;
+  border-block-end: 1px solid $border-subtle-01;
+  border-inline-start: 1px solid $border-subtle-01;
+  gap: $spacing-01;
+  min-block-size: 7rem;
+
+  &:nth-child(7n + 8) {
+    border-inline-start: 0;
+  }
+}
+
+.monthCellOut {
+  background: $layer-01;
+
+  .monthDate {
+    color: $text-placeholder;
+  }
+}
+
+.monthDate {
+  @include type-style('label-02');
+
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  block-size: $spacing-07;
+  color: $text-primary;
+  cursor: pointer;
+  inline-size: $spacing-07;
+
+  &:hover {
+    background: $layer-hover-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+  }
+}
+
+.monthDateToday,
+.monthDateToday:hover {
+  background: $interactive;
+  color: $text-on-color;
+}
+
+.monthList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-01;
+}
+
+.chip {
+  @include type-style('label-01');
+
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+  padding: $spacing-01 $spacing-02;
+  border-width: 0;
+  border-style: solid;
+  color: $text-primary;
+  cursor: pointer;
+  gap: $spacing-02;
+  inline-size: 100%;
+  text-align: start;
+
+  &:hover {
+    box-shadow: 0 $spacing-01 $spacing-02 $shadow;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+  }
+}
+
+.chip.chipHeld {
+  border-width: 1px;
+  border-style: dashed;
+  background: $background;
+  color: $text-secondary;
+}
+
+.chipTime {
+  flex: none;
+  color: $text-secondary;
+}
+
+// Narrow days drop the time first, so the expert's name keeps the room.
+@container month-cell (max-width: 7rem) {
+  .chipTime {
+    display: none;
+  }
+}
+
+.chipName {
+  @include font-weight('semibold');
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.more {
+  @include type-style('label-01');
+
+  align-self: flex-start;
+  padding: $spacing-01 $spacing-02;
+  border: 0;
+  background: none;
+  color: $link-primary;
+  cursor: pointer;
+
+  &:hover {
+    background: $layer-hover-01;
+  }
+}
+
+// ——— The meeting preview card —————————————————————————————————————————————————————
+.preview {
+  position: fixed;
+  z-index: 8000;
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-03 $spacing-05 $spacing-06;
+  border: 1px solid $border-subtle-01;
+  animation: preview-in $duration-fast-02 motion(entrance, productive) both;
+  background: $background;
+  box-shadow: 0 $spacing-03 $spacing-07 $shadow;
+  gap: $spacing-05;
+  inline-size: min(25rem, calc(100vw - #{$spacing-06}));
+
+  &:focus {
+    outline: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes preview-in {
+  from {
+    opacity: 0;
+    transform: translateY($spacing-02);
+  }
+}
+
+.previewTools {
+  display: flex;
+  justify-content: flex-end;
+  margin-inline-end: calc(-1 * #{$spacing-03});
+}
+
+.previewRow {
+  display: grid;
+  align-items: start;
+  gap: $spacing-04;
+  grid-template-columns: $spacing-06 minmax(0, 1fr);
+
+  > .swatch {
+    margin-block-start: $spacing-02;
+    margin-inline-start: $spacing-01;
+  }
+}
+
+.previewIcon {
+  fill: $icon-secondary;
+  margin-block-start: $spacing-01;
+}
+
+.previewTitle {
+  @include type-style('heading-03');
+}
+
+.previewWhen {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+  margin-block-start: $spacing-02;
+}
+
+.previewTag.previewTag {
+  margin: $spacing-03 0 0;
+}
+
+.previewLink {
+  @include type-style('body-compact-01');
+
+  color: $link-primary;
+  margin-block-start: $spacing-01;
+}
+
+.previewNote {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.meet {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-03;
+}
+
+// The Join button keeps even padding: it has no trailing icon. Doubled class outranks
+// Carbon's button root rule.
+.joinButton.joinButton {
+  padding-inline: $spacing-05;
+}
+
+.meetLink {
+  @include type-style('label-01');
+
+  display: inline-flex;
+  align-items: center;
+  color: $text-secondary;
+  gap: $spacing-02;
+}
+
+.guests {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.guestsTitle {
+  @include type-style('heading-compact-01');
+
+  margin-block-start: $spacing-01;
+}
+
+.guest {
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+
+  & + & {
+    margin-block-start: $spacing-03;
+  }
+}
+
+.avatar {
+  @include type-style('label-01');
+  @include font-weight('semibold');
+
+  overflow: hidden;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: $layer-accent-01;
+  block-size: $spacing-07;
+  inline-size: $spacing-07;
+}
+
+.photo {
+  display: block;
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: cover;
+}
+
+.guestText {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.guestName {
+  @include type-style('body-compact-01');
+  @include font-weight('semibold');
+}
+
+.guestDetail {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
