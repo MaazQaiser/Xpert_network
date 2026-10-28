@@ -5,7 +5,7 @@ export const networkSectorSchema = z.enum([
   'industrial',
   'food',
   'logistics',
-  'aviation',
+  'medical',
   'environment',
   'consumer',
 ]);
@@ -15,7 +15,7 @@ export const NETWORK_SECTOR_LABELS: Record<NetworkSector, string> = {
   industrial: 'Industrial automation',
   food: 'Food & beverage',
   logistics: 'Cold chain & logistics',
-  aviation: 'Aviation & MRO',
+  medical: 'Medical distribution',
   environment: 'Environmental services',
   consumer: 'Outdoor & consumer audio',
 };

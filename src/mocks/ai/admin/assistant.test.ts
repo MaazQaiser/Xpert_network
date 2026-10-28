@@ -13,7 +13,9 @@ describe('assistantReply: screening answers', () => {
       'Umer',
       screened,
     );
-    expect(reply.text).toMatch(/\*\*Sophia Bell\*\*’s screening answers for \*\*UK MRO carve-out/);
+    expect(reply.text).toMatch(
+      /\*\*Sophia Bell\*\*’s screening answers for \*\*Medical distributors: ERP & EDI/,
+    );
     expect(reply.blocks).toEqual([
       {
         kind: 'screeningAnswers',

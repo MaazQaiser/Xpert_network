@@ -131,8 +131,8 @@ describe('admin mock API (F11–F12)', () => {
       id: 'PRJ-1043',
       count: 64,
       head: 'exp_5310',
-      topic: 'Own approval',
-      drop: 'Customer reaction',
+      topic: 'Team structure',
+      drop: 'API maturity',
     },
     { id: 'PRJ-1044', count: 38, head: 'exp_6207', topic: 'Market sizing', drop: 'Cost & margins' },
   ])('runs $id from approval to the call with its own experts', async (story) => {
@@ -208,7 +208,7 @@ describe('admin mock API (F11–F12)', () => {
           projectId: 'PRJ-1043',
           count: 2,
           href: '/admin/projects/PRJ-1043',
-          prompt: 'Show the screening answers for UK MRO carve-out, Part 145 readiness',
+          prompt: 'Show the screening answers for Medical distributors: ERP & EDI integration',
         },
       ],
     });

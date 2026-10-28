@@ -17,7 +17,7 @@ const SECTOR_BY_PROJECT: Record<string, NetworkSector> = {
   'PRJ-1040': 'logistics',
   'PRJ-1041': 'food',
   'PRJ-1042': 'consumer',
-  'PRJ-1043': 'aviation',
+  'PRJ-1043': 'medical',
   'PRJ-1044': 'environment',
 };
 
@@ -77,18 +77,18 @@ const MEMBERS: readonly [string, NetworkSector][] = [
   ['Dana Whitfield', 'consumer'],
   ['Eli Navarro', 'consumer'],
   ['Farah Qureshi', 'consumer'],
-  ['Alistair Grant', 'aviation'],
-  ['Bethan Lloyd', 'aviation'],
-  ['Callum Reid', 'aviation'],
-  ['Deirdre Walsh', 'aviation'],
-  ['Euan McKenzie', 'aviation'],
-  ['Fiona Gallagher', 'aviation'],
-  ['Gareth Hughes', 'aviation'],
-  ['Harriet Shaw', 'aviation'],
-  ['Imran Akhtar', 'aviation'],
-  ['Joost de Wit', 'aviation'],
-  ['Katie Byrne', 'aviation'],
-  ['Liam Doherty', 'aviation'],
+  ['Brian Kowalski', 'medical'],
+  ['Danielle Ortiz', 'medical'],
+  ['Greg Lindqvist', 'medical'],
+  ['Heather Nguyen', 'medical'],
+  ['Jason Whitaker', 'medical'],
+  ['Kristen Alvarez', 'medical'],
+  ['Matt Delgado', 'medical'],
+  ['Nicole Brennan', 'medical'],
+  ['Paul Okafor', 'medical'],
+  ['Rebecca Stein', 'medical'],
+  ['Scott Harrington', 'medical'],
+  ['Tanya Brooks', 'medical'],
   ['Anouk Peeters', 'environment'],
   ['Bram Janssens', 'environment'],
   ['Clara Vogel', 'environment'],
@@ -316,7 +316,7 @@ function member(name: string, sector: NetworkSector, num: number, now: Date): Ne
   const id = `exp_${num}`;
   const career = careerFor(sector);
   const story =
-    sector === 'aviation' || sector === 'environment' || sector === 'consumer'
+    sector === 'medical' || sector === 'environment' || sector === 'consumer'
       ? storyFor(Object.keys(SECTOR_BY_PROJECT).find((p) => SECTOR_BY_PROJECT[p] === sector) ?? '')
       : null;
   const role = story

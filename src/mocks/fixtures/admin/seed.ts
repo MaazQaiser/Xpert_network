@@ -27,7 +27,7 @@ const minutesAgo = (now: Date, minutes: number) =>
 const step = (label: string, at: string | null): PipelineStep => ({ label, done: at !== null, at });
 
 // The two newest emails haven't been opened yet.
-const UNREAD = new Set(['req_ridgeline_audio', 'req_northgate_mro', 'req_kite_coldstorage']);
+const UNREAD = new Set(['req_ridgeline_audio', 'req_northgate_meddist', 'req_kite_coldstorage']);
 
 /** The mailboxes the AI watches. */
 export function seedMailAccounts(now = new Date()): MailAccount[] {
@@ -69,30 +69,30 @@ export function seedInbox(now = new Date()): Record<string, InboxRequest> {
       projectId: 'PRJ-1042',
     },
     {
-      id: 'req_northgate_mro',
+      id: 'req_northgate_meddist',
       from: { name: 'Amy Wang', email: 'amy.wang@northgate.example' },
       company: 'Northgate Advisory',
       to: PROJECTS_INBOX,
-      subject: 'Looking for MRO / aviation compliance experts',
-      body: 'Hello, we’re advising on a carve-out of an MRO business in the UK. Scope attached. We’d like 4–5 calls with former quality and compliance leads who know EASA Part 145.',
+      subject: 'Monthly expert calls: Medline, Henry Schein, Owens & Minor (ERP / EDI)',
+      body: 'Hi team, we run competitive intelligence for a medical distributor client on a retainer and would like 1–2 expert interviews a month. For this month and next the focus is ERP and EDI integration with health systems at Medline, Henry Schein and Owens & Minor. Brief attached. 60-minute recorded phone calls, please.',
       receivedAt: t(29),
       status: 'brief_ready',
       attachment: {
-        name: 'Scope_v2.docx',
+        name: 'Retainer_Brief_ERP_EDI_Integration.docx',
         kind: 'docx',
-        pages: 4,
-        size: '310 KB',
+        pages: 3,
+        size: '184 KB',
         note: 'text layer found',
         progress: null,
       },
       steps: [
         step('Email received and sender matched to client “Northgate Advisory”', t(29)),
         step('Attachment saved to secure storage', t(29)),
-        step('Text extracted from 4 pages', t(28)),
+        step('Text extracted from 3 pages', t(28)),
         step('Brief, requirements and 6 client questions extracted', t(27)),
         step('Waiting for your review before matching experts', null),
       ],
-      confirmations: ['budget not stated in the scope'],
+      confirmations: ['interview fee not stated in the brief'],
       autoReply: null,
       projectId: 'PRJ-1043',
     },
@@ -352,11 +352,14 @@ export function seedProjects(now = new Date()): Record<string, Project> {
     }),
     draftProject(PRJ_1043, {
       id: 'PRJ-1043',
-      name: 'UK MRO carve-out, Part 145 readiness',
+      name: 'Medical distributors: ERP & EDI integration',
       status: 'draft',
       client: { id: 'cli_northgate', name: 'Northgate Advisory' },
       contact: { name: 'Amy Wang', email: 'amy.wang@northgate.example' },
-      source: { requestId: 'req_northgate_mro', fileName: 'Scope_v2.docx' },
+      source: {
+        requestId: 'req_northgate_meddist',
+        fileName: 'Retainer_Brief_ERP_EDI_Integration.docx',
+      },
       createdAt: t(27),
       pendingExpertReviews: 2,
     }),

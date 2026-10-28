@@ -31,7 +31,7 @@ export const chatEmailSchema = z.object({
   /** Why the AI put it here, in a few words ("Brief ready to review"). */
   reason: z.string(),
   projectId: z.string().nullable(),
-  /** What picking it asks the assistant, e.g. "Give me the brief for UK MRO carve-out, Part 145 readiness". */
+  /** What picking it asks the assistant, e.g. "Give me the brief for Medical distributors: ERP & EDI integration". */
   prompt: z.string(),
   /** The label on the pick button. */
   action: z.string(),

@@ -80,10 +80,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-// Labeled buttons have no trailing icon. Carbon still reserves the icon slot on the end,
-// so the end padding matches the start. Icon-only buttons keep their own padding.
-/* stylelint-disable-next-line selector-class-pattern -- Carbon's button class */
-.cds--btn:not(.cds--btn--icon-only) {
+// Labeled buttons without an icon: Carbon still reserves the icon slot on the end, so the end
+// padding matches the start. Buttons with a trailing icon keep Carbon's room for it, and
+// icon-only buttons keep their own padding.
+/* stylelint-disable-next-line selector-class-pattern -- Carbon's button classes */
+.cds--btn:not(.cds--btn--icon-only, :has(> .cds--btn__icon)) {
   /* stylelint-disable-next-line carbon/layout-use -- matches Carbon's own start padding */
   padding-inline-end: calc(var(--cds-layout-density-padding-inline-local) - 0.0625rem);
 }

@@ -41,12 +41,12 @@ describe('Inbox (F12, screen 02)', () => {
 
   it('shows only unread emails, and opening one marks it read', async () => {
     mockLocation.search = 'view=unread';
-    renderWithProviders(<Inbox selectedId="req_northgate_mro" />, { persona: 'ops' });
+    renderWithProviders(<Inbox selectedId="req_northgate_meddist" />, { persona: 'ops' });
     const list = await screen.findByRole('list', { name: 'Requests' });
     expect(screen.getByRole('button', { name: /^Unread/ })).toHaveAttribute('aria-pressed', 'true');
     // Two unread to start; opening Amy's email reads it.
     await waitFor(() => expect(within(list).getAllByRole('listitem')).toHaveLength(1));
-    expect(db.get().adminInbox['req_northgate_mro']?.read).toBe(true);
+    expect(db.get().adminInbox['req_northgate_meddist']?.read).toBe(true);
   });
 
   it('shows only the emails of the chosen mailbox', async () => {

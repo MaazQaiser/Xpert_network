@@ -62,8 +62,10 @@ describe('AdminHome (F11, screen 01)', () => {
     const emails = screen.getByRole('list', { name: 'Emails' });
     expect(within(emails).getAllByRole('listitem')).toHaveLength(3);
     await userEvent.click(within(emails).getByRole('button', { name: /Show brief: Amy Wang/ }));
-    const canvas = await screen.findByRole('article', { name: /UK MRO carve-out/ });
-    expect(within(canvas).getByText(/EASA Part 145 and UK CAA approvals/)).toBeInTheDocument();
+    const canvas = await screen.findByRole('article', { name: /Medical distributors: ERP & EDI/ });
+    expect(
+      within(canvas).getByText(/Hands-on EDI, eProcurement, API or onboarding work/),
+    ).toBeInTheDocument();
     expect(within(canvas).getByRole('link', { name: 'Open project file' })).toHaveAttribute(
       'href',
       '/admin/projects/PRJ-1043/brief',
@@ -73,22 +75,23 @@ describe('AdminHome (F11, screen 01)', () => {
     await userEvent.click(within(canvas).getByRole('button', { name: 'Edit brief' }));
     const brief = within(canvas).getByLabelText('Brief');
     await userEvent.clear(brief);
-    await userEvent.type(
-      brief,
-      'Northgate needs 4–5 calls on Part 145 readiness after a carve-out.',
-    );
+    await userEvent.type(brief, 'Northgate needs 1–2 calls a month on ERP and EDI integration.');
     await userEvent.click(within(canvas).getByRole('button', { name: 'Save' }));
     expect(
-      await within(canvas).findByText(/Northgate needs 4–5 calls on Part 145 readiness/),
+      await within(canvas).findByText(
+        /Northgate needs 1–2 calls a month on ERP and EDI integration/,
+      ),
     ).toBeInTheDocument();
-    expect(db.get().adminProjects['PRJ-1043']?.brief).toMatch(/^Northgate needs 4–5 calls/);
+    expect(db.get().adminProjects['PRJ-1043']?.brief).toMatch(/^Northgate needs 1–2 calls/);
   });
 
   it('finds experts from the brief, sends several the questions, then extends the search', async () => {
     renderWithProviders(<AdminHome />, { persona: 'ops' });
     await userEvent.click(await screen.findByRole('link', { name: /New project emails: 3/ }));
     await userEvent.click(await screen.findByRole('button', { name: /Show brief: Amy Wang/ }));
-    expect(await screen.findByRole('article', { name: /UK MRO carve-out/ })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('article', { name: /Medical distributors: ERP & EDI/ }),
+    ).toBeInTheDocument();
     // Under the brief the AI asks to create the project file; the AI confirms and offers the next step.
     expect(screen.getByText(paragraph(/Create .+ from this brief/))).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Create project' }));
@@ -98,8 +101,10 @@ describe('AdminHome (F11, screen 01)', () => {
     expect(screen.queryByText(/Creating the project file/)).toBeNull();
     expect(db.get().adminProjects['PRJ-1043']?.status).toBe('matching');
     const reqs = screen.getByRole('article', { name: 'Requirements for PRJ-1043' });
-    expect(within(reqs).getByText(/EASA Part 145 and UK CAA approvals/)).toBeInTheDocument();
-    expect(within(reqs).getByText(/5 expert\s+requirements/)).toBeInTheDocument();
+    expect(
+      within(reqs).getByText(/Hands-on EDI, eProcurement, API or onboarding work/),
+    ).toBeInTheDocument();
+    expect(within(reqs).getByText(/6 expert\s+requirements/)).toBeInTheDocument();
     expect(within(reqs).queryByText(/screening questions/)).toBeNull();
     // The requirements edit in place, from the pencil at the card's top right.
     await userEvent.click(within(reqs).getByRole('button', { name: 'Edit requirements' }));
@@ -117,7 +122,7 @@ describe('AdminHome (F11, screen 01)', () => {
     expect(
       await screen.findByRole(
         'heading',
-        { name: /These are the top 10 experts for UK MRO carve-out/ },
+        { name: /These are the top 10 experts for Medical distributors: ERP & EDI/ },
         { timeout: 10_000 },
       ),
     ).toBeInTheDocument();
@@ -168,7 +173,9 @@ describe('AdminHome (F11, screen 01)', () => {
       within(card).getByRole('heading', { name: /What should they know/ }),
     ).toBeInTheDocument();
     expect(
-      within(card).getByRole('button', { name: 'Remove EASA Part 145 and UK CAA approvals' }),
+      within(card).getByRole('button', {
+        name: 'Remove Hands-on EDI, eProcurement, API or onboarding work',
+      }),
     ).toBeInTheDocument();
     expect(
       within(card).getByRole('textbox', { name: 'Knowledge the experts need' }),
@@ -267,7 +274,7 @@ describe('AdminHome (F11, screen 01)', () => {
     expect(within(projects).getAllByRole('listitem')).toHaveLength(2);
     await userEvent.click(
       within(projects).getByRole('button', {
-        name: 'Review answers for UK MRO carve-out, Part 145 readiness',
+        name: 'Review answers for Medical distributors: ERP & EDI integration',
       }),
     );
 

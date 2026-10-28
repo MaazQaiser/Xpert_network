@@ -28,67 +28,91 @@ const block = (
   sourceFor,
 });
 
-/** PRJ-1043: Amy Wang (Northgate Advisory) — UK MRO carve-out, from Scope_v2.docx. */
+/**
+ * PRJ-1043: Amy Wang (Northgate Advisory). A retainer: 1–2 expert calls a month on Medline,
+ * Henry Schein and Owens & Minor; this month and next, ERP and EDI integration with health
+ * systems. From Retainer_Brief_ERP_EDI_Integration.docx.
+ */
 export const PRJ_1043: DraftProjectContent = {
   brief:
-    'Northgate Advisory is advising on the carve-out of a UK aircraft maintenance (MRO) business. They need 4–5 one-hour calls with former quality and compliance leads who know EASA Part 145 and UK CAA oversight, to test how ready the business is to hold its own approvals after separation. First calls before 6 Nov.',
+    'Northgate Advisory runs competitive intelligence for a medical distributor client on a retainer and wants 1–2 expert interviews a month. The target companies stay the same, in priority order: Medline Industries, Henry Schein (medical, not dental) and Owens & Minor. For this month and next the topic is ERP integration and electronic connectivity: how these distributors structure, implement and price ERP and EDI integrations with health system customers, and how mature their API capabilities are. Experts are former employees with hands-on eProcurement, EDI, API or customer-onboarding integration work, ideally people who owned integration projects and can speak to whether customers were charged. U.S.-based with U.S. health system experience; left within the last 12 months (up to 18 considered). 60-minute recorded telephone interviews.',
   requirements: [
-    { id: 'r43_quality', text: 'Former Head of Quality / Compliance Manager, Part 145 MRO' },
-    { id: 'r43_easa', text: 'EASA Part 145 and UK CAA approvals' },
-    { id: 'r43_carveout', text: 'Lived through a carve-out or approval transfer' },
-    { id: 'r43_years', text: '10+ yrs in aviation maintenance' },
-    { id: 'r43_left', text: 'Not at the target or its parent today' },
+    { id: 'r43_company', text: 'Ex-Medline, Henry Schein (medical) or Owens & Minor' },
+    { id: 'r43_hands_on', text: 'Hands-on EDI, eProcurement, API or onboarding work' },
+    { id: 'r43_customer', text: 'Customer-facing integrations, not internal IT' },
+    { id: 'r43_commercial', text: 'Can speak to integration pricing' },
+    { id: 'r43_recency', text: 'Left within 12 months (up to 18)' },
+    { id: 'r43_us', text: 'U.S.-based, with U.S. health system experience' },
   ],
   questions: [
     {
       id: 'q43_1',
-      text: 'What does it take for a carved-out MRO to hold its own Part 145 approval, and how long does the CAA take?',
+      text: 'How do Medline, Henry Schein and Owens & Minor structure their integration teams, and who owns customer-facing EDI and eProcurement work?',
       page: 2,
     },
     {
       id: 'q43_2',
-      text: 'Which quality and compliance functions are usually shared with the parent and hardest to separate?',
+      text: 'How is an ERP or EDI integration with a health system implemented, from kickoff to go-live, and how long does it take?',
       page: 2,
     },
     {
       id: 'q43_3',
-      text: 'How do customers and lessors react to a change of approval holder?',
-      page: 3,
+      text: 'Which ERPs and connectivity channels (direct EDI, GHX, punch-out, API) do health system customers use most?',
+      page: 2,
     },
     {
       id: 'q43_4',
-      text: 'What are the common findings in a first CAA audit after separation?',
+      text: 'Are health systems charged for integrations, and how is that priced or bundled into the distribution contract?',
       page: 3,
     },
     {
       id: 'q43_5',
-      text: 'What staffing does a stand-alone quality department need for a 300-person MRO?',
+      text: 'How mature are each distributor’s API capabilities compared with EDI, and what do customers use them for?',
       page: 3,
     },
     {
       id: 'q43_6',
-      text: 'Which IT systems (maintenance records, tooling, parts traceability) are hardest to stand up?',
-      page: 4,
+      text: 'Where do integration projects most often stall or fail, and what does that cost the distributor?',
+      page: 3,
     },
   ],
   facts: [
     {
       id: 'f43_industry',
       label: 'Industry',
-      value: 'Aircraft maintenance (MRO)',
+      value: 'Medical supply distribution',
       state: 'ok',
       page: 1,
     },
-    { id: 'f43_geography', label: 'Geography', value: 'United Kingdom', state: 'ok', page: 1 },
-    { id: 'f43_calls', label: 'Calls needed', value: '4–5 × 60 min', state: 'ok', page: 1 },
-    { id: 'f43_deadline', label: 'Deadline', value: 'Before 6 Nov', state: 'ok', page: 1 },
-    { id: 'f43_budget', label: 'Budget', value: null, state: 'missing', page: null },
+    {
+      id: 'f43_targets',
+      label: 'Target companies',
+      value: 'Medline, Henry Schein (medical), Owens & Minor',
+      state: 'ok',
+      page: 1,
+    },
+    { id: 'f43_geography', label: 'Geography', value: 'United States', state: 'ok', page: 3 },
+    {
+      id: 'f43_calls',
+      label: 'Calls needed',
+      value: '1–2 a month × 60 min, by phone, recorded',
+      state: 'ok',
+      page: 1,
+    },
+    {
+      id: 'f43_recency',
+      label: 'Recency',
+      value: 'Left ≤ 12 months (up to 18)',
+      state: 'ok',
+      page: 3,
+    },
+    { id: 'f43_budget', label: 'Interview fee', value: null, state: 'missing', page: null },
   ],
   confirmations: [
     {
       id: 'c43_budget',
       factId: 'f43_budget',
-      text: 'Budget not mentioned in the scope',
+      text: 'Interview fee not mentioned in the brief',
       proposal: null,
       state: 'open',
     },
@@ -97,68 +121,84 @@ export const PRJ_1043: DraftProjectContent = {
     {
       page: 1,
       blocks: [
-        block('p43_1a', 'heading', 'Scope: UK MRO carve-out readiness'),
-        block('p43_1b', 'text', 'Prepared by Northgate Advisory for Xpert Network. October 2026.'),
+        block('p43_1a', 'heading', 'Retainer brief: medical distributors'),
+        block('p43_1b', 'text', 'Prepared by Northgate Advisory for Xpert Network.'),
         block(
           'p43_1c',
           'text',
-          'We are advising a buyer on the carve-out of a UK maintenance, repair and overhaul business (approx. 300 staff, two hangars) from its airline parent.',
-          'f43_industry',
+          'We conduct competitive intelligence research for a medical distributor client under a retainer agreement, and we’re hoping to schedule 1–2 primary research interviews each month to supplement that work.',
+          'f43_calls',
         ),
-        block('p43_1d', 'text', 'We would like 4–5 one-hour calls before 6 November.', 'f43_calls'),
+        block(
+          'p43_1d',
+          'text',
+          'Research topics may shift month to month, but the target companies are largely consistent: Medline Industries, Henry Schein, and Owens & Minor, in that order of priority.',
+          'f43_targets',
+        ),
       ],
     },
     {
       page: 2,
       blocks: [
-        block('p43_2a', 'heading', 'Approvals and quality'),
+        block('p43_2a', 'heading', 'This month and next: ERP integration and connectivity'),
         block(
           'p43_2b',
           'text',
-          'The business operates under its parent’s EASA Part 145 and UK CAA approvals. The buyer needs to understand what it takes to hold these approvals independently.',
-          'q43_1',
+          'We’re looking to understand how these medical distributors structure, implement, and price ERP and EDI integrations with health system customers, and how mature their API capabilities are.',
+          'q43_2',
         ),
         block(
           'p43_2c',
           'text',
-          'Quality, compliance and training are shared with the parent today; we want to know which functions are hardest to separate.',
-          'q43_2',
+          'We’re looking for former employees with direct, hands-on involvement in eProcurement integration, EDI operations, API development or management, or customer implementation and onboarding for electronic connectivity. The ideal candidate owned or was closely involved in integration projects.',
+          'q43_1',
+        ),
+        block(
+          'p43_2d',
+          'text',
+          'Likely titles: IT Manager or Director, Partner Integration (Medline’s EDI and eProcurement team); eCommerce Project Manager with eProcurement, EDI or API focus; Technical Product Manager, Enterprise Integration Services; Manager or Director, Digital Supply Chain Solutions (Owens & Minor); eProcurement Operations Specialist or Manager, U.S. Medical (Henry Schein).',
+          'q43_3',
         ),
       ],
     },
     {
       page: 3,
       blocks: [
-        block('p43_3a', 'heading', 'Customers, audits and people'),
+        block('p43_3a', 'heading', 'Notes'),
         block(
           'p43_3b',
           'text',
-          'How customers and lessors react to a change of approval holder.',
-          'q43_3',
+          'For Henry Schein candidates, we are focused exclusively on their medical distribution business, not dental.',
         ),
-        block('p43_3c', 'text', 'Typical findings in a first CAA audit after separation.', 'q43_4'),
         block(
-          'p43_3d',
+          'p43_3c',
           'text',
-          'The staffing a stand-alone quality department needs at this size.',
-          'q43_5',
-        ),
-      ],
-    },
-    {
-      page: 4,
-      blocks: [
-        block('p43_4a', 'heading', 'Systems'),
-        block(
-          'p43_4b',
-          'text',
-          'Maintenance records, tooling control and parts traceability systems are run by the parent group.',
+          'Prioritize candidates with direct involvement in customer-facing integration work, not just internal IT or infrastructure roles.',
           'q43_6',
         ),
         block(
-          'p43_4c',
+          'p43_3d',
           'text',
-          'Experts should be former quality or compliance leads with 10+ years in Part 145 maintenance, not employed by the target or its parent.',
+          'Candidates who can speak to the commercial side, whether and how customers were charged for integrations, are especially valuable.',
+          'q43_4',
+        ),
+        block(
+          'p43_3e',
+          'text',
+          'U.S.-based candidates with U.S. health system experience preferred.',
+          'f43_geography',
+        ),
+        block(
+          'p43_3f',
+          'text',
+          'Format: 60-minute telephone interviews, recorded. Recency: left within the last 12 months strongly preferred; up to 18 months considered.',
+          'f43_recency',
+        ),
+        block(
+          'p43_3g',
+          'text',
+          'We would also like to understand how mature their API capabilities are.',
+          'q43_5',
         ),
       ],
     },

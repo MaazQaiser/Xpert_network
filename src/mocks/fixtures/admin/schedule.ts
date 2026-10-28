@@ -63,7 +63,11 @@ const SEEDS: Seed[] = [
     ],
   },
   {
-    project: { id: 'PRJ-1043', name: 'UK MRO carve-out, Part 145 readiness', colour: 'magenta' },
+    project: {
+      id: 'PRJ-1043',
+      name: 'Medical distributors: ERP & EDI integration',
+      colour: 'magenta',
+    },
     client: {
       name: 'Amy Wang',
       company: 'Northgate Advisory',
@@ -94,7 +98,10 @@ const ROLES: Record<string, readonly string[]> = {
     'Ex-Head of Logistics, cold-chain operator',
     'Former Warehouse Director, temperature-controlled storage',
   ],
-  'PRJ-1043': ['Former Head of Quality, Part 145 MRO', 'Ex-Accountable Manager, line maintenance'],
+  'PRJ-1043': [
+    'Former IT Director, Partner Integration (EDI & eProcurement)',
+    'Ex-eCommerce Project Manager, eProcurement & EDI',
+  ],
 };
 
 function roleFor(projectId: string, expert: number): string {

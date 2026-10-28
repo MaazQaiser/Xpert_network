@@ -27,10 +27,10 @@ describe('Experts (F20)', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
     // The sector filter is searchable: typing narrows its options.
-    await userEvent.type(screen.getByRole('combobox', { name: /Sector/ }), 'avi');
-    expect(screen.getByRole('option', { name: /^Aviation & MRO/ })).toBeInTheDocument();
+    await userEvent.type(screen.getByRole('combobox', { name: /Sector/ }), 'med');
+    expect(screen.getByRole('option', { name: /^Medical distribution/ })).toBeInTheDocument();
     expect(screen.queryByRole('option', { name: /^Food & beverage/ })).toBeNull();
-    await userEvent.click(screen.getByRole('option', { name: /^Aviation & MRO/ }));
+    await userEvent.click(screen.getByRole('option', { name: /^Medical distribution/ }));
     expect(screen.getByText(/of \d+ experts match/)).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Megan Price' })).toBeNull();
   });

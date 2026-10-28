@@ -314,95 +314,123 @@ const SCRIPTS: Record<string, Script> = {
   },
   'PRJ-1043': {
     questions: [
-      'What does it take to hold your own Part 145 approval?',
-      'Which quality functions are hardest to separate?',
-      'How do customers react to a change of approval holder?',
-      'What does a first CAA audit usually find?',
+      'How are integration teams structured, and who owns customer-facing EDI work?',
+      'How is an ERP or EDI integration with a health system implemented, and how long does it take?',
+      'Which ERPs and connectivity channels do health systems use most?',
+      'Are customers charged for integrations, and how is that priced?',
+      'How mature are the distributors’ API capabilities compared with EDI?',
     ],
     answers: [
       {
-        text: 'The CAA wants an accountable manager and a quality system separate from the parent before it grants approval.',
+        text: 'Each distributor runs a central integration team (at Medline, Partner Integration) that owns EDI maps and eProcurement connections; account teams only scope the work.',
         at: 280,
       },
       {
-        text: 'Continuing airworthiness and the stores system are the hardest to separate.',
-        at: 910,
+        text: 'A typical health system go-live takes 8–14 weeks: mapping the 850, 855, 856 and 810 transactions, testing with the hospital’s ERP, then a parallel run.',
+        at: 640,
+      },
+      {
+        text: 'Most large health systems run Epic, Lawson (Infor) or Workday, and connect through GHX rather than direct EDI.',
+        at: 980,
+      },
+      {
+        text: 'Standard EDI is almost never charged. Custom work is quoted, but it is usually waived or folded into the prime-vendor contract to win the account.',
+        at: 1410,
       },
       null,
-      {
-        text: 'First audits mostly find procedures still pointing at the parent’s manuals.',
-        at: 1530,
-      },
     ],
-    covered: [0, 1, 3],
-    purpose: 'Test how ready a carved-out MRO is to hold its own Part 145 approval.',
+    covered: [0, 1, 2, 3],
+    purpose:
+      'Understand how Medline, Henry Schein and Owens & Minor structure, implement and price ERP and EDI integrations with U.S. health systems.',
     takeaways: [
-      'The CAA wants an accountable manager and a separate quality system before it grants approval.',
-      'Continuing airworthiness and the stores system are the hardest to separate.',
-      'First audits mostly find procedures still pointing at the parent’s manuals.',
+      'Integration sits in a central team (Medline calls it Partner Integration); account teams only scope it.',
+      'A health system EDI go-live takes 8–14 weeks across the 850, 855, 856 and 810 transactions.',
+      'Most health systems run Epic, Lawson or Workday and connect through GHX rather than direct EDI.',
+      'Standard EDI is free; custom work is quoted but usually waived inside the prime-vendor contract.',
     ],
     nextSteps: [
       {
-        text: 'Send {client} the exposition checklist {expert} described',
+        text: 'Send {client} the sample integration timeline {expert} described',
         owner: 'expert',
-        at: 700,
+        at: 660,
       },
-      { text: 'Find an expert on customer reaction to approval changes', owner: 'pm', at: 1600 },
+      {
+        text: 'Find an Owens & Minor expert on Digital Supply Chain Solutions',
+        owner: 'pm',
+        at: 1700,
+      },
+      { text: 'Cover API maturity in the next call', owner: 'pm', at: 1720 },
     ],
     moments: [
       { at: 0, title: 'Introductions' },
-      { at: 240, title: 'Getting your own approval' },
-      { at: 900, title: 'Hardest functions to separate' },
-      { at: 1500, title: 'First CAA audit' },
+      { at: 240, title: 'How the integration team is set up' },
+      { at: 620, title: 'From kickoff to go-live' },
+      { at: 960, title: 'ERPs and GHX' },
+      { at: 1390, title: 'Who pays for integration' },
     ],
     lines: [
       {
         at: 5,
         speaker: 'pm',
-        text: 'Thanks both. {expert}, could you start with your Part 145 background?',
+        text: 'Thanks both for joining. {expert}, could you start with your role on customer integrations?',
       },
       {
         at: 30,
         speaker: 'expert',
-        text: 'I was Head of Quality at a Part 145 MRO through its separation from an airline.',
+        text: 'I led the team that connected health systems to us by EDI and eProcurement, until I left about eight months ago.',
       },
       {
         at: 250,
         speaker: 'client',
-        text: 'What does the CAA need before it grants a new approval?',
+        text: 'Who actually owns an integration when a new health system signs?',
       },
       {
         at: 280,
         speaker: 'expert',
-        text: 'Your own accountable manager and a separate quality system. I have an exposition checklist I can share.',
+        text: 'A central integration team. Sales scopes it, but my team owned the maps, the testing and the go-live.',
       },
       {
-        at: 910,
-        speaker: 'expert',
-        text: 'Continuing airworthiness and the stores system are the hardest; they’re woven into the airline.',
-      },
-      { at: 1510, speaker: 'client', text: 'What does a first audit usually find?' },
-      {
-        at: 1530,
-        speaker: 'expert',
-        text: 'Procedures still pointing at the parent’s manuals. Clean those first.',
-      },
-      {
-        at: 1610,
+        at: 620,
         speaker: 'client',
-        text: 'We still need a view on how customers react to the change.',
+        text: 'How long does a typical go-live take, start to finish?',
+      },
+      {
+        at: 640,
+        speaker: 'expert',
+        text: 'Eight to fourteen weeks. Orders, acknowledgements, ship notices and invoices, then a parallel run. I can share a sample timeline.',
+      },
+      {
+        at: 980,
+        speaker: 'expert',
+        text: 'Most big systems are on Epic, Lawson or Workday, and they nearly all route through GHX rather than direct EDI.',
+      },
+      { at: 1390, speaker: 'client', text: 'Do the health systems pay for any of this?' },
+      {
+        at: 1410,
+        speaker: 'expert',
+        text: 'Standard EDI, never. Custom work gets a quote, but it is usually waived to win the prime-vendor contract.',
+      },
+      {
+        at: 1700,
+        speaker: 'client',
+        text: 'It would help to hear from someone on the Owens & Minor side too.',
+      },
+      {
+        at: 1720,
+        speaker: 'pm',
+        text: 'Noted. I’ll find an Owens & Minor expert, and we’ll pick up API maturity next time.',
       },
     ],
     requests: [
-      { kind: 'document', text: 'The Part 145 exposition checklist', at: 280 },
+      { kind: 'document', text: 'A sample health system integration timeline', at: 640 },
       {
         kind: 'new_requirement',
-        text: 'An expert on customer reaction to a change of approval holder',
-        at: 1610,
+        text: 'A former Owens & Minor expert from Digital Supply Chain Solutions',
+        at: 1700,
       },
     ],
     subject: 'Notes from your call with {expert}',
-    body: 'Hi {clientFirst},\n\nThanks for the call. Key points: the CAA needs your own accountable manager and quality system, continuing airworthiness and stores are the hardest to separate, and first audits mostly find procedures still pointing at the parent’s manuals.\n\n{expertFirst}’s exposition checklist is attached, and I’m finding an expert on customer reaction.\n\nBest,\nUmer',
+    body: 'Hi {clientFirst},\n\nThanks for the call. The short version: integration sits in a central team, a health system EDI go-live takes 8–14 weeks, most systems connect through GHX on Epic, Lawson or Workday, and standard EDI is not charged; custom work is usually waived inside the prime-vendor contract.\n\nThe sample timeline {expertFirst} mentioned is attached. I’m finding a former Owens & Minor expert, and we’ll cover API maturity in the next call.\n\nBest,\nUmer',
   },
 };
 
@@ -473,7 +501,7 @@ const INDUSTRY: Record<string, string> = {
   'PRJ-1039': 'Industrial automation',
   'PRJ-1040': 'Cold chain & logistics',
   'PRJ-1041': 'Food & beverage',
-  'PRJ-1043': 'Aviation & MRO',
+  'PRJ-1043': 'Medical distribution',
 };
 
 function statusOf(meeting: Meeting, now: Date): CallRecord['status'] {
