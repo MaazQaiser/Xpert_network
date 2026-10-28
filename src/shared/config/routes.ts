@@ -58,8 +58,12 @@ export const routes = {
     ) => `/admin/projects/${projectId}/${step}`,
     clients: '/admin/clients',
     experts: '/admin/experts',
+    expert: (expertId: string) => `/admin/experts/${expertId}`,
     outreach: '/admin/outreach',
     scheduling: '/admin/scheduling',
     calls: '/admin/calls',
+    callReview: (callId: string) => `/admin/calls/${callId}`,
+    knowledge: '/admin/knowledge',
+    report: (callId: string) => `/admin/knowledge/${callId}`,
   },
 } as const;

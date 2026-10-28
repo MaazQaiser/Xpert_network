@@ -130,3 +130,22 @@ $toast-life: 10s;
     transform: scaleX(0);
   }
 }
+
+// A toast with nothing to open (e.g. "Report sent"): the message, and a line of detail.
+.message {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-04 $spacing-02 $spacing-04 $spacing-04;
+  gap: $spacing-02;
+}
+
+.detail {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+// An information note rather than a success.
+.iconInfo svg {
+  fill: $support-info;
+}

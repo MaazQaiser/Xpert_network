@@ -9,6 +9,8 @@ export * from './model/clientDraft.schema';
 export * from './model/booking.schema';
 export * from './model/call.schema';
 export * from './model/schedule.schema';
+export * from './model/calls.schema';
+export * from './model/network.schema';
 export {
   adminKeys,
   useInbox,
@@ -21,6 +23,12 @@ export {
 export { AdminHome } from './components/AdminHome/AdminHome';
 export { Inbox } from './components/Inbox/Inbox';
 export { Scheduling } from './components/Scheduling/Scheduling';
+export { Calls } from './components/Calls/Calls';
+export { CallReview } from './components/Calls/CallReview';
+export { Experts } from './components/Experts/Experts';
+export { KnowledgeBase } from './components/Knowledge/KnowledgeBase';
+export { ReportReader } from './components/Knowledge/ReportReader';
+export { ExpertDetail } from './components/Experts/ExpertDetail';
 export { ProjectFile } from './components/ProjectFile/ProjectFile';
 export { ProjectsList } from './components/ProjectsList/ProjectsList';
 export { ProjectSteps } from './components/ProjectSteps/ProjectSteps';

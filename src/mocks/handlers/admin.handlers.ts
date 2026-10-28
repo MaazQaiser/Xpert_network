@@ -34,6 +34,8 @@ import { expertPerson } from '../fixtures/admin/expertPeople';
 import { buildBooking, buildChecklist, replyInboxRequest } from '../fixtures/admin/booking';
 import { buildCallSession } from '../fixtures/admin/call';
 import { buildSchedule } from '../fixtures/admin/schedule';
+import { buildCalls, toRecord } from '../fixtures/admin/calls';
+import { buildNetwork } from '../fixtures/admin/network';
 import { PM_NAME } from '../fixtures/admin/seed';
 import { PRJ_1042_BRIEFS } from '../fixtures/admin/prj1042';
 import { db } from '../store/db';
@@ -151,6 +153,69 @@ function screenedExperts(): ScreenedExpert[] {
 }
 
 export const adminHandlers = [
+  // Knowledge base: the research report from every completed call, newest first.
+  http.get('/api/admin/reports', async () => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    if (getControls().emptyData) return HttpResponse.json([]);
+    const reports = buildCalls(new Date(), db.get().adminCallFollowUps)
+      .filter((call) => call.status === 'completed')
+      .sort((a, b) => b.startsAt.localeCompare(a.startsAt));
+    return HttpResponse.json(reports);
+  }),
+  // Experts (F20): the Xpert Network database, and one expert's full record.
+  http.get('/api/admin/experts', async () => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    return HttpResponse.json(getControls().emptyData ? [] : buildNetwork(new Date()));
+  }),
+  http.get('/api/admin/experts/:id', async ({ params }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const expert = buildNetwork(new Date()).find((e) => e.id === params.id);
+    return expert ? HttpResponse.json(expert) : notFound();
+  }),
+  // Calls: every booked call; and one call's full record.
+  http.get('/api/admin/calls', async () => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    if (getControls().emptyData) return HttpResponse.json([]);
+    return HttpResponse.json(buildCalls(new Date(), db.get().adminCallFollowUps).map(toRecord));
+  }),
+  http.get('/api/admin/calls/:id', async ({ params }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const call = buildCalls(new Date(), db.get().adminCallFollowUps).find(
+      (c) => c.id === params.id,
+    );
+    return call ? HttpResponse.json(call) : notFound();
+  }),
+  // Send the follow-ups: the summary email to the client (email sandbox; nothing leaves).
+  http.post('/api/admin/calls/:id/follow-ups', async ({ params }) => {
+    const auth = await guard();
+    if ('response' in auth) return auth.response;
+    const call = buildCalls(new Date(), db.get().adminCallFollowUps).find(
+      (c) => c.id === params.id,
+    );
+    if (!call) return notFound();
+    if (call.status !== 'completed') {
+      return errorResponse(409, 'not_ended', 'Follow-ups go out once the call has ended.');
+    }
+    const sentAt = new Date().toISOString();
+    db.update((draft) => {
+      draft.adminCallFollowUps[call.id] = sentAt;
+      draft.adminMail.push({
+        id: createId('mail'),
+        projectId: call.projectId,
+        to: call.email.toEmail,
+        subject: call.email.subject,
+        body: call.email.body,
+        sentAt,
+      });
+    });
+    return HttpResponse.json({ ...call, followUpsSentAt: sentAt, followUpsOpen: 0 });
+  }),
+
   // Scheduling: the PM's calendar of booked calls and held slots across projects.
   http.get('/api/admin/schedule', async () => {
     const auth = await guard();

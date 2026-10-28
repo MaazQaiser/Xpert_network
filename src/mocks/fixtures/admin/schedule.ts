@@ -78,14 +78,29 @@ const SEEDS: Seed[] = [
   },
 ];
 
-const ROLES = [
-  'Former Head of Quality, Part 145 MRO',
-  'Ex-Plant Director, automotive automation',
-  'Former Green Coffee Buyer, GCC roaster',
-  'Ex-Head of Logistics, cold-chain operator',
-  'Former Operations Director, contract manufacturing',
-  'Ex-Procurement Lead, food service',
-] as const;
+/** Expert roles per project, so each call's expert fits what the client is researching. */
+const ROLES: Record<string, readonly string[]> = {
+  'PRJ-1039': [
+    'Ex-Plant Director, automotive automation',
+    'Former Operations Director, contract manufacturing',
+    'Ex-Head of Automation, packaging lines',
+  ],
+  'PRJ-1041': [
+    'Former Green Coffee Buyer, GCC roaster',
+    'Ex-Procurement Lead, food service',
+    'Former Head of Sourcing, specialty coffee importer',
+  ],
+  'PRJ-1040': [
+    'Ex-Head of Logistics, cold-chain operator',
+    'Former Warehouse Director, temperature-controlled storage',
+  ],
+  'PRJ-1043': ['Former Head of Quality, Part 145 MRO', 'Ex-Accountable Manager, line maintenance'],
+};
+
+function roleFor(projectId: string, expert: number): string {
+  const roles = ROLES[projectId] ?? ROLES['PRJ-1039'] ?? [];
+  return roles[expert % roles.length] ?? 'Industry expert';
+}
 
 /** A Meet code shaped like Google's (abc-defg-hij), stable for a meeting id. */
 function meetCode(seed: string): string {
@@ -105,6 +120,34 @@ function weekStart(now: Date): Date {
   const weekday = (start.getUTCDay() + 6) % 7;
   start.setUTCDate(start.getUTCDate() - weekday);
   return start;
+}
+
+/** One call happening right now, so the demo always has something live. */
+function liveCall(now: Date): Meeting {
+  const start = new Date(now.getTime() - 18 * 60_000);
+  start.setUTCMinutes(start.getUTCMinutes() - (start.getUTCMinutes() % 5), 0, 0);
+  const seed = SEEDS[0];
+  const expert = expertPerson('exp_3919');
+  return {
+    id: 'mtg_live',
+    kind: 'booked',
+    projectId: seed?.project.id ?? 'PRJ-1039',
+    startsAt: start.toISOString(),
+    endsAt: new Date(start.getTime() + 45 * 60_000).toISOString(),
+    client: {
+      name: seed?.client.name ?? 'Tom Becker',
+      detail: seed?.client.company ?? 'Halden Group',
+      email: seed?.client.email ?? null,
+      photoUrl: seed?.client.photoUrl ?? null,
+    },
+    expert: {
+      name: expert.name,
+      detail: 'Former Operations Director, contract manufacturing',
+      email: null,
+      photoUrl: expert.photoUrl,
+    },
+    meetUrl: `https://meet.google.com/${meetCode('mtg_live')}`,
+  };
 }
 
 export function buildSchedule(now: Date): Schedule {
@@ -131,7 +174,7 @@ export function buildSchedule(now: Date): Schedule {
         },
         expert: {
           name: expert.name,
-          detail: ROLES[call.expert % ROLES.length] ?? ROLES[0],
+          detail: roleFor(seed.project.id, call.expert),
           email: null,
           photoUrl: expert.photoUrl,
         },
@@ -139,6 +182,7 @@ export function buildSchedule(now: Date): Schedule {
       };
     }),
   );
+  meetings.push(liveCall(now));
   meetings.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
   return { timeZone: 'GMT', projects: SEEDS.map((s) => s.project), meetings };
 }

@@ -10,7 +10,7 @@ describe('Scheduling (F15)', () => {
   it('shows this week’s calls and opens one with its Google Meet link', async () => {
     const { container } = renderWithProviders(<Scheduling />, { persona: 'ops' });
     expect(
-      await screen.findByText(/7 booked calls and 3 held slots this week/),
+      await screen.findByText(/8 booked calls and 3 held slots this week/),
     ).toBeInTheDocument();
     await expectNoAxeViolations(container);
 

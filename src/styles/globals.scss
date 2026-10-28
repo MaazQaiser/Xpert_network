@@ -88,3 +88,21 @@ body {
     transition-duration: $duration-fast-01;
   }
 }
+
+// A page can mark one element to print on its own (e.g. a call report's Download PDF): the
+// rest of the app hides, and that element prints from the top of the page.
+@media print {
+  body:has([data-print-root]) * {
+    visibility: hidden;
+  }
+
+  [data-print-root],
+  [data-print-root] * {
+    visibility: visible;
+  }
+
+  [data-print-root] {
+    position: absolute;
+    inset: 0;
+  }
+}

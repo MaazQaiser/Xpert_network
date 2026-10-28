@@ -1,5 +1,6 @@
 // Names and portraits for matched experts, shown to the PM (the client sees "Expert A" until
-// booked). Portraits are randomuser.me placeholders, stored in public/images/avatars/experts.
+// booked). Portraits are professional office headshots (Pexels licence), cropped to 256px and
+// stored in public/images/avatars/expert-headshots.
 const PEOPLE = [
   'Jake Morrison',
   'Emily Carter',
@@ -37,5 +38,5 @@ export function expertPerson(expertId: string): { name: string; photoUrl: string
   // PEOPLE[0] belongs to Expert #4821 alone, so the lead expert's name never shows up twice.
   const index = num % PEOPLE.length || 1 + (num % (PEOPLE.length - 1));
   const name = expertId === 'exp_4821' ? PEOPLE[0] : (PEOPLE[index] ?? PEOPLE[1]);
-  return { name, photoUrl: `/images/avatars/experts/${slug(name)}.jpg` };
+  return { name, photoUrl: `/images/avatars/expert-headshots/${slug(name)}.jpg` };
 }

@@ -4,7 +4,7 @@ import { useId } from 'react';
 import styles from './AdminLoginFrame.module.scss';
 
 // The hub (Xpert Network) in the middle, experts around it. Portraits are the demo placeholders
-// from public/images/avatars/experts; the art is decorative and hidden from assistive tech.
+// from public/images/avatars/expert-headshots; the art is decorative and hidden from assistive tech.
 const HUB = { x: 240, y: 200 };
 const EXPERTS = [
   { x: 96, y: 96, photo: 'jake-morrison' },
@@ -81,7 +81,7 @@ export function NetworkArt() {
           <g key={e.photo} className={styles.expert} style={{ '--i': i } as React.CSSProperties}>
             <circle className={styles.expertRing} cx={e.x} cy={e.y} r={R + 3} />
             <image
-              href={`/images/avatars/experts/${e.photo}.jpg`}
+              href={`/images/avatars/expert-headshots/${e.photo}.jpg`}
               x={e.x - R}
               y={e.y - R}
               width={R * 2}

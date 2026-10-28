@@ -1,0 +1,333 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/motion' as *;
+
+// Knowledge base: the reports from every call. The frame matches Calls and Experts: a soft
+// grey edge to edge, the content on white.
+
+.root {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-05;
+  margin: calc(-1 * #{$spacing-07}) calc(-1 * #{$spacing-05});
+  background: $layer-01;
+  gap: $spacing-05;
+  min-block-size: calc(100vh - #{$spacing-09});
+
+  @include breakpoint(md) {
+    padding: $spacing-05 $spacing-06 $spacing-06;
+    margin-inline: calc(-1 * #{$spacing-07});
+  }
+}
+
+.topBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: $spacing-04 $spacing-06;
+}
+
+.pageTitle {
+  @include type-style('heading-04');
+}
+
+.subtitle {
+  @include type-style('body-compact-01');
+
+  margin-block-start: $spacing-02;
+  color: $text-secondary;
+}
+
+// The page's main action, at the top right.
+.headerActions {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+
+.panel {
+  padding: $spacing-05;
+  border: 1px solid $border-subtle-01;
+  background: $background;
+
+  @include breakpoint(md) {
+    padding: $spacing-06;
+  }
+}
+
+// The panel fills the rest of the page's height.
+.listArea {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.filterPanel {
+  // Runs to the foot of the page, however few reports there are.
+  flex: 1;
+  padding: $spacing-05;
+  border: 1px solid $border-subtle-01;
+  background: $background;
+
+  @include breakpoint(md) {
+    padding: $spacing-05 $spacing-06 $spacing-06;
+  }
+}
+
+.toolbar {
+  display: grid;
+  align-items: end;
+  gap: $spacing-04 $spacing-03;
+  grid-template-columns: minmax(0, 1fr);
+
+  // Search taking the room, then the project filter, then the sort, as on Experts.
+  @include breakpoint(md) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 16rem) auto;
+  }
+}
+
+// Search, first in the filter row, with a visible label like its neighbours.
+.searchField {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.searchLabel {
+  @include type-style('label-01');
+
+  margin-block-end: $spacing-03;
+  color: $text-secondary;
+}
+
+// A menu option: its name, and on the right how many reports it holds.
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+  inline-size: 100%;
+}
+
+.optionCount {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.sort {
+  display: flex;
+
+  @include breakpoint(md) {
+    justify-content: flex-end;
+  }
+}
+
+.count {
+  @include type-style('body-compact-01');
+
+  margin-block: $spacing-05 $spacing-03;
+  color: $text-secondary;
+}
+
+.none {
+  @include type-style('body-01');
+
+  padding-block: $spacing-07;
+  color: $text-secondary;
+}
+
+.mark {
+  background: $highlight;
+  color: inherit;
+}
+
+// Three cards to a row on a laptop, two on a tablet, one on a phone.
+.grid {
+  display: grid;
+  gap: $spacing-05;
+  grid-template-columns: minmax(0, 1fr);
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include breakpoint(lg) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.cardItem {
+  display: flex;
+}
+
+// One report: the whole card opens it.
+.card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: $spacing-05;
+  border: 1px solid $border-subtle-01;
+  background: $layer-01;
+  color: $text-primary;
+  text-decoration: none;
+  transition:
+    border-color $duration-fast-02 motion(standard, productive),
+    background-color $duration-fast-02 motion(standard, productive);
+
+  @include breakpoint(md) {
+    padding: $spacing-06;
+  }
+
+  &:hover {
+    border-color: $border-strong-01;
+    background: $layer-hover-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: -2px;
+  }
+}
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-04;
+}
+
+.cardTitle {
+  @include type-style('heading-compact-02');
+  @include font-weight('semibold');
+
+  padding-block-start: $spacing-02;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+  margin-block-start: $spacing-03;
+}
+
+// Carbon's tag carries outer margin; the gap does the spacing here.
+.chip.chip {
+  margin: 0;
+}
+
+.description {
+  @include type-style('body-01');
+
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  color: $text-secondary;
+  margin-block: $spacing-04 $spacing-05;
+}
+
+// Footer: the date on the left, the faces on the right.
+.cardFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block-start: $spacing-04;
+  border-block-start: 1px solid $border-subtle-01;
+  gap: $spacing-04;
+  margin-block-start: auto;
+}
+
+.faces {
+  display: flex;
+  flex: none;
+}
+
+.face + .face {
+  margin-inline-start: calc(-1 * #{$spacing-02});
+}
+
+.footDate {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+// The open button: a ring with an arrow, filled on hover.
+.open {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid $border-strong-01;
+  border-radius: 50%;
+  block-size: $spacing-07;
+  color: $icon-primary;
+  inline-size: $spacing-07;
+  transition:
+    background-color $duration-fast-02 motion(standard, productive),
+    border-color $duration-fast-02 motion(standard, productive),
+    color $duration-fast-02 motion(standard, productive);
+
+  svg {
+    transition: transform $duration-fast-02 motion(standard, productive);
+  }
+
+  .card:hover & {
+    border-color: $interactive;
+    background: $interactive;
+    color: $icon-on-color;
+  }
+
+  .card:hover & svg {
+    transform: translate($spacing-01, calc(-1 * #{$spacing-01}));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    svg {
+      transition: none;
+    }
+  }
+}
+
+// ——— Reading one report ————————————————————————————————————————————————————————————
+.readerBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
+
+.back {
+  @include type-style('body-compact-01');
+
+  display: inline-flex;
+  align-items: center;
+  color: $link-primary;
+  gap: $spacing-02;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+  }
+}
+
+// The report at a reading width, centred; the padding leaves room for its grey desk.
+.reader {
+  padding: $spacing-05;
+  inline-size: 100%;
+  max-inline-size: 60rem;
+  margin-inline: auto;
+
+  @include breakpoint(md) {
+    padding: $spacing-05 $spacing-07;
+  }
+}

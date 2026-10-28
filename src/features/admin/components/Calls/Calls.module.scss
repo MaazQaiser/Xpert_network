@@ -1,0 +1,1590 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/motion' as *;
+
+// Calls, after Fathom: the list (a live card, then Upcoming and Completed) and one call's
+// review (the recording beside its summary, transcript and follow-ups). The frame matches
+// Scheduling: a soft grey edge to edge, the content on white panels.
+
+.root {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-05;
+  margin: calc(-1 * #{$spacing-07}) calc(-1 * #{$spacing-05});
+  background: $layer-01;
+  gap: $spacing-05;
+  min-block-size: calc(100vh - #{$spacing-09});
+
+  @include breakpoint(md) {
+    padding: $spacing-05 $spacing-06 $spacing-06;
+    margin-inline: calc(-1 * #{$spacing-07});
+  }
+}
+
+// ——— Shared bits ————————————————————————————————————————————————————————————————
+.topBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03 $spacing-06;
+}
+
+.pageTitle {
+  @include type-style('heading-04');
+}
+
+.search {
+  @include breakpoint(md) {
+    max-inline-size: 22rem;
+  }
+}
+
+.meta {
+  @include type-style('helper-text-01');
+
+  display: block;
+  color: $text-secondary;
+}
+
+.metaLink {
+  color: $link-primary;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.none {
+  @include type-style('body-01');
+
+  padding-block: $spacing-05;
+  color: $text-secondary;
+}
+
+.body01 {
+  @include type-style('body-01');
+}
+
+.sectionTitle {
+  @include type-style('heading-compact-01');
+
+  display: flex;
+  align-items: baseline;
+  margin-block-end: $spacing-03;
+  gap: $spacing-03;
+}
+
+.count {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+// Carbon buttons without a trailing icon keep their right padding for one; even it out.
+.evenButton.evenButton {
+  padding-inline-end: $spacing-05;
+  max-inline-size: none;
+  white-space: nowrap;
+}
+
+.avatar {
+  @include type-style('label-01');
+
+  display: inline-flex;
+  overflow: hidden;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid $background;
+  border-radius: 50%;
+  background: $layer-accent-01;
+  color: $text-primary;
+}
+
+.avatar24 {
+  block-size: $spacing-06;
+  inline-size: $spacing-06;
+}
+
+.avatar32 {
+  block-size: $spacing-07;
+  inline-size: $spacing-07;
+}
+
+.avatar48 {
+  @include type-style('heading-compact-01');
+
+  block-size: $spacing-09;
+  inline-size: $spacing-09;
+}
+
+.avatar64 {
+  @include type-style('heading-03');
+
+  block-size: $spacing-10;
+  inline-size: $spacing-10;
+}
+
+.photo {
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: cover;
+}
+
+// ——— Project colours: Carbon's tag palette, theme-aware ————————————————————————————
+/* stylelint-disable carbon/theme-use -- Carbon tag palette tokens, theme-aware (as in Scheduling) */
+.blue.stripe,
+.blue.dot {
+  background: var(--cds-tag-color-blue);
+}
+
+.blue.thumb,
+.blue.live {
+  background: var(--cds-tag-background-blue);
+}
+
+.teal.stripe,
+.teal.dot {
+  background: var(--cds-tag-color-teal);
+}
+
+.teal.thumb,
+.teal.live {
+  background: var(--cds-tag-background-teal);
+}
+
+.purple.stripe,
+.purple.dot {
+  background: var(--cds-tag-color-purple);
+}
+
+.purple.thumb,
+.purple.live {
+  background: var(--cds-tag-background-purple);
+}
+
+.magenta.stripe,
+.magenta.dot {
+  background: var(--cds-tag-color-magenta);
+}
+
+.magenta.thumb,
+.magenta.live {
+  background: var(--cds-tag-background-magenta);
+}
+
+.cyan.stripe,
+.cyan.dot {
+  background: var(--cds-tag-color-cyan);
+}
+
+.cyan.thumb,
+.cyan.live {
+  background: var(--cds-tag-background-cyan);
+}
+
+.green.stripe,
+.green.dot {
+  background: var(--cds-tag-color-green);
+}
+
+.green.thumb,
+.green.live {
+  background: var(--cds-tag-background-green);
+}
+/* stylelint-enable carbon/theme-use */
+
+// ——— The list ——————————————————————————————————————————————————————————————————
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+}
+
+.panel {
+  border: 1px solid $border-subtle-01;
+  background: $background;
+}
+
+.tabs {
+  padding-inline: $spacing-05;
+  border-block-end: 1px solid $border-subtle-01;
+}
+
+.tabDot {
+  display: inline-block;
+  block-size: $spacing-03;
+  inline-size: $spacing-03;
+  border-radius: 50%;
+  margin-inline-start: $spacing-03;
+  background: $support-error;
+  vertical-align: middle;
+}
+
+.tabPanel.tabPanel {
+  padding: $spacing-03 $spacing-05 $spacing-06;
+}
+
+.day + .day {
+  margin-block-start: $spacing-05;
+}
+
+.dayTitle {
+  @include type-style('label-01');
+
+  padding-block: $spacing-04 $spacing-03;
+  color: $text-secondary;
+  text-transform: uppercase;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  padding-block: $spacing-04;
+  border-block-end: 1px solid $border-subtle-01;
+  gap: $spacing-05;
+
+  &:last-child {
+    border-block-end: 0;
+  }
+}
+
+.when {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  inline-size: 3.5rem;
+}
+
+.whenTime {
+  @include type-style('heading-compact-01');
+}
+
+.whenLength {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.stripe {
+  flex: none;
+  align-self: stretch;
+  inline-size: $spacing-02;
+}
+
+.faces {
+  display: none;
+  flex: none;
+
+  > * + * {
+    margin-inline-start: calc(-1 * #{$spacing-03});
+  }
+
+  @include breakpoint(md) {
+    display: flex;
+  }
+}
+
+.rowMain {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  color: $text-primary;
+  gap: $spacing-01;
+  min-inline-size: 0;
+  text-decoration: none;
+
+  &:hover .rowTitle {
+    color: $link-primary;
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+}
+
+.rowTitle {
+  @include type-style('heading-compact-01');
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowEnd {
+  display: none;
+  flex: none;
+  align-items: center;
+  gap: $spacing-03;
+
+  @include breakpoint(md) {
+    display: flex;
+  }
+}
+
+.rowArrow {
+  color: $icon-secondary;
+}
+
+// The recording's tile, as in Fathom: two faces on the project's tint, its length on top.
+.thumb {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  block-size: 4rem;
+  inline-size: 6.5rem;
+
+  > .avatar + .avatar {
+    margin-inline-start: calc(-1 * #{$spacing-03});
+  }
+}
+
+.thumbFrame {
+  object-fit: cover;
+}
+
+.thumbLength {
+  @include type-style('label-01');
+
+  position: absolute;
+  z-index: 1;
+  padding: 0 $spacing-02;
+  background: $background-inverse;
+  color: $text-inverse;
+  inset-block-end: $spacing-02;
+  inset-inline-end: $spacing-02;
+}
+
+// ——— The live card ———————————————————————————————————————————————————————————————
+.live {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: $spacing-05;
+  border: 1px solid $border-subtle-01;
+  gap: $spacing-05;
+}
+
+.liveFaces {
+  display: flex;
+  flex: none;
+
+  > * + * {
+    margin-inline-start: calc(-1 * #{$spacing-04});
+  }
+}
+
+.liveText {
+  flex: 1;
+  min-inline-size: 14rem;
+}
+
+.liveBadge {
+  @include type-style('label-01');
+
+  display: flex;
+  align-items: center;
+  color: $text-error;
+  gap: $spacing-03;
+  text-transform: uppercase;
+}
+
+.liveDot {
+  display: inline-block;
+  flex: none;
+  block-size: $spacing-03;
+  inline-size: $spacing-03;
+  border-radius: 50%;
+  animation: pulse $duration-slow-02 motion(standard, expressive) infinite alternate;
+  background: $support-error;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes pulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.3;
+  }
+}
+
+.liveTitle {
+  @include type-style('heading-03');
+
+  margin-block: $spacing-02;
+}
+
+.liveActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+// ——— The review ——————————————————————————————————————————————————————————————————
+.reviewHead {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.back {
+  @include type-style('body-compact-01');
+
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  color: $link-primary;
+  gap: $spacing-02;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+  }
+}
+
+.reviewTitleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: $spacing-04;
+}
+
+.reviewTitle {
+  @include type-style('heading-04');
+}
+
+.reviewTitleRow .meta {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-block-start: $spacing-02;
+  gap: $spacing-01 $spacing-05;
+}
+
+.metaProject {
+  display: inline-flex;
+  align-items: center;
+}
+
+.dot {
+  display: inline-block;
+  block-size: $spacing-03;
+  inline-size: $spacing-03;
+  border-radius: 50%;
+  margin-inline-end: $spacing-02;
+}
+
+.reviewActions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-04;
+}
+
+// Fathom's order: the video first, then what it said.
+.reviewStack {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+  max-inline-size: 64rem;
+}
+
+// ——— The player: a dark stage (Carbon's g100 zone, so its tokens turn dark) ——————————
+.player {
+  overflow: hidden;
+  background: $background;
+  color: $text-primary;
+}
+
+.screen {
+  position: relative;
+  display: grid;
+
+  // Squarer on a phone, so the speaker isn't a sliver; widescreen from tablet up.
+  aspect-ratio: 4 / 3;
+  padding: $spacing-03;
+  gap: $spacing-03;
+  grid-template-columns: minmax(0, 1fr);
+
+  @include breakpoint(md) {
+    aspect-ratio: 16 / 9;
+    grid-template-columns: minmax(0, 1fr) 11rem;
+  }
+}
+
+// Whoever is talking, large, as a meeting app's speaker view; the controls sit over its foot.
+.mainTile {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  background: $layer-01;
+
+  .avatar {
+    border: 0;
+  }
+}
+
+// A camera fills its tile, as a meeting app crops a feed.
+.camera {
+  position: absolute;
+  display: block;
+  block-size: 100%;
+  inline-size: 100%;
+  inset: 0;
+  object-fit: cover;
+}
+
+// The new speaker's camera cuts in with a short fade, as a meeting app switches feeds.
+.mainTile .camera {
+  animation: speaker-in $duration-moderate-02 motion(entrance, productive);
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes speaker-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.avatar96 {
+  @include type-style('heading-05');
+
+  block-size: $spacing-12;
+  inline-size: $spacing-12;
+
+  @include breakpoint(md) {
+    block-size: $spacing-13;
+    inline-size: $spacing-13;
+  }
+}
+
+// The others on the call: a strip on the right; on a phone, small tiles over the top corner.
+.strip {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  inset-block-start: $spacing-05;
+  inset-inline-end: $spacing-05;
+
+  @include breakpoint(md) {
+    position: static;
+    padding-block-end: $spacing-10;
+    gap: $spacing-03;
+  }
+}
+
+// On a phone the strip's small tiles keep a camera's shape.
+.stripTile {
+  aspect-ratio: 4 / 3;
+  inline-size: $spacing-12;
+
+  @include breakpoint(md) {
+    aspect-ratio: auto;
+    inline-size: auto;
+  }
+}
+
+.stripTile {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-03;
+  background: $layer-02;
+
+  @include breakpoint(md) {
+    flex: 1;
+    padding: $spacing-05;
+  }
+
+  .nameTag {
+    display: none;
+
+    @include breakpoint(md) {
+      display: inline-flex;
+    }
+  }
+
+  .avatar {
+    border: 0;
+  }
+}
+
+.nameTag {
+  @include type-style('label-01');
+
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  padding: $spacing-01 $spacing-03;
+  background: $background;
+  gap: $spacing-03;
+  inset-block-end: $spacing-11;
+  inset-inline-start: $spacing-03;
+  max-inline-size: calc(100% - #{$spacing-05});
+}
+
+.nameTagCompact {
+  inset-block-end: $spacing-02;
+  inset-inline-start: $spacing-02;
+}
+
+.nameTagName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nameTagRole {
+  color: $text-secondary;
+}
+
+.stageLive {
+  @include type-style('label-01');
+
+  position: absolute;
+  display: flex;
+  align-items: center;
+  padding: $spacing-02 $spacing-03;
+  background: $background;
+  color: $text-error;
+  gap: $spacing-02;
+  inset-block-start: $spacing-05;
+  inset-inline-start: $spacing-05;
+  text-transform: uppercase;
+}
+
+// The controls, over the foot of the stage.
+.controls {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  padding: $spacing-03 $spacing-04 $spacing-03 $spacing-03;
+  background: $background;
+  gap: $spacing-03;
+  inset-block-end: 0;
+  inset-inline: 0;
+
+  @include breakpoint(md) {
+    gap: $spacing-04;
+  }
+}
+
+.time {
+  @include type-style('code-01');
+
+  flex: none;
+  color: $text-secondary;
+}
+
+.liveClock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  padding: $spacing-03;
+  gap: $spacing-02 $spacing-04;
+}
+
+.liveClockNote {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+// The scrubber: who was talking, in their colours; the played part brighter; moments above.
+.track {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  block-size: $spacing-07;
+}
+
+.segments {
+  position: absolute;
+  overflow: hidden;
+  block-size: $spacing-03;
+  background: $layer-02;
+  inset-inline: 0;
+}
+
+.segment {
+  position: absolute;
+  block-size: 100%;
+  border-inline-end: 1px solid $background;
+}
+
+// What's still to play sits under a veil, so the played part reads in full colour.
+.unplayed {
+  position: absolute;
+  block-size: 100%;
+  background: $background;
+  inset-inline-end: 0;
+  opacity: 0.6;
+}
+
+.range {
+  position: relative;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  inline-size: 100%;
+
+  &::-webkit-slider-runnable-track {
+    block-size: $spacing-07;
+    background: transparent;
+  }
+
+  &::-webkit-slider-thumb {
+    block-size: $spacing-04;
+    inline-size: $spacing-04;
+    border-radius: 50%;
+    margin-block-start: $spacing-03;
+    appearance: none;
+    background: $text-primary;
+  }
+
+  &::-moz-range-thumb {
+    block-size: $spacing-04;
+    inline-size: $spacing-04;
+    border: 0;
+    border-radius: 50%;
+    background: $text-primary;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+}
+
+.marker {
+  position: absolute;
+  block-size: $spacing-03;
+  inline-size: $spacing-01;
+  background: $support-warning;
+  inset-block-start: $spacing-01;
+  pointer-events: none;
+}
+
+.speed {
+  @include type-style('label-02');
+
+  flex: none;
+  padding: $spacing-02 $spacing-03;
+  border: 1px solid $border-subtle-01;
+  background: none;
+  color: $text-primary;
+  cursor: pointer;
+  min-inline-size: $spacing-08;
+
+  &:hover {
+    background: $layer-hover-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+  }
+}
+
+// Each person's colour (scrubber, talk time). Carbon's tag palette, so it holds in both zones.
+/* stylelint-disable carbon/theme-use -- Carbon tag palette tokens, theme-aware */
+.speakerClient {
+  background: var(--cds-tag-color-teal);
+}
+
+.speakerExpert {
+  background: var(--cds-tag-color-purple);
+}
+
+.speakerPm {
+  background: var(--cds-tag-color-gray);
+}
+/* stylelint-enable carbon/theme-use */
+
+.talkTime {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03 $spacing-06;
+}
+
+.talker {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.swatch {
+  display: inline-block;
+  block-size: $spacing-03;
+  inline-size: $spacing-05;
+}
+
+.talkerShare {
+  color: $text-secondary;
+}
+
+// Key moments, in the summary.
+.moments {
+  display: flex;
+  flex-direction: column;
+}
+
+.moment {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  align-items: baseline;
+  padding: $spacing-03;
+  border: 0;
+  margin-inline: calc(-1 * #{$spacing-03});
+  background: none;
+  color: $text-primary;
+  cursor: pointer;
+  gap: $spacing-04;
+  inline-size: calc(100% + #{$spacing-05});
+  text-align: start;
+
+  &:hover:not(:disabled) {
+    background: $layer-hover-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: -2px;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.momentHere {
+  background: $highlight;
+}
+
+.momentAt {
+  @include type-style('code-01');
+
+  flex: none;
+  color: $link-primary;
+  inline-size: 3rem;
+}
+
+// The summary reads like Fathom's: a bar with the AI note and Copy, then headed sections.
+.summaryBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding-block-end: $spacing-05;
+  border-block-end: 1px solid $border-subtle-01;
+  gap: $spacing-04;
+}
+
+.summaryHeading {
+  @include type-style('heading-03');
+
+  margin-block-end: $spacing-04;
+}
+
+// The notes: Summary, Transcript, Follow-ups.
+.notes {
+  border: 1px solid $border-subtle-01;
+  background: $background;
+}
+
+.tabCount {
+  @include type-style('label-01');
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: $spacing-02;
+  margin-inline-start: $spacing-03;
+  background: $support-error;
+  color: $text-on-color;
+  min-inline-size: $spacing-05;
+}
+
+.notesPanel.notesPanel {
+  padding: $spacing-05 $spacing-05 $spacing-07;
+
+  @include breakpoint(md) {
+    padding-inline: $spacing-07;
+  }
+}
+
+.summary,
+.followUps {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+.aiLine {
+  @include type-style('helper-text-01');
+
+  display: flex;
+  align-items: center;
+  color: $text-secondary;
+  gap: $spacing-03;
+}
+
+.bullets {
+  @include type-style('body-01');
+
+  display: flex;
+  flex-direction: column;
+  padding-inline-start: $spacing-05;
+  gap: $spacing-03;
+  list-style: disc;
+}
+
+.checks {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+
+  li {
+    @include type-style('body-01');
+
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-03;
+  }
+
+  svg {
+    flex: none;
+    margin-block-start: $spacing-01;
+  }
+}
+
+.checkDone svg {
+  fill: $support-success;
+}
+
+.checkOpen {
+  color: $text-secondary;
+
+  svg {
+    fill: $icon-secondary;
+  }
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-01;
+}
+
+.stepMeta {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+  padding-inline-start: $spacing-07;
+}
+
+.timeLink {
+  @include type-style('code-01');
+
+  padding: 0;
+  border: 0;
+  background: none;
+  color: $link-primary;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+  }
+}
+
+// Transcript lines.
+.transcript {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+}
+
+.lines {
+  display: flex;
+  overflow-y: auto;
+  flex-direction: column;
+
+  // On a wide screen the transcript scrolls in its own box; a phone just scrolls the page.
+  @include breakpoint(md) {
+    max-block-size: 34rem;
+    overscroll-behavior: contain;
+  }
+}
+
+.line {
+  display: flex;
+  align-items: flex-start;
+  padding: $spacing-03;
+  gap: $spacing-04;
+  transition: background-color $duration-fast-02 motion(standard, productive);
+}
+
+.lineActive {
+  background: $highlight;
+}
+
+// Live: the line just spoken arrives softly and stays marked until the next one.
+.lineNew {
+  animation: line-in $duration-moderate-02 motion(entrance, productive);
+  background: $highlight;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes line-in {
+  from {
+    opacity: 0;
+    transform: translateY($spacing-03);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.lineTime {
+  @include type-style('code-01');
+
+  color: $text-secondary;
+}
+
+.lineNow {
+  @include type-style('label-01');
+
+  color: $text-error;
+}
+
+.liveTranscript {
+  @include type-style('heading-compact-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.liveTranscriptNote {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+// The listening row: three bars rising and falling, as a live caption tool shows it.
+.listening {
+  @include type-style('helper-text-01');
+
+  display: flex;
+  align-items: center;
+  padding-inline: $spacing-03;
+  color: $text-secondary;
+  gap: $spacing-04;
+}
+
+.bars {
+  display: inline-flex;
+  align-items: flex-end;
+  block-size: $spacing-05;
+  gap: $spacing-01;
+  inline-size: $spacing-06;
+  justify-content: center;
+
+  span {
+    block-size: 100%;
+    animation: bar $duration-slow-01 motion(standard, expressive) infinite alternate;
+    background: $interactive;
+    inline-size: $spacing-01;
+    transform-origin: bottom;
+  }
+
+  span:nth-child(2) {
+    animation-delay: $duration-fast-02;
+  }
+
+  span:nth-child(3) {
+    animation-delay: $duration-moderate-02;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    span {
+      animation: none;
+      transform: scaleY(0.5);
+    }
+  }
+}
+
+@keyframes bar {
+  from {
+    transform: scaleY(0.25);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.lineHead {
+  display: flex;
+  align-items: baseline;
+  margin-block-end: $spacing-01;
+  gap: $spacing-03;
+}
+
+.lineName {
+  @include type-style('heading-compact-01');
+}
+
+// Follow-ups.
+.requests {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+}
+
+.request {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-04;
+}
+
+.requestIcon {
+  flex: none;
+  margin-block-start: $spacing-01;
+  fill: $icon-secondary;
+}
+
+.requestKind {
+  @include type-style('label-01');
+
+  margin-block-end: $spacing-01;
+  color: $text-secondary;
+}
+
+.mail {
+  border: 1px solid $border-subtle-01;
+}
+
+.mailRow {
+  display: flex;
+  align-items: center;
+  padding: $spacing-03 $spacing-05;
+  border-block-end: 1px solid $border-subtle-01;
+  gap: $spacing-04;
+}
+
+.mailLabel {
+  @include type-style('body-compact-01');
+
+  flex: none;
+  color: $text-secondary;
+  inline-size: 3.5rem;
+}
+
+// Gmail's recipient chip: a face and a name in a soft pill.
+.recipient {
+  display: inline-flex;
+  align-items: center;
+  padding: $spacing-01 $spacing-04 $spacing-01 $spacing-01;
+  border-radius: $spacing-05;
+  background: $layer-02;
+  gap: $spacing-03;
+
+  .avatar {
+    border: 0;
+  }
+}
+
+.personName {
+  @include type-style('heading-compact-01');
+
+  display: block;
+}
+
+.mailSubject {
+  @include type-style('heading-compact-01');
+}
+
+.mailBody {
+  @include type-style('body-01');
+
+  padding: $spacing-05;
+  white-space: pre-wrap;
+}
+
+.sendRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-block-start: $spacing-04;
+}
+
+.sentLine {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  align-items: center;
+  margin-block-start: $spacing-04;
+  color: $text-primary;
+  gap: $spacing-03;
+
+  svg {
+    fill: $support-success;
+  }
+}
+
+// Before the call.
+.upcoming {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-06;
+  border: 1px solid $border-subtle-01;
+  background: $background;
+  gap: $spacing-05;
+  max-inline-size: 48rem;
+}
+
+.people {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-07;
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: $spacing-04;
+}
+
+.upcomingNote {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+.questionList {
+  @include type-style('body-01');
+
+  display: flex;
+  flex-direction: column;
+  padding-inline-start: $spacing-05;
+  gap: $spacing-03;
+  list-style: decimal;
+}
+
+// ——— The call report: a document, on its own sheet ————————————————————————————————
+.reportWrap {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+}
+
+.reportBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+}
+
+.reportActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+.reportPending {
+  display: flex;
+  flex-direction: column;
+  padding-block: $spacing-07;
+  gap: $spacing-03;
+}
+
+.reportPendingTitle {
+  @include type-style('heading-compact-02');
+}
+
+// The sheet sits on a grey desk, so it reads as a page and not another panel.
+.report {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-06 $spacing-05;
+  border: 1px solid $border-subtle-01;
+  background: $background;
+  box-shadow: 0 $spacing-01 $spacing-03 $overlay;
+
+  @include breakpoint(md) {
+    padding: $spacing-08 $spacing-09;
+  }
+}
+
+.reportWrap:has(.report) {
+  padding: $spacing-04;
+  margin: calc(-1 * #{$spacing-05});
+  background: $layer-01;
+
+  @include breakpoint(md) {
+    padding: $spacing-06;
+    margin: calc(-1 * #{$spacing-05}) calc(-1 * #{$spacing-07});
+  }
+}
+
+.letterhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding-block-end: $spacing-04;
+  border-block-end: 2px solid $border-strong-01;
+  gap: $spacing-03;
+  margin-block-end: $spacing-07;
+}
+
+.brand {
+  @include type-style('heading-compact-01');
+
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.reportRef {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.reportTitle {
+  @include type-style('heading-05');
+}
+
+.reportSubtitle {
+  @include type-style('body-02');
+
+  margin-block-start: $spacing-03;
+  color: $text-secondary;
+}
+
+// The call's facts, in a ruled grid.
+.reportFacts {
+  display: grid;
+  padding-block: $spacing-05;
+  border-block: 1px solid $border-subtle-01;
+  gap: $spacing-05 $spacing-06;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-block-start: $spacing-07;
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  dt {
+    @include type-style('label-01');
+
+    color: $text-secondary;
+  }
+
+  dd {
+    @include type-style('body-compact-01');
+
+    margin-block-start: $spacing-02;
+  }
+}
+
+.reportSection {
+  margin-block-start: $spacing-08;
+}
+
+.reportHeading {
+  @include type-style('heading-03');
+
+  padding-block-end: $spacing-03;
+  border-block-end: 1px solid $border-subtle-01;
+  margin-block-end: $spacing-05;
+}
+
+.reportLead {
+  @include type-style('body-02');
+
+  margin-block-end: $spacing-05;
+}
+
+.reportBullets {
+  @include type-style('body-01');
+
+  display: flex;
+  flex-direction: column;
+  padding-inline-start: $spacing-05;
+  gap: $spacing-03;
+  list-style: disc;
+}
+
+// Question and answer: the number in the margin, the question, what the expert said.
+.qa {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+.qaItem {
+  display: grid;
+  gap: $spacing-04;
+  grid-template-columns: $spacing-07 minmax(0, 1fr);
+}
+
+.qaNumber {
+  @include type-style('code-02');
+
+  color: $link-primary;
+}
+
+.qaOpen .qaNumber {
+  color: $text-secondary;
+}
+
+.qaBody {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+}
+
+.qaQuestion {
+  @include type-style('heading-compact-02');
+}
+
+.qaAnswer {
+  @include type-style('body-01');
+}
+
+.qaMissing {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+// A timestamp that plays the recording from there.
+.source {
+  @include type-style('code-01');
+
+  padding: 0 $spacing-02;
+  border: 0;
+  background: $highlight;
+  color: $link-primary;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+  }
+}
+
+.reportSection .requests {
+  margin-block-end: $spacing-06;
+}
+
+.stepsTable {
+  @include type-style('body-compact-01');
+
+  border-collapse: collapse;
+  inline-size: 100%;
+
+  th {
+    @include type-style('label-01');
+
+    padding: $spacing-03 $spacing-04 $spacing-03 0;
+    border-block-end: 1px solid $border-strong-01;
+    color: $text-secondary;
+    text-align: start;
+  }
+
+  td {
+    padding: $spacing-04 $spacing-04 $spacing-04 0;
+    border-block-end: 1px solid $border-subtle-01;
+    vertical-align: top;
+  }
+}
+
+.stepOwner {
+  white-space: nowrap;
+}
+
+.reportFooter {
+  @include type-style('helper-text-01');
+
+  padding-block-start: $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
+  color: $text-secondary;
+  margin-block-start: $spacing-09;
+}
+
+// Download PDF prints the report alone (globals.scss hides the rest via data-print-root).
+@media print {
+  .report {
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .source {
+    background: none;
+  }
+}

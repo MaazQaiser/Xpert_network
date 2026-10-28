@@ -96,6 +96,8 @@ export type DemoState = {
   adminBooking: Record<string, Booking>;
   /** Screen 14: the live call workspace, per project. */
   adminCall: Record<string, CallSession>;
+  /** Calls page: when each call's follow-ups went out. */
+  adminCallFollowUps: Record<string, string>;
   adminAvailability: Record<
     string,
     { expertIds: string[]; askedAt: string; sentToClientAt: string | null }
@@ -177,6 +179,7 @@ function seed(): DemoState {
     adminClientDraft: {},
     adminBooking: {},
     adminCall: {},
+    adminCallFollowUps: {},
   };
   withCustomReports(state, customReports);
   return state;

@@ -18,6 +18,8 @@ import { clientDraftSchema, type ClientDraftInput } from '../model/clientDraft.s
 import { bookingSchema, type BookingAction } from '../model/booking.schema';
 import { callSessionSchema, type CallAction } from '../model/call.schema';
 import { scheduleSchema } from '../model/schedule.schema';
+import { callDetailSchema, callRecordSchema } from '../model/calls.schema';
+import { networkExpertSchema } from '../model/network.schema';
 import {
   inboxRequestSchema,
   mailAccountSchema,
@@ -62,6 +64,8 @@ export const adminKeys = {
     [...adminKeys.all, 'project', id, 'availability', experts] as const,
   shortlist: (id: string) => [...adminKeys.all, 'project', id, 'shortlist'] as const,
   schedule: () => [...adminKeys.all, 'schedule'] as const,
+  calls: () => [...adminKeys.all, 'calls'] as const,
+  callRecord: (id: string) => [...adminKeys.all, 'calls', id] as const,
 };
 
 export function useHomeSummary() {
@@ -399,5 +403,68 @@ export function useSchedule() {
   return useQuery({
     queryKey: adminKeys.schedule(),
     queryFn: ({ signal }) => apiRequest('/admin/schedule', { schema: scheduleSchema, signal }),
+  });
+}
+
+/** Calls: every booked call, upcoming, live and completed. */
+export function useCalls() {
+  return useQuery({
+    queryKey: adminKeys.calls(),
+    queryFn: ({ signal }) =>
+      apiRequest('/admin/calls', { schema: z.array(callRecordSchema), signal }),
+    // A live call's progress (questions covered so far) keeps moving.
+    refetchInterval: (query) =>
+      query.state.data?.some((call) => call.status === 'live') ? 10_000 : false,
+  });
+}
+
+/** One call's full record: summary, transcript, follow-ups. */
+export function useCallRecord(id: string) {
+  return useQuery({
+    queryKey: adminKeys.callRecord(id),
+    queryFn: ({ signal }) => apiRequest(`/admin/calls/${id}`, { schema: callDetailSchema, signal }),
+    // While the call is live, keep pulling: new transcript lines, questions covered, requests.
+    refetchInterval: (query) => (query.state.data?.status === 'live' ? 3000 : false),
+  });
+}
+
+/** Sends a call's follow-up email to the client (email sandbox). */
+export function useSendCallFollowUps(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () =>
+      apiRequest(`/admin/calls/${id}/follow-ups`, { method: 'POST', schema: callDetailSchema }),
+    onSuccess: (call) => {
+      queryClient.setQueryData(adminKeys.callRecord(id), call);
+      void queryClient.invalidateQueries({ queryKey: adminKeys.calls() });
+      void queryClient.invalidateQueries({ queryKey: [...adminKeys.all, 'reports'] });
+    },
+  });
+}
+
+/** The Xpert Network database: every vetted expert (F20). */
+export function useNetworkExperts() {
+  return useQuery({
+    queryKey: [...adminKeys.all, 'network'] as const,
+    queryFn: ({ signal }) =>
+      apiRequest('/admin/experts', { schema: z.array(networkExpertSchema), signal }),
+  });
+}
+
+/** One expert in the network, with their projects and calls. */
+export function useNetworkExpert(id: string) {
+  return useQuery({
+    queryKey: [...adminKeys.all, 'network', id] as const,
+    queryFn: ({ signal }) =>
+      apiRequest(`/admin/experts/${id}`, { schema: networkExpertSchema, signal }),
+  });
+}
+
+/** The knowledge base: the report from every completed call, newest first. */
+export function useReports() {
+  return useQuery({
+    queryKey: [...adminKeys.all, 'reports'] as const,
+    queryFn: ({ signal }) =>
+      apiRequest('/admin/reports', { schema: z.array(callDetailSchema), signal }),
   });
 }

@@ -1,0 +1,577 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '@carbon/react/scss/motion' as *;
+
+// Experts (F20): the network directory and one expert's record. The frame matches Calls and
+// Scheduling: a soft grey edge to edge, the content on white panels.
+
+.root {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-05;
+  margin: calc(-1 * #{$spacing-07}) calc(-1 * #{$spacing-05});
+  background: $layer-01;
+  gap: $spacing-05;
+  min-block-size: calc(100vh - #{$spacing-09});
+
+  @include breakpoint(md) {
+    padding: $spacing-05 $spacing-06 $spacing-06;
+    margin-inline: calc(-1 * #{$spacing-07});
+  }
+}
+
+.panel {
+  padding: $spacing-05;
+  border: 1px solid $border-subtle-01;
+  background: $background;
+
+  @include breakpoint(md) {
+    padding: $spacing-06;
+  }
+}
+
+.muted {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+.count {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.arrow {
+  flex: none;
+  color: $icon-secondary;
+}
+
+// ——— The directory ——————————————————————————————————————————————————————————————
+.topBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: $spacing-04 $spacing-06;
+}
+
+.pageTitle {
+  @include type-style('heading-04');
+}
+
+.subtitle {
+  @include type-style('body-compact-01');
+
+  margin-block-start: $spacing-02;
+  color: $text-secondary;
+}
+
+// The page's main action, at the top right.
+.headerActions {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+
+.filters {
+  display: grid;
+  align-items: end;
+  gap: $spacing-04 $spacing-03;
+  grid-template-columns: minmax(0, 1fr);
+
+  // Tablet: search across the top, the three filters under it, the sort last.
+  @include breakpoint(md) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    .searchField {
+      grid-column: 1 / -1;
+    }
+  }
+
+  // Laptop: one row, search taking the room the filters leave.
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(0, 1fr) repeat(3, minmax(0, 11rem)) auto;
+
+    .searchField {
+      grid-column: auto;
+    }
+  }
+}
+
+// Search, first in the filter row, with a visible label like its neighbours.
+.searchField {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.searchLabel {
+  @include type-style('label-01');
+
+  margin-block-end: $spacing-03;
+  color: $text-secondary;
+}
+
+// A menu option: its name, and on the far right how many experts it holds.
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+  inline-size: 100%;
+}
+
+.optionCount {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.sort {
+  display: flex;
+  justify-content: flex-start;
+
+  @include breakpoint(md) {
+    justify-content: flex-end;
+  }
+}
+
+.filters + .count {
+  margin-block: $spacing-05 $spacing-03;
+}
+
+.clear {
+  @include type-style('body-compact-01');
+
+  padding: 0;
+  border: 0;
+  background: none;
+  color: $link-primary;
+  cursor: pointer;
+  text-decoration: underline;
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+  }
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.table {
+  @include type-style('body-compact-01');
+
+  border-collapse: collapse;
+  inline-size: 100%;
+
+  thead th {
+    @include type-style('heading-compact-01');
+
+    padding: $spacing-04;
+    border-block-end: 1px solid $border-strong-01;
+    text-align: start;
+    white-space: nowrap;
+  }
+
+  tbody td,
+  tbody th {
+    padding: $spacing-04;
+    border-block-end: 1px solid $border-subtle-01;
+    text-align: start;
+    vertical-align: middle;
+  }
+
+  tbody th {
+    @include font-weight('regular');
+  }
+}
+
+// The columns a phone drops (the expert and their country stay); a laptop shows them all.
+.wide {
+  display: none;
+
+  @include breakpoint(md) {
+    display: table-cell;
+  }
+}
+
+.wider {
+  display: none;
+
+  @include breakpoint(lg) {
+    display: table-cell;
+  }
+}
+
+.row {
+  cursor: pointer;
+  transition: background-color $duration-fast-02 motion(standard, productive);
+
+  &:hover {
+    background: $layer-hover-01;
+  }
+
+  &:hover .arrow {
+    color: $icon-primary;
+  }
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: $spacing-04;
+  min-inline-size: 14rem;
+}
+
+.whoText {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-01;
+  min-inline-size: 0;
+}
+
+.name {
+  @include type-style('heading-compact-01');
+
+  color: $text-primary;
+  text-decoration: none;
+
+  &:hover {
+    color: $link-primary;
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+}
+
+.headline {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.rate {
+  @include font-weight('semibold');
+
+  white-space: nowrap;
+}
+
+.arrowCol {
+  inline-size: $spacing-07;
+}
+
+.noMatch {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-block: $spacing-07;
+  gap: $spacing-03;
+}
+
+.noMatchTitle {
+  @include type-style('heading-compact-02');
+}
+
+.pagination {
+  margin-block-start: $spacing-05;
+}
+
+// ——— One expert ————————————————————————————————————————————————————————————————
+.back {
+  @include type-style('body-compact-01');
+
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  color: $link-primary;
+  gap: $spacing-02;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+  }
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+}
+
+.identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: $spacing-05;
+}
+
+// The portrait at one size on every screen (the call stage's large size grows on wide ones).
+.heroAvatar.heroAvatar {
+  block-size: $spacing-12;
+  inline-size: $spacing-12;
+}
+
+.joined {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.identityText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $spacing-02;
+  min-inline-size: 16rem;
+}
+
+.nameRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03 $spacing-04;
+}
+
+.heroName {
+  @include type-style('heading-04');
+}
+
+.heroHeadline {
+  @include type-style('body-02');
+}
+
+.heroMeta {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-block-start: $spacing-02;
+  color: $text-secondary;
+  gap: $spacing-02 $spacing-03;
+}
+
+// The LinkedIn button: the logo sits beside the words, not at the far edge.
+.linkedin.linkedin {
+  gap: $spacing-03;
+  padding-inline-end: $spacing-05;
+  max-inline-size: none;
+  white-space: nowrap;
+}
+
+// The numbers, side by side, divided by hairlines.
+.stats {
+  display: grid;
+  border-block-start: 1px solid $border-subtle-01;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-block-start: $spacing-05;
+  row-gap: $spacing-05;
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-02;
+    padding-inline-end: $spacing-05;
+  }
+
+  @include breakpoint(md) {
+    > div + div {
+      padding-inline-start: $spacing-05;
+      border-inline-start: 1px solid $border-subtle-01;
+    }
+  }
+
+  dt {
+    @include type-style('label-01');
+
+    color: $text-secondary;
+  }
+
+  dd {
+    @include type-style('heading-compact-02');
+  }
+}
+
+.statStrong.statStrong {
+  @include font-weight('semibold');
+}
+
+.columns {
+  display: grid;
+  align-items: stretch;
+  gap: $spacing-05;
+
+  @include breakpoint(lg) {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  }
+}
+
+// Calls sit under Experience, in the left column.
+.callsPanel {
+  @include breakpoint(lg) {
+    grid-column: 1;
+  }
+}
+
+.sectionTitle {
+  @include type-style('heading-03');
+
+  display: flex;
+  align-items: baseline;
+  margin-block-end: $spacing-05;
+  gap: $spacing-03;
+}
+
+.bullets {
+  @include type-style('body-01');
+
+  display: flex;
+  flex-direction: column;
+  padding-inline-start: $spacing-05;
+  gap: $spacing-03;
+  list-style: disc;
+}
+
+// Career, as on LinkedIn: a dot per role, joined by a line to the next.
+.history {
+  display: flex;
+  flex-direction: column;
+}
+
+.job {
+  display: flex;
+  align-items: stretch;
+  gap: $spacing-05;
+}
+
+.jobRail {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  padding-block-start: $spacing-01;
+}
+
+.jobDot {
+  flex: none;
+  border: 2px solid $interactive;
+  border-radius: 50%;
+  background: $background;
+  block-size: $spacing-04;
+  inline-size: $spacing-04;
+}
+
+.job:first-child .jobDot {
+  background: $interactive;
+}
+
+.jobLine {
+  flex: 1;
+  background: $border-strong-01;
+  inline-size: 2px;
+  margin-block-start: $spacing-02;
+}
+
+.job:last-child .jobLine {
+  display: none;
+}
+
+.jobText {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-01;
+  min-inline-size: 0;
+}
+
+.job:not(:last-child) .jobText {
+  padding-block-end: $spacing-06;
+}
+
+.jobTitle {
+  @include type-style('heading-compact-01');
+}
+
+.jobOrg {
+  @include type-style('body-compact-01');
+}
+
+.jobMeta {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+// Projects and calls: each a row that opens it.
+.linkList {
+  display: flex;
+  flex-direction: column;
+  margin-inline: calc(-1 * #{$spacing-03});
+}
+
+.linkRow {
+  display: flex;
+  align-items: center;
+  padding: $spacing-04 $spacing-03;
+  border-block-end: 1px solid $border-subtle-01;
+  color: $text-primary;
+  gap: $spacing-04;
+  text-decoration: none;
+  transition: background-color $duration-fast-02 motion(standard, productive);
+
+  &:hover {
+    background: $layer-hover-01;
+  }
+
+  &:hover .linkTitle {
+    color: $link-primary;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: -2px;
+  }
+}
+
+.linkList li:last-child .linkRow {
+  border-block-end: 0;
+}
+
+.linkMain {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $spacing-01;
+  min-inline-size: 0;
+}
+
+.linkTitle {
+  @include type-style('heading-compact-01');
+}
+
+.linkMeta {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.match {
+  @include type-style('label-01');
+
+  flex: none;
+  color: $text-secondary;
+}

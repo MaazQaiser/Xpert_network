@@ -1,4 +1,5 @@
 import {
+  Book,
   Bullhorn,
   Calendar,
   Catalog,
@@ -45,5 +46,6 @@ export const NAVIGATION: Record<Role, NavItem[]> = {
     { href: routes.admin.outreach, label: 'Outreach', icon: Bullhorn },
     { href: routes.admin.scheduling, label: 'Scheduling', icon: Calendar },
     { href: routes.admin.calls, label: 'Calls', icon: Phone },
+    { href: routes.admin.knowledge, label: 'Knowledge base', icon: Book },
   ],
 };
