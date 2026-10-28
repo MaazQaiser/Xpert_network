@@ -7,7 +7,7 @@ import { renderWithProviders } from '@/test/render';
 import { Scheduling } from './Scheduling';
 
 describe('Scheduling (F15)', () => {
-  it('shows this week’s calls and opens one with its Google Meet link', async () => {
+  it('shows this week’s calls and opens one with Join into our meeting room', async () => {
     const { container } = renderWithProviders(<Scheduling />, { persona: 'ops' });
     expect(
       await screen.findByText(/8 booked calls and 3 held slots this week/),
@@ -18,9 +18,8 @@ describe('Scheduling (F15)', () => {
     const [call] = screen.getAllByRole('button', { name: /^Booked call: / });
     await userEvent.click(call!);
     const preview = await screen.findByRole('dialog', { name: /^Expert call: / });
-    const join = within(preview).getByRole('link', { name: /Join with Google Meet/ });
-    expect(join).toHaveAttribute('href', expect.stringMatching(/^https:\/\/meet\.google\.com\//));
-    expect(join).toHaveAttribute('target', '_blank');
+    const join = within(preview).getByRole('link', { name: 'Join call' });
+    expect(join).toHaveAttribute('href', expect.stringMatching(/^\/admin\/calls\/.+\/room$/));
     expect(within(preview).getByText('2 guests')).toBeInTheDocument();
     await userEvent.keyboard('{Escape}');
     expect(screen.queryByRole('dialog')).toBeNull();
@@ -29,7 +28,7 @@ describe('Scheduling (F15)', () => {
     const [held] = screen.getAllByRole('button', { name: /^Held slot: / });
     await userEvent.click(held!);
     const heldPreview = await screen.findByRole('dialog', { name: /^Held slot: / });
-    expect(within(heldPreview).queryByRole('link', { name: /Join with Google Meet/ })).toBeNull();
+    expect(within(heldPreview).queryByRole('link', { name: 'Join call' })).toBeNull();
     expect(within(heldPreview).getByText(/Awaiting .*’s pick/)).toBeInTheDocument();
   });
 

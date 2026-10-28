@@ -21,9 +21,9 @@ describe('Calls (F16)', () => {
   it('shows the live call on top, then upcoming and completed calls', async () => {
     const { container } = renderWithProviders(<Calls />, { persona: 'ops' });
     const live = await screen.findByRole('article', { name: /^Live now: / });
-    expect(within(live).getByRole('link', { name: /Join with Google Meet/ })).toHaveAttribute(
+    expect(within(live).getByRole('link', { name: 'Join call' })).toHaveAttribute(
       'href',
-      expect.stringMatching(/^https:\/\/meet\.google\.com\//),
+      '/admin/calls/mtg_live/room',
     );
     expect(within(live).getByRole('link', { name: 'Follow live notes' })).toBeInTheDocument();
     await expectNoAxeViolations(container);
@@ -32,9 +32,7 @@ describe('Calls (F16)', () => {
     await userEvent.click(screen.getByRole('tab', { name: /^Completed/ }));
     expect(screen.getAllByText('Report to send').length).toBeGreaterThan(0);
     await userEvent.click(screen.getByRole('tab', { name: /^Upcoming/ }));
-    expect(
-      screen.getAllByRole('link', { name: /^Join .* with Google Meet/ }).length,
-    ).toBeGreaterThan(0);
+    expect(screen.getAllByRole('link', { name: /^Join .+ × / }).length).toBeGreaterThan(0);
 
     // Search narrows the list.
     await userEvent.type(screen.getByRole('searchbox', { name: 'Search calls' }), 'zzz');

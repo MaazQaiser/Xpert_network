@@ -63,6 +63,7 @@ export const routes = {
     scheduling: '/admin/scheduling',
     calls: '/admin/calls',
     callReview: (callId: string) => `/admin/calls/${callId}`,
+    callRoom: (callId: string) => `/admin/calls/${callId}/room`,
     knowledge: '/admin/knowledge',
     report: (callId: string) => `/admin/knowledge/${callId}`,
   },

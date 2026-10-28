@@ -25,6 +25,7 @@ export { Inbox } from './components/Inbox/Inbox';
 export { Scheduling } from './components/Scheduling/Scheduling';
 export { Calls } from './components/Calls/Calls';
 export { CallReview } from './components/Calls/CallReview';
+export { MeetingRoom } from './components/MeetingRoom/MeetingRoom';
 export { Experts } from './components/Experts/Experts';
 export { KnowledgeBase } from './components/Knowledge/KnowledgeBase';
 export { ReportReader } from './components/Knowledge/ReportReader';

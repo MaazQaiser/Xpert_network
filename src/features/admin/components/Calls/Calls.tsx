@@ -198,8 +198,8 @@ function LiveCard({ call, now }: { call: CallRecord; now: Date }) {
         </p>
       </div>
       <div className={styles.liveActions}>
-        <Button size="md" href={call.meetUrl} target="_blank" rel="noreferrer" renderIcon={Video}>
-          Join with Google Meet
+        <Button as={Link} size="md" href={routes.admin.callRoom(call.id)} renderIcon={Video}>
+          Join call
         </Button>
         <Button
           as={Link}
@@ -244,13 +244,12 @@ function UpcomingRow({ call }: { call: CallRecord }) {
           </Tag>
         )}
         <Button
+          as={Link}
           kind="ghost"
           size="sm"
-          href={call.meetUrl}
-          target="_blank"
-          rel="noreferrer"
+          href={routes.admin.callRoom(call.id)}
           renderIcon={Video}
-          aria-label={`Join ${title(call)} with Google Meet`}
+          aria-label={`Join ${title(call)}`}
         >
           Join
         </Button>

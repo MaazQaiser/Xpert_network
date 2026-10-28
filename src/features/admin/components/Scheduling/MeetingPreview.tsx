@@ -34,7 +34,7 @@ function Avatar({ person }: { person: SchedulePerson }) {
 
 /**
  * A meeting's details in a small card beside it, like Google Calendar's: when, which project,
- * the Google Meet link with Join and Copy, and who's on the call. Esc, Close or a click
+ * Join (our meeting room) with Copy, and who's on the call. Esc, Close or a click
  * outside put it away and focus returns to the meeting.
  */
 export function MeetingPreview({
@@ -165,23 +165,26 @@ export function MeetingPreview({
         <div className={styles.previewRow}>
           <Video className={styles.previewIcon} aria-hidden={true} />
           <div className={styles.meet}>
+            {/* Our own meeting room, not Google Meet: the call opens in Xpert Network. */}
             <Button
+              as={Link}
               size="md"
-              href={meeting.meetUrl}
-              target="_blank"
-              rel="noreferrer"
+              href={routes.admin.callRoom(meeting.id)}
               className={styles.joinButton}
             >
-              Join with Google Meet
-              <span className="cds--visually-hidden"> (opens in a new tab)</span>
+              Join call
             </Button>
             <span className={styles.meetLink}>
-              <span>{meeting.meetUrl.replace('https://', '')}</span>
+              <span>Xpert Network meeting room</span>
               <CopyButton
-                iconDescription="Copy the Meet link"
+                iconDescription="Copy the call link"
                 feedback="Copied"
                 align="bottom"
-                onClick={() => void navigator.clipboard?.writeText(meeting.meetUrl ?? '')}
+                onClick={() =>
+                  void navigator.clipboard?.writeText(
+                    `${window.location.origin}${routes.admin.callRoom(meeting.id)}`,
+                  )
+                }
               />
             </span>
           </div>
@@ -190,7 +193,7 @@ export function MeetingPreview({
         <div className={styles.previewRow}>
           <Time className={styles.previewIcon} aria-hidden={true} />
           <p className={styles.previewNote}>
-            Held with the expert until {clientFirst} picks a time. The Meet link goes out when the
+            Held with the expert until {clientFirst} picks a time. The call link goes out when the
             call is booked.
           </p>
         </div>

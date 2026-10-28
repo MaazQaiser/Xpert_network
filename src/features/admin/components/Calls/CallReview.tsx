@@ -115,14 +115,8 @@ function Review({ call }: { call: CallDetail }) {
               </Tag>
             ) : null}
             {call.status !== 'completed' ? (
-              <Button
-                size="md"
-                href={call.meetUrl}
-                target="_blank"
-                rel="noreferrer"
-                renderIcon={Video}
-              >
-                Join with Google Meet
+              <Button as={Link} size="md" href={routes.admin.callRoom(call.id)} renderIcon={Video}>
+                Join call
               </Button>
             ) : null}
           </div>

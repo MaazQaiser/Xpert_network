@@ -42,7 +42,7 @@ function daysFor(view: View, focus: Date): Date[] {
  * Scheduling (F15): the PM's calendar of expert calls across projects, laid out like Google
  * Calendar. One compact bar (title, Today, arrows, the period, a view menu); a mini month and
  * project filters on the left; the calendar filling the rest. Click a meeting for its details
- * and the Google Meet link.
+ * and Join, which opens the call in our meeting room.
  */
 export function Scheduling() {
   const schedule = useSchedule();
@@ -159,7 +159,7 @@ export function Scheduling() {
           <EmptyState
             pictogram={<CalendarPictogram aria-hidden="true" />}
             title="No calls scheduled yet"
-            description="When a client picks an expert’s time, the call lands here with its Google Meet link. Times you hold for clients show here too."
+            description="When a client picks an expert’s time, the call lands here with its link to join. Times you hold for clients show here too."
           />
         }
       >
