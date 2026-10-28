@@ -1,7 +1,6 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
-@use '@carbon/react/scss/breakpoint' as *;
 @use '@carbon/react/scss/motion' as *;
 
 // Home chat: the screening answers, read in the thread. The table shares the ranked experts'
@@ -13,28 +12,36 @@
   gap: $spacing-06;
 }
 
-// Five columns in the chat's 41rem column: keep cell padding tight so it rarely scrolls.
-.table.table {
-  min-inline-size: 38rem;
+.channel {
+  @include type-style('body-compact-01');
 
-  // Roomier than the ranked list: each row has fewer facts, so it breathes more.
-  thead th,
-  tbody td,
-  tbody th {
-    padding-inline: $spacing-04;
-  }
+  display: inline-flex;
+  align-items: center;
+  color: $text-primary;
+  gap: $spacing-02;
+  white-space: nowrap;
 
-  tbody td,
-  tbody th {
-    padding-block: $spacing-06;
-  }
-
-  thead th {
-    white-space: nowrap;
+  svg {
+    flex: none;
+    fill: $icon-secondary;
   }
 }
 
-// The whole row opens the report; the open one stays marked.
+.channelLinkedin svg {
+  fill: $interactive;
+}
+
+.share {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-04;
+
+  p {
+    @include type-style('body-01');
+  }
+}
+
 .row {
   cursor: pointer;
   transition: background-color $duration-fast-02 motion(standard, productive);
@@ -47,54 +54,4 @@
 .rowOpen,
 .rowOpen:hover {
   background: $highlight;
-}
-
-.nameButton {
-  @include type-style('heading-compact-01');
-
-  display: block;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: $text-primary;
-  cursor: pointer;
-  text-align: start;
-  text-decoration: underline dotted;
-  text-decoration-color: $border-strong-01;
-  text-underline-offset: $spacing-02;
-
-  &:hover {
-    color: $link-primary;
-    text-decoration-color: $link-primary;
-  }
-
-  &:focus-visible {
-    outline: 2px solid $focus;
-    outline-offset: 2px;
-  }
-}
-
-.count {
-  white-space: nowrap;
-}
-
-.qualityCol {
-  inline-size: 7rem;
-}
-
-.readyFoot {
-  display: flex;
-  justify-content: flex-end;
-}
-
-// The send button reads on one line: no Carbon width cap, full width on a phone so the client's
-// name still fits. Doubled class outranks Carbon's button root rule.
-.sendButton.sendButton {
-  inline-size: 100%;
-  max-inline-size: none;
-  white-space: nowrap;
-
-  @include breakpoint(md) {
-    inline-size: auto;
-  }
 }

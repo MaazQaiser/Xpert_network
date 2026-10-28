@@ -26,7 +26,7 @@ import {
   ToggletipButton,
   ToggletipContent,
 } from '@carbon/react';
-import { ArrowRight, Information } from '@carbon/icons-react';
+import { Information } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
 import { formatCreditPrice, formatCredits, formatCurrencyEquivalent } from '@/shared/lib/credits';
 import { formatDateTime, formatDate } from '@/shared/lib/dates';
@@ -198,7 +198,6 @@ function BuyCredits() {
           </fieldset>
           <div>
             <Button
-              renderIcon={ArrowRight}
               disabled={!pack}
               onClick={() => {
                 topUp.reset();
@@ -334,7 +333,7 @@ function History() {
             title="No transactions yet"
             description="Top-ups, report purchases and research spend will show here."
             action={
-              <Button as={Link} href="/library" kind="tertiary" renderIcon={ArrowRight}>
+              <Button as={Link} href="/library" kind="tertiary">
                 Browse the library
               </Button>
             }

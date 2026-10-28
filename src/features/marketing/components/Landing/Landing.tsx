@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { Button, Column, Grid, Tile } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
 import { Conversation, Report, Microphone } from '@carbon/pictograms-react';
 import styles from './Landing.module.scss';
 
@@ -36,7 +35,7 @@ export function Landing() {
             from our library in minutes, or as custom research in days.
           </p>
           <div className={styles.actions}>
-            <Button as={Link} href="/sign-up" renderIcon={ArrowRight}>
+            <Button as={Link} href="/sign-up">
               Get started
             </Button>
             <Button as={Link} href="/login" kind="tertiary">
@@ -63,7 +62,7 @@ export function Landing() {
             Answer open calls on topics you know and get paid for each accepted interview. Speak or
             type with our AI interviewer, at a time that suits you.
           </p>
-          <Button as={Link} href="/sign-up?role=expert" kind="ghost" renderIcon={ArrowRight}>
+          <Button as={Link} href="/sign-up?role=expert" kind="ghost">
             Join as an expert
           </Button>
         </Column>

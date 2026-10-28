@@ -9,7 +9,6 @@ import {
   RadioButtonGroup,
   Slider,
 } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
 import { addDays } from '@/shared/lib/dates';
 import { formatCreditsWithCurrency } from '@/shared/lib/credits';
 import {
@@ -113,7 +112,7 @@ export function ConstraintsForm({ brief, isDisabled, onSubmit, onSkip }: Constra
       </RadioButtonGroup>
 
       <div className={styles.buttonRow}>
-        <Button size="md" renderIcon={ArrowRight} disabled={isDisabled} onClick={submit}>
+        <Button size="md" disabled={isDisabled} onClick={submit}>
           Continue
         </Button>
         <Button kind="ghost" size="md" disabled={isDisabled} onClick={onSkip}>

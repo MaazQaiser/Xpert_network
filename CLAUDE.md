@@ -47,7 +47,7 @@ Full plan: [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md) — flows F0–F17, sc
 
 ## Non-negotiables
 
-1. **Carbon first.** Use a Carbon component before building one. Never restyle Carbon internals with deep selectors; compose or wrap. The one exception is notification reflow at 320px in `src/styles/_carbon-reflow.scss` (ADR 0011). Keep Carbon's own shapes: no custom rounded corners, glass or glows (ADR 0015).
+1. **Carbon first.** Use a Carbon component before building one. Never restyle Carbon internals with deep selectors; compose or wrap. The one exception is notification reflow at 320px in `src/styles/_carbon-reflow.scss` (ADR 0011). Keep Carbon's own shapes: buttons use `$border-radius-04` (4px) through `--cds-button-radius`; no other custom rounded corners, glass or glows (ADR 0015).
 2. **Tokens only.** No hex colours, no raw `px` spacing, no custom font stacks. Use `$spacing-*`, colour tokens (`$text-primary`, `$layer-01`…), and type sets (`@include type-style('body-01')`). Raw colours exist only in `src/styles/_themes.scss`; page titles and Carbon-tile surfaces come from `src/styles/_mixins.scss` (`display-heading`, `surface-card`).
 3. **Accessible by default.** WCAG 2.2 AA. Every interactive element is keyboard-reachable, labelled, and has visible focus. Run axe in tests.
 4. **Feature-sliced.** Code lives in `src/features/<feature>`. Features never import each other's internals — only their `index.ts` public API.

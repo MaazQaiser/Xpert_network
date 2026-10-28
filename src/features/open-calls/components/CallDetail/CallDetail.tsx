@@ -13,7 +13,7 @@ import {
   Tag,
   TextArea,
 } from '@carbon/react';
-import { ArrowRight, CheckmarkFilled } from '@carbon/icons-react';
+import { CheckmarkFilled } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
 import { formatDate } from '@/shared/lib/dates';
@@ -102,7 +102,7 @@ function DetailView({ call }: { call: OpenCall }) {
             </div>
           </dl>
           {call.application ? null : (
-            <Button as="a" href="#screening" kind="primary" renderIcon={ArrowRight}>
+            <Button as="a" href="#screening" kind="primary">
               Apply
             </Button>
           )}
@@ -168,11 +168,7 @@ function Outcome({ call }: { call: OpenCall }) {
           takes about {formatMinutes(call.estMinutes)}, and you can pause at any time.
         </p>
         <div>
-          <Button
-            as={Link}
-            href={routes.expert.interview(application.interviewId)}
-            renderIcon={ArrowRight}
-          >
+          <Button as={Link} href={routes.expert.interview(application.interviewId)}>
             Start interview
           </Button>
         </div>

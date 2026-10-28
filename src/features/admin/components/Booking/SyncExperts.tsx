@@ -12,7 +12,6 @@ import {
   TextArea,
   TextInput,
 } from '@carbon/react';
-import { ArrowRight, Locked, TextShortParagraph } from '@carbon/icons-react';
 import { AIExplainLabel } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
@@ -112,11 +111,7 @@ function SyncView({ project, booking }: { project: Project; booking: Booking }) 
         </div>
         <div className={styles.actions}>
           {isBooked ? (
-            <Button
-              as={Link}
-              href={routes.admin.projectStep(project.id, 'booking')}
-              renderIcon={ArrowRight}
-            >
+            <Button as={Link} href={routes.admin.projectStep(project.id, 'booking')}>
               View booking
             </Button>
           ) : (
@@ -124,11 +119,7 @@ function SyncView({ project, booking }: { project: Project; booking: Booking }) 
               <Button kind="tertiary" disabled={action.isPending} onClick={save}>
                 Save draft
               </Button>
-              <Button
-                renderIcon={Locked}
-                disabled={!check.success || action.isPending}
-                onClick={lock}
-              >
+              <Button disabled={!check.success || action.isPending} onClick={lock}>
                 Send to {first} & lock project
               </Button>
             </>
@@ -234,7 +225,6 @@ function SyncView({ project, booking }: { project: Project; booking: Booking }) 
               <Button
                 kind="ghost"
                 size="sm"
-                renderIcon={TextShortParagraph}
                 className={styles.headerEnd}
                 onClick={() => set(isShort ? message.ai : message.short)}
               >

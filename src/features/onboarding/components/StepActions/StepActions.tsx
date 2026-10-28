@@ -2,7 +2,6 @@
 
 import type { ReactNode } from 'react';
 import { Button } from '@carbon/react';
-import { ArrowLeft, ArrowRight } from '@carbon/icons-react';
 import styles from './StepActions.module.scss';
 
 type StepActionsProps = {
@@ -18,11 +17,11 @@ export function StepActions({ onBack, primaryLabel, isBusy, children }: StepActi
   return (
     <div className={styles.root}>
       {onBack ? (
-        <Button kind="tertiary" renderIcon={ArrowLeft} onClick={onBack} disabled={isBusy}>
+        <Button kind="tertiary" onClick={onBack} disabled={isBusy}>
           Back
         </Button>
       ) : null}
-      <Button type="submit" renderIcon={ArrowRight} disabled={isBusy}>
+      <Button type="submit" disabled={isBusy}>
         {primaryLabel}
       </Button>
       {children}

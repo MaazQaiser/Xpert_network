@@ -5,7 +5,6 @@ import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button, Tag } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
 import { routes } from '@/shared/config/routes';
 import type { CallSession } from '../../model/call.schema';
 import styles from './CallEnded.module.scss';
@@ -128,7 +127,7 @@ export function CallEnded({ session, onReview }: { session: CallSession; onRevie
         </ul>
 
         <div className={styles.actions}>
-          <Button ref={homeRef} as={Link} href={routes.admin.home} renderIcon={ArrowRight}>
+          <Button ref={homeRef} as={Link} href={routes.admin.home}>
             Go to Home
           </Button>
           <Button kind="ghost" onClick={onReview}>

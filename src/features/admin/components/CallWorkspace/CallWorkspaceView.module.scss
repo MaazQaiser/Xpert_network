@@ -1,0 +1,73 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '../admin' as adm;
+
+.root {
+  @include adm.page;
+}
+
+.layout {
+  @include adm.split(1fr);
+}
+
+.main,
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  min-inline-size: 0;
+}
+
+.card {
+  @include adm.card;
+}
+
+.cardTitle {
+  @include adm.card-title;
+}
+
+.cardHeader {
+  @include adm.row;
+
+  justify-content: space-between;
+}
+
+.hint {
+  @include adm.muted;
+}
+
+.transcript {
+  @include adm.plain-list;
+}
+
+.line {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+}
+
+.speaker {
+  @include adm.label;
+}
+
+.text {
+  @include type-style('body-01');
+
+  margin: 0;
+}
+
+.list {
+  @include adm.plain-list;
+
+  gap: $spacing-03;
+}
+
+.request {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-02;
+}

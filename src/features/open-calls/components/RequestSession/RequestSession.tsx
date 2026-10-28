@@ -13,7 +13,6 @@ import {
   Switch,
   TextArea,
 } from '@carbon/react';
-import { Microphone, MicrophoneOff, Video, VideoOff } from '@carbon/icons-react';
 import { useSession } from '@/features/auth';
 import { routes } from '@/shared/config/routes';
 import { AsyncBoundary, NotFoundState } from '@/shared/ui';
@@ -183,18 +182,11 @@ function Session({ call }: { call: OpenCall }) {
             <Button
               kind={cameraOn ? 'danger--tertiary' : 'primary'}
               size="md"
-              renderIcon={cameraOn ? VideoOff : Video}
               onClick={() => (cameraOn ? stopCamera() : void startCamera())}
             >
               {cameraOn ? 'Turn camera off' : 'Turn camera on'}
             </Button>
-            <Button
-              kind="tertiary"
-              size="md"
-              renderIcon={micOn ? Microphone : MicrophoneOff}
-              disabled={!cameraOn}
-              onClick={toggleMic}
-            >
+            <Button kind="tertiary" size="md" disabled={!cameraOn} onClick={toggleMic}>
               {micOn ? 'Mute' : 'Unmute'}
             </Button>
             {question ? (

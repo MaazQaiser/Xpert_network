@@ -3,7 +3,7 @@
 import { Fragment, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { Button, Form, InlineNotification, Tag, TextInput } from '@carbon/react';
-import { ArrowRight, Renew, Send, StopFilledAlt } from '@carbon/icons-react';
+import { Send } from '@carbon/icons-react';
 import {
   AIExplainLabel,
   AIFeedback,
@@ -113,7 +113,7 @@ export function AskReportPanel({ itemId, starters, onCite }: AskReportPanelProps
                 <div className={styles.answer}>
                   <AIStepIndicator steps={stream.steps} isActive={stream.text.length === 0} />
                   {stream.text ? <StreamingText text={stream.text} isStreaming /> : null}
-                  <Button kind="ghost" size="sm" renderIcon={StopFilledAlt} onClick={stream.stop}>
+                  <Button kind="ghost" size="sm" onClick={stream.stop}>
                     Stop
                   </Button>
                 </div>
@@ -135,7 +135,6 @@ export function AskReportPanel({ itemId, starters, onCite }: AskReportPanelProps
                   <Button
                     kind="tertiary"
                     size="sm"
-                    renderIcon={Renew}
                     onClick={() => void ask(turn.question, turn.turnId)}
                   >
                     Try again
@@ -196,7 +195,7 @@ function AnswerView({
           <p className={styles.muted}>
             Need this answered? We can scope custom research with experts.
           </p>
-          <Button as={Link} href="/ask" kind="tertiary" size="sm" renderIcon={ArrowRight}>
+          <Button as={Link} href="/ask" kind="tertiary" size="sm">
             Request research on this
           </Button>
         </div>

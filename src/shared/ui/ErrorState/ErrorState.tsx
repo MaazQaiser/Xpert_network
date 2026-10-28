@@ -1,7 +1,6 @@
 'use client';
 
 import { Button, InlineNotification } from '@carbon/react';
-import { Renew } from '@carbon/icons-react';
 import styles from './ErrorState.module.scss';
 
 export type ErrorStateProps = {
@@ -22,7 +21,7 @@ export function ErrorState({ title = "This didn't load", message, onRetry }: Err
         lowContrast
       />
       {onRetry ? (
-        <Button kind="tertiary" size="sm" renderIcon={Renew} onClick={onRetry}>
+        <Button kind="tertiary" size="sm" onClick={onRetry}>
           Try again
         </Button>
       ) : null}

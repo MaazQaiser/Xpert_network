@@ -45,8 +45,8 @@ $pt-composer-breathe: 6s;
 }
 
 // Glow look (admin Home; ADR 0015 exception): a white box with 16px corners, a faint blue
-// rim, a soft blue light travelling slowly round the edge and a gentle breathing glow. The
-// buttons inside sit 4px in, so they take 12px corners (concentric). Still for reduced motion.
+// rim, a soft blue light travelling slowly round the edge and a gentle breathing glow.
+// The send button's corners are 12px. Still for reduced motion.
 .glow {
   position: relative;
   isolation: isolate;
@@ -55,8 +55,6 @@ $pt-composer-breathe: 6s;
   background: $layer-02;
   background-clip: padding-box;
   animation: composer-breathe $pt-composer-breathe ease-in-out infinite;
-
-  --cds-button-radius: #{radius.$border-radius-16 - $spacing-02};
 
   &::before {
     position: absolute;
@@ -166,6 +164,11 @@ $pt-composer-breathe: 6s;
   flex-shrink: 0;
   align-items: center;
   gap: $spacing-02;
+}
+
+// Send, in the glow box only: 12px corners through Carbon's button-radius hook.
+.send {
+  --cds-button-radius: #{$spacing-04};
 }
 
 .hint {

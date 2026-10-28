@@ -2,7 +2,6 @@
 
 import type { ReactNode } from 'react';
 import { Button, SkeletonText, Tag } from '@carbon/react';
-import { Edit } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
 import { ErrorState } from '@/shared/ui';
 import { useTaxonomy } from '../../api/queries';
@@ -55,7 +54,7 @@ export function ExpertProfileSummary({
               {EXPERT_STEP_LABELS[step]}
             </Heading>
             {onEdit ? (
-              <Button kind="ghost" size="sm" renderIcon={Edit} onClick={() => onEdit(step)}>
+              <Button kind="ghost" size="sm" onClick={() => onEdit(step)}>
                 Edit {EXPERT_STEP_LABELS[step].toLowerCase()}
               </Button>
             ) : null}

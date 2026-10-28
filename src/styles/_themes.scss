@@ -234,8 +234,8 @@ $dark-overrides: (
 }
 
 @mixin -button-tokens($mode) {
-  // Carbon's own button-radius hook, at Carbon's default: square buttons (ADR 0015).
-  --cds-button-radius: 0;
+  // Carbon's own button-radius hook. $border-radius-04 is 0.25rem (4px).
+  --cds-button-radius: #{radius.$border-radius-04};
 
   @if $mode == light {
     --cds-button-primary: #{$blue-60};

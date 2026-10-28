@@ -12,7 +12,27 @@ export const RESPONSE_STATUS_LABELS: Record<ResponseStatus, string> = {
   declined: 'Declined',
 };
 
-/** The AI's read of how useful an expert's answers are. */
+/** Where the screening conversation happened. */
+export const conversationChannelSchema = z.enum(['linkedin', 'email', 'phone']);
+export type ConversationChannel = z.infer<typeof conversationChannelSchema>;
+
+export const CONVERSATION_CHANNEL_LABELS: Record<ConversationChannel, string> = {
+  linkedin: 'LinkedIn',
+  email: 'Email',
+  phone: 'Phone',
+};
+
+const CHANNELS: ConversationChannel[] = ['linkedin', 'email', 'phone'];
+
+/** The same expert always answers on the same channel. An explicit channel wins. */
+export function conversationChannelFor(
+  expertId: string,
+  channel?: ConversationChannel,
+): ConversationChannel {
+  if (channel) return channel;
+  const hash = [...expertId].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7);
+  return CHANNELS[hash % CHANNELS.length] ?? 'email';
+}
 export const answerQualitySchema = z.enum(['strong', 'good', 'weak']);
 export type AnswerQuality = z.infer<typeof answerQualitySchema>;
 
@@ -43,6 +63,8 @@ export const expertResponseSchema = z.object({
   photoUrl: z.string().optional(),
   /** Where the AI found them. */
   source: expertOriginSchema.optional(),
+  /** How the screening conversation happened. */
+  channel: conversationChannelSchema.optional(),
   status: responseStatusSchema,
   answeredCount: z.number().int().nonnegative(),
   quality: answerQualitySchema.nullable(),

@@ -18,16 +18,28 @@ function yearsBetween(job: WorkRole, thisYear: number): string {
 }
 
 /** A round portrait for the experts table; initials when there is no photo. */
-export function ExpertAvatar({ name, photoUrl }: { name: string; photoUrl?: string }) {
+export function ExpertAvatar({
+  name,
+  photoUrl,
+  size = 'md',
+}: {
+  name: string;
+  photoUrl?: string;
+  size?: 'sm' | 'md';
+}) {
   const initials = name
     .split(' ')
     .map((part) => part[0])
     .slice(0, 2)
     .join('');
+  const px = size === 'sm' ? 24 : 32;
   return (
-    <span className={styles.rowAvatar} aria-hidden="true">
+    <span
+      className={size === 'sm' ? `${styles.rowAvatar} ${styles.rowAvatarSm}` : styles.rowAvatar}
+      aria-hidden="true"
+    >
       {photoUrl ? (
-        <Image src={photoUrl} alt="" width={32} height={32} className={styles.photo} />
+        <Image src={photoUrl} alt="" width={px} height={px} className={styles.photo} />
       ) : (
         initials
       )}

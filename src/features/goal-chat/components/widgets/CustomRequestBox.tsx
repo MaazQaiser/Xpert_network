@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { Button } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
 import { routes } from '@/shared/config/routes';
 import styles from './widgets.module.scss';
 
@@ -18,7 +17,7 @@ export function CustomRequestBox({ requestId, gap }: CustomRequestBoxProps) {
       <span className={styles.label}>For more depth</span>
       <p className={styles.sectionTitle}>Request custom research</p>
       <p className={styles.muted}>{gap}</p>
-      <Button as={Link} href={routes.client.request(requestId)} renderIcon={ArrowRight}>
+      <Button as={Link} href={routes.client.request(requestId)}>
         Request custom research
       </Button>
     </div>

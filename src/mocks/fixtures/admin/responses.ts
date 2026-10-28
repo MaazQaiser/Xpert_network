@@ -1,10 +1,11 @@
-import type {
-  AnswerQuality,
-  ExpertResponse,
-  MatchedExpert,
-  Project,
-  ResponsesResult,
-  ResponseStatus,
+import {
+  conversationChannelFor,
+  type AnswerQuality,
+  type ExpertResponse,
+  type MatchedExpert,
+  type Project,
+  type ResponsesResult,
+  type ResponseStatus,
 } from '@/features/admin';
 import { storyFor } from './stories';
 
@@ -86,6 +87,7 @@ export function buildResponses(
       linkedinUrl: expert.linkedinUrl,
       photoUrl: expert.photoUrl,
       source: expert.source,
+      channel: conversationChannelFor(expert.id),
       status,
       answeredCount: reached,
       quality: answered ? quality : null,

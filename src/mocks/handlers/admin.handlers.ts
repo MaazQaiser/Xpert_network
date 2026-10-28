@@ -20,6 +20,7 @@ import {
   type MatchResult,
   type Project,
   type ProjectSummary,
+  conversationChannelFor,
 } from '@/features/admin';
 import { createId } from '@/shared/lib/id';
 import { getControls } from '../controls';
@@ -30,6 +31,7 @@ import { storyFor } from '../fixtures/admin/stories';
 import { buildResponses } from '../fixtures/admin/responses';
 import { buildAvailability } from '../fixtures/admin/availability';
 import { buildClientDraft } from '../fixtures/admin/clientDraft';
+import { seedTeam } from '../fixtures/admin/directory';
 import { expertPerson } from '../fixtures/admin/expertPeople';
 import { buildBooking, buildChecklist, replyInboxRequest } from '../fixtures/admin/booking';
 import { buildCallSession } from '../fixtures/admin/call';
@@ -62,6 +64,59 @@ const notFound = () =>
 // "Today" on Home means the last 24 hours, so a demo left open over midnight still adds up.
 const isToday = (iso: string, now: Date) =>
   now.getTime() - new Date(iso).getTime() < 24 * 60 * 60 * 1000;
+
+/** Calls booked from the home chat, added onto the calendar the PM already has. */
+function bookedMeetings() {
+  return Object.values(db.get().adminBooking).flatMap((booking) => {
+    if (booking.stage !== 'booked') return [];
+    return booking.picks.map((pick) => {
+      const start = new Date(pick.slot.startsAt);
+      return {
+        id: `meet_${booking.projectId}_${pick.expertId}`,
+        kind: 'booked' as const,
+        projectId: booking.projectId,
+        startsAt: start.toISOString(),
+        endsAt: new Date(start.getTime() + 60 * 60 * 1000).toISOString(),
+        client: {
+          name: booking.client.name,
+          detail: booking.client.company,
+          email: booking.client.email,
+          photoUrl: null,
+        },
+        expert: {
+          name: pick.name,
+          detail: pick.role,
+          email: null,
+          photoUrl: pick.photoUrl,
+        },
+        meetUrl: `https://meet.google.com/xpert-${booking.projectId.toLowerCase()}-${pick.letter.toLowerCase()}`,
+      };
+    });
+  });
+}
+
+/** The newest client reply that still needs its meetings booked. */
+function openBookingEmail(): HomeSummary['bookingEmail'] {
+  const { adminInbox, adminProjects, adminBooking } = db.get();
+  const reply = Object.values(adminInbox)
+    .filter((request) => request.status === 'client_reply' && request.projectId)
+    .sort((a, b) => b.receivedAt.localeCompare(a.receivedAt))
+    .find((request) => {
+      const booking = request.projectId ? adminBooking[request.projectId] : undefined;
+      return Boolean(booking && booking.stage !== 'booked');
+    });
+  if (!reply?.projectId) return null;
+  const booking = adminBooking[reply.projectId];
+  if (!booking) return null;
+  return {
+    requestId: reply.id,
+    fromName: reply.from.name,
+    subject: reply.subject,
+    projectId: reply.projectId,
+    projectName: adminProjects[reply.projectId]?.name ?? reply.projectId,
+    pickCount: Math.max(1, booking.picks.length),
+  };
+}
 
 function findProject(id: unknown): Project | null {
   return typeof id === 'string' ? (db.get().adminProjects[id] ?? null) : null;
@@ -221,7 +276,18 @@ export const adminHandlers = [
     const auth = await guard();
     if ('response' in auth) return auth.response;
     const schedule = buildSchedule(new Date());
-    return HttpResponse.json(getControls().emptyData ? { ...schedule, meetings: [] } : schedule);
+    if (getControls().emptyData) return HttpResponse.json({ ...schedule, meetings: [] });
+    const extra = bookedMeetings();
+    const projects = [...schedule.projects];
+    for (const meeting of extra) {
+      if (projects.some((project) => project.id === meeting.projectId)) continue;
+      const project = db.get().adminProjects[meeting.projectId];
+      if (project) projects.push({ id: project.id, name: project.name, colour: 'blue' });
+    }
+    const meetings = [...schedule.meetings, ...extra].sort((a, b) =>
+      a.startsAt.localeCompare(b.startsAt),
+    );
+    return HttpResponse.json({ ...schedule, projects, meetings });
   }),
 
   // Screen 03 Experts tab: returns the next batch of matching experts. Unlike /matches it works
@@ -277,9 +343,19 @@ export const adminHandlers = [
     const next = current.includes(parsed.data.expertId)
       ? current
       : [...current, parsed.data.expertId];
+    const pool = searchPool(project);
+    const sentExperts = next.flatMap((id) => pool.filter((expert) => expert.id === id));
+    const answered = buildResponses(
+      project,
+      sentExperts,
+      new Date().toISOString(),
+      new Date(),
+    ).responses.filter((response) => response.status === 'answered').length;
     db.update((draft) => {
       draft.adminScreening[project.id] = next;
       draft.adminScreeningSentAt[project.id] ??= new Date().toISOString();
+      const record = draft.adminProjects[project.id];
+      if (record) record.pendingExpertReviews = answered;
     });
     return HttpResponse.json({ screeningSent: next });
   }),
@@ -290,12 +366,50 @@ export const adminHandlers = [
     if ('response' in auth) return auth.response;
     const project = findProject(params.id);
     if (!project) return notFound();
-    const sentIds = db.get().adminScreening[project.id] ?? [];
+    let sentIds = db.get().adminScreening[project.id] ?? [];
+    // Seeded reviews have a count but no sends yet. The first open fills a real set of answers.
+    if (sentIds.length === 0 && project.pendingExpertReviews > 0) {
+      const seeded = searchPool(project)
+        .slice(0, 6)
+        .map((expert) => expert.id);
+      if (seeded.length > 0) {
+        sentIds = seeded;
+        db.update((draft) => {
+          draft.adminScreening[project.id] = seeded;
+          draft.adminScreeningSentAt[project.id] ??= new Date().toISOString();
+        });
+      }
+    }
     const pool = searchPool(project);
     const sent = sentIds.flatMap((id) => pool.filter((expert) => expert.id === id));
-    return HttpResponse.json(
-      buildResponses(project, sent, db.get().adminScreeningSentAt[project.id] ?? null, new Date()),
+    // The answers table shows each way a conversation happens. If nobody sent was on
+    // LinkedIn, one more expert from the pool answers there.
+    const hasLinkedin = sent.some((expert) => conversationChannelFor(expert.id) === 'linkedin');
+    const linkedinExpert =
+      sent.length > 0 && !hasLinkedin
+        ? pool.find((expert) => !sentIds.includes(expert.id))
+        : undefined;
+    const result = buildResponses(
+      project,
+      linkedinExpert ? [...sent, linkedinExpert] : sent,
+      db.get().adminScreeningSentAt[project.id] ?? null,
+      new Date(),
     );
+    const linkedinRow = linkedinExpert
+      ? result.responses.find((response) => response.expertId === linkedinExpert.id)
+      : undefined;
+    if (linkedinRow) {
+      linkedinRow.channel = 'linkedin';
+      linkedinRow.status = 'answered';
+      linkedinRow.answers = linkedinRow.answers.map((answer) => ({
+        ...answer,
+        answer: answer.answer ?? 'Answered in the LinkedIn thread.',
+      }));
+      linkedinRow.answeredCount = linkedinRow.answers.length;
+      linkedinRow.quality = linkedinRow.quality ?? 'good';
+      linkedinRow.qualityScore = linkedinRow.qualityScore ?? 80;
+    }
+    return HttpResponse.json(result);
   }),
 
   // Screen 09: the experts moved forward and their offered times. `?experts=a,b` records a new
@@ -455,6 +569,8 @@ export const adminHandlers = [
           body: intro,
           sentAt: now,
         });
+        const record = draft.adminProjects[project.id];
+        if (record) record.pendingExpertReviews = 0;
         const availability = draft.adminAvailability[project.id];
         if (availability) availability.sentToClientAt = now;
         // Scripted: the client replies with their picks, and the reply lands in the inbox.
@@ -674,6 +790,7 @@ export const adminHandlers = [
       activeProjects: projects.filter(
         (p) => (p.status === 'matching' || p.status === 'pitching') && p.id !== 'PRJ-1039',
       ).length,
+      bookingEmail: empty ? null : openBookingEmail(),
     };
     return HttpResponse.json(summary);
   }),
@@ -1037,13 +1154,16 @@ export const adminHandlers = [
     if ('response' in auth) return auth.response;
     const parsed = assistantInputSchema.safeParse(await request.json());
     if (!parsed.success) return errorResponse(400, 'invalid', 'Type a question first.');
+    const empty = getControls().emptyData;
+    const stored = db.get();
     return HttpResponse.json(
       assistantReply(
         parsed.data.text,
-        db.get(),
+        empty ? { adminInbox: {}, adminProjects: {} } : stored,
         new Date(),
         auth.user.name.split(' ')[0],
-        screenedExperts(),
+        empty ? [] : screenedExperts(),
+        empty ? [] : Object.values(seedTeam()),
       ),
     );
   }),

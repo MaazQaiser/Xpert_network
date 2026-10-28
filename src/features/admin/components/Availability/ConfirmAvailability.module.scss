@@ -1,0 +1,72 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '../admin' as adm;
+
+.root {
+  @include adm.page;
+}
+
+.stats {
+  display: grid;
+  gap: $spacing-04;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: repeat(2, 1fr);
+
+  @include breakpoint(md) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.stat {
+  @include adm.card;
+
+  gap: $spacing-02;
+}
+
+.statValue {
+  @include type-style('heading-05');
+
+  margin: 0;
+}
+
+.statLabel {
+  @include adm.label;
+}
+
+.hold {
+  @include adm.card;
+
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.holdText {
+  @include adm.muted;
+}
+
+.tableWrap {
+  @include adm.table-wrap;
+}
+
+.expert {
+  @include type-style('heading-compact-01');
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-01;
+}
+
+.role {
+  @include adm.label;
+}
+
+.slots {
+  @include adm.row;
+
+  gap: $spacing-02;
+}

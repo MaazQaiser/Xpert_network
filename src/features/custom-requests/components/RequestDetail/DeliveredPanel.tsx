@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { Button, InlineNotification, RadioButton, RadioButtonGroup } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
 import { formatCredits } from '@/shared/lib/credits';
 import { useRateDelivery } from '../../api/queries';
@@ -38,7 +37,7 @@ export function DeliveredPanel({ request }: { request: CustomRequest }) {
         </p>
       )}
       <div className={styles.actions}>
-        <Button as={Link} href={`/library/${delivery.reportId}/read`} renderIcon={ArrowRight}>
+        <Button as={Link} href={`/library/${delivery.reportId}/read`}>
           Open report
         </Button>
         <Button as={Link} href="/ask" kind="tertiary">

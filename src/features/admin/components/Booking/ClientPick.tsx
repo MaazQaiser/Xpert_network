@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button, Checkbox, InlineNotification, Tag } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
 import { AIExplainLabel } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
@@ -74,12 +73,11 @@ function PickView({ project, booking }: { project: Project; booking: Booking }) 
                 project.id,
                 booking.stage === 'booked' ? 'booking' : 'sync',
               )}
-              renderIcon={ArrowRight}
             >
               {booking.stage === 'booked' ? 'View booking' : 'Continue to message'}
             </Button>
           ) : (
-            <Button renderIcon={ArrowRight} disabled={action.isPending} onClick={sync}>
+            <Button disabled={action.isPending} onClick={sync}>
               {action.isPending ? 'Syncing…' : 'Sync with experts'}
             </Button>
           )}

@@ -84,7 +84,7 @@
   align-items: center;
   gap: $spacing-04;
   grid-template-columns: auto minmax(0, 1fr);
-  padding-block: $spacing-04;
+  padding: $spacing-04 $spacing-05;
 
   // Plain lines between emails, no card around them.
   & + & {
@@ -156,13 +156,26 @@
   color: $text-secondary;
 }
 
-// On phones the action takes its own row under the email.
+// A row with no leading mark: the text starts at the edge, the action stays at the end.
+.pickPlain {
+  grid-template-columns: minmax(0, 1fr);
+
+  @include breakpoint(md) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+// On phones the action takes its own row under the text. These buttons have no icon, so
+// Carbon's trailing icon gutter is removed and the label is centred.
 .pickAction.pickAction {
+  justify-content: center;
+  padding-inline: $spacing-05;
   grid-column: 1 / -1;
   justify-self: start;
 
   @include breakpoint(md) {
     grid-column: auto;
+    justify-self: end;
   }
 }
 

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button, HeaderPanel } from '@carbon/react';
-import { ChevronDown, Logout } from '@carbon/icons-react';
+import { ChevronDown } from '@carbon/icons-react';
 import { useLogout, ROLE_LOGIN, type User } from '@/features/auth';
 import styles from './UserPanel.module.scss';
 
@@ -89,7 +89,6 @@ export function UserPanel({ user, settingsHref }: { user: User; settingsHref?: s
             <Button
               kind="ghost"
               size="sm"
-              renderIcon={Logout}
               className={styles.logout}
               onClick={() =>
                 logout.mutate(undefined, { onSuccess: () => router.push(ROLE_LOGIN[user.role]) })

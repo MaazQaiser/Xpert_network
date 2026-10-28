@@ -15,7 +15,7 @@ import {
   TextInput,
   Toggle,
 } from '@carbon/react';
-import { Laptop, Logout, Mobile } from '@carbon/icons-react';
+import { Laptop, Mobile } from '@carbon/icons-react';
 import { PasswordRules } from '@/features/auth';
 import { toUserMessage } from '@/shared/api';
 import { formatDateTime, formatRelative } from '@/shared/lib/dates';
@@ -342,7 +342,6 @@ function SessionsSection({ security }: { security: Security }) {
                 <Button
                   kind="ghost"
                   size="sm"
-                  renderIcon={Logout}
                   disabled={signOut.isPending}
                   onClick={() => signOut.mutate(session.id)}
                 >
@@ -359,7 +358,6 @@ function SessionsSection({ security }: { security: Security }) {
         <div className={styles.actions}>
           <Button
             kind="danger--tertiary"
-            renderIcon={Logout}
             className={styles.wrappingButton}
             disabled={signOutOthers.isPending}
             onClick={() => signOutOthers.mutate()}

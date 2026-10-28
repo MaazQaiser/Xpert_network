@@ -29,17 +29,44 @@ function partOfDay(now: Date = new Date()): string {
   return 'evening';
 }
 
-/** The greeting's one line, with the counts as pills. */
+/** The greeting's brief: what came in, what needs a sign-off, and what's still open. */
 function briefLede(summary: HomeSummary): string {
-  const { newProjectEmails, expertsPendingReview, activeProjects } = summary;
-  const emailWord = newProjectEmails === 1 ? 'email' : 'emails';
-  const reviews = expertsPendingReview === 1 ? 'review]] is' : 'reviews]] are';
-  const projectWord = activeProjects === 1 ? 'project' : 'projects';
-  // The expert reviews are what's waiting on the PM, so that count is the blue one.
-  return `We have [[${newProjectEmails} new project ${emailWord}]], [[!${expertsPendingReview} expert ${reviews} ready to review, and [[${activeProjects} active ${projectWord}]].`;
+  const { newProjectEmails, expertsPendingReview, activeProjects, bookingEmail } = summary;
+  const emailSentence =
+    newProjectEmails === 0
+      ? 'No new project emails came in.'
+      : newProjectEmails === 1
+        ? '[[1 new project email]] came in.'
+        : `[[${newProjectEmails} new project emails]] came in.`;
+  // The reviews are the item that needs the PM, unless a client is already waiting to book.
+  const reviewMark = bookingEmail ? '' : '!';
+  const reviewClause =
+    expertsPendingReview === 0
+      ? 'No expert reviews are ready'
+      : expertsPendingReview === 1
+        ? `[[${reviewMark}1 expert review]] is ready`
+        : `[[${reviewMark}${expertsPendingReview} expert reviews]] are ready`;
+  const projectClause =
+    activeProjects === 0
+      ? 'no projects are active'
+      : activeProjects === 1
+        ? '[[1 project]] is active'
+        : `[[${activeProjects} projects]] are active`;
+  const counts = `${emailSentence}\n${reviewClause}, and ${projectClause}.`;
+  if (!bookingEmail) return counts;
+  const first = bookingEmail.fromName.split(' ')[0] ?? bookingEmail.fromName;
+  const calls = bookingEmail.pickCount === 1 ? '1 expert' : `${bookingEmail.pickCount} experts`;
+  return `[[!${first} wants to book ${calls}.]] ${counts}`;
 }
 
-type Turn = { id: string; question: string; answer: AssistantReply | null; error: unknown };
+type Turn = {
+  id: string;
+  question: string;
+  /** What the person said. The question sent to the assistant can carry an id this hides. */
+  spoken: string;
+  answer: AssistantReply | null;
+  error: unknown;
+};
 
 /** What the mascot shows: resting, working, or a short reaction to the last answer. */
 type MascotMood = 'idle' | 'thinking' | 'happy' | 'oops';
@@ -207,11 +234,18 @@ export function AdminHome() {
 
   const isBusy = ask.isPending;
 
-  const send = (question: string) => {
+  const resetHome = () => {
+    setTurns([]);
+    setWorking({});
+    window.scrollTo(0, 0);
+    void summary.refetch();
+  };
+
+  const send = (question: string, spoken = question) => {
     turnCount.current += 1;
     const id = `turn_${turnCount.current}`;
     const askedAt = Date.now();
-    setTurns((current) => [...current, { id, question, answer: null, error: null }]);
+    setTurns((current) => [...current, { id, question, spoken, answer: null, error: null }]);
     ask.mutate(question, {
       onSuccess: (answer) => {
         // The assistant takes a breath before it answers, so the reply reads as considered.
@@ -253,12 +287,44 @@ export function AdminHome() {
               {name ? `Hey ${name}, good ${partOfDay()}.` : `Good ${partOfDay()}.`}
             </h1>
             <p className={styles.lede}>
-              {summary.data ? (
-                <EmphasisText text={briefLede(summary.data)} />
-              ) : (
-                'Pulling together today’s emails, expert reviews and active projects…'
-              )}
+              {summary.data
+                ? briefLede(summary.data)
+                    .split('\n')
+                    .map((line, index) => (
+                      <span key={line} className={styles.ledeLine}>
+                        {index > 0 ? ' ' : null}
+                        <EmphasisText text={line} />
+                      </span>
+                    ))
+                : 'Pulling together today’s emails, expert reviews and active projects…'}
             </p>
+            {summary.data?.bookingEmail ? (
+              <button
+                type="button"
+                className={styles.cue}
+                onClick={() => {
+                  const email = summary.data?.bookingEmail;
+                  if (!email) return;
+                  const first = email.fromName.split(' ')[0] ?? email.fromName;
+                  const calls = email.pickCount === 1 ? '1 expert' : `${email.pickCount} experts`;
+                  send(
+                    `Tell me about the email ${email.requestId}`,
+                    `${first} replied. Book ${calls}.`,
+                  );
+                }}
+              >
+                <span className={styles.cueBody}>
+                  <span className={styles.cueTitle}>
+                    {summary.data.bookingEmail.fromName} replied
+                  </span>
+                  <span className={styles.cueSubject}>{summary.data.bookingEmail.subject}</span>
+                </span>
+                <span className={styles.cueAction}>
+                  Book {summary.data.bookingEmail.pickCount}{' '}
+                  {summary.data.bookingEmail.pickCount === 1 ? 'expert' : 'experts'}
+                </span>
+              </button>
+            ) : null}
           </header>
         )}
 
@@ -272,7 +338,7 @@ export function AdminHome() {
                 className={styles.turn}
                 ref={index === turns.length - 1 ? latest : undefined}
               >
-                <p className={styles.question}>{turn.question}</p>
+                <p className={styles.question}>{turn.spoken}</p>
                 {turn.answer ? (
                   <div className={styles.answer}>
                     <AIExplainLabel aria-label="AI answer" isWorking={working[turn.id] ?? false} />
@@ -282,6 +348,7 @@ export function AdminHome() {
                           blocks={turn.answer.blocks}
                           onAsk={send}
                           isBusy={isBusy}
+                          onHome={resetHome}
                           onWorking={(isWorking) => setTurnWorking(turn.id, isWorking)}
                         />
                         <ChatChips chips={turn.answer.chips} onAsk={send} isBusy={isBusy} />
@@ -300,7 +367,7 @@ export function AdminHome() {
                 ) : turn.error ? (
                   <p className={styles.answerError} role="alert">
                     {toUserMessage(turn.error)}{' '}
-                    <Button kind="ghost" size="sm" onClick={() => send(turn.question)}>
+                    <Button kind="ghost" size="sm" onClick={() => send(turn.question, turn.spoken)}>
                       Ask again
                     </Button>
                   </p>
@@ -336,7 +403,7 @@ export function AdminHome() {
         )}
         <FloatingComposer
           label="Ask your AI assistant"
-          placeholder="Ask anything about your emails, projects or experts…"
+          placeholder="Ask anything about your projects, team or recent conversations…"
           placement="inline"
           look="glow"
           isBusy={isBusy}

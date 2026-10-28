@@ -107,6 +107,136 @@
 
     padding-block-start: $spacing-03;
   }
+
+  dd.badges {
+    padding-block-start: $spacing-02;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 0;
+  margin: 0;
+  gap: $spacing-03;
+}
+
+.legend {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+}
+
+// A Carbon field with the filters inside it, and room to type the next one.
+.tagBox {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: $spacing-03;
+  border: 0;
+  border-block-end: 1px solid $border-strong;
+  background: $field-01;
+  gap: $spacing-02;
+  min-block-size: $spacing-09;
+
+  &:focus-within {
+    outline: 2px solid $focus;
+    outline-offset: -2px;
+  }
+}
+
+.tagBoxInvalid {
+  border-block-end-color: $support-error;
+}
+
+.chip {
+  @include type-style('label-01');
+
+  display: inline-flex;
+  align-items: center;
+  max-inline-size: 100%;
+  padding-block: $spacing-02;
+  padding-inline: $spacing-03;
+  background: $layer-selected-01;
+  color: $text-primary;
+  overflow-wrap: anywhere;
+
+  &:has(.chipRemove) {
+    padding-inline-end: 0;
+  }
+}
+
+.chipText {
+  overflow-wrap: anywhere;
+}
+
+.chipRemove {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-02;
+  border: 0;
+  background: transparent;
+  color: $icon-primary;
+  cursor: pointer;
+
+  &:hover {
+    background: $layer-hover;
+  }
+
+  &:focus {
+    outline: 2px solid $focus;
+    outline-offset: -2px;
+  }
+}
+
+.tagInput {
+  @include type-style('body-compact-01');
+
+  flex: 1 1 8rem;
+  min-inline-size: 8rem;
+  padding: $spacing-02;
+  border: 0;
+  background: transparent;
+  color: $text-primary;
+
+  &:focus {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: $text-placeholder;
+  }
+}
+
+.sourceLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-03;
+
+  svg {
+    flex: none;
+  }
+}
+
+.hint {
+  @include type-style('helper-text-01');
+
+  color: $text-helper;
+}
+
+.invalid {
+  @include type-style('label-01');
+
+  color: $text-error;
 }
 
 .foot {

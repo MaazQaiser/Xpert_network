@@ -12,15 +12,7 @@ import {
   Theme,
   Toggle,
 } from '@carbon/react';
-import {
-  Close,
-  ColorPalette,
-  Debug,
-  PauseFilled,
-  PlayFilledAlt,
-  Renew,
-  Reset,
-} from '@carbon/icons-react';
+import { Close, Debug, PauseFilled, PlayFilledAlt } from '@carbon/icons-react';
 import { ROLE_HOME, useLogin, useSession, type PersonaId } from '@/features/auth';
 import {
   DEFAULT_CONTROLS,
@@ -141,12 +133,7 @@ export function PrototypeToolbar() {
               }}
               size="sm"
             />
-            <Button
-              kind="tertiary"
-              size="sm"
-              renderIcon={ColorPalette}
-              onClick={() => router.push(routes.designSystem)}
-            >
+            <Button kind="tertiary" size="sm" onClick={() => router.push(routes.designSystem)}>
               Design system
             </Button>
             <Toggle
@@ -165,7 +152,6 @@ export function PrototypeToolbar() {
                 <Button
                   kind="tertiary"
                   size="sm"
-                  renderIcon={chatTransport.icon}
                   disabled={!chatOpen || demoChat.status === 'done'}
                   onClick={() => requestDemoChat(chatTransport.action)}
                 >
@@ -174,7 +160,6 @@ export function PrototypeToolbar() {
                 <Button
                   kind="tertiary"
                   size="sm"
-                  renderIcon={Renew}
                   disabled={!chatOpen}
                   onClick={() => requestDemoChat('replay')}
                 >
@@ -183,7 +168,6 @@ export function PrototypeToolbar() {
                 <Button
                   kind="tertiary"
                   size="sm"
-                  renderIcon={Reset}
                   disabled={!chatOpen || demoChat.status === 'ready'}
                   onClick={() => requestDemoChat('reset')}
                 >
@@ -303,7 +287,6 @@ export function PrototypeToolbar() {
             <Button
               kind="danger--tertiary"
               size="sm"
-              renderIcon={Reset}
               onClick={() => {
                 resetDemo();
                 queryClient.clear();

@@ -1,9 +1,22 @@
 import { z } from 'zod';
 
+/** A client reply that still needs the calls booked. Shown on Home until the meetings are booked. */
+export const bookingCueSchema = z.object({
+  requestId: z.string(),
+  fromName: z.string(),
+  subject: z.string(),
+  projectId: z.string(),
+  projectName: z.string(),
+  pickCount: z.number().int().min(1),
+});
+export type BookingCue = z.infer<typeof bookingCueSchema>;
+
 export const homeSummarySchema = z.object({
   newProjectEmails: z.number().int().min(0),
   expertsPendingReview: z.number().int().min(0),
   activeProjects: z.number().int().min(0),
+  /** The newest client reply that is waiting to be booked, or null. */
+  bookingEmail: bookingCueSchema.nullable(),
 });
 export type HomeSummary = z.infer<typeof homeSummarySchema>;
 
@@ -77,9 +90,47 @@ export const chatBlockSchema = z.discriminatedUnion('kind', [
         client: z.string(),
         count: z.number().int().min(0),
         href: z.string(),
+        /** Asks the assistant to open the answers in the chat. */
+        prompt: z.string().optional(),
       }),
     ),
   }),
+  /** Projects, with where each one stands. */
+  z.object({
+    kind: z.literal('projects'),
+    items: z.array(
+      z.object({
+        projectId: z.string(),
+        projectName: z.string(),
+        client: z.string(),
+        status: z.string(),
+        href: z.string(),
+      }),
+    ),
+  }),
+  /** The team roster: open work, booked work, and time to a brief. */
+  z.object({
+    kind: z.literal('team'),
+    items: z.array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        openProjects: z.number().int().min(0),
+        bookedProjects: z.number().int().min(0),
+        avgHoursToBrief: z.number().nullable(),
+        active: z.boolean(),
+      }),
+    ),
+  }),
+  /** A short company snapshot: stage, reviews waiting, emails stuck. */
+  z.object({
+    kind: z.literal('stats'),
+    items: z.array(z.object({ label: z.string(), value: z.string() })),
+  }),
+  /** The email that shares the picked expert profiles with the client. */
+  z.object({ kind: z.literal('clientEmail'), projectId: z.string() }),
+  /** The client's reply, and the yes that books the meetings. */
+  z.object({ kind: z.literal('bookMeetings'), projectId: z.string() }),
 ]);
 export type ChatBlock = z.infer<typeof chatBlockSchema>;
 
@@ -104,7 +155,7 @@ export const CARD_PROMPTS = {
 export const assistantInputSchema = z.object({ text: z.string().trim().min(1).max(500) });
 
 export const SUGGESTED_PROMPTS = [
-  'Summarise today’s new projects',
-  'Which experts need my review?',
-  'Draft replies for emails missing a brief',
+  'Share progress of all projects',
+  'Show the team progress report',
+  'Show overall company progress',
 ] as const;

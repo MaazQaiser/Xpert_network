@@ -21,7 +21,6 @@ import {
 import {
   Add,
   ArrowLeft,
-  ArrowRight,
   Attachment,
   Email,
   EmailNew,
@@ -416,22 +415,15 @@ function ReadingPane({
                 as={Link}
                 href={routes.admin.projectStep(request.projectId, 'pick')}
                 size="md"
-                renderIcon={ArrowRight}
               >
                 Open {first}’s picks
               </Button>
             ) : projectHref && request.status === 'brief_ready' ? (
-              <Button as={Link} href={projectHref} size="md" renderIcon={ArrowRight}>
+              <Button as={Link} href={projectHref} size="md">
                 Open project file
               </Button>
             ) : projectHref ? (
-              <Button
-                as={Link}
-                href={projectHref}
-                kind="tertiary"
-                size="md"
-                renderIcon={ArrowRight}
-              >
+              <Button as={Link} href={projectHref} kind="tertiary" size="md">
                 Open in project
               </Button>
             ) : null}

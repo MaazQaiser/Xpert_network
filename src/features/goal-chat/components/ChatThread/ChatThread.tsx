@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from 'react';
 import { Button } from '@carbon/react';
-import { Renew, StopFilledAlt } from '@carbon/icons-react';
 import { AIExplainLabel, AIFeedback, AIStepIndicator, StreamingText } from '@/shared/ai';
 import { ErrorState } from '@/shared/ui';
 import { formatDate, formatDateTime, formatRelative } from '@/shared/lib/dates';
@@ -192,7 +191,7 @@ export function ChatThread({ brief, messages, turn, playback }: ChatThreadProps)
             ) : null}
             {turn.status === 'streaming' ? (
               <div>
-                <Button kind="ghost" size="sm" renderIcon={StopFilledAlt} onClick={turn.stop}>
+                <Button kind="ghost" size="sm" onClick={turn.stop}>
                   Stop
                 </Button>
               </div>
@@ -200,7 +199,7 @@ export function ChatThread({ brief, messages, turn, playback }: ChatThreadProps)
             {turn.status === 'stopped' ? (
               <div className={styles.actions}>
                 <p className={styles.notice}>Response stopped.</p>
-                <Button kind="tertiary" size="sm" renderIcon={Renew} onClick={turn.retry}>
+                <Button kind="tertiary" size="sm" onClick={turn.retry}>
                   Regenerate
                 </Button>
                 <Button kind="ghost" size="sm" onClick={turn.dismiss}>

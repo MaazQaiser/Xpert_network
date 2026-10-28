@@ -1,0 +1,113 @@
+// Shared layout mixins for the admin console screens. Tokens only (CLAUDE.md rule 2).
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '../../../styles/mixins' as mx;
+
+/// Page column: header, trail, then sections.
+@mixin page {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  padding-block-end: $spacing-09;
+}
+
+/// Glass card with a stacked layout.
+@mixin card {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+  padding: $spacing-05;
+}
+
+/// Heading inside a card.
+@mixin card-title {
+  @include type-style('heading-compact-02');
+
+  margin: 0;
+}
+
+/// Secondary paragraph text.
+@mixin muted {
+  @include type-style('body-compact-01');
+
+  margin: 0;
+  color: $text-secondary;
+}
+
+/// Small caption text.
+@mixin label {
+  @include type-style('label-01');
+
+  margin: 0;
+  color: $text-secondary;
+}
+
+/// Wrapping row of inline items.
+@mixin row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+/// Main column + side column from lg.
+@mixin split($side: 1fr) {
+  display: grid;
+  gap: $spacing-05;
+  grid-template-columns: 1fr;
+
+  @include breakpoint(lg) {
+    align-items: start;
+    grid-template-columns: 2fr $side;
+  }
+}
+
+/// One column on phones, two from md.
+@mixin cards-grid {
+  display: grid;
+  gap: $spacing-05;
+  grid-template-columns: 1fr;
+
+  @include breakpoint(md) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/// Table in a glass card that scrolls sideways on narrow screens.
+@mixin table-wrap {
+  @include mx.surface-card;
+
+  overflow-x: auto;
+}
+
+/// Bulleted list inside a card.
+@mixin bullets {
+  @include type-style('body-compact-01');
+
+  margin: 0;
+  padding-inline-start: $spacing-05;
+}
+
+/// Plain list reset.
+@mixin plain-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/// Preformatted email / message body.
+@mixin message-body {
+  @include type-style('body-01');
+
+  margin: 0;
+  padding: $spacing-04;
+  background: $layer-02;
+  white-space: pre-wrap;
+}

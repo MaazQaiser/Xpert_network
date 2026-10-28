@@ -10,7 +10,6 @@ import {
   ProgressStep,
   SkeletonText,
 } from '@carbon/react';
-import { Renew } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
 import { formatDate, formatDateTime } from '@/shared/lib/dates';
 import { AsyncBoundary, NotFoundState, PageHeader, StatusTag } from '@/shared/ui';
@@ -197,7 +196,7 @@ function ClosedQuote({ request }: { request: CustomRequest }) {
         />
       ) : null}
       <div>
-        <Button renderIcon={Renew} disabled={requote.isPending} onClick={() => requote.mutate()}>
+        <Button disabled={requote.isPending} onClick={() => requote.mutate()}>
           Ask for a new quote
         </Button>
       </div>

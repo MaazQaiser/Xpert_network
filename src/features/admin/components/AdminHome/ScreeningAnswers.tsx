@@ -8,12 +8,9 @@ import {
   InlineLoading,
   InlineNotification,
   SkeletonText,
-  Tag,
 } from '@carbon/react';
-import { ArrowRight, CircleDash, SendAlt } from '@carbon/icons-react';
-import { AIExplainLabel } from '@/shared/ai';
+import { ArrowUpRight, CircleDash, Email, LogoLinkedin, Phone } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
-import { CountryFlag } from '@/shared/ui';
 import {
   useAvailability,
   useAvailabilityAction,
@@ -23,14 +20,15 @@ import {
 import type { Availability } from '../../model/availability.schema';
 import type { Project } from '../../model/project.schema';
 import {
-  ANSWER_QUALITY_LABELS,
+  CONVERSATION_CHANNEL_LABELS,
+  conversationChannelFor,
+  type ConversationChannel,
   type ExpertResponse,
   type ResponsesResult,
 } from '../../model/responses.schema';
-import { ChatClientEmail } from './ChatClientEmail';
+import { ExpertAvatar } from './ExpertProfilePanel';
 import { ReportPanel } from './ReportPanel';
 import { StreamedAnswer } from './StreamedAnswer';
-import chat from './ChatBlocks.module.scss';
 import search from './ExpertSearch.module.scss';
 import styles from './ScreeningAnswers.module.scss';
 
@@ -57,6 +55,7 @@ export function ScreeningAnswers({
   expertId,
   expertName,
   onWorking,
+  onAsk,
 }: {
   projectId: string;
   /** Asked for one expert: their report opens as soon as the answers are in. */
@@ -64,6 +63,8 @@ export function ScreeningAnswers({
   expertName?: string;
   /** Tells the answer's mascot whether the AI is still looking. */
   onWorking?: (working: boolean) => void;
+  /** Asks the assistant to draft the client email for the selected experts. */
+  onAsk?: (question: string) => void;
 }) {
   const project = useProject(projectId);
   const responses = useResponses(projectId);
@@ -153,7 +154,12 @@ export function ScreeningAnswers({
 
       <div ref={outcome} className={search.outcome}>
         {isDone ? (
-          <ScreeningReview project={project.data} data={responses.data} expertId={expertId} />
+          <ScreeningReview
+            project={project.data}
+            data={responses.data}
+            expertId={expertId}
+            onAsk={onAsk}
+          />
         ) : null}
       </div>
     </section>
@@ -164,10 +170,12 @@ function ScreeningReview({
   project,
   data,
   expertId,
+  onAsk,
 }: {
   project: Project;
   data: ResponsesResult;
   expertId?: string;
+  onAsk?: (question: string) => void;
 }) {
   const answered = data.responses.filter((r) => r.status === 'answered');
   const waiting = data.responses.filter(
@@ -176,12 +184,13 @@ function ScreeningReview({
   const picks = answered.filter((r) => r.aiPick).map((r) => r.expertId);
   const [selected, setSelected] = useState<string[]>(picks);
   const [openId, setOpenId] = useState<string | null>(expertId ?? null);
-  // Every expert who answered also gave their free times; the PM sends the picks to the client.
+  const [shareError, setShareError] = useState<unknown>(null);
+  const prepare = useAvailabilityAction(project.id);
+  // Free times for the open report and the slots column. Sending to the client is a later step.
   const availability = useAvailability(
     project.id,
     answered.map((r) => r.expertId),
   );
-  const [isPrepared, setIsPrepared] = useState(false);
   const open = answered.find((r) => r.expertId === openId) ?? null;
 
   const toggle = (id: string, on: boolean) =>
@@ -221,12 +230,39 @@ function ScreeningReview({
             project={project}
             data={data}
             answered={answered}
+            times={availability.data}
             selected={selected}
             openId={openId}
-            isLocked={isPrepared}
+            isLocked={false}
             onToggle={toggle}
             onOpen={setOpenId}
           />
+
+          {selected.length > 0 && onAsk ? (
+            <ShareProfiles
+              project={project}
+              selected={selected}
+              times={availability.data}
+              isBusy={prepare.isPending}
+              error={shareError}
+              onDismiss={() => setShareError(null)}
+              onDraft={async (experts) => {
+                setShareError(null);
+                try {
+                  await prepare.mutateAsync({
+                    action: 'prepare_client',
+                    holdSlots: true,
+                    experts,
+                  });
+                  onAsk(
+                    `Draft an email sharing these expert profiles with the client for ${project.name}`,
+                  );
+                } catch (error) {
+                  setShareError(error);
+                }
+              }}
+            />
+          ) : null}
 
           {open ? (
             <ReportPanel
@@ -242,41 +278,6 @@ function ScreeningReview({
               onClose={() => setOpenId(null)}
             />
           ) : null}
-
-          {availability.data ? (
-            <ReadyForClient
-              project={project}
-              data={availability.data}
-              people={answered}
-              selected={selected}
-              isPrepared={isPrepared}
-              onPrepared={() => setIsPrepared(true)}
-            />
-          ) : availability.isError ? (
-            <ActionableNotification
-              inline
-              kind="error"
-              lowContrast
-              hideCloseButton
-              hasFocus={false}
-              title="Their free times didn’t load."
-              subtitle={toUserMessage(availability.error)}
-              actionButtonLabel="Try again"
-              onActionButtonClick={() => void availability.refetch()}
-            />
-          ) : (
-            <SkeletonText paragraph lineCount={2} />
-          )}
-
-          {isPrepared ? (
-            <>
-              <p className={search.request}>
-                Send {selected.length === 1 ? 'this expert' : 'these experts'} to{' '}
-                {availability.data?.clientName}
-              </p>
-              <ChatClientEmail project={project} />
-            </>
-          ) : null}
         </div>
       </StreamedAnswer>
     </div>
@@ -284,13 +285,15 @@ function ScreeningReview({
 }
 
 /**
- * The experts who answered, like the ranked experts table: who they are, what they do, how far
- * they got and how good their answers are. A row opens that expert's report below.
+ * Experts who answered, in the same compact columns as the ranked list: photo, name, how the
+ * conversation happened, how many questions they answered, how many times they can take, and an
+ * arrow that opens their answers.
  */
 function AnswerTable({
   project,
   data,
   answered,
+  times,
   selected,
   openId,
   isLocked,
@@ -300,6 +303,7 @@ function AnswerTable({
   project: Project;
   data: ResponsesResult;
   answered: ExpertResponse[];
+  times: Availability | undefined;
   selected: string[];
   openId: string | null;
   /** Once availability is confirmed, the picks are fixed. */
@@ -309,17 +313,27 @@ function AnswerTable({
 }) {
   return (
     <div className={search.tableScroll}>
-      <table className={`${search.table} ${styles.table}`} aria-label="Experts who answered">
+      <table className={`${search.table} ${search.tableCompact}`} aria-label="Experts who answered">
         <thead>
           <tr>
             <th scope="col" className={search.pickCol}>
               <span className="cds--visually-hidden">Move forward</span>
             </th>
-            <th scope="col">Expert</th>
-            <th scope="col">Expertise</th>
-            <th scope="col">Answered</th>
-            <th scope="col" className={styles.qualityCol}>
-              Answer quality
+            <th scope="col" className={search.photoCol}>
+              <span className="cds--visually-hidden">Photo</span>
+            </th>
+            <th scope="col">Name</th>
+            <th scope="col" className={search.tightCol}>
+              Source
+            </th>
+            <th scope="col" className={search.tightCol}>
+              Answers
+            </th>
+            <th scope="col" className={search.tightCol}>
+              Available slots
+            </th>
+            <th scope="col" className={search.viewCol}>
+              <span className="cds--visually-hidden">View details</span>
             </th>
           </tr>
         </thead>
@@ -327,6 +341,8 @@ function AnswerTable({
           {answered.map((response, index) => {
             const name = nameOf(response);
             const isOpen = response.expertId === openId;
+            const slots = times?.experts.find((expert) => expert.expertId === response.expertId)
+              ?.slots.length;
             return (
               <tr
                 key={response.expertId}
@@ -345,50 +361,33 @@ function AnswerTable({
                     onChange={(_, { checked }) => onToggle(response.expertId, checked)}
                   />
                 </td>
-                <th scope="row" className={search.expertCell}>
-                  <button
-                    type="button"
-                    className={styles.nameButton}
-                    aria-expanded={isOpen}
-                    aria-controls={isOpen ? `report-${response.expertId}` : undefined}
-                    aria-label={`Read ${name}’s report`}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onOpen(response.expertId);
-                    }}
-                  >
-                    {name}
-                  </button>
-                  {/* Who they are at a glance: the name, then the country. */}
-                  {response.country ? (
-                    <span className={search.expertMeta}>
-                      <CountryFlag code={response.country} size="sm" short />
-                    </span>
-                  ) : null}
+                <td className={search.photoCol}>
+                  <ExpertAvatar name={name} photoUrl={response.photoUrl} size="sm" />
+                </td>
+                <th scope="row" className={search.nameCell}>
+                  {name}
                 </th>
-                <td className={search.expertiseCell}>{response.role}</td>
-                <td className={styles.count}>
+                <td className={search.tightCol}>
+                  <ChannelMark
+                    channel={conversationChannelFor(response.expertId, response.channel)}
+                  />
+                </td>
+                <td className={search.tightCol}>
                   {response.answeredCount} / {data.questionCount}
                 </td>
-                <td className={styles.qualityCol}>
-                  {response.quality && response.qualityScore !== null ? (
-                    <span className={search.match}>
-                      <span>{ANSWER_QUALITY_LABELS[response.quality]}</span>
-                      <span
-                        className={search.matchTrack}
-                        role="meter"
-                        aria-label={`Answer quality for ${name}`}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-valuenow={response.qualityScore}
-                      >
-                        <span
-                          className={search.matchFill}
-                          style={{ inlineSize: `${response.qualityScore}%` }}
-                        />
-                      </span>
-                    </span>
-                  ) : null}
+                <td className={search.tightCol}>{slots ?? '—'}</td>
+                <td className={search.viewCol} onClick={(event) => event.stopPropagation()}>
+                  <Button
+                    kind="ghost"
+                    size="sm"
+                    hasIconOnly
+                    renderIcon={ArrowUpRight}
+                    iconDescription={`View ${name}’s details`}
+                    tooltipPosition="left"
+                    tooltipAlignment="center"
+                    aria-expanded={isOpen}
+                    onClick={() => onOpen(response.expertId)}
+                  />
                 </td>
               </tr>
             );
@@ -399,124 +398,68 @@ function AnswerTable({
   );
 }
 
-/**
- * Under the answers: the experts picked, with their times, are ready to go to the client. One
- * hold option and the one step to take; sending drafts the client email below, in the thread.
- */
-function ReadyForClient({
+const CHANNEL_ICONS = {
+  linkedin: LogoLinkedin,
+  email: Email,
+  phone: Phone,
+} as const;
+
+/** Turns the ticked experts into the client email, then asks the assistant to show it. */
+function ShareProfiles({
   project,
-  data,
-  people,
   selected,
-  isPrepared,
-  onPrepared,
+  times,
+  isBusy,
+  error,
+  onDismiss,
+  onDraft,
 }: {
   project: Project;
-  data: Availability;
-  /** The experts who answered, for their names. */
-  people: ExpertResponse[];
   selected: string[];
-  isPrepared: boolean;
-  onPrepared: () => void;
+  times: Availability | undefined;
+  isBusy: boolean;
+  error: unknown;
+  onDismiss: () => void;
+  onDraft: (experts: { expertId: string; slotIds: string[] }[]) => Promise<void>;
 }) {
-  const action = useAvailabilityAction(project.id);
-  const [holdSlots, setHoldSlots] = useState(true);
-  const [error, setError] = useState<unknown>(null);
-  const client = data.clientName;
-  const ready = data.experts.filter(
-    (e) => selected.includes(e.expertId) && e.status === 'confirmed' && e.slots.length > 0,
-  );
-
-  const send = () => {
-    setError(null);
-    action.mutate(
-      {
-        action: 'prepare_client',
-        holdSlots,
-        experts: ready.map((e) => ({ expertId: e.expertId, slotIds: e.slots.map((s) => s.id) })),
-      },
-      { onSuccess: onPrepared, onError: setError },
-    );
-  };
-
+  const client = project.contact.name.split(' ')[0] ?? project.contact.name;
+  const experts = selected.flatMap((id) => {
+    const slots = times?.experts.find((expert) => expert.expertId === id)?.slots ?? [];
+    return slots.length > 0 ? [{ expertId: id, slotIds: slots.map((slot) => slot.id) }] : [];
+  });
+  const count = selected.length;
   return (
-    <article className={chat.canvas} aria-labelledby={`ready-${project.id}`}>
-      {/* A document card, like the brief: the bar says what it is, the page says what's next. */}
-      <header className={chat.canvasBar}>
-        <span className={chat.canvasLabel}>
-          <SendAlt aria-hidden={true} />
-          Ready for the client · {client}
-        </span>
-        <AIExplainLabel size="xs" aria-label={`${project.id} hand-off to the client`} />
-      </header>
-
-      <div className={chat.canvasPage}>
-        <div className={chat.docHead}>
-          <Tag type="blue" size="sm">
-            {ready.length} {ready.length === 1 ? 'expert' : 'experts'} ready
-          </Tag>
-          <h3 id={`ready-${project.id}`} className={chat.docTitle}>
-            Ready for the client
-          </h3>
-          <p className={chat.docMeta} aria-live="polite">
-            {ready.length > 0 ? (
-              <>
-                <strong>
-                  {ready.length} {ready.length === 1 ? 'expert has' : 'experts have'}
-                </strong>{' '}
-                times to offer. Next, send them to {client} with their answers and free slots.
-              </>
-            ) : (
-              'Pick at least one expert above to send to the client.'
-            )}
-          </p>
-        </div>
-
-        {ready.length > 0 ? (
-          <section className={chat.docSection}>
-            <h4 className={chat.docHeading}>Going to {client.split(' ')[0]}</h4>
-            <ul className={chat.docList}>
-              {ready.map((e) => (
-                <li key={e.expertId}>
-                  {people.find((p) => p.expertId === e.expertId)?.name ?? e.label} ·{' '}
-                  {e.slots.length} free {e.slots.length === 1 ? 'time' : 'times'}
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
-
-        <Checkbox
-          id={`hold-slots-${project.id}`}
-          labelText="Hold these slots with the experts for 48 hours"
-          checked={holdSlots}
-          disabled={isPrepared}
-          onChange={(_, { checked }) => setHoldSlots(checked)}
+    <div className={styles.share}>
+      <p>
+        Share {count === 1 ? 'this profile' : `these ${count} profiles`} with{' '}
+        <strong>{client}</strong> on <strong>{project.name}</strong>?
+      </p>
+      {error ? (
+        <InlineNotification
+          kind="error"
+          lowContrast
+          title="The email didn’t start."
+          subtitle={toUserMessage(error)}
+          onCloseButtonClick={onDismiss}
         />
-        {error ? (
-          <InlineNotification
-            kind="error"
-            lowContrast
-            title="That didn’t send."
-            subtitle={toUserMessage(error)}
-            onClose={() => setError(null)}
-          />
-        ) : null}
-        {isPrepared ? null : (
-          <div className={styles.readyFoot}>
-            <Button
-              renderIcon={ArrowRight}
-              className={styles.sendButton}
-              disabled={ready.length === 0 || action.isPending}
-              onClick={send}
-            >
-              {action.isPending
-                ? 'Preparing…'
-                : `Send ${ready.length === 1 ? 'this expert' : 'these experts'} to ${client}`}
-            </Button>
-          </div>
-        )}
-      </div>
-    </article>
+      ) : null}
+      <Button disabled={experts.length === 0 || isBusy} onClick={() => void onDraft(experts)}>
+        {isBusy ? 'Drafting…' : 'Draft the email'}
+      </Button>
+    </div>
+  );
+}
+
+function ChannelMark({ channel }: { channel: ConversationChannel }) {
+  const Icon = CHANNEL_ICONS[channel];
+  return (
+    <span
+      className={
+        channel === 'linkedin' ? `${styles.channel} ${styles.channelLinkedin}` : styles.channel
+      }
+    >
+      <Icon size={16} aria-hidden={true} />
+      {CONVERSATION_CHANNEL_LABELS[channel]}
+    </span>
   );
 }

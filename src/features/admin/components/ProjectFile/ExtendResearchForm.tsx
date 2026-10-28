@@ -4,7 +4,6 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Checkbox, CheckboxGroup, NumberInput, TextArea } from '@carbon/react';
-import { MagicWand } from '@carbon/icons-react';
 import {
   EXPERT_SOURCE_LABELS,
   expertSourceSchema,
@@ -163,9 +162,7 @@ export function ExtendResearchForm({
         <Button kind="secondary" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" renderIcon={MagicWand}>
-          Find more experts
-        </Button>
+        <Button type="submit">Find more experts</Button>
       </div>
     </form>
   );

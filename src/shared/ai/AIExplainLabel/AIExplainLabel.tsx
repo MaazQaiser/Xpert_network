@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { Button } from '@carbon/react';
-import { Search, Undo } from '@carbon/icons-react';
+import { Search } from '@carbon/icons-react';
 import styles from './AIExplainLabel.module.scss';
 
 export type AIExplainLabelProps = {
@@ -56,7 +56,7 @@ export function AIExplainLabel({
         {isWorking ? <Search size={12} className={styles.lens} aria-hidden={true} /> : null}
       </span>
       {isEdited && onRevert ? (
-        <Button kind="ghost" size="sm" renderIcon={Undo} onClick={onRevert}>
+        <Button kind="ghost" size="sm" onClick={onRevert}>
           Revert to AI draft
         </Button>
       ) : null}

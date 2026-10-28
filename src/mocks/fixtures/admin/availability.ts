@@ -38,7 +38,8 @@ export function buildAvailability(
   const days = workingDays(new Date(askedAt), 5);
   const rows: ExpertAvailability[] = experts.map((expert, index) => {
     const seed = hash(expert.id);
-    const slots = [0, 1].map((n) => {
+    const count = 1 + (seed % 3);
+    const slots = Array.from({ length: count }, (_, n) => {
       const day = days[(seed + n * 2) % days.length] ?? new Date(askedAt);
       const hour = HOURS[(seed + n * 3) % HOURS.length] ?? 10;
       const start = new Date(day);

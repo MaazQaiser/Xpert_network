@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Button, ComboBox, DismissibleTag, InlineNotification } from '@carbon/react';
-import { Add, ArrowRight } from '@carbon/icons-react';
 import { createId } from '@/shared/lib/id';
 import { useSubjects } from '../../api/queries';
 import type { ResearchBrief, Subject } from '../../model/brief.schema';
@@ -112,7 +111,6 @@ export function SubjectPicker({
               key={subject.id}
               kind="ghost"
               size="sm"
-              renderIcon={Add}
               disabled={isDisabled}
               onClick={() => onAdd(subject)}
             >
@@ -159,7 +157,6 @@ export function SubjectPicker({
       <div>
         <Button
           size="md"
-          renderIcon={ArrowRight}
           disabled={isDisabled}
           onClick={() => {
             if (brief.subjects.length === 0) {

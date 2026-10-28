@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { Button, ContainedList, ContainedListItem, IconButton, TextInput } from '@carbon/react';
-import { Add, TrashCan } from '@carbon/icons-react';
+import { TrashCan } from '@carbon/icons-react';
 import { AIExplainLabel } from '@/shared/ai';
 import { createId } from '@/shared/lib/id';
 import { useResetToAi, useUpdateProject } from '../../api/queries';
@@ -95,13 +95,7 @@ export function ExpertProfileCard({ project, onNotice }: ExpertProfileCardProps)
         size="md"
         className={styles.requirements}
         action={
-          <Button
-            kind="ghost"
-            size="sm"
-            renderIcon={Add}
-            disabled={adding}
-            onClick={() => setAdding(true)}
-          >
+          <Button kind="ghost" size="sm" disabled={adding} onClick={() => setAdding(true)}>
             Add requirement
           </Button>
         }

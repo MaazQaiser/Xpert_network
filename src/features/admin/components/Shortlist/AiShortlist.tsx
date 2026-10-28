@@ -12,7 +12,6 @@ import {
   Switch,
   Tag,
 } from '@carbon/react';
-import { ArrowRight, Renew } from '@carbon/icons-react';
 import { AIExplainLabel } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
@@ -223,7 +222,6 @@ function ShortlistView({
           <Button
             kind="ghost"
             size="sm"
-            renderIcon={Renew}
             disabled={regenerating}
             onClick={() => onResize(shortlist.size)}
           >
@@ -351,7 +349,7 @@ function ShortlistView({
         <Button kind="tertiary" size="md" disabled>
           Send shortlist to client first
         </Button>
-        <Button renderIcon={ArrowRight} size="md" disabled={selectedCount === 0}>
+        <Button size="md" disabled={selectedCount === 0}>
           Pitch {selectedCount} experts
         </Button>
       </SelectionBar>

@@ -103,7 +103,7 @@ Rules of thumb:
 
 - Prefer Carbon's own containers: `Tile`, `ClickableTile` and `Layer` (ADR 0015). Where a custom container is still needed (hero tiles, panels, auth card, onboarding/settings cards, status pages), use `@include mx.surface-card`, which draws Carbon's tile look: `$layer-01`, square, no border or shadow. The header and side nav keep Carbon's UI Shell styling.
 - Cards are `$border-radius-16` with a bright hairline border and soft shadow. Put form content inside Carbon `<Layer>` so fields use the right contextual tokens.
-- Primary buttons are blue and square, Carbon's default (`--cds-button-radius: 0` in `_themes.scss`). The same blue is used for links and focus (ADR 0014).
+- Primary buttons are blue with 4px corners (`--cds-button-radius: $border-radius-04` in `_themes.scss`) and no trailing icon. The same blue is used for links and focus (ADR 0014). Icon-only buttons keep their icon.
 - Form fields, tags, modals and the side nav keep Carbon's own shapes and styles (ADR 0015). Don't add rounded corners, glass, glows or gradients, and don't restyle Carbon internals.
 
 Use `@include type-style('<token>')`. Productive set for the app:

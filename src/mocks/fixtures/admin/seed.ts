@@ -358,6 +358,7 @@ export function seedProjects(now = new Date()): Record<string, Project> {
       contact: { name: 'Amy Wang', email: 'amy.wang@northgate.example' },
       source: { requestId: 'req_northgate_mro', fileName: 'Scope_v2.docx' },
       createdAt: t(27),
+      pendingExpertReviews: 2,
     }),
     draftProject(PRJ_1044, {
       id: 'PRJ-1044',
@@ -370,6 +371,7 @@ export function seedProjects(now = new Date()): Record<string, Project> {
         fileName: 'Sintel_Remediation_Market_Brief.pdf',
       },
       createdAt: t(38),
+      pendingExpertReviews: 2,
     }),
     makeProject({
       id: 'PRJ-1041',
@@ -388,7 +390,6 @@ export function seedProjects(now = new Date()): Record<string, Project> {
       contact: { name: 'Bilal Haddad', email: 'bilal@haddadhospitality.example' },
       createdAt: t(60 * 72),
       approvedAt: t(60 * 70),
-      pendingExpertReviews: 4,
     }),
     makeProject({
       id: 'PRJ-1039',

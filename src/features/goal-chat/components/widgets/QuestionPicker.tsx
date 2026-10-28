@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { Button, Checkbox, IconButton, InlineNotification, Tag, TextInput } from '@carbon/react';
-import { Add, ArrowDown, ArrowRight, ArrowUp, TrashCan } from '@carbon/icons-react';
+import { ArrowDown, ArrowUp, TrashCan } from '@carbon/icons-react';
 import { AIExplainLabel } from '@/shared/ai';
 import { createId } from '@/shared/lib/id';
 import type { Question } from '../../model/brief.schema';
@@ -159,7 +159,7 @@ export function QuestionPicker({
           disabled={isDisabled}
           onChange={(event) => setDraft(event.target.value)}
         />
-        <Button type="submit" kind="tertiary" size="md" renderIcon={Add} disabled={isDisabled}>
+        <Button type="submit" kind="tertiary" size="md" disabled={isDisabled}>
           Add
         </Button>
       </form>
@@ -178,7 +178,7 @@ export function QuestionPicker({
         <span className={styles.muted} aria-live="polite">
           {selectedCount} selected · choose {MIN}–{MAX}
         </span>
-        <Button size="md" renderIcon={ArrowRight} disabled={isDisabled} onClick={submit}>
+        <Button size="md" disabled={isDisabled} onClick={submit}>
           Use {selectedCount} {selectedCount === 1 ? 'question' : 'questions'}
         </Button>
       </div>

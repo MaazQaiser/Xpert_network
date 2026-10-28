@@ -15,15 +15,7 @@ import {
   Theme,
   Toggle,
 } from '@carbon/react';
-import {
-  ArrowRight,
-  CheckmarkFilled,
-  CircleDash,
-  Microphone,
-  MicrophoneOff,
-  PhoneOff,
-  ViewOff,
-} from '@carbon/icons-react';
+import { CheckmarkFilled, CircleDash, ViewOff } from '@carbon/icons-react';
 import { Headset as HeadsetPictogram } from '@carbon/pictograms-react';
 import { AIExplainLabel } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
@@ -244,18 +236,12 @@ function LiveCall({ project, session }: { project: Project; session: CallSession
               <Button
                 kind="tertiary"
                 size="md"
-                renderIcon={isMuted ? MicrophoneOff : Microphone}
                 aria-pressed={isMuted}
                 onClick={() => setIsMuted((m) => !m)}
               >
                 {isMuted ? 'Unmute' : 'Mute'}
               </Button>
-              <Button
-                kind="danger"
-                size="md"
-                renderIcon={PhoneOff}
-                onClick={() => setIsEnding(true)}
-              >
+              <Button kind="danger" size="md" onClick={() => setIsEnding(true)}>
                 End call
               </Button>
             </>
@@ -265,7 +251,6 @@ function LiveCall({ project, session }: { project: Project; session: CallSession
               href={routes.admin.projectStep(project.id, 'booking')}
               kind="tertiary"
               size="md"
-              renderIcon={ArrowRight}
             >
               Back to booking
             </Button>

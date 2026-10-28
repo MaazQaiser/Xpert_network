@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Form, InlineNotification, PasswordInput, Stack } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
 import { isApiError, toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
 import { useConfirmPasswordReset } from '../../api/mutations';
@@ -43,7 +42,7 @@ export function ResetPasswordForm({ token }: { token: string | null }) {
           hideCloseButton
         />
         <div>
-          <Button as={Link} href={routes.forgotPassword} renderIcon={ArrowRight}>
+          <Button as={Link} href={routes.forgotPassword}>
             Request a new link
           </Button>
         </div>
@@ -62,7 +61,7 @@ export function ResetPasswordForm({ token }: { token: string | null }) {
           hideCloseButton
         />
         <div>
-          <Button as={Link} href={routes.login} renderIcon={ArrowRight}>
+          <Button as={Link} href={routes.login}>
             Log in
           </Button>
         </div>
@@ -105,7 +104,7 @@ export function ResetPasswordForm({ token }: { token: string | null }) {
           {...register('confirm')}
         />
         <div className={styles.actions}>
-          <Button type="submit" renderIcon={ArrowRight} disabled={confirm.isPending}>
+          <Button type="submit" disabled={confirm.isPending}>
             Update password
           </Button>
         </div>

@@ -20,7 +20,7 @@ import {
   TextArea,
   TextInput,
 } from '@carbon/react';
-import { ArrowRight, CheckmarkFilled, Send, Time, TrashCan, View } from '@carbon/icons-react';
+import { CheckmarkFilled, Time, TrashCan } from '@carbon/icons-react';
 import { Envelope as EmailPictogram } from '@carbon/pictograms-react';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
@@ -201,7 +201,6 @@ function DraftView({ project, draft }: { project: Project; draft: ClientDraft })
                 as={Link}
                 href={routes.admin.inboxRequest(`req_reply_${project.id}`)}
                 kind="tertiary"
-                renderIcon={ArrowRight}
               >
                 View {first}’s reply in Inbox
               </Button>
@@ -211,14 +210,10 @@ function DraftView({ project, draft }: { project: Project; draft: ClientDraft })
               <Button kind="tertiary" disabled={save.isPending} onClick={() => run('save')}>
                 Save draft
               </Button>
-              <Button kind="tertiary" renderIcon={View} onClick={() => setIsPreviewOpen(true)}>
+              <Button kind="tertiary" onClick={() => setIsPreviewOpen(true)}>
                 Preview client email
               </Button>
-              <Button
-                renderIcon={Send}
-                disabled={!check.success || save.isPending}
-                onClick={() => run('send')}
-              >
+              <Button disabled={!check.success || save.isPending} onClick={() => run('send')}>
                 Send to {first}
               </Button>
             </>

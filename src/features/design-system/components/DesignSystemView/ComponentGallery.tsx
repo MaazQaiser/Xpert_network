@@ -48,7 +48,7 @@ import {
   Tile,
   Toggle,
 } from '@carbon/react';
-import { Add, Download, Filter, TrashCan } from '@carbon/icons-react';
+import { Download, Filter } from '@carbon/icons-react';
 import { Magnify } from '@carbon/pictograms-react';
 import { AIExplainLabel } from '@/shared/ai';
 import { EmptyState, ErrorState, StatusTag, type StatusTone } from '@/shared/ui';
@@ -135,21 +135,13 @@ export function ComponentGallery() {
           <Button kind="secondary">Secondary</Button>
           <Button kind="tertiary">Tertiary</Button>
           <Button kind="ghost">Ghost</Button>
-          <Button kind="danger" renderIcon={TrashCan}>
-            Delete
-          </Button>
+          <Button kind="danger">Delete</Button>
           <Button disabled>Disabled</Button>
         </div>
         <div className={styles.row}>
-          <Button size="sm" renderIcon={Add}>
-            Small
-          </Button>
-          <Button size="md" renderIcon={Add}>
-            Medium
-          </Button>
-          <Button size="lg" renderIcon={Add}>
-            Large
-          </Button>
+          <Button size="sm">Small</Button>
+          <Button size="md">Medium</Button>
+          <Button size="lg">Large</Button>
           <IconButton kind="ghost" label="Download report">
             <Download />
           </IconButton>

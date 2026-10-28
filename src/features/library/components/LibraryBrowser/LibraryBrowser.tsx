@@ -21,7 +21,7 @@ import {
   TableRow,
   Tag,
 } from '@carbon/react';
-import { ArrowRight, Grid as GridIcon, List as ListIcon } from '@carbon/icons-react';
+import { Grid as GridIcon, List as ListIcon } from '@carbon/icons-react';
 import { Magnify } from '@carbon/pictograms-react';
 import { OptionMultiSelect } from '@/features/onboarding';
 import { formatCredits } from '@/shared/lib/credits';
@@ -261,7 +261,7 @@ function Browser() {
             }
             action={
               <div className={styles.emptyActions}>
-                <Button as={Link} href="/ask" renderIcon={ArrowRight}>
+                <Button as={Link} href="/ask">
                   Describe what you need
                 </Button>
                 {isFiltered ? (

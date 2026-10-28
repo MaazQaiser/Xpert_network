@@ -4,7 +4,7 @@ import { useEffect, useRef, type KeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { Button, IconButton } from '@carbon/react';
-import { ChevronLeft, ChevronRight, Close } from '@carbon/icons-react';
+import { Close } from '@carbon/icons-react';
 import { CountryFlag } from '@/shared/ui';
 import styles from './ReportPanel.module.scss';
 
@@ -209,25 +209,13 @@ export function ExpertPanel({
         <div className={styles.body}>{children}</div>
 
         <footer className={styles.foot}>
-          <Button
-            kind="ghost"
-            size="md"
-            renderIcon={ChevronLeft}
-            disabled={position <= 0}
-            onClick={() => onStep(-1)}
-          >
+          <Button kind="ghost" size="md" disabled={position <= 0} onClick={() => onStep(-1)}>
             Previous
           </Button>
           <span className={styles.count}>
             {position + 1} of {total}
           </span>
-          <Button
-            kind="ghost"
-            size="md"
-            renderIcon={ChevronRight}
-            disabled={position >= total - 1}
-            onClick={() => onStep(1)}
-          >
+          <Button kind="ghost" size="md" disabled={position >= total - 1} onClick={() => onStep(1)}>
             Next
           </Button>
         </footer>

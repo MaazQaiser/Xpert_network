@@ -9,7 +9,7 @@ import {
   InlineNotification,
   SkeletonText,
 } from '@carbon/react';
-import { CheckmarkFilled, CircleDash, LogoLinkedin, MagicWand, SendAlt } from '@carbon/icons-react';
+import { ArrowUpRight, CheckmarkFilled, CircleDash, LogoLinkedin } from '@carbon/icons-react';
 import { EmphasisText } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
 import { CountryFlag } from '@/shared/ui';
@@ -17,10 +17,9 @@ import { useExpertSearch, useProject, useResponses, useSendScreening } from '../
 import { EXPERT_SOURCE_LABELS, type ExtendResearch } from '../../model/expertSearch.schema';
 import type { MatchedExpert } from '../../model/match.schema';
 import type { Project } from '../../model/project.schema';
-import { AnswerToast } from './AnswerToast';
+import { FlowToast } from './AnswerToast';
 import { ExpertAvatar, ExpertProfilePanel } from './ExpertProfilePanel';
 import { ExtendResearchSteps } from './ExtendResearchSteps';
-import { StreamedAnswer } from './StreamedAnswer';
 import styles from './ExpertSearch.module.scss';
 
 /** How long each step shows before its check mark, then the "almost there" note. */
@@ -42,19 +41,24 @@ type RoundResult = { experts: MatchedExpert[]; remaining: number };
 /**
  * Home chat: the AI finds experts for a project in the open. Two steps tick off, a short note
  * says the experts are on their way, then the top 10 arrive ranked. The PM picks several and
- * sends them the screening questions, or extends the research from a card in the thread; each
- * extension runs the same way and adds its experts below.
+ * sends them the screening questions, or extends the research from a card in the thread. An
+ * extension stays in this chat as a search in progress: it does not list the new experts here.
  */
+type Notice = { key: string; label: string; title: string; action: string; onAction: () => void };
+
 export function ExpertSearch({
   projectId,
   onWorking,
   onAsk,
+  onHome,
 }: {
   projectId: string;
   /** Asks the assistant a follow-up, e.g. to show the screening answers in the chat. */
   onAsk?: (question: string) => void;
   /** Tells the answer's mascot whether the AI is still searching. */
   onWorking?: (working: boolean) => void;
+  /** Clears the chat and returns to the home summary. */
+  onHome?: () => void;
 }) {
   const project = useProject(projectId);
   const screening = useSendScreening(projectId);
@@ -69,8 +73,8 @@ export function ExpertSearch({
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<unknown>(null);
   const [isExtending, setIsExtending] = useState(false);
-  // The first expert to answer, announced in a toast a few seconds after the questions go out.
-  const [answeredBy, setAnsweredBy] = useState<{ id: string; name: string } | null>(null);
+  // The latest finished step: questions sent, then the first answer.
+  const [notice, setNotice] = useState<Notice | null>(null);
   const responses = useResponses(projectId, { enabled: false });
   const extendButton = useRef<HTMLButtonElement>(null);
   const extendCard = useRef<HTMLElement>(null);
@@ -107,14 +111,23 @@ export function ExpertSearch({
   const send = async () => {
     setIsSending(true);
     setSendError(null);
+    const batch = selected;
     try {
       let latest = sent;
-      for (const id of selected) {
+      for (const id of batch) {
         latest = (await screening.mutateAsync(id)).screeningSent;
       }
       setSent(latest);
       setSelected([]);
-      announceFirstAnswer(selected);
+      const count = batch.length;
+      setNotice({
+        key: 'sent',
+        label: 'Questions sent',
+        title: `Questions sent to ${count} ${count === 1 ? 'expert' : 'experts'}`,
+        action: 'Review other items',
+        onAction: () => onHome?.(),
+      });
+      announceFirstAnswer(batch);
     } catch (error) {
       setSendError(error);
     } finally {
@@ -133,7 +146,17 @@ export function ExpertSearch({
           (r) => batch.includes(r.expertId) && r.status === 'answered',
         );
         if (!first) return;
-        setAnsweredBy({ id: first.expertId, name: first.name ?? first.label });
+        const name = first.name ?? first.label;
+        setNotice({
+          key: first.expertId,
+          label: `${name} answered`,
+          title: `${name} answered the screening questions`,
+          action: 'Review answers',
+          onAction: () => {
+            setNotice(null);
+            onAsk?.(`Show me ${name}’s screening answers`);
+          },
+        });
       });
     }, ANSWER_TOAST_MS);
   };
@@ -145,6 +168,13 @@ export function ExpertSearch({
       ...current,
       { id: current.length + 1, offset: total, criteria, excludeIds: shown },
     ]);
+    setNotice({
+      key: 'finding',
+      label: 'Finding more experts',
+      title: 'I’m finding more experts',
+      action: 'Review other tasks',
+      onAction: () => onHome?.(),
+    });
   };
 
   if (project.isPending) {
@@ -192,9 +222,12 @@ export function ExpertSearch({
           onToggle={toggle}
           viewingId={viewingId}
           onView={setViewingId}
+          onHome={onHome}
           onDone={(result, screeningSent) => {
             setResults((current) => ({ ...current, [round.id]: result }));
             setSent(screeningSent);
+            // The "still looking" note makes way for the experts it found.
+            setNotice((current) => (current?.key === 'finding' ? null : current));
           }}
         />
       ))}
@@ -204,7 +237,6 @@ export function ExpertSearch({
           {total > 0 ? (
             <Button
               size="md"
-              renderIcon={SendAlt}
               disabled={selected.length === 0 || isSending}
               onClick={() => void send()}
             >
@@ -219,7 +251,6 @@ export function ExpertSearch({
             ref={extendButton}
             kind={total > 0 ? 'tertiary' : 'primary'}
             size="md"
-            renderIcon={MagicWand}
             disabled={isExtending}
             onClick={() => setIsExtending(true)}
           >
@@ -244,26 +275,28 @@ export function ExpertSearch({
             <CheckmarkFilled aria-hidden={true} />
             <span>
               <EmphasisText
-                text={`Screening questions sent to [[!${sent.length} ${sent.length === 1 ? 'expert' : 'experts'}]]. I’ll let you know as soon as their answers come in.`}
+                text={`Questions sent to [[!${sent.length} ${sent.length === 1 ? 'expert' : 'experts'}]] on **${project.data.name}**. I’m getting their answers.`}
               />
             </span>
           </p>
-          <p className={styles.followUp}>
-            While we wait, ask me anything else about these experts or the project and I’ll answer
-            here.
-          </p>
+          {onHome ? (
+            <div className={styles.actions}>
+              <Button kind="tertiary" size="md" onClick={onHome}>
+                Review other items
+              </Button>
+            </div>
+          ) : null}
         </div>
       ) : null}
 
-      {answeredBy ? (
-        <AnswerToast
-          key={answeredBy.id}
-          name={answeredBy.name}
-          onOpen={() => {
-            setAnsweredBy(null);
-            onAsk?.(`Show me ${answeredBy.name}’s screening answers`);
-          }}
-          onClose={() => setAnsweredBy(null)}
+      {notice ? (
+        <FlowToast
+          key={notice.key}
+          label={notice.label}
+          title={notice.title}
+          action={notice.action}
+          onAction={notice.onAction}
+          onClose={() => setNotice(null)}
         />
       ) : null}
 
@@ -284,17 +317,9 @@ export function ExpertSearch({
   );
 }
 
-/** The paragraph streams first; the table follows after this beat. */
-const TABLE_PAUSE_MS = 500;
-
-function sourcesText(criteria: ExtendResearch): string {
-  return criteria.sources.map((source) => EXPERT_SOURCE_LABELS[source]).join(' and ');
-}
-
 /**
- * The ranked experts as a plain, readable table, three columns only: the expert (name linked to
- * LinkedIn, then experience, country and source), their expertise and the match. A checkbox per
- * row picks experts for screening questions; sent rows show a check instead.
+ * Ranked experts in small columns: photo, name, years, where they are based, LinkedIn and
+ * profile match. A checkbox picks experts for screening questions; sent rows show a check.
  */
 function ExpertTable({
   project,
@@ -322,7 +347,7 @@ function ExpertTable({
 }) {
   return (
     <div className={styles.tableScroll}>
-      <table className={styles.table} aria-label="Ranked experts">
+      <table className={`${styles.table} ${styles.tableCompact}`} aria-label="Ranked experts">
         <thead>
           <tr>
             <th scope="col" className={styles.pickCol}>
@@ -336,9 +361,24 @@ function ExpertTable({
                 />
               ) : null}
             </th>
-            <th scope="col">Expert</th>
-            <th scope="col" className={styles.matchCol}>
-              Match
+            <th scope="col" className={styles.photoCol}>
+              <span className="cds--visually-hidden">Photo</span>
+            </th>
+            <th scope="col">Name</th>
+            <th scope="col" className={styles.tightCol}>
+              Year of exp
+            </th>
+            <th scope="col" className={styles.tightCol}>
+              Based in
+            </th>
+            <th scope="col" className={`${styles.tightCol} ${styles.linkedinCol}`}>
+              LinkedIn profile
+            </th>
+            <th scope="col" className={`${styles.tightCol} ${styles.matchCol}`}>
+              Profile match
+            </th>
+            <th scope="col" className={styles.viewCol}>
+              <span className="cds--visually-hidden">View profile</span>
             </th>
           </tr>
         </thead>
@@ -370,64 +410,48 @@ function ExpertTable({
                     />
                   )}
                 </td>
-                {/* Who they are: name, then experience and country. */}
-                <th scope="row" className={styles.expertCell}>
-                  <span className={styles.person}>
-                    <ExpertAvatar name={name} photoUrl={expert.photoUrl} />
-                    <span className={styles.personText}>
-                      <button
-                        type="button"
-                        className={styles.nameButton}
-                        aria-haspopup="dialog"
-                        aria-label={`Open ${name}’s profile`}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onView(expert.id);
-                        }}
-                      >
-                        {name}
-                      </button>
-                      <span className={styles.expertMeta}>
-                        <strong className={styles.expertYears}>
-                          {expert.years} {expert.years === 1 ? 'year' : 'years'}
-                        </strong>
-                        <span className={styles.dot} aria-hidden="true">
-                          ·
-                        </span>
-                        <CountryFlag code={expert.country} size="sm" short />
-                        {/* Their LinkedIn profile, when they have one. */}
-                        {expert.linkedinUrl ? (
-                          <>
-                            <span className={styles.dot} aria-hidden="true">
-                              ·
-                            </span>
-                            <a
-                              className={`${styles.source} ${styles.sourceLinkedin} ${styles.sourceLink}`}
-                              href={expert.linkedinUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              aria-label={`${name} on LinkedIn (opens in a new tab)`}
-                              title="LinkedIn profile"
-                              onClick={(event) => event.stopPropagation()}
-                            >
-                              <LogoLinkedin size={16} aria-hidden={true} />
-                            </a>
-                          </>
-                        ) : null}
-                      </span>
-                    </span>
-                  </span>
+                <td className={styles.photoCol}>
+                  <ExpertAvatar name={name} photoUrl={expert.photoUrl} size="sm" />
+                </td>
+                <th scope="row" className={styles.nameCell}>
+                  {name}
                 </th>
-                <td className={styles.matchCol}>
-                  <span className={styles.match}>
-                    <span>{expert.matchPercent}%</span>
-                    <span className={styles.matchTrack} aria-hidden="true">
-                      <span
-                        className={styles.matchFill}
-                        style={{ inlineSize: `${expert.matchPercent}%` }}
-                      />
-                    </span>
-                  </span>
+                <td className={styles.tightCol}>
+                  {expert.years} {expert.years === 1 ? 'yr' : 'yrs'}
+                </td>
+                <td className={styles.tightCol}>
+                  <CountryFlag code={expert.country} size="sm" short />
+                </td>
+                <td className={`${styles.tightCol} ${styles.linkedinCol}`}>
+                  {expert.linkedinUrl ? (
+                    <a
+                      className={`${styles.source} ${styles.sourceLinkedin} ${styles.sourceLink}`}
+                      href={expert.linkedinUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`${name} on LinkedIn (opens in a new tab)`}
+                      title="LinkedIn profile"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <LogoLinkedin size={16} aria-hidden={true} />
+                    </a>
+                  ) : (
+                    <span className={styles.none}>None</span>
+                  )}
+                </td>
+                <td className={`${styles.tightCol} ${styles.matchCol}`}>{expert.matchPercent}%</td>
+                <td className={styles.viewCol} onClick={(event) => event.stopPropagation()}>
+                  <Button
+                    kind="ghost"
+                    size="sm"
+                    hasIconOnly
+                    renderIcon={ArrowUpRight}
+                    iconDescription={`Open ${name}’s profile`}
+                    tooltipPosition="left"
+                    tooltipAlignment="center"
+                    aria-haspopup="dialog"
+                    onClick={() => onView(expert.id)}
+                  />
                 </td>
               </tr>
             );
@@ -451,6 +475,7 @@ function SearchRound({
   onToggle,
   viewingId,
   onView,
+  onHome,
   onDone,
 }: {
   project: Project;
@@ -460,6 +485,8 @@ function SearchRound({
   onToggle: (ids: string[], on: boolean) => void;
   viewingId: string | null;
   onView: (id: string) => void;
+  /** Clears the chat and returns to the home summary. */
+  onHome?: () => void;
   onDone: (result: RoundResult, screeningSent: string[]) => void;
 }) {
   const search = useExpertSearch(project.id);
@@ -519,12 +546,13 @@ function SearchRound({
       const timer = window.setTimeout(() => setStep(steps.length), STEP_MS);
       return () => window.clearTimeout(timer);
     }
-    if (step === steps.length) {
+    // An extended search stays open in this chat. It never flips over to a results table.
+    if (step === steps.length && !round.criteria) {
       const timer = window.setTimeout(() => setStep(steps.length + 1), NOTE_MS);
       return () => window.clearTimeout(timer);
     }
     return undefined;
-  }, [step, steps.length, result, error]);
+  }, [step, steps.length, result, error, round.criteria]);
 
   const isDone = step > steps.length && result !== null;
   const outcome = useRef<HTMLDivElement>(null);
@@ -569,7 +597,11 @@ function SearchRound({
             <li>
               <InlineLoading
                 status="active"
-                description="Almost there. Your experts will be here in a few moments…"
+                description={
+                  round.criteria
+                    ? 'Finding more experts…'
+                    : 'Almost there. Your experts will be here in a few moments…'
+                }
               />
             </li>
           ) : null}
@@ -591,7 +623,19 @@ function SearchRound({
       ) : null}
 
       <div ref={outcome} className={styles.outcome}>
-        {isDone && result ? (
+        {round.criteria ? (
+          <div className={styles.sentBlock}>
+            <p className={styles.sentNote} role="status">
+              I’m finding more experts. Review other tasks while I look.
+            </p>
+            {onHome ? (
+              <Button kind="tertiary" size="md" onClick={onHome}>
+                Review other tasks
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
+        {isDone && result && !round.criteria ? (
           result.experts.length === 0 ? (
             <p className={styles.summary}>
               <strong>No one in the current pool matches yet.</strong> Extend the research to look
@@ -600,44 +644,20 @@ function SearchRound({
           ) : (
             <div className={styles.result}>
               <h4 className={styles.resultTitle}>
-                {round.criteria
-                  ? `${result.experts.length} more ${result.experts.length === 1 ? 'expert' : 'experts'} for ${project.name}`
-                  : `These are the top ${result.experts.length} experts for ${project.name}`}
+                {`These are the top ${result.experts.length} experts for ${project.name}`}
               </h4>
-              {round.criteria ? (
-                <StreamedAnswer
-                  className={styles.resultIntro}
-                  pauseMs={TABLE_PAUSE_MS}
-                  text={`These are **${result.experts.length} more experts** found on ${sourcesText(round.criteria)}, ranked by how well they fit the brief. Names link to LinkedIn where they have a profile.`}
-                >
-                  <ExpertTable
-                    project={project}
-                    round={round}
-                    experts={result.experts}
-                    open={open}
-                    allOn={allOn}
-                    selected={selected}
-                    sent={sent}
-                    onToggle={onToggle}
-                    viewingId={viewingId}
-                    onView={onView}
-                  />
-                </StreamedAnswer>
-              ) : (
-                // The first round: the heading, then straight to the table.
-                <ExpertTable
-                  project={project}
-                  round={round}
-                  experts={result.experts}
-                  open={open}
-                  allOn={allOn}
-                  selected={selected}
-                  sent={sent}
-                  onToggle={onToggle}
-                  viewingId={viewingId}
-                  onView={onView}
-                />
-              )}
+              <ExpertTable
+                project={project}
+                round={round}
+                experts={result.experts}
+                open={open}
+                allOn={allOn}
+                selected={selected}
+                sent={sent}
+                onToggle={onToggle}
+                viewingId={viewingId}
+                onView={onView}
+              />
             </div>
           )
         ) : null}

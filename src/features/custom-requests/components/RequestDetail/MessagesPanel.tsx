@@ -2,7 +2,6 @@
 
 import { useState, type FormEvent } from 'react';
 import { Button, Form, InlineNotification, TextArea } from '@carbon/react';
-import { Send } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
 import { formatDateTime, formatRelative } from '@/shared/lib/dates';
 import { useSendRequestMessage } from '../../api/queries';
@@ -77,13 +76,7 @@ export function MessagesPanel({ request }: { request: CustomRequest }) {
           invalidText={error ?? undefined}
         />
         <div>
-          <Button
-            type="submit"
-            kind="tertiary"
-            size="md"
-            renderIcon={Send}
-            disabled={send.isPending}
-          >
+          <Button type="submit" kind="tertiary" size="md" disabled={send.isPending}>
             Send
           </Button>
         </div>

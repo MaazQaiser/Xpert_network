@@ -1,11 +1,10 @@
 @use '@carbon/react/scss/spacing' as *;
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
-@use '@carbon/react/scss/breakpoint' as *;
 @use '@carbon/react/scss/motion' as *;
 
-// Home chat: the client email in short. One card for the email (envelope, note, experts, what
-// the client sees), then the send step. Flat Carbon layer and hairlines, like the other cards.
+// Home chat: the client email. Envelope, note, expert profiles, then the sender's sign-off.
+// Flat Carbon layer and hairlines, like the other cards.
 
 .stack {
   display: flex;
@@ -125,34 +124,6 @@
   min-inline-size: 12rem;
 }
 
-// Below the experts: what the client sees, as label and value rows.
-.facts {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-03;
-
-  > div {
-    display: grid;
-    gap: $spacing-02 $spacing-05;
-    grid-template-columns: 1fr;
-
-    @include breakpoint(md) {
-      grid-template-columns: 6rem minmax(0, 1fr);
-    }
-  }
-
-  dt {
-    @include type-style('label-01');
-
-    color: $text-secondary;
-    padding-block-start: $spacing-01;
-  }
-
-  dd {
-    @include type-style('body-compact-01');
-  }
-}
-
 .intro {
   @include type-style('body-01');
 
@@ -248,20 +219,40 @@
   color: $text-secondary;
 }
 
-.facts {
+// The letter's close: a sign-off, then portrait, name and title.
+.signature {
+  display: flex;
+  flex-direction: column;
   padding-block-start: $spacing-05;
   border-block-start: 1px solid $border-subtle-01;
+  gap: $spacing-04;
 }
 
-.coverage {
-  display: flex;
-  flex-wrap: wrap;
-  gap: $spacing-03;
-  margin-block-start: $spacing-04;
+.signoff {
+  @include type-style('body-01');
+}
 
-  strong {
-    @include font-weight('semibold');
-  }
+.signer {
+  display: flex;
+  align-items: center;
+  gap: $spacing-04;
+}
+
+.signerText {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-01;
+  min-inline-size: 0;
+}
+
+.signerName {
+  @include type-style('heading-compact-01');
+}
+
+.signerTitle {
+  @include type-style('label-02');
+
+  color: $text-secondary;
 }
 
 // ——— The send step ————————————————————————————————————————————————————————————

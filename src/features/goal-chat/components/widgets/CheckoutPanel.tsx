@@ -10,7 +10,6 @@ import {
   StructuredListRow,
   StructuredListWrapper,
 } from '@carbon/react';
-import { ArrowLeft, ShoppingCart, SendAlt } from '@carbon/icons-react';
 import { TopUpPanel, useWallet } from '@/features/wallet';
 import { ErrorState } from '@/shared/ui';
 import { toUserMessage } from '@/shared/api';
@@ -156,19 +155,12 @@ export function CheckoutPanel({
         <div className={styles.buttonRow}>
           <Button
             size="md"
-            renderIcon={option === 'custom' ? SendAlt : ShoppingCart}
             disabled={checkout.isPending || shortfall > 0}
             onClick={() => checkout.mutate({ option, reportIds: toBuy.map((r) => r.id) })}
           >
             {checkout.isPending ? 'Processing…' : primaryLabel}
           </Button>
-          <Button
-            kind="ghost"
-            size="md"
-            renderIcon={ArrowLeft}
-            disabled={checkout.isPending}
-            onClick={onChangeOption}
-          >
+          <Button kind="ghost" size="md" disabled={checkout.isPending} onClick={onChangeOption}>
             Change option
           </Button>
         </div>

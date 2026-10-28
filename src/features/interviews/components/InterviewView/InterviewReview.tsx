@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button, InlineNotification, TextArea } from '@carbon/react';
-import { ArrowRight, Edit } from '@carbon/icons-react';
 import { AIExplainLabel } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
@@ -70,11 +69,7 @@ export function InterviewReview({ interview }: { interview: Interview }) {
           />
         ) : null}
         <div>
-          <Button
-            renderIcon={ArrowRight}
-            disabled={submit.isPending}
-            onClick={() => submit.mutate()}
-          >
+          <Button disabled={submit.isPending} onClick={() => submit.mutate()}>
             {submit.isPending ? 'Submitting…' : 'Submit interview'}
           </Button>
         </div>
@@ -159,7 +154,7 @@ function SummaryItem({
         <>
           <p className={styles.body}>{summary.text}</p>
           <div>
-            <Button kind="ghost" size="sm" renderIcon={Edit} onClick={() => setIsEditing(true)}>
+            <Button kind="ghost" size="sm" onClick={() => setIsEditing(true)}>
               Edit summary
             </Button>
           </div>
@@ -217,7 +212,7 @@ export function InterviewSubmitted({ interview }: { interview: Interview }) {
               : 'Our team checks every interview before the client sees it. Your fee shows as pending on your earnings page until then.'}
         </p>
         <div className={styles.composerActions}>
-          <Button as={Link} href={routes.expert.earnings} renderIcon={ArrowRight}>
+          <Button as={Link} href={routes.expert.earnings}>
             Go to earnings
           </Button>
           <Button as={Link} href={routes.expert.calls} kind="tertiary">

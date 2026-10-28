@@ -30,7 +30,7 @@ import {
   DismissibleTag,
   Tag,
 } from '@carbon/react';
-import { ArrowRight, Pin, Subtract } from '@carbon/icons-react';
+import { Pin, Subtract } from '@carbon/icons-react';
 import { AIExplainLabel } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
@@ -230,11 +230,7 @@ function MatchesPanel({ project, matches }: { project: Project; matches: MatchRe
             <Switch name="20" text="Top 20" />
             <Switch name="30" text="Top 30" />
           </ContentSwitcher>
-          <Button
-            renderIcon={ArrowRight}
-            disabled={generate.isPending || visible.length === 0}
-            onClick={runGenerate}
-          >
+          <Button disabled={generate.isPending || visible.length === 0} onClick={runGenerate}>
             {generate.isPending ? 'Generating…' : `Generate Top ${size} shortlist`}
           </Button>
         </div>

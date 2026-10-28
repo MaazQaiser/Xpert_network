@@ -17,7 +17,6 @@ import {
   Document,
   Edit,
   Launch,
-  Search,
   UserMultiple,
   WarningAltFilled,
 } from '@carbon/icons-react';
@@ -33,6 +32,9 @@ import {
 } from '../../model/home.schema';
 import { projectPatchSchema, PROJECT_STATUS_LABELS } from '../../model/project.schema';
 import { initials, receivedLabel, senderPhoto } from '../inboxDisplay';
+import { FlowToast } from './AnswerToast';
+import { BookMeetings } from './BookMeetings';
+import { ChatClientEmail } from './ChatClientEmail';
 import { ExpertSearch } from './ExpertSearch';
 import { ScreeningAnswers } from './ScreeningAnswers';
 import styles from './ChatBlocks.module.scss';
@@ -45,12 +47,15 @@ export function ChatBlocks({
   onAsk,
   isBusy,
   onWorking,
+  onHome,
 }: {
   blocks: ChatBlock[];
   onAsk: AskFn;
   isBusy: boolean;
   /** A block the AI is still working on (the expert search) reports it here. */
   onWorking?: (working: boolean) => void;
+  /** Clears the chat and shows the home summary again. */
+  onHome?: () => void;
 }) {
   return (
     <>
@@ -68,6 +73,7 @@ export function ChatBlocks({
                 projectId={block.projectId}
                 onWorking={onWorking}
                 onAsk={onAsk}
+                onHome={onHome}
               />
             );
           case 'screeningAnswers':
@@ -78,8 +84,13 @@ export function ChatBlocks({
                 expertId={block.expertId}
                 expertName={block.expertName}
                 onWorking={onWorking}
+                onAsk={onAsk}
               />
             );
+          case 'clientEmail':
+            return <ClientEmailBlock key={key} projectId={block.projectId} onHome={onHome} />;
+          case 'bookMeetings':
+            return <BookMeetings key={key} projectId={block.projectId} />;
           case 'createProject':
             return (
               <CreateProjectAsk
@@ -101,12 +112,7 @@ export function ChatBlocks({
           case 'action':
             return (
               <div key={key} className={styles.nextStep}>
-                <Button
-                  size="md"
-                  renderIcon={Search}
-                  disabled={isBusy}
-                  onClick={() => onAsk(block.prompt)}
-                >
+                <Button size="md" disabled={isBusy} onClick={() => onAsk(block.prompt)}>
                   {block.label}
                 </Button>
               </div>
@@ -123,7 +129,13 @@ export function ChatBlocks({
           case 'draftReply':
             return <DraftReply key={key} to={block.to} subject={block.subject} body={block.body} />;
           case 'experts':
-            return <ExpertsList key={key} items={block.items} />;
+            return <ExpertsList key={key} items={block.items} onAsk={onAsk} isBusy={isBusy} />;
+          case 'projects':
+            return <ProjectsList key={key} items={block.items} />;
+          case 'team':
+            return <TeamList key={key} items={block.items} />;
+          case 'stats':
+            return <StatsList key={key} items={block.items} />;
         }
       })}
     </>
@@ -483,8 +495,7 @@ function CreateProjectAsk({
   return (
     <div className={styles.createAsk}>
       <p>
-        Should we proceed to create the project <strong>{p.name}</strong> from this brief, or look
-        at another project brief?
+        Create <strong>{p.name}</strong> from this brief?
       </p>
       {approve.isError ? (
         <p className={styles.footerError} role="alert">
@@ -512,7 +523,7 @@ function CreateProjectAsk({
           disabled={isBusy || approve.isPending}
           onClick={() => onAsk(CARD_PROMPTS.emails)}
         >
-          Show other briefs
+          Another brief
         </Button>
       </div>
     </div>
@@ -550,7 +561,9 @@ function RequirementsReview({
   const update = useUpdateProject(projectId);
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<string | null>(null);
+  const [toastDismissed, setToastDismissed] = useState(false);
 
+  const created = step >= CREATE_STEPS.length && project.data !== undefined;
   // Tick the steps off (the last one waits for the project file); the answer then replaces them.
   useEffect(() => {
     if (step >= CREATE_STEPS.length) return undefined;
@@ -614,9 +627,18 @@ function RequirementsReview({
     // The steps make way for the result once it's in.
     <div className={styles.createdFlow}>
       <p className={styles.createdLead}>
-        Your project <strong>{p.name}</strong> has been created successfully. Now review the
-        experts’ requirements below; if you need to change any, you can edit them.
+        <strong>{p.name}</strong> is created. These are the requirements I’ll search on. Edit any
+        that are wrong.
       </p>
+      {created && !toastDismissed ? (
+        <FlowToast
+          label={`${p.name} created`}
+          title={`${p.name} created`}
+          action="Review requirements"
+          onAction={() => setToastDismissed(true)}
+          onClose={() => setToastDismissed(true)}
+        />
+      ) : null}
 
       {/* The requirements as a document card, like the brief: bar, then the page. */}
       <article className={styles.canvas} aria-label={`Requirements for ${p.id}`}>
@@ -695,7 +717,7 @@ function RequirementsReview({
       <div className={styles.reqFoot}>
         <div className={styles.footerText}>
           <p>
-            <strong>Should I find experts who match them?</strong>
+            <strong>Find experts for {p.name}?</strong>
           </p>
           <p className={styles.reqHint}>
             Something missing? Edit the brief above and this list updates.
@@ -703,7 +725,6 @@ function RequirementsReview({
         </div>
         <Button
           size="md"
-          renderIcon={Search}
           disabled={isBusy || draft !== null}
           onClick={() => onAsk(`Yes, find experts for ${p.name}`)}
         >
@@ -782,10 +803,125 @@ function DraftReply({ to, subject, body }: { to: string; subject: string; body: 
   );
 }
 
-function ExpertsList({
+function ProjectsList({
   items,
 }: {
-  items: { projectId: string; projectName: string; client: string; count: number; href: string }[];
+  items: {
+    projectId: string;
+    projectName: string;
+    client: string;
+    status: string;
+    href: string;
+  }[];
+}) {
+  return (
+    <ul className={styles.picks} aria-label="Projects">
+      {items.map((item) => (
+        <li key={item.projectId} className={`${styles.pick} ${styles.pickPlain}`}>
+          <div className={styles.pickBody}>
+            <p className={styles.pickFrom}>
+              {item.projectId} · {item.projectName}
+            </p>
+            <p className={styles.pickMeta}>
+              {item.client} · {item.status}
+            </p>
+          </div>
+          <Button
+            as={Link}
+            href={item.href}
+            kind="tertiary"
+            size="sm"
+            className={styles.pickAction}
+          >
+            Open project
+          </Button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function teamMeta(member: {
+  openProjects: number;
+  bookedProjects: number;
+  avgHoursToBrief: number | null;
+  active: boolean;
+}): string {
+  const booked = member.bookedProjects === 0 ? 'none booked' : `${member.bookedProjects} booked`;
+  const hours =
+    member.avgHoursToBrief == null
+      ? null
+      : `${member.avgHoursToBrief} ${member.avgHoursToBrief === 1 ? 'hour' : 'hours'} to a brief`;
+  return [member.active ? null : 'Inactive', `${member.openProjects} open`, booked, hours]
+    .filter((part) => part !== null)
+    .join(' · ');
+}
+
+function TeamList({
+  items,
+}: {
+  items: {
+    id: string;
+    name: string;
+    openProjects: number;
+    bookedProjects: number;
+    avgHoursToBrief: number | null;
+    active: boolean;
+  }[];
+}) {
+  return (
+    <ul className={styles.picks} aria-label="Team progress">
+      {items.map((item) => (
+        <li key={item.id} className={styles.pick}>
+          <span className={styles.avatar} aria-hidden={true}>
+            {initials(item.name)}
+          </span>
+          <div className={styles.pickBody}>
+            <p className={styles.pickFrom}>{item.name}</p>
+            <p className={styles.pickMeta}>{teamMeta(item)}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function StatsList({ items }: { items: { label: string; value: string }[] }) {
+  return (
+    <article className={styles.card} aria-label="Company progress">
+      <dl className={styles.points}>
+        {items.map((item) => (
+          <div key={item.label}>
+            <dt>{item.label}</dt>
+            <dd>{item.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </article>
+  );
+}
+
+function ClientEmailBlock({ projectId, onHome }: { projectId: string; onHome?: () => void }) {
+  const project = useProject(projectId);
+  if (!project.data) return <SkeletonText paragraph lineCount={2} />;
+  return <ChatClientEmail project={project.data} onHome={onHome} />;
+}
+
+function ExpertsList({
+  items,
+  onAsk,
+  isBusy,
+}: {
+  items: {
+    projectId: string;
+    projectName: string;
+    client: string;
+    count: number;
+    href: string;
+    prompt?: string;
+  }[];
+  onAsk: AskFn;
+  isBusy: boolean;
 }) {
   return (
     <ul className={styles.picks} aria-label="Projects with expert answers to review">
@@ -803,15 +939,27 @@ function ExpertsList({
               review
             </p>
           </div>
-          <Button
-            as={Link}
-            href={item.href}
-            kind="tertiary"
-            size="sm"
-            className={styles.pickAction}
-          >
-            Review answers
-          </Button>
+          {item.prompt ? (
+            <Button
+              kind="tertiary"
+              size="sm"
+              className={styles.pickAction}
+              disabled={isBusy}
+              onClick={() => onAsk(item.prompt ?? '')}
+            >
+              {`Review answers for ${item.projectName}`}
+            </Button>
+          ) : (
+            <Button
+              as={Link}
+              href={item.href}
+              kind="tertiary"
+              size="sm"
+              className={styles.pickAction}
+            >
+              Review answers
+            </Button>
+          )}
         </li>
       ))}
     </ul>

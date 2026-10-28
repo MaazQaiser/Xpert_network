@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { Button, IconButton, TextArea } from '@carbon/react';
-import { Add, Edit, TrashCan } from '@carbon/icons-react';
+import { Edit, TrashCan } from '@carbon/icons-react';
 import { AIExplainLabel } from '@/shared/ai';
 import { createId } from '@/shared/lib/id';
 import { useResetToAi, useUpdateProject } from '../../api/queries';
@@ -116,7 +116,6 @@ export function QuestionsCard({ project, onNotice }: QuestionsCardProps) {
         <Button
           kind="ghost"
           size="sm"
-          renderIcon={Add}
           className={styles.headerAction}
           disabled={editing !== null}
           onClick={() => setEditing({ id: null, text: '', touched: false })}

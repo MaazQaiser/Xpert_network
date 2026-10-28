@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { Button } from '@carbon/react';
-import { ArrowLeft } from '@carbon/icons-react';
 import { Magnify } from '@carbon/pictograms-react';
 import styles from './NotFoundState.module.scss';
 
@@ -21,7 +20,7 @@ export function NotFoundState({ title, message, backHref, backLabel }: NotFoundS
       <Magnify aria-hidden="true" className={styles.pictogram} />
       <h1 className={styles.title}>{title}</h1>
       <p className={styles.message}>{message}</p>
-      <Button as={Link} href={backHref} kind="tertiary" renderIcon={ArrowLeft}>
+      <Button as={Link} href={backHref} kind="tertiary">
         {backLabel}
       </Button>
     </div>

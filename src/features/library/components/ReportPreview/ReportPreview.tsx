@@ -13,7 +13,7 @@ import {
   Stack,
   Tag,
 } from '@carbon/react';
-import { ArrowRight, Certificate, Time, UserAvatar, UserMultiple } from '@carbon/icons-react';
+import { Certificate, Time, UserAvatar, UserMultiple } from '@carbon/icons-react';
 import { TopUpPanel, useWallet } from '@/features/wallet';
 import { toUserMessage } from '@/shared/api';
 import {
@@ -182,7 +182,7 @@ function PurchaseCard({ entry }: { entry: LibraryEntry }) {
         <p className={styles.help}>
           You bought this report{entry.purchasedAt ? ` on ${formatDate(entry.purchasedAt)}` : ''}.
         </p>
-        <Button as={Link} href={`/library/${entry.id}/read`} renderIcon={ArrowRight}>
+        <Button as={Link} href={`/library/${entry.id}/read`}>
           Open report
         </Button>
       </div>

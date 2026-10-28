@@ -9,7 +9,6 @@ import {
   SkeletonText,
   Stack,
 } from '@carbon/react';
-import { ArrowRight, Edit } from '@carbon/icons-react';
 import { Handshake, Time, Warning_01 as Warning } from '@carbon/pictograms-react';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
@@ -104,7 +103,7 @@ function Approved({ profile }: { profile: ExpertOnboarding }) {
         </p>
       </div>
       <div className={styles.actions}>
-        <Button as={Link} href={routes.expert.calls} renderIcon={ArrowRight}>
+        <Button as={Link} href={routes.expert.calls}>
           Browse interview requests
         </Button>
         <Button as={Link} href={routes.expert.home} kind="tertiary">
@@ -152,7 +151,6 @@ function Rejected({ profile }: { profile: ExpertOnboarding }) {
         ) : null}
         <div className={styles.actions}>
           <Button
-            renderIcon={Edit}
             disabled={reopen.isPending}
             onClick={() =>
               reopen.mutate(undefined, {
@@ -177,7 +175,7 @@ function NotSubmitted() {
     <div className={styles.root}>
       <h1 className={styles.title}>Your profile isn’t submitted yet</h1>
       <div>
-        <Button as={Link} href={routes.expert.onboarding} renderIcon={ArrowRight}>
+        <Button as={Link} href={routes.expert.onboarding}>
           Continue your profile
         </Button>
       </div>

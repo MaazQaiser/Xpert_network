@@ -22,7 +22,6 @@ import {
   TableRow,
   Tag,
 } from '@carbon/react';
-import { ArrowRight, Email } from '@carbon/icons-react';
 import { Envelope as EmailPictogram } from '@carbon/pictograms-react';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
@@ -175,17 +174,11 @@ function ResponsesView({ project, data }: { project: Project; data: ResponsesDat
         </div>
         <div className={styles.actions}>
           {waiting > 0 ? (
-            <Button
-              kind="tertiary"
-              renderIcon={Email}
-              disabled={nudge.isPending}
-              onClick={runNudge}
-            >
+            <Button kind="tertiary" disabled={nudge.isPending} onClick={runNudge}>
               Nudge {waiting} {waiting === 1 ? 'expert' : 'experts'}
             </Button>
           ) : null}
           <Button
-            renderIcon={ArrowRight}
             disabled={selected.length === 0}
             onClick={() =>
               router.push(

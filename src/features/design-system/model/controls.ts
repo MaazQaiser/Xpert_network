@@ -103,7 +103,7 @@ const buttonRadius: TokenControl = {
     name: '--cds-button-radius',
     label: 'Button radius',
     usage: 'Every Carbon button',
-    defaultPx: 0,
+    defaultPx: 4,
     min: 0,
     max: 24,
     unit: 'rem',

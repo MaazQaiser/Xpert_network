@@ -1,0 +1,66 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '../admin' as adm;
+
+.root {
+  @include adm.page;
+}
+
+.layout {
+  @include adm.split(1fr);
+}
+
+.main,
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  min-inline-size: 0;
+}
+
+.card {
+  @include adm.card;
+}
+
+.cardTitle {
+  @include adm.card-title;
+}
+
+.hint {
+  @include adm.muted;
+}
+
+.checklist {
+  @include adm.plain-list;
+
+  gap: $spacing-03;
+}
+
+.check {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.checkDone {
+  color: $support-success;
+}
+
+.tableWrap {
+  @include adm.table-wrap;
+}
+
+.expert {
+  @include type-style('heading-compact-01');
+
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-01;
+}
+
+.role {
+  @include adm.label;
+}

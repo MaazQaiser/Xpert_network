@@ -80,6 +80,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+// Labeled buttons have no trailing icon. Carbon still reserves the icon slot on the end,
+// so the end padding matches the start. Icon-only buttons keep their own padding.
+/* stylelint-disable-next-line selector-class-pattern -- Carbon's button class */
+.cds--btn:not(.cds--btn--icon-only) {
+  /* stylelint-disable-next-line carbon/layout-use -- matches Carbon's own start padding */
+  padding-inline-end: calc(var(--cds-layout-density-padding-inline-local) - 0.0625rem);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

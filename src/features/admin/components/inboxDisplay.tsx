@@ -41,6 +41,7 @@ const SENDER_PHOTOS: Record<string, string> = {
   'j.okafor@brightlinepe.example': '/images/avatars/james-okafor.jpg',
   'elena@corvidpartners.example': '/images/avatars/elena-duarte.jpg',
   'tom.becker@halden.example': '/images/avatars/tom-becker.jpg',
+  'paltu@xpertnetwork.example': '/images/avatars/palto-kersion.jpg',
 };
 
 /** The sender's photo if we have one, else null (callers show initials). */

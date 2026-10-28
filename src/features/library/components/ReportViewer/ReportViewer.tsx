@@ -4,7 +4,6 @@ import { Suspense, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Button, InlineNotification, SkeletonPlaceholder, SkeletonText, Tag } from '@carbon/react';
-import { ArrowRight, Chat, Download } from '@carbon/icons-react';
 import { Lock_01 as LockPictogram } from '@carbon/pictograms-react';
 import { isApiError } from '@/shared/api';
 import { formatDate } from '@/shared/lib/dates';
@@ -37,7 +36,7 @@ function Viewer({ itemId }: { itemId: string }) {
         title="You don’t own this report yet"
         description="Buy it to read the full report and ask questions about it."
         action={
-          <Button as={Link} href={`/library/${itemId}`} renderIcon={ArrowRight}>
+          <Button as={Link} href={`/library/${itemId}`}>
             See preview and price
           </Button>
         }
@@ -105,12 +104,11 @@ function ViewerBody({ report }: { report: Report }) {
         }
         actions={
           <>
-            <Button kind="tertiary" renderIcon={Download} onClick={() => setPdfNotice(true)}>
+            <Button kind="tertiary" onClick={() => setPdfNotice(true)}>
               Download PDF
             </Button>
             {!isWide ? (
               <Button
-                renderIcon={Chat}
                 aria-expanded={isAskOpen}
                 aria-controls="ask-report"
                 onClick={() => setIsAskOpen((open) => !open)}

@@ -11,7 +11,6 @@ import {
   SkeletonText,
   Stack,
 } from '@carbon/react';
-import { Save } from '@carbon/icons-react';
 import type { Role } from '@/features/auth';
 import { ROLE_EVENTS } from '@/features/notifications';
 import { toUserMessage } from '@/shared/api';
@@ -149,7 +148,7 @@ function PreferencesForm({
           ))}
         </RadioButtonGroup>
         <div className={styles.actions}>
-          <Button type="submit" renderIcon={Save} disabled={!isDirty || update.isPending}>
+          <Button type="submit" disabled={!isDirty || update.isPending}>
             Save notification settings
           </Button>
         </div>

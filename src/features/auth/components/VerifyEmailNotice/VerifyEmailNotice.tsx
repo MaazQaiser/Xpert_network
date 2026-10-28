@@ -9,7 +9,6 @@ import {
   SkeletonText,
   Stack,
 } from '@carbon/react';
-import { ArrowRight, Email } from '@carbon/icons-react';
 import { MailVerse } from '@carbon/pictograms-react';
 import { toUserMessage } from '@/shared/api';
 import { ErrorState } from '@/shared/ui';
@@ -48,7 +47,7 @@ export function VerifyEmailNotice() {
       <Stack gap={5}>
         <p className={styles.body}>Log in to finish verifying your email.</p>
         <div>
-          <Button as={Link} href={routes.login} renderIcon={ArrowRight}>
+          <Button as={Link} href={routes.login}>
             Log in
           </Button>
         </div>
@@ -63,7 +62,7 @@ function Verified({ user }: { user: User }) {
     <Stack gap={5}>
       <p className={styles.body}>Your email {user.email} is verified.</p>
       <div>
-        <Button as={Link} href={nextRoute(user)} renderIcon={ArrowRight}>
+        <Button as={Link} href={nextRoute(user)}>
           Continue
         </Button>
       </div>
@@ -109,7 +108,6 @@ function Pending({ user }: { user: User }) {
 
         <div className={styles.actions}>
           <Button
-            renderIcon={ArrowRight}
             className={styles.wrappingButton}
             disabled={verify.isPending}
             onClick={() =>
@@ -118,12 +116,7 @@ function Pending({ user }: { user: User }) {
           >
             <span className={styles.wrappingLabel}>Open the email link (prototype)</span>
           </Button>
-          <Button
-            kind="tertiary"
-            renderIcon={Email}
-            disabled={resend.isPending}
-            onClick={() => resend.mutate()}
-          >
+          <Button kind="tertiary" disabled={resend.isPending} onClick={() => resend.mutate()}>
             Resend email
           </Button>
         </div>

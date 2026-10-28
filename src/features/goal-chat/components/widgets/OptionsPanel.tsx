@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Button, RadioTile, TileGroup } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
 import { formatCreditsWithCurrency } from '@/shared/lib/credits';
 import { summariseCoverage, type CoverageResult } from '../../model/coverage.schema';
 import type { ResearchBrief, ResearchOption } from '../../model/brief.schema';
@@ -87,7 +86,7 @@ export function OptionsPanel({ brief, coverage, isInteractive, onChoose }: Optio
       </TileGroup>
       {isInteractive ? (
         <div>
-          <Button size="md" renderIcon={ArrowRight} onClick={() => onChoose(choice)}>
+          <Button size="md" onClick={() => onChoose(choice)}>
             Continue
           </Button>
         </div>

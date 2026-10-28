@@ -6,8 +6,9 @@ import type {
   InboxRequest,
   Project,
 } from '@/features/admin';
-import { CARD_PROMPTS, PROJECT_STATUS_LABELS } from '@/features/admin';
+import { CARD_PROMPTS, PROJECT_STATUS_LABELS, SUGGESTED_PROMPTS } from '@/features/admin';
 import { createId } from '@/shared/lib/id';
+import { seedTeam } from '../../fixtures/admin/directory';
 import type { DemoState } from '../../store/db';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -62,6 +63,26 @@ function toChatEmail(email: InboxRequest): ChatEmail {
 /** An expert who was sent a project's screening questions. */
 export type ScreenedExpert = { projectId: string; expertId: string; name: string };
 
+/** Enough of a team member for the progress report. */
+type RosterMember = {
+  id: string;
+  name: string;
+  openProjects: number;
+  bookedProjects: number;
+  avgHoursToBrief: number | null;
+  active: boolean;
+};
+
+/** Same projects the Home "Active projects" card counts. */
+function isActiveProject(project: Project): boolean {
+  return (
+    (project.status === 'matching' || project.status === 'pitching') && project.id !== 'PRJ-1039'
+  );
+}
+
+const countLabel = (count: number, singular: string, plural = `${singular}s`) =>
+  `${count} ${count === 1 ? singular : plural}`;
+
 const firstName = (name: string) => name.split(' ')[0] ?? name;
 
 /**
@@ -72,12 +93,16 @@ const firstName = (name: string) => name.split(' ')[0] ?? name;
  */
 export function assistantReply(
   text: string,
-  state: Pick<DemoState, 'adminInbox' | 'adminProjects'>,
+  state: Pick<DemoState, 'adminInbox' | 'adminProjects'> & {
+    adminBooking?: DemoState['adminBooking'];
+  },
   now = new Date(),
   /** The PM's first name, so the assistant can speak to them. */
   pmName?: string,
   /** Experts sent screening questions, so the PM can ask for one by name. */
   screened: ScreenedExpert[] = [],
+  /** Team roster. Empty when the prototype toolbar is showing no data. */
+  team: RosterMember[] = Object.values(seedTeam()),
 ): AssistantReply {
   const q = text.toLowerCase();
   const projects = Object.values(state.adminProjects);
@@ -111,9 +136,19 @@ export function assistantReply(
   // ——— Find experts for a project: the search runs in the chat ———————————————————————
   if (named && q.includes('find experts')) {
     return reply(
-      `Searching the [[!Xpert Network database]] for experts for **${named.name}**.`,
+      `Searching the [[!system’s expert listing]] for **${named.name}**.`,
       `${named.id} brief, expert profile and screening questions`,
       { blocks: [{ kind: 'expertSearch', projectId: named.id }] },
+    );
+  }
+
+  // Profiles the PM picked, as one email to the client.
+  if (named && q.includes('sharing these expert profiles')) {
+    const client = firstName(named.contact.name);
+    return reply(
+      `Here’s the email to **${client}** for **${named.name}**. It has the profiles you picked. Send it when it looks right.`,
+      `${named.id} client email`,
+      { blocks: [{ kind: 'clientEmail', projectId: named.id }] },
     );
   }
 
@@ -175,7 +210,7 @@ export function assistantReply(
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     const emails = fresh
       .map((p) => (p.source.requestId ? state.adminInbox[p.source.requestId] : undefined))
-      .filter((e): e is InboxRequest => e !== undefined)
+      .filter((e): e is InboxRequest => e !== undefined && e.status === 'brief_ready')
       .map((e) => ({
         ...toChatEmail(e),
         prompt: `Give me the brief for ${(e.projectId && state.adminProjects[e.projectId]?.name) ?? e.projectId}`,
@@ -219,8 +254,24 @@ export function assistantReply(
 
   // ——— One email, summarised, with next steps —————————————————————————————————————
   const fromEmail = inbox.find(
-    (e) => q.includes(`email from ${e.from.name.toLowerCase()}`) || q.includes(e.id),
+    (e) => q.includes(`email from ${e.from.name.toLowerCase()}`) || q.includes(e.id.toLowerCase()),
   );
+  if (fromEmail?.status === 'client_reply' && fromEmail.projectId) {
+    const booking = state.adminBooking?.[fromEmail.projectId];
+    const client = firstName(fromEmail.from.name);
+    const count = booking?.picks.length ?? 2;
+    if (booking?.stage === 'booked') {
+      return reply(`The calls with **${client}** are booked.`, `${fromEmail.from.name}’s reply`, {
+        chips: [go('View your calendar', '/admin/scheduling')],
+      });
+    }
+    const people = count === 1 ? '1 expert' : `${count} experts`;
+    return reply(
+      `**${client}** picked ${people} and wants to connect. Should I book the meetings?`,
+      `${fromEmail.from.name}’s reply`,
+      { blocks: [{ kind: 'bookMeetings', projectId: fromEmail.projectId }] },
+    );
+  }
   if (fromEmail) {
     const file = fromEmail.attachment;
     const points = [
@@ -294,13 +345,15 @@ export function assistantReply(
 
   // ——— Experts waiting for review ——————————————————————————————————————————————————
   if (q.includes('expert') && (q.includes('review') || q.includes('waiting'))) {
-    const waiting = projects.filter((p) => p.pendingExpertReviews > 0);
+    const waiting = projects
+      .filter((p) => p.pendingExpertReviews > 0)
+      .sort((a, b) => b.pendingExpertReviews - a.pendingExpertReviews || b.id.localeCompare(a.id));
     if (waiting.length === 0) {
       return reply('No expert answers are waiting for you right now.', 'All projects');
     }
     const total = waiting.reduce((sum, p) => sum + p.pendingExpertReviews, 0);
     return reply(
-      `[[!${total} expert ${total === 1 ? 'answer' : 'answers'}]] ${total === 1 ? 'is' : 'are'} waiting for your review. Open a project to read them.`,
+      `[[!${total} expert ${total === 1 ? 'answer' : 'answers'}]] ${total === 1 ? 'is' : 'are'} waiting. Pick a project and I’ll open the answers.`,
       'Expert responses across all projects',
       {
         blocks: [
@@ -312,6 +365,7 @@ export function assistantReply(
               client: p.client.name,
               count: p.pendingExpertReviews,
               href: `/admin/projects/${p.id}`,
+              prompt: `Show the screening answers for ${p.name}`,
             })),
           },
         ],
@@ -343,6 +397,165 @@ export function assistantReply(
     );
   }
 
+  // ——— Progress of every project, not only the ones still in matching or pitching ———————
+  if (q.includes('progress') && q.includes('project')) {
+    const all = projects
+      .filter((project) => project.status !== 'archived')
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    if (all.length === 0) {
+      return reply('There’s no project progress to share yet.', 'All projects');
+    }
+    return reply(
+      `Here’s where all [[!${countLabel(all.length, 'project')}]] stand.`,
+      'All projects',
+      {
+        blocks: [
+          {
+            kind: 'projects',
+            items: all.map((p) => ({
+              projectId: p.id,
+              projectName: p.name,
+              client: p.client.name,
+              status: PROJECT_STATUS_LABELS[p.status],
+              href: `/admin/projects/${p.id}`,
+            })),
+          },
+        ],
+        chips: [
+          ask(SUGGESTED_PROMPTS[1], SUGGESTED_PROMPTS[1]),
+          ask(SUGGESTED_PROMPTS[2], SUGGESTED_PROMPTS[2]),
+        ],
+      },
+    );
+  }
+
+  // ——— Active projects, the same set as the Home card ———————————————————————————————
+  if (q.includes('active') && q.includes('project')) {
+    const active = projects
+      .filter(isActiveProject)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    if (active.length === 0) {
+      return reply('You have no active projects right now.', 'Projects in matching or pitching');
+    }
+    return reply(
+      `You have [[!${countLabel(active.length, 'active project')}]]. ${
+        active.length === 1 ? 'Here’s where it stands.' : 'Here’s where each one stands.'
+      }`,
+      'Projects in matching or pitching',
+      {
+        blocks: [
+          {
+            kind: 'projects',
+            items: active.map((p) => ({
+              projectId: p.id,
+              projectName: p.name,
+              client: p.client.name,
+              status: PROJECT_STATUS_LABELS[p.status],
+              href: `/admin/projects/${p.id}`,
+            })),
+          },
+        ],
+        chips: [
+          ask(SUGGESTED_PROMPTS[1], SUGGESTED_PROMPTS[1]),
+          ask(SUGGESTED_PROMPTS[2], SUGGESTED_PROMPTS[2]),
+        ],
+      },
+    );
+  }
+
+  // ——— Team roster: who is carrying booked work, and who is inactive ————————————————
+  if (q.includes('team')) {
+    if (team.length === 0) {
+      return reply('No one is on the team roster right now.', 'Team roster');
+    }
+    const activePeople = team.filter((member) => member.active);
+    const leader = [...team].sort((a, b) => b.bookedProjects - a.bookedProjects)[0];
+    const inactive = team.filter((member) => !member.active);
+    const people = countLabel(activePeople.length, 'person', 'people');
+    let text = `[[!${people}]] ${activePeople.length === 1 ? 'is' : 'are'} active on the team.`;
+    const carrying =
+      leader && leader.bookedProjects > 0 ? `**${leader.name}** is carrying the booked work` : null;
+    const resting =
+      inactive.length > 0
+        ? `${inactive.map((member) => `**${member.name}**`).join(' and ')} ${
+            inactive.length === 1 ? 'is' : 'are'
+          } inactive`
+        : null;
+    if (carrying && resting) text += ` ${carrying}, and ${resting}.`;
+    else if (carrying || resting) text += ` ${carrying ?? resting}.`;
+    return reply(text, 'Team roster', {
+      blocks: [
+        {
+          kind: 'team',
+          items: team.map((member) => ({
+            id: member.id,
+            name: member.name,
+            openProjects: member.openProjects,
+            bookedProjects: member.bookedProjects,
+            avgHoursToBrief: member.avgHoursToBrief,
+            active: member.active,
+          })),
+        },
+      ],
+      chips: [
+        ask(SUGGESTED_PROMPTS[0], SUGGESTED_PROMPTS[0]),
+        ask(SUGGESTED_PROMPTS[2], SUGGESTED_PROMPTS[2]),
+      ],
+    });
+  }
+
+  // ——— The newest conversations in the inbox ———————————————————————————————————————
+  if (q.includes('conversation')) {
+    const recent = [...inbox].sort((a, b) => b.receivedAt.localeCompare(a.receivedAt)).slice(0, 3);
+    if (recent.length === 0) {
+      return reply('No recent conversations in your inbox.', 'Inbox, newest first');
+    }
+    const lead = recent.length === 1 ? 'Here is the' : 'Here are the';
+    return reply(
+      `${lead} [[${countLabel(recent.length, 'most recent conversation')}]] in your inbox.`,
+      'Inbox, newest first',
+      {
+        blocks: [{ kind: 'emails', items: recent.map(toChatEmail) }],
+        chips: [go('See all emails in the Inbox', '/admin/inbox')],
+      },
+    );
+  }
+
+  // ——— Company progress: stages, reviews waiting, emails that cannot become a brief ———
+  if (q.includes('company')) {
+    const drafts = projects.filter((p) => p.status === 'draft').length;
+    const inFlight = projects.filter(
+      (p) => p.status === 'matching' || p.status === 'pitching',
+    ).length;
+    const reviews = projects.reduce((sum, p) => sum + p.pendingExpertReviews, 0);
+    const stuck = inbox.filter(
+      (r) => r.status === 'needs_client_info' || r.status === 'cant_open',
+    ).length;
+    if (projects.length === 0 && reviews === 0 && stuck === 0) {
+      return reply('There’s no company progress to report yet.', 'All projects and the inbox');
+    }
+    return reply(
+      `You have ${countLabel(projects.length, 'project')}: ${drafts} still in draft and ${inFlight} in matching or pitching. [[!${reviews} expert ${reviews === 1 ? 'answer' : 'answers'}]] ${reviews === 1 ? 'is' : 'are'} waiting for review, and ${countLabel(stuck, 'email')} cannot become a brief yet.`,
+      'All projects and the inbox',
+      {
+        blocks: [
+          {
+            kind: 'stats',
+            items: [
+              { label: 'Stage', value: `${drafts} draft, ${inFlight} matching or pitching` },
+              { label: 'Reviews', value: `${reviews} waiting` },
+              { label: 'Emails stuck', value: `${stuck} cannot become a brief yet` },
+            ],
+          },
+        ],
+        chips: [
+          ask(SUGGESTED_PROMPTS[0], SUGGESTED_PROMPTS[0]),
+          ask(SUGGESTED_PROMPTS[1], SUGGESTED_PROMPTS[1]),
+        ],
+      },
+    );
+  }
+
   if (q.includes('project') || q.includes('summar') || q.includes('today')) {
     const today = projects.filter((p) => within24h(p.createdAt, now));
     if (today.length === 0) {
@@ -367,7 +580,7 @@ export function assistantReply(
   if (named) return briefReply(named);
 
   return reply(
-    'I can answer questions about your inbox, projects and experts. Try one of the suggestions, or name a project like PRJ-1042.',
+    'I can answer questions about your projects, team and recent conversations. Try one of the suggestions, or name a project like PRJ-1042.',
     'Projects inbox and project files',
   );
 

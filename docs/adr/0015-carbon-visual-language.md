@@ -11,14 +11,14 @@ Stakeholders want the product to look like the Carbon Design System everywhere, 
 
 ## Decision
 
-- **Shape.** Carbon's defaults throughout. Buttons are square (`--cds-button-radius: 0`). Form fields keep Carbon's own field style (fill and bottom border), so `src/styles/_carbon-shape.scss` is removed. Feature styles no longer set rounded corners. Circles (avatars, status dots, the notification count) stay round, as they are in Carbon.
+- **Shape.** Carbon's defaults throughout, with one radius change: every button uses Carbon's `$border-radius-04` (4px) through `--cds-button-radius` in `_themes.scss` (revised 2026-10-28). Form fields keep Carbon's own field style (fill and bottom border), so `src/styles/_carbon-shape.scss` is removed. Feature styles no longer set their own button corners. Circles (avatars, status dots, calendar day cells, the notification count) stay round, as they are in Carbon.
 - **Surfaces.** `mixins.surface-card` and `glass-fill` now draw Carbon's tile look: the `$layer-01` fill, square corners, no border, no shadow and no blur. The page has no gradient. The surface tokens (`--pt-glass-*`, `--pt-card-radius`) stay so the design system page can still override them at runtime (ADR 0013). The field-shape controls on that page were removed with the override they drove.
 - **Shell.** The header and side nav use Carbon's UI Shell styling unchanged, including Carbon's current-page indicator, so `src/styles/_carbon-side-nav.scss` is removed. `glass-chrome` is gone.
 - **Components over custom pieces.** Prefer Carbon components for new and reworked UI: `Tile`, `ClickableTile` and `Layer` for panels and cards, Carbon `Link` for inline links, Carbon buttons for suggestions. The admin Home uses these.
 - **Message box.** `FloatingComposer` uses Carbon's field look: the field fill, a strong bottom border, square corners and Carbon's 2px focus outline. The orbiting rim and breathing glow are removed.
 - **Quick suggestions.** Suggestion chips (admin Home, client chat) are Carbon ghost buttons on a `$layer-01` fill. Tertiary's ink outline and black hover read too heavy for this use.
 - **Kept.** The blue primary and navy dark theme (ADR 0014), the fonts (ADR 0014), and the admin Home mascot and its state animations.
-- **Exception (2026-10-23): admin Home ask area.** At the stakeholder's request, the docked ask area on `/admin/home` keeps a softer look: suggestion chips with 8px corners, and the message box in `FloatingComposer`'s `look="glow"` (white, 16px corners, a faint moving blue rim and a gentle glow; still for reduced motion). Every other message box keeps the Carbon field look.
+- **Exception (2026-10-23): admin Home ask area.** At the stakeholder's request, the docked ask area on `/admin/home` keeps a softer look: suggestion chips on a quiet layer fill, and the message box in `FloatingComposer`'s `look="glow"` (white, 16px corners, a faint moving blue rim and a gentle glow; still for reduced motion). The chips and the buttons inside the glow box use the same 4px button radius as every other button. Every other message box keeps the Carbon field look.
 
 ## Consequences
 

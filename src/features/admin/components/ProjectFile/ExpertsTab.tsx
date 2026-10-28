@@ -20,10 +20,8 @@ import {
   CheckmarkFilled,
   CircleDash,
   InProgress,
-  MagicWand,
   MisuseOutline,
   Renew,
-  Search,
   Send,
 } from '@carbon/icons-react';
 import { CountryFlag } from '@/shared/ui';
@@ -260,9 +258,7 @@ export function ExpertsTab({ project, onFound, onNotice }: ExpertsTabProps) {
                         The AI searches the network for people who match the expert profile and the
                         client questions.
                       </p>
-                      <Button renderIcon={Search} onClick={() => run(FIRST_BATCH)}>
-                        Start finding experts
-                      </Button>
+                      <Button onClick={() => run(FIRST_BATCH)}>Start finding experts</Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -304,7 +300,6 @@ export function ExpertsTab({ project, onFound, onNotice }: ExpertsTabProps) {
           <Button
             ref={extendButton}
             size="lg"
-            renderIcon={MagicWand}
             disabled={isBusy}
             onClick={() => setIsSheetOpen(true)}
           >

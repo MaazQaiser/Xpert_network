@@ -14,7 +14,6 @@ import {
   Stack,
   TextInput,
 } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
 import { useSignUp } from '../../api/mutations';
@@ -135,11 +134,7 @@ export function SignUpForm({ role }: { role: SignUpRole }) {
             )}
           />
           <div className={styles.actions}>
-            <Button
-              type="submit"
-              renderIcon={ArrowRight}
-              disabled={isSubmitting || signUp.isPending}
-            >
+            <Button type="submit" disabled={isSubmitting || signUp.isPending}>
               Create account
             </Button>
             <p className={styles.alt}>

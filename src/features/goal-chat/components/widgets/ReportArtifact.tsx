@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@carbon/react';
-import { Document, Download } from '@carbon/icons-react';
+import { Document } from '@carbon/icons-react';
 import { routes } from '@/shared/config/routes';
 import { useOpenReportReview } from '../ReportReview/reportReviewContext';
 import styles from './widgets.module.scss';
@@ -86,12 +86,7 @@ export function ReportArtifact({ reportId, title, finding, sources, live }: Repo
         ))}
       </ul>
       <div className={styles.buttonRow}>
-        <Button
-          size="sm"
-          kind="tertiary"
-          renderIcon={Download}
-          onClick={() => downloadReport(title, finding, sources)}
-        >
+        <Button size="sm" kind="tertiary" onClick={() => downloadReport(title, finding, sources)}>
           Download
         </Button>
         {openReport ? (

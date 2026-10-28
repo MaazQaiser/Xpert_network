@@ -2,27 +2,17 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import {
   ActionableNotification,
   Button,
   IconButton,
   InlineLoading,
   InlineNotification,
-  Tag,
   TextArea,
   TextInput,
 } from '@carbon/react';
-import {
-  ArrowRight,
-  CheckmarkFilled,
-  CircleDash,
-  Edit,
-  Email,
-  Launch,
-  Send,
-  TrashCan,
-} from '@carbon/icons-react';
+import { CheckmarkFilled, CircleDash, Edit, Email, Launch, TrashCan } from '@carbon/icons-react';
+import { useSession, type User } from '@/features/auth';
 import { AIExplainLabel } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
@@ -35,6 +25,7 @@ import {
 } from '../../model/clientDraft.schema';
 import type { Project } from '../../model/project.schema';
 import { senderPhoto } from '../inboxDisplay';
+import { FlowToast } from './AnswerToast';
 import { StreamedAnswer } from './StreamedAnswer';
 import chat from './ChatBlocks.module.scss';
 import search from './ExpertSearch.module.scss';
@@ -70,11 +61,18 @@ function initials(name: string): string {
 
 /**
  * Home chat, after the experts are handed to the client: the AI drafts the client email in the
- * open, then shows it in short (who it goes to, each expert's profile, quote and free times,
- * and which of the client's questions they cover). Send to the client sends it as drafted;
+ * open, then shows it as an email: who it is from, who it goes to, each expert's profile,
+ * and the sender's sign-off. Send to the client sends it as drafted;
  * the full editor stays one link away.
  */
-export function ChatClientEmail({ project }: { project: Project }) {
+export function ChatClientEmail({
+  project,
+  onHome,
+}: {
+  project: Project;
+  /** Returns to the home summary once the email has gone. */
+  onHome?: () => void;
+}) {
   const draft = useClientDraft(project.id);
   const [step, setStep] = useState(0);
   const outcome = useRef<HTMLDivElement>(null);
@@ -136,15 +134,26 @@ export function ChatClientEmail({ project }: { project: Project }) {
       ) : null}
 
       <div ref={outcome} className={search.outcome}>
-        {isDone ? <EmailSummary project={project} draft={draft.data} /> : null}
+        {isDone ? <EmailSummary project={project} draft={draft.data} onHome={onHome} /> : null}
       </div>
     </section>
   );
 }
 
-function EmailSummary({ project, draft }: { project: Project; draft: ClientDraft }) {
+function EmailSummary({
+  project,
+  draft,
+  onHome,
+}: {
+  project: Project;
+  draft: ClientDraft;
+  onHome?: () => void;
+}) {
+  const session = useSession();
+  const sender = session.data?.user ?? null;
   const save = useSaveClientDraft(project.id);
   const [error, setError] = useState<unknown>(null);
+  const [toast, setToast] = useState(false);
   const sentNote = useRef<HTMLParagraphElement>(null);
   const first = draft.to.name.split(' ')[0] ?? draft.to.name;
   const count = draft.experts.length;
@@ -167,12 +176,6 @@ function EmailSummary({ project, draft }: { project: Project; draft: ClientDraft
     check && !check.success
       ? check.error.issues.find((i) => i.path[0] === field)?.message
       : undefined;
-
-  const coverage = draft.questionTopics.map((topic, index) => ({
-    topic,
-    letters: shown.filter((e) => e.covers.includes(index)).map((e) => e.letter),
-  }));
-  const uncovered = coverage.filter((c) => c.letters.length === 0).length;
 
   // Once sent, the confirmation comes into view.
   useEffect(() => {
@@ -201,7 +204,10 @@ function EmailSummary({ project, draft }: { project: Project; draft: ClientDraft
         expertIds: draft.experts.map((e) => e.expertId),
         settings,
       },
-      { onError: setError },
+      {
+        onSuccess: () => setToast(true),
+        onError: setError,
+      },
     );
   };
 
@@ -271,28 +277,17 @@ function EmailSummary({ project, draft }: { project: Project; draft: ClientDraft
             </header>
 
             <div className={styles.emailBody}>
-              {/* The envelope, as in a mail app: a To line with the recipient as a chip, then the
-                  subject, each on its own ruled line. */}
+              {/* The envelope, as in a mail app: from, to, then the subject, each on its own line. */}
               <div className={styles.envelope}>
+                {sender ? (
+                  <div className={styles.mailRow}>
+                    <span className={styles.mailLabel}>From</span>
+                    <PersonChip name={sender.name} detail={sender.title} email={sender.email} />
+                  </div>
+                ) : null}
                 <div className={styles.mailRow}>
                   <span className={styles.mailLabel}>To</span>
-                  <span className={styles.recipient} title={draft.to.email}>
-                    <span className={styles.recipientAvatar} aria-hidden="true">
-                      {senderPhoto(draft.to.email) ? (
-                        <Image
-                          src={senderPhoto(draft.to.email) ?? ''}
-                          alt=""
-                          width={24}
-                          height={24}
-                          className={styles.photo}
-                        />
-                      ) : (
-                        initials(draft.to.name)
-                      )}
-                    </span>
-                    <span className={styles.recipientName}>{draft.to.name}</span>
-                    <span className={styles.recipientEmail}>{draft.to.email}</span>
-                  </span>
+                  <PersonChip name={draft.to.name} detail={draft.to.email} email={draft.to.email} />
                 </div>
                 <div className={styles.mailRow}>
                   <span className={styles.mailLabel} id={`email-subject-label-${project.id}`}>
@@ -352,30 +347,7 @@ function EmailSummary({ project, draft }: { project: Project; draft: ClientDraft
                 ))}
               </ul>
 
-              {/* Which of the client's questions the experts cover. */}
-              <dl className={styles.facts}>
-                <div>
-                  <dt>Coverage</dt>
-                  <dd>
-                    <strong>
-                      {uncovered === 0
-                        ? `All ${coverage.length} of ${first}’s questions covered`
-                        : `${coverage.length - uncovered} of ${coverage.length} questions covered`}
-                    </strong>
-                    {/* Each question as a chip, with the expert letters that cover it. */}
-                    <ul className={styles.coverage} aria-label="Questions covered">
-                      {coverage.map((c, index) => (
-                        <li key={c.topic}>
-                          <Tag type={c.letters.length > 0 ? 'cool-gray' : 'red'} size="md">
-                            Q{index + 1} · {c.topic} ·{' '}
-                            <strong>{c.letters.join(', ') || 'not covered'}</strong>
-                          </Tag>
-                        </li>
-                      ))}
-                    </ul>
-                  </dd>
-                </div>
-              </dl>
+              {sender ? <EmailSignature user={sender} /> : null}
             </div>
           </article>
 
@@ -394,23 +366,28 @@ function EmailSummary({ project, draft }: { project: Project; draft: ClientDraft
               <p ref={sentNote} className={styles.sentNote} role="status">
                 <CheckmarkFilled aria-hidden={true} />
                 <span>
-                  Sent to <strong>{draft.to.name}</strong>. {first}’s reply with the picks is in
-                  your Inbox.
+                  Sent to <strong>{draft.to.name}</strong> for <strong>{project.name}</strong>. I’ll
+                  watch for the reply.
                 </span>
               </p>
-              <Button
-                as={Link}
-                href={routes.admin.inboxRequest(`req_reply_${project.id}`)}
-                kind="tertiary"
-                size="md"
-                renderIcon={ArrowRight}
-              >
-                View {first}’s reply
-              </Button>
+              {onHome ? (
+                <Button kind="tertiary" size="md" onClick={onHome}>
+                  Review other tasks
+                </Button>
+              ) : null}
+              {toast ? (
+                <FlowToast
+                  label={`Email sent to ${draft.to.name}`}
+                  title={`Email sent to ${draft.to.name}`}
+                  action="Review other tasks"
+                  onAction={() => onHome?.()}
+                  onClose={() => setToast(false)}
+                />
+              ) : null}
             </div>
           ) : (
             <div className={styles.foot}>
-              <Button renderIcon={Send} disabled={isEditing || save.isPending} onClick={send}>
+              <Button disabled={isEditing || save.isPending} onClick={send}>
                 {save.isPending ? 'Sending…' : `Send to ${first}`}
               </Button>
             </div>
@@ -418,6 +395,49 @@ function EmailSummary({ project, draft }: { project: Project; draft: ClientDraft
         </div>
       </StreamedAnswer>
     </div>
+  );
+}
+
+/** A person on a mail line: portrait, name, then their address or title. */
+function PersonChip({ name, detail, email }: { name: string; detail: string; email: string }) {
+  const photo = senderPhoto(email);
+  return (
+    <span className={styles.recipient} title={email}>
+      <span className={styles.recipientAvatar} aria-hidden="true">
+        {photo ? (
+          <Image src={photo} alt="" width={24} height={24} className={styles.photo} />
+        ) : (
+          initials(name)
+        )}
+      </span>
+      <span className={styles.recipientName}>{name}</span>
+      <span className={styles.recipientEmail}>{detail}</span>
+    </span>
+  );
+}
+
+/** The close of the email: sign-off, then the sender’s portrait, name and title. */
+function EmailSignature({ user }: { user: User }) {
+  const photo = senderPhoto(user.email);
+  return (
+    <footer className={styles.signature}>
+      <p className={styles.signoff}>Best regards,</p>
+      <div className={styles.signer}>
+        <span className={styles.avatar} aria-hidden="true">
+          {photo ? (
+            <Image src={photo} alt="" width={32} height={32} className={styles.photo} />
+          ) : (
+            initials(user.name)
+          )}
+        </span>
+        <div className={styles.signerText}>
+          <p className={styles.signerName}>{user.name}</p>
+          <p className={styles.signerTitle}>
+            {user.title}, {user.organisation}
+          </p>
+        </div>
+      </div>
+    </footer>
   );
 }
 

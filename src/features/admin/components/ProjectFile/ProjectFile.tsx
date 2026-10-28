@@ -16,7 +16,6 @@ import {
   Tabs,
   Tag,
 } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
 import { AIExplainLabel } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
@@ -147,7 +146,6 @@ function ProjectFileView({ project }: { project: Project }) {
                   as={Link}
                   href={routes.admin.projectStep(project.id, 'responses')}
                   size="md"
-                  renderIcon={ArrowRight}
                 >
                   View screening answers ({sentCount})
                 </Button>

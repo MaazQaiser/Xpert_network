@@ -26,7 +26,7 @@ import {
   TextArea,
   Tile,
 } from '@carbon/react';
-import { ArrowRight, Chat, CheckmarkFilled, DocumentExport } from '@carbon/icons-react';
+import { Chat, CheckmarkFilled, DocumentExport } from '@carbon/icons-react';
 import { Calendar as CalendarPictogram } from '@carbon/pictograms-react';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
@@ -356,7 +356,6 @@ function AvailabilityView({ project, data }: { project: Project; data: Availabil
               <Button
                 as={Link}
                 href={routes.admin.projectStep(project.id, next.step)}
-                renderIcon={ArrowRight}
                 className={styles.send}
               >
                 {next.label}
@@ -364,7 +363,6 @@ function AvailabilityView({ project, data }: { project: Project; data: Availabil
             </>
           ) : (
             <Button
-              renderIcon={ArrowRight}
               className={styles.send}
               disabled={ready.length === 0 || action.isPending}
               onClick={() =>

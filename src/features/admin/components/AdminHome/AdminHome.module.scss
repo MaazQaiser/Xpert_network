@@ -2,8 +2,8 @@
 @use '@carbon/react/scss/theme' as *;
 @use '@carbon/react/scss/type' as *;
 @use '@carbon/react/scss/breakpoint' as *;
-@use '@carbon/react/scss/border-radius' as radius;
 @use '@carbon/react/scss/motion' as *;
+@use '@carbon/react/scss/border-radius' as radius;
 @use '../../../../styles/mixins' as mx;
 @use '../../../../styles/tokens' as *;
 
@@ -49,6 +49,55 @@ $pt-mascot-float: 6s;
   flex-direction: column;
   align-items: center;
   text-align: center;
+}
+
+// A client reply waiting to be booked, sitting under the greeting.
+.cue {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-05;
+  inline-size: 100%;
+  margin-block-start: $spacing-06;
+  padding: $spacing-04 $spacing-05;
+  border: 1px solid $border-subtle-01;
+  background: $layer-01;
+  color: $text-primary;
+  cursor: pointer;
+  text-align: start;
+
+  &:hover {
+    background: $layer-hover-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+}
+
+.cueBody {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  min-inline-size: 0;
+}
+
+.cueTitle {
+  @include type-style('heading-compact-01');
+}
+
+.cueSubject {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.cueAction {
+  @include type-style('body-compact-01');
+
+  flex: none;
+  color: $link-primary;
 }
 
 // ——— Mascot ————————————————————————————————————————————————————————————————
@@ -238,7 +287,7 @@ $pt-mascot-think: 1.4s;
   }
 }
 
-// The intro sits right under the greeting as plain text.
+// A short brief under the greeting: one sentence a line, counts inside the sentence.
 .lede {
   @include type-style('body-02');
 
@@ -246,6 +295,10 @@ $pt-mascot-think: 1.4s;
   margin-block-start: $spacing-03;
   color: $text-secondary;
   text-wrap: pretty;
+}
+
+.ledeLine {
+  display: block;
 }
 
 // ——— Today: tip and counts ————————————————————————————————————————————————————
@@ -337,6 +390,7 @@ $pt-mascot-think: 1.4s;
   align-self: flex-end;
   max-inline-size: 80%;
   padding: $spacing-03 $spacing-05;
+  border-radius: radius.$border-radius-04;
   animation: bubble-in $duration-moderate-02 motion(entrance, expressive) both;
   background: $interactive;
   color: $text-on-color;
@@ -367,7 +421,7 @@ $pt-mascot-think: 1.4s;
 .rise {
   display: flex;
   flex-direction: column;
-  gap: $spacing-06;
+  gap: $spacing-05;
 }
 
 @keyframes rise-in {
@@ -454,14 +508,14 @@ $pt-mascot-think: 1.4s;
   }
 }
 
-// Suggestions are light Carbon ghost buttons on a $layer-01 fill with 8px corners (ADR 0015
-// exception, with the glow field below), sharing one row edge to edge; a narrow page wraps.
+// Suggestions are light Carbon ghost buttons on a $layer-01 fill, sharing one row edge to edge;
+// a narrow page wraps. Corners come from --cds-button-radius (4px).
 // The ask bar keeps the cards' column width on Home and in the chat, so it never jumps.
 .root .ask {
   max-inline-size: $home-width;
 }
 
-// Three suggestions in the same three columns (and gap) as the cards above, so edges line up.
+// Three suggestions in the same three columns as the cards above, so the edges line up.
 .prompts {
   display: grid;
   gap: $spacing-04;
@@ -476,8 +530,8 @@ $pt-mascot-think: 1.4s;
   }
 }
 
-// Doubled class outranks Carbon's button root rule: width, height, corners, a quiet layer fill
-// and ink text, centred.
+// Doubled class outranks Carbon's button root rule: width, height, a quiet layer fill
+// and ink text, centred. Corners stay on Carbon's button radius.
 .prompt.prompt {
   justify-content: center;
   inline-size: 100%;
@@ -492,7 +546,6 @@ $pt-mascot-think: 1.4s;
   // No outline, as in the reference: the fill is quiet (~1.07:1 to the page), and the chip is
   // identified by its own label (text 15.7:1), which WCAG 1.4.11 accepts for buttons.
   border: 1px solid transparent;
-  border-radius: radius.$border-radius-08;
   background: $layer-01;
   color: $text-primary;
 

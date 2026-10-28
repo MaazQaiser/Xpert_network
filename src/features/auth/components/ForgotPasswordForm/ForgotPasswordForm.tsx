@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Form, InlineNotification, Stack, TextInput } from '@carbon/react';
-import { ArrowRight, Email } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
 import { useRequestPasswordReset } from '../../api/mutations';
@@ -38,16 +37,11 @@ export function ForgotPasswordForm() {
           hideCloseButton
         />
         <div className={styles.actions}>
-          <Button
-            as={Link}
-            href={routes.resetPassword(`demo-${request.data.sentAt}`)}
-            renderIcon={ArrowRight}
-          >
+          <Button as={Link} href={routes.resetPassword(`demo-${request.data.sentAt}`)}>
             Open the reset link (prototype)
           </Button>
           <Button
             kind="tertiary"
-            renderIcon={Email}
             onClick={() => request.mutate(getValues('email'))}
             disabled={request.isPending}
           >
@@ -84,7 +78,7 @@ export function ForgotPasswordForm() {
           {...register('email')}
         />
         <div className={styles.actions}>
-          <Button type="submit" renderIcon={ArrowRight} disabled={request.isPending}>
+          <Button type="submit" disabled={request.isPending}>
             Send reset link
           </Button>
           <Link href={routes.login}>Back to log in</Link>

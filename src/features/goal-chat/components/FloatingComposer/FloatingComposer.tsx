@@ -128,6 +128,7 @@ export function FloatingComposer({
             iconDescription={isBusy ? 'Wait for the reply to finish' : 'Send'}
             tooltipPosition="top"
             disabled={!canSend}
+            className={look === 'glow' ? styles.send : undefined}
           />
         </div>
       </form>

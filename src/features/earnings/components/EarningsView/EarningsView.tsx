@@ -15,7 +15,6 @@ import {
   TextInput,
 } from '@carbon/react';
 import { Banking } from '@carbon/pictograms-react';
-import { ArrowRight, Edit } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
 import { formatDate } from '@/shared/lib/dates';
@@ -99,11 +98,7 @@ function EarningsContent({ earnings }: { earnings: Earnings }) {
                 : `You can request a payout from ${formatUsd(minPayoutUsd)}`}
           </p>
           <div>
-            <Button
-              renderIcon={ArrowRight}
-              disabled={!canRequest || request.isPending}
-              onClick={() => setDialog('payout')}
-            >
+            <Button disabled={!canRequest || request.isPending} onClick={() => setDialog('payout')}>
               Request payout
             </Button>
           </div>
@@ -140,7 +135,7 @@ function EarningsContent({ earnings }: { earnings: Earnings }) {
           <h2 id="method-heading" className={styles.cardTitle}>
             Payout method
           </h2>
-          <Button kind="ghost" size="sm" renderIcon={Edit} onClick={() => setDialog('method')}>
+          <Button kind="ghost" size="sm" onClick={() => setDialog('method')}>
             {method ? 'Change' : 'Add payout method'}
           </Button>
         </div>

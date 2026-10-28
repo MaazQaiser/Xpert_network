@@ -13,7 +13,6 @@ import {
   SkeletonText,
   Stack,
 } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
 import { useBreakpointUp } from '@/shared/hooks/useMediaQuery';
@@ -84,7 +83,6 @@ function ExpertOnboardingView({ profile }: { profile: ExpertOnboarding }) {
           <Button
             as={Link}
             href={profile.status === 'approved' ? routes.expert.home : routes.expert.pending}
-            renderIcon={ArrowRight}
           >
             {profile.status === 'approved' ? 'Go to expert home' : 'See review status'}
           </Button>

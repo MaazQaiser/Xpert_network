@@ -15,7 +15,6 @@ import {
   Stack,
   TextInput,
 } from '@carbon/react';
-import { UserMultiple } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
 import { useLogin } from '../../api/useLogin';
@@ -136,7 +135,6 @@ export function LoginForm({ realm }: LoginFormProps) {
           <Button
             kind="secondary"
             size="md"
-            renderIcon={UserMultiple}
             aria-expanded={demoOpen}
             aria-controls="demo-accounts"
             onClick={() => setDemoOpen((open) => !open)}

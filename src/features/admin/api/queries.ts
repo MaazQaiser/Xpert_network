@@ -266,7 +266,12 @@ export function useSendScreening(id: string) {
         schema: screeningResultSchema,
       }),
     // The project file's "View screening answers" counts who was sent the questions.
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.responses(id) }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: adminKeys.responses(id) });
+      void queryClient.invalidateQueries({ queryKey: adminKeys.project(id) });
+      void queryClient.invalidateQueries({ queryKey: adminKeys.projects() });
+      void queryClient.invalidateQueries({ queryKey: adminKeys.summary() });
+    },
   });
 }
 
@@ -307,6 +312,7 @@ export function useAvailability(id: string, experts: string[]) {
 
 /** Screen 09 actions: nudge, resend compliance, message an expert, send to the client. */
 export function useAvailabilityAction(id: string) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: AvailabilityAction) =>
       apiRequest(`/admin/projects/${id}/availability`, {
@@ -314,6 +320,12 @@ export function useAvailabilityAction(id: string) {
         body,
         schema: availabilityActionResultSchema,
       }),
+    onSuccess: (_result, body) => {
+      if (body.action === 'prepare_client') {
+        return queryClient.invalidateQueries({ queryKey: adminKeys.clientDraft(id) });
+      }
+      return undefined;
+    },
   });
 }
 
@@ -342,6 +354,8 @@ export function useSaveClientDraft(id: string) {
       if (draft.sentAt) {
         void queryClient.invalidateQueries({ queryKey: adminKeys.inbox() });
         void queryClient.invalidateQueries({ queryKey: adminKeys.booking(id) });
+        void queryClient.invalidateQueries({ queryKey: adminKeys.summary() });
+        void queryClient.invalidateQueries({ queryKey: adminKeys.projects() });
       }
     },
   });
@@ -365,6 +379,8 @@ export function useBookingAction(id: string) {
     onSuccess: (booking) => {
       queryClient.setQueryData(adminKeys.booking(id), booking);
       void queryClient.invalidateQueries({ queryKey: adminKeys.inbox() });
+      void queryClient.invalidateQueries({ queryKey: adminKeys.summary() });
+      void queryClient.invalidateQueries({ queryKey: adminKeys.schedule() });
     },
   });
 }

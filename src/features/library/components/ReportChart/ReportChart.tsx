@@ -5,7 +5,6 @@ import { SimpleBarChart } from '@carbon/charts-react';
 import { ChartTheme, ScaleTypes, type BarChartOptions } from '@carbon/charts';
 import '@carbon/charts-react/styles.css';
 import { Button } from '@carbon/react';
-import { DataTable as DataTableIcon } from '@carbon/icons-react';
 import { useThemePreference } from '@/providers/ThemeProvider';
 import type { Chart } from '../../model/report.schema';
 import styles from './ReportChart.module.scss';
@@ -43,7 +42,6 @@ export function ReportChart({ chart, caption }: { chart: Chart; caption?: string
         <Button
           kind="ghost"
           size="sm"
-          renderIcon={DataTableIcon}
           aria-expanded={showTable}
           aria-controls={tableId}
           onClick={() => setShowTable((shown) => !shown)}

@@ -1,0 +1,19 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/theme' as *;
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+}
+
+.meta {
+  @include type-style('label-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+  color: $text-secondary;
+}

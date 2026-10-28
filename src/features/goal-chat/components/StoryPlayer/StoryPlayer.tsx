@@ -3,7 +3,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { Button } from '@carbon/react';
-import { PauseFilled, PlayFilledAlt, Renew } from '@carbon/icons-react';
 import { routes } from '@/shared/config/routes';
 import type { StoryPlaybackStatus } from '../../hooks/useStoryPlayback';
 import styles from './StoryPlayer.module.scss';
@@ -39,7 +38,7 @@ export function StoryPlayer({
             Messages arrive one at a time, the way a live brief does. Pause, replay and reset are in
             prototype controls.
           </p>
-          <Button size="lg" renderIcon={PlayFilledAlt} onClick={onPlay}>
+          <Button size="lg" onClick={onPlay}>
             Play conversation
           </Button>
         </div>
@@ -49,16 +48,16 @@ export function StoryPlayer({
       {status === 'ready' ? null : (
         <div className={styles.dock}>
           {status === 'playing' ? (
-            <Button kind="tertiary" size="sm" renderIcon={PauseFilled} onClick={onPause}>
+            <Button kind="tertiary" size="sm" onClick={onPause}>
               Pause
             </Button>
           ) : null}
           {status === 'paused' ? (
-            <Button size="sm" renderIcon={PlayFilledAlt} onClick={onPlay}>
+            <Button size="sm" onClick={onPlay}>
               Resume
             </Button>
           ) : null}
-          <Button kind="tertiary" size="sm" renderIcon={Renew} onClick={onReplay}>
+          <Button kind="tertiary" size="sm" onClick={onReplay}>
             Replay
           </Button>
           <p className={styles.progress} aria-live="polite">

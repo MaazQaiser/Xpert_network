@@ -1,7 +1,6 @@
 'use client';
 
 import { Button, TextArea } from '@carbon/react';
-import { Undo } from '@carbon/icons-react';
 import { useResetToAi, useUpdateProject } from '../../api/queries';
 import { isEdited, projectPatchSchema, type Project } from '../../model/project.schema';
 import type { ProjectNotice } from './ProjectFile';
@@ -78,7 +77,6 @@ export function BriefCard({ project, draft, onDraftChange: setDraft, onNotice }:
           <Button
             kind="ghost"
             size="sm"
-            renderIcon={Undo}
             onClick={() =>
               reset.mutate(
                 { part: 'brief' },

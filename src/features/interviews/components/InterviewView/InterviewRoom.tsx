@@ -13,21 +13,7 @@ import {
   RadioButtonGroup,
   TextArea,
 } from '@carbon/react';
-import {
-  Chat,
-  CheckmarkFilled,
-  CircleDash,
-  InProgress,
-  Information,
-  Locked,
-  Microphone,
-  Pause,
-  Play,
-  Renew,
-  Send,
-  StopFilled,
-  VolumeUp,
-} from '@carbon/icons-react';
+import { CheckmarkFilled, CircleDash, InProgress, Information } from '@carbon/icons-react';
 import { AIStepIndicator, StreamingText, useAIStream } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
 import { createId } from '@/shared/lib/id';
@@ -153,7 +139,6 @@ export function InterviewRoom({ interview }: { interview: Interview }) {
             <Button
               kind="tertiary"
               size="md"
-              renderIcon={Pause}
               disabled={isBusy || update.isPending}
               onClick={() => update.mutate({ status: 'paused' })}
             >
@@ -225,7 +210,7 @@ export function InterviewRoom({ interview }: { interview: Interview }) {
                 className={styles.notice}
               />
               <div>
-                <Button kind="primary" size="md" renderIcon={Renew} onClick={() => send(pending)}>
+                <Button kind="primary" size="md" onClick={() => send(pending)}>
                   Resume
                 </Button>
               </div>
@@ -270,7 +255,7 @@ export function InterviewRoom({ interview }: { interview: Interview }) {
                   invalidText={inputError ?? undefined}
                 />
                 <div className={styles.composerActions}>
-                  <Button type="submit" renderIcon={Send} disabled={isBusy || connectionLost}>
+                  <Button type="submit" disabled={isBusy || connectionLost}>
                     {isVoice ? 'Done' : 'Send answer'}
                   </Button>
                   <Button
@@ -282,7 +267,6 @@ export function InterviewRoom({ interview }: { interview: Interview }) {
                   </Button>
                   <Button
                     kind="ghost"
-                    renderIcon={Locked}
                     disabled={isBusy || connectionLost}
                     onClick={() =>
                       send({ turnId: createId('turn'), action: 'confidential', text: '' })
@@ -300,7 +284,6 @@ export function InterviewRoom({ interview }: { interview: Interview }) {
               <Button
                 kind="ghost"
                 size="sm"
-                renderIcon={isVoice ? Chat : Microphone}
                 disabled={isBusy || update.isPending}
                 onClick={() => {
                   speech.stopSpeaking();
@@ -448,7 +431,7 @@ function PausedPanel({
           : `Your answers are saved and the clock is stopped. You’ll pick up at ${section?.title.toLowerCase() ?? 'the next question'}.`}
       </p>
       <div>
-        <Button renderIcon={Play} disabled={isPending} onClick={onResume}>
+        <Button disabled={isPending} onClick={onResume}>
           Resume
         </Button>
       </div>
@@ -485,30 +468,18 @@ function VoiceBar({
               : 'Voice answers aren’t available in this browser, so type your answer; questions are still read aloud.'}
       </p>
       <div className={styles.voiceActions}>
-        <Button
-          kind="ghost"
-          size="sm"
-          renderIcon={VolumeUp}
-          disabled={!speech.canSpeak || disabled}
-          onClick={onReplay}
-        >
+        <Button kind="ghost" size="sm" disabled={!speech.canSpeak || disabled} onClick={onReplay}>
           Replay question
         </Button>
         {speech.canListen ? (
           speech.isListening ? (
-            <Button
-              kind="secondary"
-              size="md"
-              renderIcon={StopFilled}
-              onClick={speech.stopListening}
-            >
+            <Button kind="secondary" size="md" onClick={speech.stopListening}>
               Stop
             </Button>
           ) : (
             <Button
               kind="secondary"
               size="md"
-              renderIcon={Microphone}
               disabled={disabled}
               onClick={() => {
                 speech.stopSpeaking();

@@ -162,6 +162,9 @@ describe('admin mock API (F11–F12)', () => {
       expertIds: three,
       settings: draft.body.settings,
     });
+    const summary = await call('/api/admin/summary');
+    expect(summary.body.newProjectEmails).toBe(2);
+    expect(summary.body.bookingEmail).toMatchObject({ projectId: story.id, pickCount: 2 });
     await call(`${base}/booking`, 'POST', { action: 'sync', standbyIds: [] });
     const booking = db.get().adminBooking[story.id]!;
     expect(booking.picks[1]?.note).toBeTruthy();
@@ -169,6 +172,12 @@ describe('admin mock API (F11–F12)', () => {
       action: 'lock',
       message: { ...booking.message, attachInvites: true, revealNames: true },
     });
+    expect((await call('/api/admin/summary')).body.bookingEmail).toBeNull();
+    const schedule = await call('/api/admin/schedule');
+    const meetings = schedule.body.meetings as { projectId: string; kind: string }[];
+    expect(
+      meetings.some((meeting) => meeting.projectId === story.id && meeting.kind === 'booked'),
+    ).toBe(true);
 
     const session = await call(`${base}/call`);
     const topics = session.body.questionTopics as string[];
@@ -188,7 +197,20 @@ describe('admin mock API (F11–F12)', () => {
     expect(body.text).toContain('[[!4 expert answers]] are waiting');
     expect((body.blocks as unknown[])[0]).toMatchObject({
       kind: 'experts',
-      items: [{ projectId: 'PRJ-1040', count: 4, href: '/admin/projects/PRJ-1040' }],
+      items: [
+        {
+          projectId: 'PRJ-1044',
+          count: 2,
+          href: '/admin/projects/PRJ-1044',
+          prompt: 'Show the screening answers for Soil & groundwater remediation, BE / NL / DE',
+        },
+        {
+          projectId: 'PRJ-1043',
+          count: 2,
+          href: '/admin/projects/PRJ-1043',
+          prompt: 'Show the screening answers for UK MRO carve-out, Part 145 readiness',
+        },
+      ],
     });
   });
 });

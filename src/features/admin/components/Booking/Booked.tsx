@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button, InlineNotification, Tag } from '@carbon/react';
-import { ArrowRight, CheckmarkFilled, CircleDash, Unlocked } from '@carbon/icons-react';
+import { CheckmarkFilled, CircleDash } from '@carbon/icons-react';
 import { AIExplainLabel } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
@@ -104,11 +104,7 @@ function BookedView({ project, booking }: { project: Project; booking: Booking }
           >
             Book another expert
           </Button>
-          <Button
-            as={Link}
-            href={routes.admin.projectStep(project.id, 'call')}
-            renderIcon={ArrowRight}
-          >
+          <Button as={Link} href={routes.admin.projectStep(project.id, 'call')}>
             Open call workspace
           </Button>
         </div>
@@ -169,13 +165,7 @@ function BookedView({ project, booking }: { project: Project; booking: Booking }
               drop a question) are tracked as new versions, so nothing gets lost.
             </p>
             <div>
-              <Button
-                kind="tertiary"
-                size="md"
-                renderIcon={Unlocked}
-                disabled={action.isPending}
-                onClick={unlock}
-              >
+              <Button kind="tertiary" size="md" disabled={action.isPending} onClick={unlock}>
                 Unlock to edit
               </Button>
             </div>

@@ -13,7 +13,7 @@ import {
   NumberInput,
   Tile,
 } from '@carbon/react';
-import { Checkmark, Edit, TrashCan } from '@carbon/icons-react';
+import { TrashCan } from '@carbon/icons-react';
 import { AIExplainLabel } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
 import { formatCreditsWithCurrency } from '@/shared/lib/credits';
@@ -231,10 +231,10 @@ export function BriefSummaryCard({ brief, isInteractive, onConfirm }: BriefSumma
 
       {isInteractive && !isEditing ? (
         <div className={styles.buttonRow}>
-          <Button size="md" renderIcon={Checkmark} onClick={onConfirm}>
+          <Button size="md" onClick={onConfirm}>
             Confirm needs
           </Button>
-          <Button kind="tertiary" size="md" renderIcon={Edit} onClick={startEditing}>
+          <Button kind="tertiary" size="md" onClick={startEditing}>
             Edit
           </Button>
         </div>

@@ -14,7 +14,7 @@ import {
   TabPanels,
   Tabs,
 } from '@carbon/react';
-import { ArrowLeft, Export, Reset } from '@carbon/icons-react';
+import { ArrowLeft } from '@carbon/icons-react';
 import { useThemePreference } from '@/providers/ThemeProvider';
 import { routes } from '@/shared/config/routes';
 import { useTokenOverrides } from '../../hooks/useTokenOverrides';
@@ -61,15 +61,10 @@ export function DesignSystemView() {
               <Switch name="light" text="Light theme" />
               <Switch name="dark" text="Dark theme" />
             </ContentSwitcher>
-            <Button
-              kind="ghost"
-              renderIcon={Reset}
-              disabled={editCount === 0}
-              onClick={() => setDialog('reset')}
-            >
+            <Button kind="ghost" disabled={editCount === 0} onClick={() => setDialog('reset')}>
               Reset all
             </Button>
-            <Button renderIcon={Export} onClick={() => setDialog('export')}>
+            <Button onClick={() => setDialog('export')}>
               Export changes{editCount > 0 ? ` (${editCount})` : ''}
             </Button>
           </div>

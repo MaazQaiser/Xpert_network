@@ -13,7 +13,7 @@ import {
   Select,
   SelectItem,
 } from '@carbon/react';
-import { ArrowRight, Microphone } from '@carbon/icons-react';
+import { Microphone } from '@carbon/icons-react';
 import { isApiError, toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
 import { formatMinutes, formatUsd } from '@/shared/lib/money';
@@ -205,7 +205,6 @@ export function Preflight({ interview }: { interview: Interview }) {
             <div>
               <Button
                 type="submit"
-                renderIcon={ArrowRight}
                 disabled={
                   start.isPending || (mode === 'voice' && (micDenied || !mic.data?.granted))
                 }

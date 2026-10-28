@@ -18,7 +18,6 @@ import {
   TextArea,
   TextInput,
 } from '@carbon/react';
-import { Add, TrashCan } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
 import { createId } from '@/shared/lib/id';
 import { ErrorState } from '@/shared/ui';
@@ -254,12 +253,7 @@ export function WorkStep({ profile, isBusy, onBack, onSubmit }: StepProps<WorkHi
               </div>
               {fields.length > 1 ? (
                 <div>
-                  <Button
-                    kind="ghost"
-                    size="sm"
-                    renderIcon={TrashCan}
-                    onClick={() => remove(index)}
-                  >
+                  <Button kind="ghost" size="sm" onClick={() => remove(index)}>
                     Remove {label.toLowerCase()}
                   </Button>
                 </div>
@@ -276,7 +270,6 @@ export function WorkStep({ profile, isBusy, onBack, onSubmit }: StepProps<WorkHi
           <Button
             kind="tertiary"
             size="md"
-            renderIcon={Add}
             disabled={fields.length >= 6}
             onClick={() => append(emptyPosition())}
           >

@@ -334,6 +334,12 @@
   inline-size: $spacing-07;
 }
 
+// The ranked-experts table uses a smaller portrait so the photo stays its own narrow column.
+.rowAvatarSm {
+  block-size: $spacing-06;
+  inline-size: $spacing-06;
+}
+
 .why {
   @include type-style('body-01');
 

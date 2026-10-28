@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, RadioTile, Stack, TileGroup } from '@carbon/react';
-import { ArrowRight, ChartLineData, Microphone } from '@carbon/icons-react';
+import { ChartLineData, Microphone } from '@carbon/icons-react';
 import { routes } from '@/shared/config/routes';
 import type { SignUpRole } from '../../model/session.schema';
 import styles from './RoleSelect.module.scss';
@@ -52,9 +52,7 @@ export function RoleSelect({ initialRole = 'client' }: { initialRole?: SignUpRol
         })}
       </TileGroup>
       <div>
-        <Button renderIcon={ArrowRight} onClick={() => router.push(routes.signUpAs(choice))}>
-          Continue
-        </Button>
+        <Button onClick={() => router.push(routes.signUpAs(choice))}>Continue</Button>
       </div>
     </Stack>
   );
