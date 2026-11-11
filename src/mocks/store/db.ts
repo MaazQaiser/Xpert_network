@@ -36,7 +36,7 @@ import type {
   CallSession,
   MailAccount,
 } from '@/features/admin';
-import { seedInbox, seedMailAccounts, seedProjects, type SentMail } from '../fixtures/admin/seed';
+import type { SentMail } from '../fixtures/admin/seed';
 
 export type DemoState = {
   version: 2;
@@ -167,9 +167,11 @@ function seed(): DemoState {
     applications: structuredClone(SEED_APPLICATIONS),
     interviews: {},
     earnings: structuredClone(SEED_EARNINGS),
-    adminInbox: seedInbox(),
-    adminMailAccounts: seedMailAccounts(),
-    adminProjects: seedProjects(),
+    // No demo emails, mailboxes or projects: the inbox shows real connected accounts only.
+    // Tests load the demo set themselves (src/test/adminDemo.ts).
+    adminInbox: {},
+    adminMailAccounts: [],
+    adminProjects: {},
     adminMail: [],
     adminMatches: {},
     adminShortlists: {},

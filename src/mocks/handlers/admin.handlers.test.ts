@@ -1,11 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { db } from '@/test/mockBackend';
+import { db, loadAdminDemo } from '@/test/mockBackend';
 
 // Seeds are relative to now; midday keeps "today" counts stable.
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(new Date('2026-10-22T12:00:00'));
   db.reset();
+  loadAdminDemo();
 });
 afterEach(() => vi.useRealTimers());
 

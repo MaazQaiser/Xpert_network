@@ -14,6 +14,7 @@ import {
   Modal,
   MenuItem,
   MenuItemDivider,
+  MenuItemGroup,
   MenuItemRadioGroup,
   SelectableTag,
   SkeletonText,
@@ -26,6 +27,7 @@ import {
   EmailNew,
   Folder,
   Locked,
+  LogoLinkedin,
   CheckmarkFilled,
   DocumentPdf,
   Document,
@@ -35,14 +37,28 @@ import { Envelope as EmailPictogram } from '@carbon/pictograms-react';
 import { AIExplainLabel } from '@/shared/ai';
 import { routes } from '@/shared/config/routes';
 import { AsyncBoundary, EmptyState } from '@/shared/ui';
-import { useInbox, useMailAccounts, useMarkInboxRead, useProject } from '../../api/queries';
 import {
+  useInbox,
+  useMailAccounts,
+  useMarkConversationRead,
+  useMarkInboxRead,
+  useProject,
+  useSenderConversations,
+  useSenderProfiles,
+  useSendersUnread,
+} from '../../api/queries';
+import {
+  conversationMatches,
   INBOX_VIEW_LABELS,
   INBOX_VIEWS,
   inView,
+  latestReceivedAt,
   matchesSearch,
   parseInboxView,
+  senderAccountId,
+  senderName,
   type InboxRequest,
+  type SenderProfile,
 } from '../../model/inbox.schema';
 import type { SourcePage } from '../../model/project.schema';
 import {
@@ -55,14 +71,24 @@ import {
 } from '../inboxDisplay';
 import { SourceDocument } from '../SourceDocument/SourceDocument';
 import { AddAccountModal } from './AddAccountModal';
+import { AddSenderModal } from './AddSenderModal';
+import {
+  ConversationList,
+  ConversationListSkeleton,
+  ConversationThread,
+} from './SenderConversations';
 import styles from './Inbox.module.scss';
-
-const INBOX_ADDRESS = 'projects@xpertnetwork.example';
 
 /** "partners@xpertnetwork.example" → "Partners inbox", short enough for the switcher menu. */
 function mailboxName(address: string): string {
   const local = address.split('@')[0] ?? address;
   return `${local.charAt(0).toUpperCase()}${local.slice(1)} inbox`;
+}
+
+/** "Ateeb Ahmad · 2 unread" (the LinkedIn icon sits beside it), or "· not connected". */
+function senderItemLabel(profile: SenderProfile, unread: number): string {
+  if (!profile.linkedinConnected) return `${senderName(profile)} · not connected`;
+  return unread > 0 ? `${senderName(profile)} · ${unread} unread` : senderName(profile);
 }
 
 /** PRD screen 02: incoming client emails, with what the AI did to each. */
@@ -77,19 +103,7 @@ export function Inbox({ selectedId = null }: { selectedId?: string | null }) {
 function InboxBody({ selectedId }: { selectedId: string | null }) {
   const inbox = useInbox();
   return (
-    <AsyncBoundary
-      query={inbox}
-      errorTitle="The inbox didn’t load"
-      loading={<InboxSkeleton />}
-      isEmpty={(data) => data.length === 0}
-      empty={
-        <EmptyState
-          pictogram={<EmailPictogram aria-hidden="true" />}
-          title="No client emails yet"
-          description={`The AI watches ${INBOX_ADDRESS}. When a client emails a brief, it reads the email and any attachment, then drafts a project file for you here.`}
-        />
-      }
-    >
+    <AsyncBoundary query={inbox} errorTitle="The inbox didn’t load" loading={<InboxSkeleton />}>
       {(requests) => <InboxLayout requests={requests} selectedId={selectedId} />}
     </AsyncBoundary>
   );
@@ -121,22 +135,46 @@ function InboxLayout({
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-  const accounts = useMailAccounts().data ?? [];
-  const addresses = accounts.length > 0 ? accounts.map((a) => a.address) : [INBOX_ADDRESS];
-  const defaultAccount = addresses[0] ?? INBOX_ADDRESS;
+  const mailAccounts = useMailAccounts();
+  const addresses = (mailAccounts.data ?? []).map((a) => a.address);
+  // LinkedIn sender profiles from GetSales sit alongside the mailboxes in the switcher.
+  const senderProfiles = useSenderProfiles();
+  const senders = senderProfiles.data ?? [];
+  const senderFor = (item: string) => senders.find((p) => senderAccountId(p.uuid) === item);
+  const items = [...addresses, ...senders.map((p) => senderAccountId(p.uuid))];
+  // The first connected mailbox, else the first LinkedIn sender; null while nothing is connected.
+  const defaultAccount = items[0] ?? null;
   const accountParam = params.get('account');
-  const account = accountParam && addresses.includes(accountParam) ? accountParam : defaultAccount;
+  const account = accountParam && items.includes(accountParam) ? accountParam : defaultAccount;
+  const sender = account ? (senderFor(account) ?? null) : null;
+  const isLoadingAccounts = mailAccounts.isPending || senderProfiles.isPending;
+  const unreadBySender = useSendersUnread(senders.map((p) => p.uuid));
   const view = parseInboxView(params.get('view'));
   const query = params.get('q') ?? '';
   const search = params.toString();
   // Each email belongs to the mailbox it was sent to.
   const mailbox = requests.filter((r) => r.to === account);
   const shown = mailbox.filter((r) => inView(r, view) && matchesSearch(r, query));
+  // A LinkedIn sender shows its GetSales conversations instead of emails.
+  const conversationsQuery = useSenderConversations(sender?.uuid ?? '', {
+    enabled: Boolean(sender),
+  });
+  const conversations = conversationsQuery.data ?? [];
+  const conversationId = sender ? params.get('conversation') : null;
+  const shownConversations = conversations.filter(
+    (c) => (view !== 'unread' || c.unread > 0) && conversationMatches(c, query),
+  );
+  // Nothing opens on its own, so a new reply stays unread until someone clicks it.
+  const openConversation = conversations.find((c) => c.id === conversationId);
+  const views = sender ? INBOX_VIEWS.filter((v) => v !== 'attachments') : INBOX_VIEWS;
   const selected = requests.find((r) => r.id === selectedId) ?? (selectedId ? undefined : shown[0]);
   const processing = mailbox.filter((r) => r.status === 'reading' || r.status === 'extracting');
-  const unread = mailbox.filter((r) => !r.read).length;
+  const unread = sender
+    ? conversations.filter((c) => c.unread > 0).length
+    : mailbox.filter((r) => !r.read).length;
   const unreadIn = (address: string) => requests.filter((r) => r.to === address && !r.read).length;
   const [isAdding, setIsAdding] = useState(false);
+  const [isAddingSender, setIsAddingSender] = useState(false);
   const markRead = useMarkInboxRead();
   // Emails the PM marked unread on purpose stay unread while they're still open.
   const [keptUnread, setKeptUnread] = useState<string[]>([]);
@@ -150,6 +188,17 @@ function InboxLayout({
     if (openedId) markRead.mutate({ id: openedId, read: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per opened email
   }, [openedId]);
+
+  // An open LinkedIn thread is read, including replies that sync in while it's on screen.
+  const markConversationRead = useMarkConversationRead(sender?.uuid ?? '');
+  const unreadUntil =
+    openConversation && openConversation.unread > 0 ? latestReceivedAt(openConversation) : null;
+  useEffect(() => {
+    if (openConversation && unreadUntil) {
+      markConversationRead.mutate({ leadUuid: openConversation.lead.uuid, until: unreadUntil });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per newly seen reply
+  }, [openConversation?.id, unreadUntil]);
 
   const setParam = (key: 'view' | 'q', value: string) => {
     const next = new URLSearchParams(search);
@@ -166,6 +215,12 @@ function InboxLayout({
   };
 
   const hrefFor = (id: string) => `${routes.admin.inboxRequest(id)}${search ? `?${search}` : ''}`;
+  const conversationHref = (id: string | null) => {
+    const next = new URLSearchParams(search);
+    if (id) next.set('conversation', id);
+    else next.delete('conversation');
+    return `${routes.admin.inbox}?${next.toString()}`;
+  };
   const toggleRead = (request: InboxRequest) => {
     setKeptUnread((ids) =>
       request.read ? [...ids, request.id] : ids.filter((id) => id !== request.id),
@@ -175,7 +230,7 @@ function InboxLayout({
 
   // A mail window: the message list and the open email, each scrolling on its own.
   return (
-    <div className={`${styles.window} ${selectedId ? styles.hasSelection : ''}`}>
+    <div className={`${styles.window} ${selectedId || conversationId ? styles.hasSelection : ''}`}>
       <section className={styles.listPane} aria-labelledby="inbox-title">
         <header className={styles.listHeader}>
           <h1 id="inbox-title" className={styles.title}>
@@ -185,38 +240,75 @@ function InboxLayout({
           <MenuButton
             kind="ghost"
             size="sm"
-            label={account}
+            label={
+              sender
+                ? senderName(sender)
+                : (account ?? (isLoadingAccounts ? 'Loading accounts…' : 'No accounts connected'))
+            }
             menuAlignment="bottom-start"
             className={styles.accountButton}
           >
-            <MenuItemRadioGroup
-              label="Mailboxes"
-              items={addresses}
-              selectedItem={account}
-              itemToString={(item) => {
-                const address = String(item);
-                const count = unreadIn(address);
-                return count > 0
-                  ? `${mailboxName(address)} · ${count} unread`
-                  : mailboxName(address);
-              }}
-              onChange={(item) => switchAccount(String(item))}
-            />
+            {addresses.length > 0 ? (
+              <MenuItemRadioGroup
+                // Remounted when the account changes, so no mailbox stays ticked on a sender.
+                key={account ?? 'none'}
+                label="Mailboxes"
+                items={addresses}
+                selectedItem={sender ? undefined : (account ?? undefined)}
+                itemToString={(item) => {
+                  const address = String(item);
+                  const count = unreadIn(address);
+                  return count > 0
+                    ? `${mailboxName(address)} · ${count} unread`
+                    : mailboxName(address);
+                }}
+                onChange={(item) => switchAccount(String(item))}
+              />
+            ) : null}
+            {senders.length > 0 ? (
+              <MenuItemGroup label="LinkedIn senders">
+                {senders.map((profile) => (
+                  <MenuItem
+                    key={profile.uuid}
+                    label={senderItemLabel(profile, unreadBySender[profile.uuid] ?? 0)}
+                    renderIcon={LogoLinkedin}
+                    onClick={() => switchAccount(senderAccountId(profile.uuid))}
+                  />
+                ))}
+              </MenuItemGroup>
+            ) : null}
+            {senderProfiles.isPending ? (
+              <MenuItem label="Loading LinkedIn senders…" disabled />
+            ) : senderProfiles.isError ? (
+              <MenuItem
+                label="LinkedIn senders didn’t load. Retry"
+                onClick={() => void senderProfiles.refetch()}
+              />
+            ) : null}
             <MenuItemDivider />
             <MenuItem
               label="Add another account"
               renderIcon={Add}
-              onClick={() => setIsAdding(true)}
+              onClick={() => setIsAddingSender(true)}
             />
+            <MenuItem label="Connect a mailbox" onClick={() => setIsAdding(true)} />
           </MenuButton>
-          <p className={styles.listMeta}>
-            <span className={styles.liveDot} aria-hidden="true" />
-            {mailbox.length} messages · {unread} unread · AI agent live,{' '}
-            {processing.length === 1 ? '1 processing' : `${processing.length} processing`}
-          </p>
+          {sender ? (
+            <p className={styles.listMeta}>
+              <span className={styles.liveDot} aria-hidden="true" />
+              LinkedIn · {sender.linkedinConnected ? 'Connected' : 'Not connected'}
+              {sender.label ? ` · ${sender.label}` : ''}
+            </p>
+          ) : !account ? null : (
+            <p className={styles.listMeta}>
+              <span className={styles.liveDot} aria-hidden="true" />
+              {mailbox.length} messages · {unread} unread · AI agent live,{' '}
+              {processing.length === 1 ? '1 processing' : `${processing.length} processing`}
+            </p>
+          )}
           <div className={styles.search}>
             <Search
-              key={account}
+              key={account ?? 'none'}
               size="md"
               labelText="Search requests"
               placeholder="Search"
@@ -227,7 +319,7 @@ function InboxLayout({
           </div>
           {/* Mail filters as chips: everything, unread only, or emails with a file. */}
           <div className={styles.chips} role="group" aria-label="Filter emails">
-            {INBOX_VIEWS.map((option) => (
+            {views.map((option) => (
               <SelectableTag
                 key={option}
                 className={styles.chip}
@@ -245,7 +337,53 @@ function InboxLayout({
             ))}
           </div>
         </header>
-        {mailbox.length === 0 ? (
+        {sender && !sender.linkedinConnected ? (
+          <div className={styles.noResults}>
+            <InlineNotification
+              kind="info"
+              lowContrast
+              hideCloseButton
+              title="Connect LinkedIn to this sender."
+              subtitle="Log in to this sender’s LinkedIn account before sending messages from it."
+            />
+          </div>
+        ) : sender ? (
+          <AsyncBoundary
+            query={conversationsQuery}
+            errorTitle="LinkedIn conversations didn’t load"
+            loading={<ConversationListSkeleton />}
+            isEmpty={(data) => data.length === 0}
+            empty={
+              <p className={styles.noResults} role="status">
+                No LinkedIn conversations yet. Messages sent from {senderName(sender)} will appear
+                here.
+              </p>
+            }
+          >
+            {() =>
+              shownConversations.length === 0 ? (
+                <p className={styles.noResults} role="status">
+                  No conversations match. Clear the search or choose another filter.
+                </p>
+              ) : (
+                <ConversationList
+                  conversations={shownConversations}
+                  selectedId={openConversation?.id ?? null}
+                  hrefFor={conversationHref}
+                />
+              )
+            }
+          </AsyncBoundary>
+        ) : !account ? (
+          isLoadingAccounts ? (
+            <ConversationListSkeleton />
+          ) : (
+            <p className={styles.noResults} role="status">
+              Nothing connected yet. Use the menu above to add a LinkedIn sender or connect a
+              mailbox.
+            </p>
+          )
+        ) : mailbox.length === 0 ? (
           <p className={styles.noResults} role="status">
             Connected. The AI is watching {account}; new client emails will appear here.
           </p>
@@ -300,12 +438,48 @@ function InboxLayout({
       </section>
 
       <section className={styles.readingPane} aria-label="Selected request">
-        {selected ? (
+        {sender && openConversation ? (
+          <ConversationThread
+            conversation={openConversation}
+            senderUuid={sender.uuid}
+            senderLabel={senderName(sender)}
+            senderAvatarUrl={sender.avatarUrl}
+            backHref={conversationHref(null)}
+          />
+        ) : sender && conversationsQuery.isPending ? (
+          <div
+            className={styles.readingSkeleton}
+            role="status"
+            aria-busy="true"
+            aria-label="Loading conversation"
+          >
+            <SkeletonText heading width="50%" />
+            <SkeletonText paragraph lineCount={6} />
+          </div>
+        ) : sender ? (
+          <EmptyState
+            pictogram={<EmailPictogram aria-hidden="true" />}
+            title={conversationId ? 'We couldn’t find that conversation' : 'No conversation open'}
+            description={
+              conversationId
+                ? 'It may have been removed. Choose another conversation from the list.'
+                : `LinkedIn conversations of ${senderName(sender)} open here.`
+            }
+          />
+        ) : selected ? (
           <ReadingPane
             request={selected}
             backHref={`${routes.admin.inbox}${search ? `?${search}` : ''}`}
             onToggleRead={() => toggleRead(selected)}
           />
+        ) : !account ? (
+          isLoadingAccounts ? null : (
+            <EmptyState
+              pictogram={<EmailPictogram aria-hidden="true" />}
+              title="No accounts connected"
+              description="Add a LinkedIn sender or connect a mailbox, and its messages will show here."
+            />
+          )
         ) : mailbox.length === 0 ? (
           <EmptyState
             pictogram={<EmailPictogram aria-hidden="true" />}
@@ -327,6 +501,15 @@ function InboxLayout({
           onAdded={(address) => {
             setIsAdding(false);
             switchAccount(address);
+          }}
+        />
+      ) : null}
+      {isAddingSender ? (
+        <AddSenderModal
+          onClose={() => setIsAddingSender(false)}
+          onAdded={(profile) => {
+            setIsAddingSender(false);
+            switchAccount(senderAccountId(profile.uuid));
           }}
         />
       ) : null}

@@ -25,6 +25,12 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  // GetSales sender profiles come from the PoC backend, which holds the API key. MSW has no
+  // browser handler for them, so the call passes through to Next.js and on to the backend.
+  async rewrites() {
+    const backend = process.env.BACKEND_URL ?? 'http://localhost:8000';
+    return [{ source: '/api/getsales/:path*', destination: `${backend}/api/getsales/:path*` }];
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },

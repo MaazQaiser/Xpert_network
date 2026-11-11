@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { db } from '@/test/mockBackend';
+import { adminDemoState, db } from '@/test/mockBackend';
 import { assistantReply } from './assistant';
 
 describe('assistantReply: screening answers', () => {
@@ -57,7 +57,8 @@ describe('assistantReply: screening answers', () => {
 });
 
 describe('assistantReply: home suggestions', () => {
-  const state = db.get();
+  // Read once while the file loads, before setup.tsx adds the demo emails and projects.
+  const state = { ...db.get(), ...adminDemoState() };
 
   it('shares the progress of every project', () => {
     const reply = assistantReply('Share progress of all projects', state);

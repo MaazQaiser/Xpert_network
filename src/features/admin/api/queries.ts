@@ -1,6 +1,12 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  queryOptions,
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { z } from 'zod';
 import { apiRequest } from '@/shared/api';
 import { assistantReplySchema, homeSummarySchema } from '../model/home.schema';
@@ -23,7 +29,13 @@ import { networkExpertSchema } from '../model/network.schema';
 import {
   inboxRequestSchema,
   mailAccountSchema,
+  linkedinConversationSchema,
+  linkedinMessageSchema,
+  senderProfileSchema,
   type AddMailAccountInput,
+  type CreateSenderProfileInput,
+  type LinkedinConversation,
+  type SendLinkedinMessageInput,
   type InboxRequest,
 } from '../model/inbox.schema';
 import { nudgeResultSchema, responsesSchema } from '../model/responses.schema';
@@ -52,6 +64,9 @@ export const adminKeys = {
   summary: () => [...adminKeys.all, 'summary'] as const,
   inbox: () => [...adminKeys.all, 'inbox'] as const,
   mailAccounts: () => [...adminKeys.all, 'inbox', 'accounts'] as const,
+  senderProfiles: () => [...adminKeys.all, 'inbox', 'senders'] as const,
+  senderConversations: (uuid: string) =>
+    [...adminKeys.all, 'inbox', 'senders', uuid, 'conversations'] as const,
   projects: () => [...adminKeys.all, 'projects'] as const,
   project: (id: string) => [...adminKeys.all, 'project', id] as const,
   clarification: (id: string) => [...adminKeys.all, 'project', id, 'clarification'] as const,
@@ -107,6 +122,137 @@ export function useAddMailAccount() {
     mutationFn: (body: AddMailAccountInput) =>
       apiRequest('/admin/inbox/accounts', { method: 'POST', body, schema: mailAccountSchema }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.mailAccounts() }),
+  });
+}
+
+/**
+ * Screen 02: the LinkedIn sender profiles in GetSales. Unlike the rest of the console, these
+ * come from the real PoC backend (next.config.ts rewrites /api/getsales to it; MSW passes the
+ * call through in the browser).
+ */
+export function useSenderProfiles() {
+  return useQuery({
+    queryKey: adminKeys.senderProfiles(),
+    queryFn: ({ signal }) =>
+      apiRequest('/getsales/sender-profiles', { schema: z.array(senderProfileSchema), signal }),
+  });
+}
+
+/**
+ * Every LinkedIn conversation of one sender profile. Checked each minute for replies, and every
+ * 10 seconds while a message we sent is still queued in GetSales.
+ */
+function senderConversationsOptions(uuid: string) {
+  return queryOptions({
+    queryKey: adminKeys.senderConversations(uuid),
+    queryFn: ({ signal }) =>
+      apiRequest(`/getsales/sender-profiles/${encodeURIComponent(uuid)}/conversations`, {
+        schema: z.array(linkedinConversationSchema),
+        signal,
+      }),
+    refetchInterval: (query) =>
+      query.state.data?.some((c) =>
+        c.messages.some((m) => m.direction === 'sent' && m.status === 'in_progress'),
+      )
+        ? 10_000
+        : 60_000,
+  });
+}
+
+export function useSenderConversations(uuid: string, { enabled = true } = {}) {
+  return useQuery({ ...senderConversationsOptions(uuid), enabled: enabled && Boolean(uuid) });
+}
+
+/**
+ * Conversations with an unread reply, per sender, for the account switcher. Shares the cache
+ * (and the minute-by-minute refresh) with the open sender's conversation list.
+ */
+export function useSendersUnread(uuids: string[]): Record<string, number> {
+  return useQueries({
+    queries: uuids.map((uuid) => senderConversationsOptions(uuid)),
+    combine: (results) =>
+      Object.fromEntries(
+        uuids.map((uuid, i) => [uuid, results[i]?.data?.filter((c) => c.unread > 0).length ?? 0]),
+      ),
+  });
+}
+
+/**
+ * Reply in a LinkedIn conversation through GetSales; the message shows as queued straight away.
+ * A retry passes `replaces` (the failed message's uuid), so the failed copy leaves the thread.
+ */
+export function useSendLinkedinMessage(senderUuid: string, conversation: LinkedinConversation) {
+  const queryClient = useQueryClient();
+  const key = adminKeys.senderConversations(senderUuid);
+  return useMutation({
+    mutationFn: ({ text }: SendLinkedinMessageInput & { replaces?: string }) =>
+      apiRequest(
+        `/getsales/sender-profiles/${encodeURIComponent(senderUuid)}/leads/${encodeURIComponent(
+          conversation.lead.uuid,
+        )}/messages`,
+        { method: 'POST', body: { text }, schema: linkedinMessageSchema },
+      ),
+    onSuccess: (message, { replaces }) => {
+      queryClient.setQueryData<LinkedinConversation[]>(key, (list) =>
+        list?.map((c) =>
+          c.id === conversation.id
+            ? {
+                ...c,
+                lastMessageAt: message.sentAt ?? c.lastMessageAt,
+                messages: [...c.messages.filter((m) => m.uuid !== replaces), message],
+              }
+            : c,
+        ),
+      );
+      void queryClient.invalidateQueries({ queryKey: key });
+    },
+  });
+}
+
+/** Opening a thread marks the lead's messages read (kept by the PoC backend). */
+export function useMarkConversationRead(senderUuid: string) {
+  const queryClient = useQueryClient();
+  const key = adminKeys.senderConversations(senderUuid);
+  return useMutation({
+    mutationFn: ({ leadUuid, until }: { leadUuid: string; until: string }) =>
+      apiRequest(
+        `/getsales/sender-profiles/${encodeURIComponent(senderUuid)}/leads/${encodeURIComponent(
+          leadUuid,
+        )}/read`,
+        { method: 'POST', body: { until }, schema: z.null() },
+      ),
+    // Clear the dot straight away; the server keeps it cleared on the next sync.
+    onMutate: ({ leadUuid, until }) => {
+      queryClient.setQueryData<LinkedinConversation[]>(key, (list) =>
+        list?.map((c) =>
+          c.lead.uuid === leadUuid
+            ? {
+                ...c,
+                unread: 0,
+                messages: c.messages.map((m) =>
+                  m.direction === 'received' && (m.sentAt ?? '') <= until
+                    ? { ...m, read: true }
+                    : m,
+                ),
+              }
+            : c,
+        ),
+      );
+    },
+    onError: () => void queryClient.invalidateQueries({ queryKey: key }),
+  });
+}
+
+export function useCreateSenderProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ label, ...rest }: CreateSenderProfileInput) =>
+      apiRequest('/getsales/sender-profiles', {
+        method: 'POST',
+        body: { ...rest, label: label || null },
+        schema: senderProfileSchema,
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.senderProfiles() }),
   });
 }
 

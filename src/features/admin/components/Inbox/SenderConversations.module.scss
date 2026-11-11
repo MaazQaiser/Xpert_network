@@ -1,0 +1,235 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+
+// ——— Profile photos ————————————————————————————————————————————————————————————
+.avatar {
+  @include type-style('label-01');
+
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: $layer-accent-01;
+  color: $text-primary;
+}
+
+.avatarSm {
+  block-size: $spacing-07;
+  inline-size: $spacing-07;
+}
+
+.avatarMd {
+  @include type-style('heading-compact-01');
+
+  block-size: $spacing-08;
+  inline-size: $spacing-08;
+}
+
+.avatarLg {
+  @include type-style('heading-compact-02');
+
+  block-size: $spacing-09;
+  inline-size: $spacing-09;
+}
+
+.avatarPhoto {
+  display: block;
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: cover;
+}
+
+// A conversation row: unread dot, photo, then the name, headline and last message.
+.rowWithAvatar.rowWithAvatar {
+  align-items: start;
+  column-gap: $spacing-03;
+  grid-template-columns: $spacing-05 auto minmax(0, 1fr);
+}
+
+.listSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-06;
+  padding: $spacing-05;
+}
+
+// ——— A LinkedIn thread: the lead on a header band, then the messages as a chat ——————————
+.thread {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100%;
+}
+
+.threadHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-04 $spacing-05;
+  padding: $spacing-05;
+  border-block-end: 1px solid $border-subtle-01;
+  background: $layer-01;
+
+  @include breakpoint(md) {
+    padding: $spacing-06;
+  }
+}
+
+.who {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $spacing-01;
+  min-inline-size: 0;
+}
+
+.leadName {
+  @include type-style('heading-03');
+}
+
+.headline {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.messages {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $spacing-06;
+  padding: $spacing-06 $spacing-05;
+  list-style: none;
+
+  @include breakpoint(md) {
+    padding: $spacing-07 $spacing-06;
+  }
+}
+
+// Ours on the right in the brand colour with our photo; the lead's on the left on a layer.
+.sent,
+.received {
+  display: flex;
+  align-items: flex-end;
+  gap: $spacing-03;
+  max-inline-size: min(40rem, 90%);
+}
+
+.sent {
+  flex-direction: row-reverse;
+  align-self: flex-end;
+}
+
+.received {
+  align-self: flex-start;
+}
+
+.messageBody {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  min-inline-size: 0;
+}
+
+.sent .messageBody {
+  align-items: flex-end;
+}
+
+.received .messageBody {
+  align-items: flex-start;
+}
+
+.meta {
+  @include type-style('label-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-03;
+  color: $text-secondary;
+}
+
+.bubble {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  padding: $spacing-04 $spacing-05;
+}
+
+.sent .bubble {
+  background: $background-brand;
+  color: $text-on-color;
+}
+
+.received .bubble {
+  background: $layer-02;
+  color: $text-primary;
+}
+
+.subject {
+  @include type-style('heading-compact-01');
+}
+
+.text {
+  @include type-style('body-02');
+
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.failedRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-02;
+}
+
+.failed {
+  @include type-style('label-01');
+
+  color: $text-error;
+}
+
+.pending {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+// The reply box stays at the bottom of the pane while the thread scrolls above it.
+.composerDock {
+  position: sticky;
+  inset-block-end: 0;
+  border-block-start: 1px solid $border-subtle-01;
+  background: $background;
+}
+
+.composer {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  padding: $spacing-05;
+
+  @include breakpoint(md) {
+    padding: $spacing-05 $spacing-06;
+  }
+}
+
+.composerRow {
+  display: flex;
+  align-items: flex-end;
+  gap: $spacing-03;
+}
+
+.composerField {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.composerHint {
+  @include type-style('helper-text-01');
+
+  color: $text-helper;
+}

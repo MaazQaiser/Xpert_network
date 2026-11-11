@@ -122,6 +122,13 @@
   }
 }
 
+.readingSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-05;
+  padding: $spacing-06;
+}
+
 .modalText {
   @include type-style('body-01');
 

@@ -1,9 +1,11 @@
 import '@testing-library/jest-dom/vitest';
-import { afterAll, afterEach, beforeAll, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import { server } from '@/mocks/node';
+import { resetSenderProfiles } from '@/mocks/handlers/getsales.handlers';
 import { db } from '@/mocks/store/db';
 import { resetControls } from '@/mocks/controls';
+import { loadAdminDemo } from './adminDemo';
 import { mockLocation, mockRouter, resetNavigationMock } from './navigation';
 
 // Carbon Charts draws with SVG APIs jsdom lacks; tests get a labelled stand-in instead.
@@ -49,11 +51,13 @@ globalThis.fetch = (input: RequestInfo | URL, init?: RequestInit) =>
   realFetch(typeof input === 'string' && input.startsWith('/') ? `${BASE}${input}` : input, init);
 
 beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
+beforeEach(() => loadAdminDemo());
 afterEach(() => {
   cleanup();
   server.resetHandlers();
   resetNavigationMock();
   db.reset();
+  resetSenderProfiles();
   resetControls();
 });
 afterAll(() => server.close());
