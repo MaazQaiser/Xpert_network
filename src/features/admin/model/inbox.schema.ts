@@ -82,6 +82,21 @@ export const addMailAccountInputSchema = z.object({
 export type AddMailAccountInput = z.infer<typeof addMailAccountInputSchema>;
 
 /** A GetSales sender profile: one LinkedIn account the team sends outreach from. */
+/** One day's LinkedIn hours: day 0 = Sunday … 6 = Saturday, minutes from midnight. */
+export const senderTimeBlockSchema = z.object({
+  dow: z.number().int().min(0).max(6),
+  min: z.number().int().min(0).max(1439),
+  max: z.number().int().min(1).max(1440),
+});
+export type SenderTimeBlock = z.infer<typeof senderTimeBlockSchema>;
+
+/** When a sender's messages and connection requests may go out; the rest waits for the next window. */
+export const senderScheduleSchema = z.object({
+  timezone: z.string(),
+  timeblocks: z.array(senderTimeBlockSchema),
+});
+export type SenderSchedule = z.infer<typeof senderScheduleSchema>;
+
 export const senderProfileSchema = z.object({
   uuid: z.string(),
   firstName: z.string(),
@@ -91,8 +106,227 @@ export const senderProfileSchema = z.object({
   linkedinConnected: z.boolean(),
   avatarUrl: z.string().nullable(),
   createdAt: z.string().nullable(),
+  linkedinSchedule: senderScheduleSchema.nullable().optional(),
+  /** Whether the sender's LinkedIn session is working right now. */
+  linkedinState: z
+    .enum(['not_connected', 'ok', 'starting', 'stopped', 'login_issue', 'issue', 'unknown'])
+    .optional(),
+  /** Why it isn't working, as LinkedIn automation reported it. */
+  linkedinIssue: z.string().nullable().optional(),
+  /** Now is outside the sender's schedule; sending resumes then. Null while inside it. */
+  outsideHoursUntil: z.string().nullable().optional(),
 });
 export type SenderProfile = z.infer<typeof senderProfileSchema>;
+
+export type SenderHealthTone = 'ok' | 'warning' | 'error' | 'off';
+export interface SenderHealth {
+  tone: SenderHealthTone;
+  /** Short status for "LinkedIn · …". */
+  text: string;
+  /** A sentence on what's wrong, when something is (its own line). */
+  detail: string | null;
+  /** A short aside on the status line itself, after another "·". */
+  note?: string;
+}
+
+/** "Fri 09:00", in the schedule's own time zone (the hours the user set). */
+function resumeLabel(iso: string, timeZone: string | undefined): string {
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  };
+  try {
+    return new Intl.DateTimeFormat('en-GB', { ...options, timeZone }).format(new Date(iso));
+  } catch {
+    return new Intl.DateTimeFormat('en-GB', options).format(new Date(iso));
+  }
+}
+
+/** One status for the inbox: the first thing stopping this sender from sending, else Connected. */
+export function senderHealth(profile: SenderProfile): SenderHealth {
+  const state = profile.linkedinState ?? (profile.linkedinConnected ? 'ok' : 'not_connected');
+  const issue = profile.linkedinIssue ?? null;
+  if (state === 'not_connected') {
+    return { tone: 'off', text: 'Not connected', detail: null };
+  }
+  if (profile.status !== 'enabled') {
+    return {
+      tone: 'warning',
+      text: 'Paused',
+      detail: 'This sender is switched off, so nothing goes out.',
+    };
+  }
+  if (state === 'login_issue') {
+    return {
+      tone: 'error',
+      text: 'Needs sign-in',
+      detail: issue ?? 'LinkedIn signed this account out. Sign in again before sending.',
+    };
+  }
+  if (state === 'issue') {
+    return {
+      tone: 'error',
+      text: 'Not working',
+      detail: issue ?? 'The LinkedIn session hit a problem. Messages wait until it’s fixed.',
+    };
+  }
+  if (state === 'stopped') {
+    return {
+      tone: 'warning',
+      text: 'Stopped',
+      detail: 'Messages wait until the LinkedIn session runs again.',
+    };
+  }
+  if (state === 'starting') return { tone: 'warning', text: 'Starting…', detail: null };
+  if (profile.outsideHoursUntil) {
+    return {
+      tone: 'warning',
+      text: `Sending paused until ${resumeLabel(profile.outsideHoursUntil, profile.linkedinSchedule?.timezone)}`,
+      detail: null,
+      note: 'Outside this sender’s hours',
+    };
+  }
+  if (state === 'unknown') return { tone: 'off', text: 'Status unknown', detail: null };
+  return { tone: 'ok', text: 'Connected', detail: null };
+}
+
+/** A day ends at 23:59: GetSales' app has no 24:00 (it shows 1440 minutes as 00:00). */
+export const END_OF_DAY = 1439;
+/** Monday first, the way the schedule reads. */
+export const WEEK_DAYS = [1, 2, 3, 4, 5, 6, 0] as const;
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+export const dayName = (dow: number) => DAY_NAMES[dow] ?? '';
+
+/** 540 → "09:00", 1439 → "23:59". */
+export function clockTime(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+/** "09:00" → 540, "23:59" → 1439. */
+export function minutesOf(time: string): number {
+  const [h = 0, m = 0] = time.split(':').map(Number);
+  return h * 60 + m;
+}
+
+export const isAllDayEveryDay = (schedule: SenderSchedule) =>
+  WEEK_DAYS.every((dow) =>
+    schedule.timeblocks.some((b) => b.dow === dow && b.min === 0 && b.max >= END_OF_DAY),
+  );
+
+/** "24 hours, every day", "Mon–Fri, 09:00–18:00", or "5 days a week, custom hours". */
+export function scheduleSummary(schedule: SenderSchedule | null | undefined): string {
+  if (!schedule || schedule.timeblocks.length === 0) return 'no hours set';
+  if (isAllDayEveryDay(schedule)) return '24 hours, every day';
+  const days = WEEK_DAYS.filter((dow) => schedule.timeblocks.some((b) => b.dow === dow));
+  const [first] = schedule.timeblocks;
+  const sameHours = schedule.timeblocks.every((b) => b.min === first?.min && b.max === first?.max);
+  if (!first || !sameHours) return `${days.length} days a week, custom hours`;
+  const hours =
+    first.min === 0 && first.max >= END_OF_DAY
+      ? '24 hours'
+      : `${clockTime(first.min)}–${clockTime(first.max)}`;
+  return `${dayRanges(days)}, ${hours}`;
+}
+
+/** [1,2,3,4,5] → "Mon–Fri"; [1,3] → "Mon, Wed". Works in WEEK_DAYS order. */
+function dayRanges(days: number[]): string {
+  if (days.length === 7) return 'Every day';
+  const order = days.map((d) => WEEK_DAYS.indexOf(d as (typeof WEEK_DAYS)[number]));
+  const runs: number[][] = [];
+  for (const i of order) {
+    const run = runs.at(-1);
+    if (run && run.at(-1) === i - 1) run.push(i);
+    else runs.push([i]);
+  }
+  return runs
+    .map((run) => {
+      const names = run.map((i) => dayName(WEEK_DAYS[i] ?? 0));
+      return run.length > 2 ? `${names[0]}–${names.at(-1)}` : names.join(', ');
+    })
+    .join(', ');
+}
+
+const clockPattern = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/** The schedule dialog: a time zone and a row per day (Monday first). */
+export const senderScheduleFormSchema = z
+  .object({
+    timezone: z.string().min(1, 'Pick a time zone.'),
+    days: z
+      .array(
+        z.object({
+          dow: z.number().int().min(0).max(6),
+          enabled: z.boolean(),
+          start: z.string(),
+          end: z.string(),
+        }),
+      )
+      .length(7),
+  })
+  .superRefine((form, ctx) => {
+    if (!form.days.some((d) => d.enabled)) {
+      ctx.addIssue({ code: 'custom', path: ['days'], message: 'Turn on at least one day.' });
+    }
+    form.days.forEach((day, i) => {
+      if (!day.enabled) return;
+      for (const field of ['start', 'end'] as const) {
+        if (!clockPattern.test(day[field])) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['days', i, field],
+            message: 'Use HH:MM, e.g. 09:00.',
+          });
+        }
+      }
+      if (clockPattern.test(day.start) && clockPattern.test(day.end)) {
+        if (minutesOf(day.end) <= minutesOf(day.start)) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['days', i, 'end'],
+            message: 'End after the start.',
+          });
+        }
+      }
+    });
+  });
+export type SenderScheduleForm = z.infer<typeof senderScheduleFormSchema>;
+
+/** Every day, 00:00 to 23:59: what new senders start with. */
+export const allDayEveryDayForm = (timezone: string): SenderScheduleForm => ({
+  timezone,
+  days: WEEK_DAYS.map((dow) => ({ dow, enabled: true, start: '00:00', end: '23:59' })),
+});
+
+export function scheduleToForm(schedule: SenderSchedule | null | undefined): SenderScheduleForm {
+  if (!schedule) return allDayEveryDayForm('Asia/Karachi');
+  return {
+    timezone: schedule.timezone,
+    days: WEEK_DAYS.map((dow) => {
+      const block = schedule.timeblocks.find((b) => b.dow === dow);
+      return block
+        ? {
+            dow,
+            enabled: true,
+            start: clockTime(block.min),
+            // A day saved elsewhere as ending at 24:00 shows as 23:59.
+            end: clockTime(Math.min(block.max, END_OF_DAY)),
+          }
+        : { dow, enabled: false, start: '09:00', end: '18:00' };
+    }),
+  };
+}
+
+export function formToSchedule(form: SenderScheduleForm): SenderSchedule {
+  return {
+    timezone: form.timezone,
+    timeblocks: form.days
+      .filter((d) => d.enabled)
+      .map((d) => ({ dow: d.dow, min: minutesOf(d.start), max: minutesOf(d.end) })),
+  };
+}
 
 export const createSenderProfileInputSchema = z.object({
   firstName: z.string().trim().min(1, 'Enter a first name.').max(255),
@@ -100,6 +334,45 @@ export const createSenderProfileInputSchema = z.object({
   label: z.string().trim().max(255, 'Keep the label under 255 characters.'),
 });
 export type CreateSenderProfileInput = z.infer<typeof createSenderProfileInputSchema>;
+
+/**
+ * How a reply reads, to decide whether to follow up. Labelled by placeholder rules for now; an AI
+ * model will use the same labels.
+ */
+export const replySentimentSchema = z.enum([
+  'positive',
+  'neutral',
+  'negative',
+  'not_interested',
+  'do_not_contact',
+]);
+export type ReplySentiment = z.infer<typeof replySentimentSchema>;
+
+export const REPLY_SENTIMENT_LABELS: Record<ReplySentiment, string> = {
+  positive: 'Positive',
+  neutral: 'Neutral',
+  negative: 'Negative',
+  not_interested: 'Not interested',
+  do_not_contact: 'Do not contact',
+};
+
+/** Carbon tag colours, from go-ahead (green) to stop (high contrast). */
+export const REPLY_SENTIMENT_TAG = {
+  positive: 'green',
+  neutral: 'cool-gray',
+  not_interested: 'magenta',
+  negative: 'red',
+  do_not_contact: 'high-contrast',
+} as const satisfies Record<ReplySentiment, string>;
+
+/** Something that happened in a thread besides a message. */
+export const threadEventSchema = z.object({
+  kind: z.enum(['connection_accepted', 'message_opened']),
+  at: z.string(),
+  /** The connection note accepted, or the message opened. */
+  messageUuid: z.string(),
+});
+export type ThreadEvent = z.infer<typeof threadEventSchema>;
 
 /** One LinkedIn message in a GetSales conversation, sent by our sender or received from the lead. */
 export const linkedinMessageSchema = z.object({
@@ -112,6 +385,8 @@ export const linkedinMessageSchema = z.object({
   linkedinType: z.enum(['connection_note', 'message', 'inmail']).nullable(),
   failReason: z.string().nullable(),
   read: z.boolean(),
+  /** On the last message of each run of replies after we wrote from the app. */
+  sentiment: replySentimentSchema.nullable().optional(),
 });
 export type LinkedinMessage = z.infer<typeof linkedinMessageSchema>;
 
@@ -129,6 +404,10 @@ export const linkedinConversationSchema = z.object({
   lastMessageAt: z.string().nullable(),
   unread: z.number().int().nonnegative(),
   messages: z.array(linkedinMessageSchema),
+  /** When we first wrote from the app: the lead moves from New to Approaching. */
+  approachedAt: z.string().nullable().optional(),
+  /** How their latest reply reads. */
+  sentiment: replySentimentSchema.nullable().optional(),
 });
 export type LinkedinConversation = z.infer<typeof linkedinConversationSchema>;
 
@@ -151,6 +430,13 @@ export function latestReceivedAt(conversation: LinkedinConversation): string | n
 
 /** LinkedIn's limit for the note on a connection request. */
 export const CONNECTION_NOTE_MAX = 300;
+
+/**
+ * A message we sent that GetSales hasn't delivered yet: `new` waits for the sender's next
+ * schedule window (or its turn in the queue), `in_progress` is going out now.
+ */
+export const isQueuedMessage = (message: LinkedinMessage) =>
+  message.direction === 'sent' && (message.status === 'new' || message.status === 'in_progress');
 
 /** LinkedIn refused the message because the person isn't a 1st-degree connection. */
 export function failedAsNonConnection(message: LinkedinMessage): boolean {

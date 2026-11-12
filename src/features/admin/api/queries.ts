@@ -31,8 +31,12 @@ import {
   mailAccountSchema,
   linkedinConversationSchema,
   linkedinMessageSchema,
+  isQueuedMessage,
   senderProfileSchema,
+  threadEventSchema,
   type AddMailAccountInput,
+  type SenderProfile,
+  type SenderSchedule,
   type CreateSenderProfileInput,
   type LinkedinConversation,
   type SendLinkedinMessageInput,
@@ -69,6 +73,8 @@ export const adminKeys = {
   linkedinProfile: (uuid: string) => [...adminKeys.all, 'linkedin', 'profile', uuid] as const,
   senderConversations: (uuid: string) =>
     [...adminKeys.all, 'inbox', 'senders', uuid, 'conversations'] as const,
+  threadActivity: (senderUuid: string, leadUuid: string) =>
+    [...adminKeys.all, 'inbox', 'senders', senderUuid, 'activity', leadUuid] as const,
   projects: () => [...adminKeys.all, 'projects'] as const,
   project: (id: string) => [...adminKeys.all, 'project', id] as const,
   clarification: (id: string) => [...adminKeys.all, 'project', id, 'clarification'] as const,
@@ -137,12 +143,14 @@ export function useSenderProfiles() {
     queryKey: adminKeys.senderProfiles(),
     queryFn: ({ signal }) =>
       apiRequest('/getsales/sender-profiles', { schema: z.array(senderProfileSchema), signal }),
+    // Picks up a LinkedIn sign-out, stop or pause within a minute.
+    refetchInterval: 60_000,
   });
 }
 
 /**
  * Every LinkedIn conversation of one sender profile. Checked each minute for replies, and every
- * 10 seconds while a message we sent is still queued in GetSales.
+ * 10 seconds while a message we sent is still queued in GetSales (waiting or going out).
  */
 function senderConversationsOptions(uuid: string) {
   return queryOptions({
@@ -153,11 +161,25 @@ function senderConversationsOptions(uuid: string) {
         signal,
       }),
     refetchInterval: (query) =>
-      query.state.data?.some((c) =>
-        c.messages.some((m) => m.direction === 'sent' && m.status === 'in_progress'),
-      )
-        ? 10_000
-        : 60_000,
+      query.state.data?.some((c) => c.messages.some(isQueuedMessage)) ? 10_000 : 60_000,
+  });
+}
+
+/**
+ * What happened in a thread besides messages (our connection note accepted, a message opened),
+ * refreshed with the conversations.
+ */
+export function useThreadActivity(senderUuid: string, leadUuid: string) {
+  return useQuery({
+    queryKey: adminKeys.threadActivity(senderUuid, leadUuid),
+    queryFn: ({ signal }) =>
+      apiRequest(
+        `/getsales/sender-profiles/${encodeURIComponent(senderUuid)}/leads/${encodeURIComponent(
+          leadUuid,
+        )}/activity`,
+        { schema: z.array(threadEventSchema), signal },
+      ),
+    refetchInterval: 60_000,
   });
 }
 
@@ -351,6 +373,23 @@ export function useCreateSenderProfile() {
         schema: senderProfileSchema,
       }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.senderProfiles() }),
+  });
+}
+
+/** Set when a sender's messages and connection requests may go out (saved in GetSales). */
+export function useUpdateSenderSchedule(senderUuid: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (schedule: SenderSchedule) =>
+      apiRequest(`/getsales/sender-profiles/${encodeURIComponent(senderUuid)}/schedule`, {
+        method: 'PUT',
+        body: schedule,
+        schema: senderProfileSchema,
+      }),
+    onSuccess: (updated) =>
+      queryClient.setQueryData<SenderProfile[]>(adminKeys.senderProfiles(), (list) =>
+        list?.map((p) => (p.uuid === updated.uuid ? updated : p)),
+      ),
   });
 }
 

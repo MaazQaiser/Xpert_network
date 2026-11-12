@@ -1,0 +1,54 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.field {
+  display: block;
+}
+
+// Hours and minutes side by side, each scrolling on its own.
+.lists {
+  display: flex;
+  gap: $spacing-02;
+  padding: $spacing-02;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  max-block-size: 14rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  & + & {
+    border-inline-start: 1px solid $border-subtle-01;
+    padding-inline-start: $spacing-02;
+  }
+}
+
+.option {
+  @include type-style('body-compact-01');
+
+  min-inline-size: 3rem;
+  padding: $spacing-03 $spacing-05;
+  border: 0;
+  background: transparent;
+  color: $text-primary;
+  cursor: pointer;
+  text-align: center;
+
+  &:hover {
+    background: $layer-hover-01;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: -2px;
+  }
+
+  &[aria-pressed='true'] {
+    @include type-style('heading-compact-01');
+
+    background: $layer-selected-01;
+  }
+}

@@ -109,6 +109,40 @@ describe('Inbox (F12, screen 02)', () => {
     await expectNoAxeViolations(container);
   });
 
+  it('says when the sender’s LinkedIn needs signing in again', async () => {
+    server.use(
+      http.get('/api/getsales/sender-profiles', () =>
+        HttpResponse.json([
+          {
+            uuid: '50181726-f022-4c23-8116-1c45e97f8a19',
+            firstName: 'Ateeb',
+            lastName: 'Ahmad',
+            label: null,
+            status: 'enabled',
+            linkedinConnected: true,
+            avatarUrl: null,
+            createdAt: '2026-11-11T09:53:13.000Z',
+            linkedinState: 'login_issue',
+            linkedinIssue: 'LinkedIn asked for a verification code.',
+            outsideHoursUntil: null,
+          },
+        ]),
+      ),
+    );
+    mockLocation.search = 'account=sender%3A50181726-f022-4c23-8116-1c45e97f8a19';
+    const { container } = renderWithProviders(<Inbox />, { persona: 'ops' });
+    expect(await screen.findByText(/LinkedIn · Needs sign-in/)).toBeInTheDocument();
+    expect(screen.queryByText(/LinkedIn · Connected/)).not.toBeInTheDocument();
+    expect(screen.getByText('LinkedIn asked for a verification code.')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Ateeb Ahmad' }));
+    const group = await screen.findByRole('group', { name: 'LinkedIn senders' });
+    expect(
+      within(group).getByRole('menuitem', { name: 'Ateeb Ahmad · needs sign-in' }),
+    ).toBeInTheDocument();
+    await expectNoAxeViolations(container);
+  });
+
   it('lists the conversations of a sender and leaves new replies unread', async () => {
     mockLocation.search = 'account=sender%3A50181726-f022-4c23-8116-1c45e97f8a19';
     const { container } = renderWithProviders(<Inbox />, { persona: 'ops' });
@@ -283,6 +317,242 @@ describe('Inbox (F12, screen 02)', () => {
     expect(within(messages).getByText('Great, does Thursday 3pm work?')).toBeInTheDocument();
     expect(within(messages).getByText('Sending…')).toBeInTheDocument();
     expect(field).toHaveValue('');
+    await expectNoAxeViolations(container);
+  });
+
+  it('shows a message waiting for the sender’s next schedule window as sending', async () => {
+    server.use(
+      http.get('/api/getsales/sender-profiles/:uuid/conversations', () =>
+        HttpResponse.json([
+          {
+            id: 'lead_hassan',
+            lead: {
+              uuid: 'lead_hassan',
+              name: 'Hassan Islam',
+              headline: null,
+              company: null,
+              linkedinUrl: null,
+              avatarUrl: null,
+            },
+            lastMessageAt: '2026-11-12T08:48:52.000Z',
+            unread: 0,
+            messages: [
+              {
+                uuid: 'queued',
+                direction: 'sent',
+                text: 'This is a test msg. Ignore',
+                subject: null,
+                sentAt: null,
+                status: 'new',
+                linkedinType: 'message',
+                failReason: null,
+                read: true,
+              },
+            ],
+          },
+        ]),
+      ),
+    );
+    mockLocation.search =
+      'account=sender%3A50181726-f022-4c23-8116-1c45e97f8a19&conversation=lead_hassan';
+    renderWithProviders(<Inbox />, { persona: 'ops' });
+    const messages = await screen.findByRole('list', { name: 'Messages with Hassan Islam' });
+    expect(within(messages).getByText('Sending…')).toBeInTheDocument();
+  });
+
+  it('changes when the sender’s LinkedIn messages go out', async () => {
+    mockLocation.search = 'account=sender%3A50181726-f022-4c23-8116-1c45e97f8a19';
+    renderWithProviders(<Inbox />, { persona: 'ops' });
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Sends Mon–Fri, 09:00–18:00' }),
+    );
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByText('LinkedIn schedule')).toBeInTheDocument();
+    expect(within(dialog).getByRole('switch', { name: 'Mon' })).toBeChecked();
+    expect(within(dialog).getByRole('switch', { name: 'Sat' })).not.toBeChecked();
+    expect(within(dialog).getByLabelText('Mon from')).toHaveValue('09:00');
+    await expectNoAxeViolations(dialog);
+
+    // An end before the start is caught here, not by GetSales.
+    const monTo = within(dialog).getByLabelText('Mon to');
+    await userEvent.clear(monTo);
+    await userEvent.type(monTo, '08:00');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Save schedule' }));
+    expect(await within(dialog).findByText('End after the start.')).toBeInTheDocument();
+
+    await userEvent.click(within(dialog).getByRole('button', { name: '24 hours, every day' }));
+    expect(within(dialog).getByRole('switch', { name: 'Sat' })).toBeChecked();
+    expect(within(dialog).getByLabelText('Mon to')).toHaveValue('23:59');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Save schedule' }));
+
+    expect(
+      await screen.findByRole('button', { name: 'Sends 24 hours, every day' }),
+    ).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  it('picks a schedule time from hour and minute lists', async () => {
+    mockLocation.search = 'account=sender%3A50181726-f022-4c23-8116-1c45e97f8a19';
+    renderWithProviders(<Inbox />, { persona: 'ops' });
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Sends Mon–Fri, 09:00–18:00' }),
+    );
+    const dialog = await screen.findByRole('dialog');
+    const monFrom = within(dialog).getByLabelText('Mon from');
+    expect(monFrom).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.click(monFrom);
+    expect(monFrom).toHaveAttribute('aria-expanded', 'true');
+    // Carbon's auto-aligned popover stays `visibility: hidden` in jsdom (nothing to measure), which
+    // also blanks accessible names, so the lists are found by id and their options by text. In a
+    // browser they show below the field.
+    const lists = document.getElementById('schedule-1-start-lists') as HTMLElement;
+    const [hours, minutes] = within(lists).getAllByRole('group', { hidden: true }) as [
+      HTMLElement,
+      HTMLElement,
+    ];
+    expect(hours).toHaveAttribute('aria-label', 'Mon from, hour');
+    expect(minutes).toHaveAttribute('aria-label', 'Mon from, minute');
+    // 00 to 23 and 00 to 59, with the current time marked.
+    expect(within(hours).getAllByRole('button', { hidden: true })).toHaveLength(24);
+    expect(within(minutes).getAllByRole('button', { hidden: true })).toHaveLength(60);
+    expect(within(hours).getByText('09')).toHaveAttribute('aria-pressed', 'true');
+    await expectNoAxeViolations(dialog);
+
+    await userEvent.click(within(hours).getByText('10'));
+    expect(monFrom).toHaveValue('10:00');
+    await userEvent.click(within(minutes).getByText('30'));
+    expect(monFrom).toHaveValue('10:30');
+    // Picking the minute closes the lists; typing still works.
+    expect(monFrom).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.clear(monFrom);
+    await userEvent.type(monFrom, '07:15');
+    expect(monFrom).toHaveValue('07:15');
+
+    // Escape closes the lists but keeps the dialog open.
+    await userEvent.click(monFrom);
+    await userEvent.keyboard('{Escape}');
+    expect(monFrom).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('marks a thread Approaching in the list until they reply', async () => {
+    server.use(
+      http.get('/api/getsales/sender-profiles/:uuid/conversations', () =>
+        HttpResponse.json([
+          {
+            id: 'lead_sahar',
+            lead: {
+              uuid: 'lead_sahar',
+              name: 'Sahar A',
+              headline: 'Senior Manager UX',
+              company: null,
+              linkedinUrl: null,
+              avatarUrl: null,
+            },
+            lastMessageAt: '2026-11-11T20:49:15Z',
+            unread: 0,
+            approachedAt: '2026-11-11T20:49:15Z',
+            sentiment: null,
+            messages: [
+              {
+                uuid: 'note',
+                direction: 'sent',
+                text: 'Hi Sahar, would you do a paid call?',
+                subject: null,
+                sentAt: '2026-11-11T20:49:15Z',
+                status: 'done',
+                linkedinType: 'connection_note',
+                failReason: null,
+                read: true,
+              },
+            ],
+          },
+        ]),
+      ),
+    );
+    mockLocation.search = 'account=sender%3A50181726-f022-4c23-8116-1c45e97f8a19';
+    renderWithProviders(<Inbox />, { persona: 'ops' });
+    const list = await screen.findByRole('list', { name: 'Conversations' });
+    const row = within(list).getByRole('link', { name: /Sahar A/ });
+    expect(within(row).getByText('Approaching')).toBeInTheDocument();
+  });
+
+  it('shows what happened between messages, and how the reply reads', async () => {
+    const message = (
+      uuid: string,
+      direction: 'sent' | 'received',
+      text: string,
+      sentAt: string,
+    ) => ({
+      uuid,
+      direction,
+      text,
+      subject: null,
+      sentAt,
+      status: 'done',
+      linkedinType: uuid === 'note' ? 'connection_note' : 'message',
+      failReason: null,
+      read: true,
+      sentiment: null as string | null,
+    });
+    const reply = { ...message('r1', 'received', 'no thanks', '2026-11-11T16:00:00Z') };
+    reply.sentiment = 'not_interested';
+    server.use(
+      http.get('/api/getsales/sender-profiles/:uuid/conversations', () =>
+        HttpResponse.json([
+          {
+            id: 'lead_umar',
+            lead: {
+              uuid: 'lead_umar',
+              name: 'Umar Sarwar',
+              headline: null,
+              company: null,
+              linkedinUrl: null,
+              avatarUrl: null,
+            },
+            lastMessageAt: '2026-11-11T16:00:00Z',
+            unread: 0,
+            approachedAt: '2026-11-11T15:34:35Z',
+            sentiment: 'not_interested',
+            messages: [
+              message('note', 'sent', 'Hi Umar, would you do a paid call?', '2026-11-11T15:34:35Z'),
+              message('m1', 'sent', 'It’s 30 minutes, paid.', '2026-11-11T15:40:00Z'),
+              reply,
+            ],
+          },
+        ]),
+      ),
+      http.get('/api/getsales/sender-profiles/:uuid/leads/:leadUuid/activity', () =>
+        HttpResponse.json([
+          { kind: 'connection_accepted', at: '2026-11-11T15:36:00Z', messageUuid: 'note' },
+          { kind: 'message_opened', at: '2026-11-11T15:50:00Z', messageUuid: 'm1' },
+          { kind: 'message_opened', at: '2026-11-11T15:55:00Z', messageUuid: 'm1' },
+        ]),
+      ),
+    );
+    mockLocation.search =
+      'account=sender%3A50181726-f022-4c23-8116-1c45e97f8a19&conversation=lead_umar';
+    const { container } = renderWithProviders(<Inbox />, { persona: 'ops' });
+    const thread = await screen.findByRole('list', { name: 'Messages with Umar Sarwar' });
+    await within(thread).findByText('Umar saw your message');
+
+    // In order: note, Approaching, accepted, message, seen (once), reply, its label.
+    const rows = within(thread)
+      .getAllByRole('listitem')
+      .map((li) => li.textContent ?? '');
+    expect(rows).toHaveLength(7);
+    expect(rows[0]).toContain('Hi Umar, would you do a paid call?');
+    expect(rows[1]).toContain('Approaching');
+    expect(rows[2]).toContain('Umar accepted your connection request');
+    expect(rows[3]).toContain('It’s 30 minutes, paid.');
+    expect(rows[4]).toContain('Umar saw your message');
+    expect(rows[5]).toContain('no thanks');
+    expect(rows[6]).toContain('Not interested');
+
+    // The list shows the latest reply's label too.
+    const list = screen.getByRole('list', { name: 'Conversations' });
+    expect(within(list).getByText('Not interested')).toBeInTheDocument();
     await expectNoAxeViolations(container);
   });
 

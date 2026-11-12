@@ -233,3 +233,40 @@
 
   color: $text-helper;
 }
+
+// ——— Status lines between messages: accepted, opened, approaching, how a reply reads ————————————
+.event {
+  @include type-style('label-01');
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03;
+  align-items: center;
+  justify-content: center;
+  color: $text-secondary;
+}
+
+.eventIcon {
+  flex: none;
+  fill: $icon-secondary;
+}
+
+.eventText {
+  display: inline-flex;
+  gap: $spacing-02;
+  align-items: center;
+}
+
+.eventTime {
+  color: $text-helper;
+}
+
+// The thread's status pill, under the preview in its row.
+.rowStatus {
+  display: block;
+  margin-block-start: $spacing-02;
+
+  &:empty {
+    display: none;
+  }
+}

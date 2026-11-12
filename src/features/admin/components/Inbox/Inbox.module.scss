@@ -82,6 +82,27 @@
   inline-size: $spacing-03;
 }
 
+// The sender's LinkedIn status: paused or stopped, broken, or not connected / unknown.
+.dotWarning {
+  background: $support-warning;
+}
+
+.dotError {
+  background: $support-error;
+}
+
+.dotOff {
+  background: $icon-disabled;
+}
+
+// What's wrong with the sender's LinkedIn, under its status.
+.healthDetail {
+  @include type-style('helper-text-01');
+
+  max-inline-size: 40ch;
+  color: $text-secondary;
+}
+
 // The current mailbox under the title, as a quiet switcher.
 .accountButton.accountButton {
   align-self: flex-start;
@@ -127,6 +148,12 @@
   flex-direction: column;
   gap: $spacing-05;
   padding: $spacing-06;
+}
+
+// The sender's LinkedIn hours, under the account switcher; opens the schedule dialog.
+.scheduleButton {
+  align-self: flex-start;
+  margin-block-start: $spacing-02;
 }
 
 .modalText {

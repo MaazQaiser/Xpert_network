@@ -1,0 +1,58 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.intro {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}
+
+.zoneRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-05;
+  align-items: flex-end;
+
+  > :first-child {
+    flex: 1 1 16rem;
+  }
+}
+
+.days {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.legend {
+  @include type-style('label-01');
+
+  margin-block-end: $spacing-03;
+  color: $text-secondary;
+}
+
+// Toggle with the day's name, then "from" to "to" side by side.
+.dayRow {
+  display: grid;
+  grid-template-columns: 6rem auto auto auto;
+  gap: $spacing-04;
+  align-items: start;
+  justify-content: start;
+}
+
+.to {
+  @include type-style('body-compact-01');
+
+  padding-block-start: $spacing-03;
+  color: $text-secondary;
+}
+
+.error {
+  @include type-style('helper-text-01');
+
+  color: $text-error;
+}

@@ -28,6 +28,7 @@ import {
   Folder,
   Locked,
   LogoLinkedin,
+  Time,
   CheckmarkFilled,
   DocumentPdf,
   Document,
@@ -55,7 +56,9 @@ import {
   latestReceivedAt,
   matchesSearch,
   parseInboxView,
+  scheduleSummary,
   senderAccountId,
+  senderHealth,
   senderName,
   type InboxRequest,
   type SenderProfile,
@@ -72,6 +75,7 @@ import {
 import { SourceDocument } from '../SourceDocument/SourceDocument';
 import { AddAccountModal } from './AddAccountModal';
 import { AddSenderModal } from './AddSenderModal';
+import { SenderScheduleModal } from './SenderScheduleModal';
 import {
   ConversationList,
   ConversationListSkeleton,
@@ -87,9 +91,19 @@ function mailboxName(address: string): string {
 
 /** "Ateeb Ahmad · 2 unread" (the LinkedIn icon sits beside it), or "· not connected". */
 function senderItemLabel(profile: SenderProfile, unread: number): string {
-  if (!profile.linkedinConnected) return `${senderName(profile)} · not connected`;
+  const health = senderHealth(profile);
+  // "Ateeb Ahmad · needs sign-in": lower-case the first letter only, so "Fri" stays "Fri".
+  const status = health.text.charAt(0).toLowerCase() + health.text.slice(1);
+  if (health.tone !== 'ok') return `${senderName(profile)} · ${status}`;
   return unread > 0 ? `${senderName(profile)} · ${unread} unread` : senderName(profile);
 }
+
+const HEALTH_DOT = {
+  ok: styles.liveDot,
+  warning: `${styles.liveDot} ${styles.dotWarning}`,
+  error: `${styles.liveDot} ${styles.dotError}`,
+  off: `${styles.liveDot} ${styles.dotOff}`,
+} as const;
 
 /** PRD screen 02: incoming client emails, with what the AI did to each. */
 export function Inbox({ selectedId = null }: { selectedId?: string | null }) {
@@ -147,6 +161,7 @@ function InboxLayout({
   const accountParam = params.get('account');
   const account = accountParam && items.includes(accountParam) ? accountParam : defaultAccount;
   const sender = account ? (senderFor(account) ?? null) : null;
+  const health = sender ? senderHealth(sender) : null;
   const isLoadingAccounts = mailAccounts.isPending || senderProfiles.isPending;
   const unreadBySender = useSendersUnread(senders.map((p) => p.uuid));
   const view = parseInboxView(params.get('view'));
@@ -175,6 +190,7 @@ function InboxLayout({
   const unreadIn = (address: string) => requests.filter((r) => r.to === address && !r.read).length;
   const [isAdding, setIsAdding] = useState(false);
   const [isAddingSender, setIsAddingSender] = useState(false);
+  const [isEditingSchedule, setIsEditingSchedule] = useState(false);
   const markRead = useMarkInboxRead();
   // Emails the PM marked unread on purpose stay unread while they're still open.
   const [keptUnread, setKeptUnread] = useState<string[]>([]);
@@ -294,11 +310,25 @@ function InboxLayout({
             <MenuItem label="Connect a mailbox" onClick={() => setIsAdding(true)} />
           </MenuButton>
           {sender ? (
-            <p className={styles.listMeta}>
-              <span className={styles.liveDot} aria-hidden="true" />
-              LinkedIn · {sender.linkedinConnected ? 'Connected' : 'Not connected'}
-              {sender.label ? ` · ${sender.label}` : ''}
-            </p>
+            <>
+              <p className={styles.listMeta}>
+                <span className={HEALTH_DOT[health?.tone ?? 'off']} aria-hidden="true" />
+                LinkedIn · {health?.text}
+                {health?.note ? ` · ${health.note}` : ''}
+                {sender.label ? ` · ${sender.label}` : ''}
+              </p>
+              {health?.detail ? <p className={styles.healthDetail}>{health.detail}</p> : null}
+              {/* When GetSales may send for this sender; outside it, sends wait. */}
+              <Button
+                kind="ghost"
+                size="sm"
+                className={styles.scheduleButton}
+                renderIcon={Time}
+                onClick={() => setIsEditingSchedule(true)}
+              >
+                Sends {scheduleSummary(sender.linkedinSchedule)}
+              </Button>
+            </>
           ) : !account ? null : (
             <p className={styles.listMeta}>
               <span className={styles.liveDot} aria-hidden="true" />
@@ -503,6 +533,9 @@ function InboxLayout({
             switchAccount(address);
           }}
         />
+      ) : null}
+      {isEditingSchedule && sender ? (
+        <SenderScheduleModal sender={sender} onClose={() => setIsEditingSchedule(false)} />
       ) : null}
       {isAddingSender ? (
         <AddSenderModal

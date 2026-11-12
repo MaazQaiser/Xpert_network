@@ -2,6 +2,7 @@ import { http, HttpResponse } from 'msw';
 import {
   createSenderProfileInputSchema,
   sendLinkedinMessageInputSchema,
+  senderScheduleSchema,
   type LinkedinConversation,
   type LinkedinProfile,
   type SenderProfile,
@@ -21,8 +22,14 @@ const SEED: SenderProfile[] = [
     linkedinConnected: true,
     avatarUrl: null,
     createdAt: '2026-11-11T09:53:13.000Z',
+    linkedinSchedule: {
+      timezone: 'Asia/Karachi',
+      timeblocks: [1, 2, 3, 4, 5].map((dow) => ({ dow, min: 540, max: 1080 })),
+    },
   },
 ];
+
+const ALL_DAY_EVERY_DAY = [0, 1, 2, 3, 4, 5, 6].map((dow) => ({ dow, min: 0, max: 1439 }));
 
 const CONVERSATIONS: LinkedinConversation[] = [
   {
@@ -162,11 +169,11 @@ const PEOPLE: Record<string, LinkedinProfile> = {
   },
 };
 
-let profiles: SenderProfile[] = [...SEED];
+let profiles: SenderProfile[] = structuredClone(SEED);
 let conversations: LinkedinConversation[] = structuredClone(CONVERSATIONS);
 
 export function resetSenderProfiles() {
-  profiles = [...SEED];
+  profiles = structuredClone(SEED);
   conversations = structuredClone(CONVERSATIONS);
 }
 
@@ -218,6 +225,11 @@ export const getsalesHandlers = [
   }),
 
   // Opening a thread marks the lead's replies read up to the given time.
+  // Nothing has happened in the seeded threads beyond their messages.
+  http.get('/api/getsales/sender-profiles/:uuid/leads/:leadUuid/activity', () =>
+    HttpResponse.json([]),
+  ),
+
   http.post(
     '/api/getsales/sender-profiles/:uuid/leads/:leadUuid/read',
     async ({ params, request }) => {
@@ -301,8 +313,29 @@ export const getsalesHandlers = [
       linkedinConnected: false,
       avatarUrl: null,
       createdAt: new Date().toISOString(),
+      linkedinSchedule: { timezone: 'Asia/Karachi', timeblocks: ALL_DAY_EVERY_DAY },
     };
     profiles = [...profiles, profile];
     return HttpResponse.json(profile, { status: 201 });
+  }),
+
+  http.put('/api/getsales/sender-profiles/:uuid/schedule', async ({ params, request }) => {
+    const parsed = senderScheduleSchema.safeParse(await request.json());
+    const profile = profiles.find((p) => p.uuid === params.uuid);
+    if (!profile) {
+      return HttpResponse.json(
+        { code: 'not_found', message: 'That sender isn’t in GetSales any more.' },
+        { status: 404 },
+      );
+    }
+    if (!parsed.success || parsed.data.timeblocks.length === 0) {
+      return HttpResponse.json(
+        { code: 'validation_error', message: 'Turn on at least one day.' },
+        { status: 422 },
+      );
+    }
+    const updated = { ...profile, linkedinSchedule: parsed.data };
+    profiles = profiles.map((p) => (p.uuid === updated.uuid ? updated : p));
+    return HttpResponse.json(updated);
   }),
 ];

@@ -1,22 +1,31 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, IconButton, InlineNotification, SkeletonText, Tag, TextArea } from '@carbon/react';
-import { ArrowLeft, Launch, Renew, Send, UserFollow } from '@carbon/icons-react';
+import { ArrowLeft, Chat, Launch, Renew, Send, UserFollow, View } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
-import { useSendConnectionRequest, useSendLinkedinMessage } from '../../api/queries';
+import {
+  useSendConnectionRequest,
+  useSendLinkedinMessage,
+  useThreadActivity,
+} from '../../api/queries';
 import {
   CONNECTION_NOTE_MAX,
   failedAsNonConnection,
+  isQueuedMessage,
   LINKEDIN_MESSAGE_MAX,
+  REPLY_SENTIMENT_LABELS,
+  REPLY_SENTIMENT_TAG,
   sendLinkedinMessageInputSchema,
   type LinkedinConversation,
   type LinkedinMessage,
+  type ReplySentiment,
   type SendLinkedinMessageInput,
+  type ThreadEvent,
 } from '../../model/inbox.schema';
 import { fullDateLabel, initials, longDateLabel, receivedLabel } from '../inboxDisplay';
 import styles from './Inbox.module.scss';
@@ -132,12 +141,63 @@ export function ConversationList({
                   </span>
                 ) : null}
                 <span className={styles.preview}>{lastLine(conversation)}</span>
+                <span className={chat.rowStatus}>
+                  <StatusPill conversation={conversation} />
+                </span>
               </span>
             </Link>
           </li>
         );
       })}
     </ul>
+  );
+}
+
+/** Where the thread stands, under its row's preview: how their latest reply reads, else Approaching. */
+function StatusPill({ conversation }: { conversation: LinkedinConversation }) {
+  if (conversation.sentiment) return <SentimentTag sentiment={conversation.sentiment} />;
+  if (!conversation.approachedAt) return null;
+  return (
+    <Tag as="span" size="sm" type="blue">
+      Approaching
+    </Tag>
+  );
+}
+
+/** How a reply reads, as a coloured tag. Labelled automatically, so the tag says so on hover. */
+function SentimentTag({ sentiment }: { sentiment: ReplySentiment }) {
+  return (
+    <Tag
+      as="span"
+      size="sm"
+      type={REPLY_SENTIMENT_TAG[sentiment]}
+      title="Labelled automatically from the reply"
+    >
+      {REPLY_SENTIMENT_LABELS[sentiment]}
+    </Tag>
+  );
+}
+
+/** A status line between messages: something that happened, not something someone wrote. */
+function EventRow({
+  icon: Icon,
+  at,
+  children,
+}: {
+  icon: ComponentType<{ size?: number; 'aria-hidden'?: boolean; className?: string }>;
+  at: string | null | undefined;
+  children: ReactNode;
+}) {
+  return (
+    <li className={chat.event}>
+      <Icon size={16} aria-hidden={true} className={chat.eventIcon} />
+      <span className={chat.eventText}>{children}</span>
+      {at ? (
+        <time className={chat.eventTime} dateTime={at} title={fullDateLabel(at)}>
+          {longDateLabel(at)}
+        </time>
+      ) : null}
+    </li>
   );
 }
 
@@ -169,11 +229,25 @@ export function ConversationThread({
   const invitingId = invite.isPending ? invite.variables?.messageUuid : undefined;
   const inviteFailedId = invite.isError ? invite.variables?.messageUuid : undefined;
   const firstName = lead.name.split(' ')[0] ?? lead.name;
+  // Status lines between messages: each sits after the message it's about.
+  const activity = useThreadActivity(senderUuid, lead.uuid);
+  const eventsFor = (uuid: string): ThreadEvent[] => {
+    const events = (activity.data ?? []).filter((e) => e.messageUuid === uuid);
+    // LinkedIn may report the same message opened twice: once is enough.
+    return events.filter((e, i) => events.findIndex((x) => x.kind === e.kind) === i);
+  };
+  // Our first message from the app moves them from New to Approaching.
+  const approachedAt = conversation.approachedAt;
+  const approachingId = approachedAt
+    ? messages.find((m) => m.direction === 'sent' && (m.sentAt ?? '') >= approachedAt)?.uuid
+    : undefined;
 
-  // Like any chat, open at the newest message (and follow new replies as they sync in).
+  // Like any chat, open at the newest message (and follow new replies as they sync in). Status
+  // lines load just after the messages, so follow them down too.
+  const eventCount = activity.data?.length ?? 0;
   useEffect(() => {
     endRef.current?.scrollIntoView?.({ block: 'end' });
-  }, [conversation.id, lastId]);
+  }, [conversation.id, lastId, eventCount]);
 
   return (
     <article className={chat.thread} aria-labelledby="conversation-title">
@@ -208,94 +282,121 @@ export function ConversationThread({
           const isSent = message.direction === 'sent';
           const typeLabel = message.linkedinType ? TYPE_LABELS[message.linkedinType] : undefined;
           return (
-            <li key={message.uuid} className={isSent ? chat.sent : chat.received}>
-              <Avatar
-                name={isSent ? senderLabel : lead.name}
-                url={isSent ? senderAvatarUrl : lead.avatarUrl}
-                size="sm"
-              />
-              <div className={chat.messageBody}>
-                <p className={chat.meta}>
-                  <span>{isSent ? senderLabel : lead.name}</span>
-                  {message.sentAt ? (
-                    <time dateTime={message.sentAt} title={fullDateLabel(message.sentAt)}>
-                      {longDateLabel(message.sentAt)}
-                    </time>
-                  ) : null}
-                  {typeLabel ? (
-                    <Tag size="sm" type="gray">
-                      {typeLabel}
-                    </Tag>
-                  ) : null}
-                </p>
-                <div className={chat.bubble}>
-                  {message.subject ? <p className={chat.subject}>{message.subject}</p> : null}
-                  <p className={chat.text}>{message.text}</p>
-                </div>
-                {isSent && failedAsNonConnection(message) ? (
-                  <div className={chat.failedRow}>
-                    <p className={chat.failed}>
-                      {invitedIds.includes(message.uuid)
-                        ? `Sent as a connection request instead, with this message as the note. You can message ${firstName} once they accept.`
-                        : invitingId === message.uuid
-                          ? 'Sending a connection request…'
-                          : inviteFailedId === message.uuid
-                            ? `The connection request didn’t go: ${toUserMessage(invite.error)}`
-                            : message.text.trim().length > CONNECTION_NOTE_MAX
-                              ? `Not sent: ${firstName} isn’t a connection. Shorten it to ${CONNECTION_NOTE_MAX} characters to send it as a connection request note.`
-                              : `Not sent: ${firstName} isn’t a 1st-degree connection, and LinkedIn only lets you message connections.`}
-                    </p>
-                    {/* One connection request per person: once one is out, no more buttons. */}
-                    {invitedIds.length > 0 ||
-                    message.text.trim().length > CONNECTION_NOTE_MAX ? null : (
-                      <Button
+            <Fragment key={message.uuid}>
+              <li className={isSent ? chat.sent : chat.received}>
+                <Avatar
+                  name={isSent ? senderLabel : lead.name}
+                  url={isSent ? senderAvatarUrl : lead.avatarUrl}
+                  size="sm"
+                />
+                <div className={chat.messageBody}>
+                  <p className={chat.meta}>
+                    <span>{isSent ? senderLabel : lead.name}</span>
+                    {message.sentAt ? (
+                      <time dateTime={message.sentAt} title={fullDateLabel(message.sentAt)}>
+                        {longDateLabel(message.sentAt)}
+                      </time>
+                    ) : null}
+                    {typeLabel ? (
+                      // A span, not Carbon's default div: it sits inside the meta paragraph.
+                      <Tag as="span" size="sm" type="gray">
+                        {typeLabel}
+                      </Tag>
+                    ) : null}
+                  </p>
+                  <div className={chat.bubble}>
+                    {message.subject ? <p className={chat.subject}>{message.subject}</p> : null}
+                    <p className={chat.text}>{message.text}</p>
+                  </div>
+                  {isSent && failedAsNonConnection(message) ? (
+                    <div className={chat.failedRow}>
+                      <p className={chat.failed}>
+                        {invitedIds.includes(message.uuid)
+                          ? `Sent as a connection request instead, with this message as the note. You can message ${firstName} once they accept.`
+                          : invitingId === message.uuid
+                            ? 'Sending a connection request…'
+                            : inviteFailedId === message.uuid
+                              ? `The connection request didn’t go: ${toUserMessage(invite.error)}`
+                              : message.text.trim().length > CONNECTION_NOTE_MAX
+                                ? `Not sent: ${firstName} isn’t a connection. Shorten it to ${CONNECTION_NOTE_MAX} characters to send it as a connection request note.`
+                                : `Not sent: ${firstName} isn’t a 1st-degree connection, and LinkedIn only lets you message connections.`}
+                      </p>
+                      {/* One connection request per person: once one is out, no more buttons. */}
+                      {invitedIds.length > 0 ||
+                      message.text.trim().length > CONNECTION_NOTE_MAX ? null : (
+                        <Button
+                          kind="ghost"
+                          size="sm"
+                          renderIcon={UserFollow}
+                          disabled={invite.isPending}
+                          onClick={() =>
+                            invite.mutate(
+                              {
+                                senderUuid,
+                                leadUuid: lead.uuid,
+                                note: message.text.trim(),
+                                messageUuid: message.uuid,
+                              },
+                              {
+                                onSuccess: () => setInvitedIds((ids) => [...ids, message.uuid]),
+                              },
+                            )
+                          }
+                        >
+                          Send as connection request
+                        </Button>
+                      )}
+                    </div>
+                  ) : isSent && message.status === 'failed' ? (
+                    <div className={chat.failedRow}>
+                      <p className={chat.failed}>
+                        {retryingId === message.uuid
+                          ? 'Sending again…'
+                          : retryFailedId === message.uuid
+                            ? `Still not sent: ${toUserMessage(retry.error)}`
+                            : `Not sent${message.failReason ? `: ${message.failReason}` : '.'}`}
+                      </p>
+                      <IconButton
                         kind="ghost"
                         size="sm"
-                        renderIcon={UserFollow}
-                        disabled={invite.isPending}
-                        onClick={() =>
-                          invite.mutate(
-                            {
-                              senderUuid,
-                              leadUuid: lead.uuid,
-                              note: message.text.trim(),
-                              messageUuid: message.uuid,
-                            },
-                            {
-                              onSuccess: () => setInvitedIds((ids) => [...ids, message.uuid]),
-                            },
-                          )
-                        }
+                        align="left"
+                        label="Retry sending"
+                        disabled={retry.isPending}
+                        onClick={() => retry.mutate({ text: message.text, replaces: message.uuid })}
                       >
-                        Send as connection request
-                      </Button>
-                    )}
-                  </div>
-                ) : isSent && message.status === 'failed' ? (
-                  <div className={chat.failedRow}>
-                    <p className={chat.failed}>
-                      {retryingId === message.uuid
-                        ? 'Sending again…'
-                        : retryFailedId === message.uuid
-                          ? `Still not sent: ${toUserMessage(retry.error)}`
-                          : `Not sent${message.failReason ? `: ${message.failReason}` : '.'}`}
-                    </p>
-                    <IconButton
-                      kind="ghost"
-                      size="sm"
-                      align="left"
-                      label="Retry sending"
-                      disabled={retry.isPending}
-                      onClick={() => retry.mutate({ text: message.text, replaces: message.uuid })}
-                    >
-                      <Renew />
-                    </IconButton>
-                  </div>
-                ) : isSent && message.status === 'in_progress' ? (
-                  <p className={chat.pending}>Sending…</p>
-                ) : null}
-              </div>
-            </li>
+                        <Renew />
+                      </IconButton>
+                    </div>
+                  ) : isQueuedMessage(message) ? (
+                    <p className={chat.pending}>Sending…</p>
+                  ) : null}
+                </div>
+              </li>
+              {message.uuid === approachingId ? (
+                <EventRow icon={Send} at={approachedAt}>
+                  Status{' '}
+                  <Tag as="span" size="sm" type="blue">
+                    Approaching
+                  </Tag>
+                </EventRow>
+              ) : null}
+              {eventsFor(message.uuid).map((event) => (
+                <EventRow
+                  key={`${event.kind}-${event.at}`}
+                  icon={event.kind === 'connection_accepted' ? UserFollow : View}
+                  at={event.at}
+                >
+                  {event.kind === 'connection_accepted'
+                    ? `${firstName} accepted your connection request`
+                    : `${firstName} saw your message`}
+                </EventRow>
+              ))}
+              {message.sentiment ? (
+                <EventRow icon={Chat} at={message.sentAt}>
+                  Reply <SentimentTag sentiment={message.sentiment} />
+                </EventRow>
+              ) : null}
+            </Fragment>
           );
         })}
       </ol>

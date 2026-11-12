@@ -86,7 +86,7 @@ export function AddSenderModal({
             id="sender-label"
             labelText="Label (optional)"
             placeholder="e.g. PM — consumer projects"
-            helperText="Sends Monday to Friday, 9:00 to 18:00 Pakistan time."
+            helperText="Sends at any hour, every day. Change it later from the sender’s schedule."
             invalid={Boolean(errors.label)}
             invalidText={errors.label?.message}
             {...register('label')}
