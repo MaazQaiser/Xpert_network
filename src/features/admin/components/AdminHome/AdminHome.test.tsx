@@ -365,7 +365,7 @@ describe('AdminHome (F11, screen 01)', () => {
       const field = within(draft).getByLabelText('Message to Hassan');
       // A first message is written for you, short enough for a connection note.
       expect(field).toHaveValue(
-        'Hi Hassan, I’m Ateeb from Xpert Network. I came across your profile and would love to connect. Would you be open to a short paid call to share your expertise?',
+        'Hi Hassan, I’m Ateeb from Xpert Network. I came across your profile and would love to connect. Would you have a few minutes to fill in a short paid questionnaire about your expertise?',
       );
       // A known connection: a normal message, so no 300-character note limit.
       expect(within(draft).getByText(/as a message/)).toBeInTheDocument();

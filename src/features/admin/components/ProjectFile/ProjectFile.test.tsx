@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { db } from '@/test/mockBackend';
+import { http, HttpResponse } from 'msw';
+import { db, loadListProjects, server } from '@/test/mockBackend';
 import { expectNoAxeViolations } from '@/test/axe';
 import { renderWithProviders } from '@/test/render';
 import { ProjectFile } from './ProjectFile';
@@ -33,6 +34,110 @@ describe('ProjectFile (F12, screen 03)', () => {
     await userEvent.click(screen.getByRole('tab', { name: /Needs confirming\s*2/ }));
     expect(screen.getByRole('heading', { name: 'Needs confirming (2)' })).toBeInTheDocument();
     await expectNoAxeViolations(container);
+  });
+
+  it('shows the people of its LinkedIn list as the experts of a list project', async () => {
+    loadListProjects();
+    // GetSales is slow to list people: the list arrives after the project.
+    let releaseList = () => {};
+    const listArrives = new Promise<void>((resolve) => {
+      releaseList = resolve;
+    });
+    server.use(
+      http.get('/api/getsales/lists/:uuid', async ({ params }) => {
+        await listArrives;
+        return HttpResponse.json({
+          uuid: params.uuid,
+          name: 'Xpert PoC test',
+          members: ['Hassan Islam', 'Sahar A', 'Zain Shiraz'].map((name, i) => ({
+            lead: {
+              uuid: ['lead_hassan', 'lead_sahar', 'lead_zain'][i],
+              name,
+              headline: null,
+              company: 'Tkxel',
+              linkedinUrl: `https://www.linkedin.com/in/${['lead_hassan', 'lead_sahar', 'lead_zain'][i]}`,
+              avatarUrl: null,
+            },
+            position: 'Engineer',
+            location: 'Lahore, Punjab, Pakistan',
+            connection: (['connected', 'requested', 'not_connected'] as const)[i],
+          })),
+        });
+      }),
+    );
+    const { container } = renderWithProviders(<ProjectFile projectId="PRJ-1045" />, {
+      persona: 'ops',
+    });
+    expect(
+      await screen.findByRole('heading', {
+        name: 'AI-native product teams, Pakistan software services',
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Created from the LinkedIn list Xpert PoC test/)).toBeInTheDocument();
+    // The count says it's loading, not 0, until the list arrives; then it's counted without a search.
+    expect(screen.getByRole('tab', { name: /^Experts\s*…\s*loading/ })).toBeInTheDocument();
+    releaseList();
+    const expertsTab = await screen.findByRole('tab', { name: /^Experts\s*3/ });
+    await userEvent.click(expertsTab);
+    expect(
+      screen.getByText('3 experts from the LinkedIn list Xpert PoC test.'),
+    ).toBeInTheDocument();
+    const table = screen.getByRole('table', { name: 'Experts for this project' });
+    const rows = within(table).getAllByRole('row').slice(1);
+    expect(rows.map((row) => within(row).getAllByRole('cell')[0]?.textContent)).toEqual([
+      'HIHassan Islam',
+      'SASahar A',
+      'ZSZain Shiraz',
+    ]);
+    expect(within(rows[0]!).getByText('Connected')).toBeInTheDocument();
+    expect(within(rows[1]!).getByText('Request sent')).toBeInTheDocument();
+    expect(within(rows[2]!).getByText('Not connected')).toBeInTheDocument();
+    expect(within(rows[0]!).getByRole('link', { name: 'Hassan Islam' })).toHaveAttribute(
+      'href',
+      'https://www.linkedin.com/in/lead_hassan',
+    );
+    // No expert search on a list project.
+    expect(screen.queryByRole('button', { name: /Find experts|Start the search/i })).toBeNull();
+    await expectNoAxeViolations(container);
+  });
+
+  it('turns on sending the screening questions to interested replies on a list project', async () => {
+    loadListProjects();
+    const saved: unknown[] = [];
+    server.events.on('request:start', async ({ request }) => {
+      if (request.method === 'PUT' && request.url.endsWith('/follow-up')) {
+        saved.push(await request.clone().json());
+      }
+    });
+    const { container } = renderWithProviders(<ProjectFile projectId="PRJ-1045" />, {
+      persona: 'ops',
+    });
+    await userEvent.click(await screen.findByRole('tab', { name: /^Experts\s*3/ }));
+    const toggle = await screen.findByRole('switch', {
+      name: 'Send the screening questions to interested replies',
+    });
+    // Off until someone turns it on.
+    expect(toggle).not.toBeChecked();
+    expect(screen.getByText(/Only replies that arrive after you turn this on/)).toBeInTheDocument();
+
+    await userEvent.click(toggle);
+    await waitFor(() => expect(toggle).toBeChecked());
+    expect(saved).toEqual([
+      {
+        enabled: true,
+        questions: [
+          'How has LLM tooling changed delivery timelines on your projects in the last year?',
+          'How do US clients usually scope and price AI product work with your firm?',
+          'What is hardest to hire for in your team right now, and why?',
+        ],
+      },
+    ]);
+    expect(screen.getByText(/Sent to 0 people so far/)).toBeInTheDocument();
+    // The exact message is a click away.
+    await userEvent.click(screen.getByRole('button', { name: 'The message they get' }));
+    expect(screen.getByText(/1\. How has LLM tooling changed delivery timelines/)).toBeVisible();
+    await expectNoAxeViolations(container);
+    server.events.removeAllListeners();
   });
 
   it('shows four section tabs and the screening questions without page numbers', async () => {

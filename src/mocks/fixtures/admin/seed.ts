@@ -267,6 +267,33 @@ const activity = (at: string, actor: Activity['actor'], text: string): Activity 
 type ProjectSeed = Pick<Project, 'id' | 'name' | 'status' | 'client' | 'contact' | 'createdAt'> &
   Partial<Project>;
 
+const LIST_PROJECT_BRIEF =
+  'Commercial due diligence on AI-native product delivery in Pakistan’s software services sector. Crescent Ventures is weighing a growth investment in a Lahore-based services firm and wants practitioner views on how AI engineering, UX and growth teams are set up; how far LLM tooling has changed delivery; talent supply and pay in Lahore and Islamabad; how US clients buy AI product work; and margins on AI projects against traditional builds. About 10 calls with engineers, designers and marketing leads at software services firms.';
+
+const LIST_PROJECT_REQUIREMENTS = [
+  {
+    id: 'r1',
+    text: 'Hands-on AI engineering, product design or growth role at a software services firm (past 3 years)',
+  },
+  { id: 'r2', text: 'Delivered AI or LLM features for US or EU clients' },
+  { id: 'r3', text: 'Based in Pakistan, or managing Pakistan-based delivery teams' },
+  { id: 'r4', text: 'Team lead or above for at least 2 years' },
+];
+
+const LIST_PROJECT_QUESTIONS = [
+  {
+    id: 'q1',
+    text: 'How has LLM tooling changed delivery timelines on your projects in the last year?',
+    page: null,
+  },
+  {
+    id: 'q2',
+    text: 'How do US clients usually scope and price AI product work with your firm?',
+    page: null,
+  },
+  { id: 'q3', text: 'What is hardest to hire for in your team right now, and why?', page: null },
+];
+
 /** Projects other than PRJ-1042 only need enough to list and open. */
 function makeProject(seed: ProjectSeed): Project {
   const brief = seed.brief ?? `${seed.client.name}: ${seed.name}.`;
@@ -403,6 +430,51 @@ export function seedProjects(now = new Date()): Record<string, Project> {
       source: { requestId: 'req_halden_automation', fileName: 'Expert_criteria.xlsx' },
       createdAt: t(60 * 27),
       approvedAt: t(60 * 25),
+    }),
+  ];
+  return Object.fromEntries(projects.map((project) => [project.id, project]));
+}
+
+/**
+ * Projects built on the PoC's GetSales lists: their experts come live from the backend. Kept out
+ * of seedProjects, the scripted demo story the tests run against.
+ */
+export function seedListProjects(now = new Date()): Record<string, Project> {
+  const t = (minutes: number) => minutesAgo(now, minutes);
+  const projects: Project[] = [
+    makeProject({
+      id: 'PRJ-1045',
+      name: 'AI-native product teams, Pakistan software services',
+      status: 'matching',
+      client: { id: 'cli_crescent', name: 'Crescent Ventures' },
+      contact: { name: 'Hira Aslam', email: 'hira.aslam@crescentventures.example' },
+      createdAt: t(5),
+      approvedAt: t(4),
+      brief: LIST_PROJECT_BRIEF,
+      requirements: LIST_PROJECT_REQUIREMENTS,
+      questions: LIST_PROJECT_QUESTIONS,
+      ai: {
+        brief: LIST_PROJECT_BRIEF,
+        requirements: LIST_PROJECT_REQUIREMENTS,
+        questions: LIST_PROJECT_QUESTIONS,
+      },
+      facts: [
+        { id: 'f_calls', label: 'Calls', value: 'About 10', state: 'ok', page: null },
+        {
+          id: 'f_region',
+          label: 'Region',
+          value: 'Lahore, Islamabad, US clients',
+          state: 'ok',
+          page: null,
+        },
+        { id: 'f_budget', label: 'Budget', value: null, state: 'missing', page: null },
+      ],
+      activity: [
+        activity(t(4), 'system', 'Experts loaded from the LinkedIn list Xpert PoC test'),
+        activity(t(5), 'ai', 'AI created project file v0.1'),
+      ],
+      // The PoC's GetSales list (GETSALES_LIST_NAME): its people are this project's experts.
+      leadList: { uuid: '91914127-a3b2-4163-a5ac-2123f098cdcb', name: 'Xpert PoC test' },
     }),
   ];
   return Object.fromEntries(projects.map((project) => [project.id, project]));

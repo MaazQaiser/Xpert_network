@@ -1,0 +1,12 @@
+@use '@carbon/react/scss/spacing' as *;
+
+// Photo and name side by side in the Expert column.
+.person {
+  display: inline-flex;
+  gap: $spacing-03;
+  align-items: center;
+}
+
+.role {
+  max-inline-size: 22rem;
+}

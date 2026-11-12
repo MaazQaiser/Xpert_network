@@ -4,4 +4,4 @@ export { setControls, resetControls } from '@/mocks/controls';
 export { USERS } from '@/mocks/fixtures/users';
 export { scenarios } from '@/mocks/scenarios';
 export { server } from '@/mocks/node';
-export { adminDemoState, loadAdminDemo } from './adminDemo';
+export { adminDemoState, loadAdminDemo, loadListProjects } from './adminDemo';

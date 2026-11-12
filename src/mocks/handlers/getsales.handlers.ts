@@ -5,6 +5,9 @@ import {
   senderScheduleSchema,
   type LinkedinConversation,
   type LinkedinProfile,
+  listFollowUpInputSchema,
+  type ListFollowUp,
+  type ListMember,
   type SenderProfile,
 } from '@/features/admin';
 
@@ -169,13 +172,44 @@ const PEOPLE: Record<string, LinkedinProfile> = {
   },
 };
 
+function listMember(
+  uuid: string,
+  name: string,
+  position: string,
+  connection: ListMember['connection'],
+): ListMember {
+  return {
+    lead: {
+      uuid,
+      name,
+      headline: `${position} @ Tkxel`,
+      company: 'Tkxel',
+      linkedinUrl: `https://www.linkedin.com/in/${uuid}`,
+      avatarUrl: null,
+    },
+    position,
+    location: 'Lahore, Punjab, Pakistan',
+    connection,
+  };
+}
+
 let profiles: SenderProfile[] = structuredClone(SEED);
 let conversations: LinkedinConversation[] = structuredClone(CONVERSATIONS);
+let followUps: Record<string, ListFollowUp> = {};
 
 export function resetSenderProfiles() {
   profiles = structuredClone(SEED);
   conversations = structuredClone(CONVERSATIONS);
+  followUps = {};
 }
+
+const FOLLOW_UP_OFF: ListFollowUp = {
+  enabled: false,
+  questions: [],
+  message: '',
+  enabledAt: null,
+  sentCount: 0,
+};
 
 export const getsalesHandlers = [
   http.get('/api/getsales/sender-profiles', () => HttpResponse.json(profiles)),
@@ -225,6 +259,55 @@ export const getsalesHandlers = [
   }),
 
   // Opening a thread marks the lead's replies read up to the given time.
+  // A project's GetSales list: three people, one of each connection state.
+  http.get('/api/getsales/lists/:uuid', ({ params }) =>
+    HttpResponse.json({
+      uuid: params.uuid,
+      name: 'Xpert PoC test',
+      members: [
+        listMember('lead_hassan', 'Hassan Islam', 'Senior Software Engineer', 'connected'),
+        listMember('lead_sahar', 'Sahar A', 'Senior Manager User Experience', 'requested'),
+        listMember('lead_zain', 'Zain Shiraz', 'AI Engineer', 'not_connected'),
+      ],
+    }),
+  ),
+
+  // Off until turned on; the message mirrors the server's wording.
+  http.get('/api/getsales/lists/:uuid/follow-up', ({ params }) =>
+    HttpResponse.json(followUps[params.uuid as string] ?? FOLLOW_UP_OFF),
+  ),
+
+  http.put('/api/getsales/lists/:uuid/follow-up', async ({ params, request }) => {
+    const input = listFollowUpInputSchema.safeParse(await request.json());
+    if (!input.success) {
+      return HttpResponse.json(
+        { code: 'validation_error', message: 'Check the questions.' },
+        { status: 422 },
+      );
+    }
+    const { enabled, questions } = input.data;
+    if (enabled && questions.length === 0) {
+      return HttpResponse.json(
+        { code: 'validation_error', message: 'Add a screening question first.' },
+        { status: 422 },
+      );
+    }
+    const previous = followUps[params.uuid as string] ?? FOLLOW_UP_OFF;
+    const saved: ListFollowUp = {
+      enabled,
+      questions,
+      message: questions.length
+        ? `Thanks, great to hear! Here's the short questionnaire. Reply here whenever it suits you; a few lines per question is plenty.\n\n${questions
+            .map((q, i) => `${i + 1}. ${q}`)
+            .join('\n')}`
+        : '',
+      enabledAt: enabled ? (previous.enabledAt ?? new Date().toISOString()) : null,
+      sentCount: previous.sentCount,
+    };
+    followUps[params.uuid as string] = saved;
+    return HttpResponse.json(saved);
+  }),
+
   // Nothing has happened in the seeded threads beyond their messages.
   http.get('/api/getsales/sender-profiles/:uuid/leads/:leadUuid/activity', () =>
     HttpResponse.json([]),

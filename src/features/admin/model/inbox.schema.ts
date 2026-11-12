@@ -349,7 +349,7 @@ export const replySentimentSchema = z.enum([
 export type ReplySentiment = z.infer<typeof replySentimentSchema>;
 
 export const REPLY_SENTIMENT_LABELS: Record<ReplySentiment, string> = {
-  positive: 'Positive',
+  positive: 'Interested',
   neutral: 'Neutral',
   negative: 'Negative',
   not_interested: 'Not interested',

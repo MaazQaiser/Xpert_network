@@ -1,0 +1,27 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.helper {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+  max-inline-size: 40rem;
+}
+
+.preview {
+  max-inline-size: 40rem;
+}
+
+// The questions keep their line breaks, as on LinkedIn.
+.message {
+  @include type-style('body-01');
+
+  white-space: pre-wrap;
+}

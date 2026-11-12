@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   ActionableNotification,
@@ -27,6 +27,7 @@ import { BriefCard } from './BriefCard';
 import { ClarificationModal } from './ClarificationModal';
 import { ExpertProfileCard } from './ExpertProfileCard';
 import { ExpertsTab } from './ExpertsTab';
+import { ListExpertsTab } from './ListExpertsTab';
 import { QuestionsCard } from './QuestionsCard';
 import styles from './ProjectFile.module.scss';
 
@@ -78,7 +79,10 @@ function ProjectFileView({ project }: { project: Project }) {
   const isDraft = project.status === 'draft' || project.status === 'needs_client_info';
 
   const [tab, setTab] = useState(0);
-  const [expertsFound, setExpertsFound] = useState(0);
+  // A list project's experts come from GetSales: unknown (not 0) until the list has loaded.
+  const [expertsFound, setExpertsFound] = useState<number | null>(project.leadList ? null : 0);
+  // A new array only when the questions change, so the follow-up's sync doesn't rerun each render.
+  const listQuestions = useMemo(() => project.questions.map((q) => q.text), [project.questions]);
   const counts = [project.requirements.length, project.questions.length, open.length, expertsFound];
   // The header's way on appears once screening questions have gone to at least one expert.
   const responses = useResponses(project.id);
@@ -107,7 +111,10 @@ function ProjectFileView({ project }: { project: Project }) {
                 size="sm"
               />
               <span className={styles.metaText}>
-                Created from email · {formatRelative(project.createdAt)}
+                {project.leadList
+                  ? `Created from the LinkedIn list ${project.leadList.name}`
+                  : 'Created from email'}{' '}
+                · {formatRelative(project.createdAt)}
               </span>
             </div>
             <h1 className={styles.title}>{project.name}</h1>
@@ -199,7 +206,13 @@ function ProjectFileView({ project }: { project: Project }) {
           {TAB_LABELS.map((label, index) => (
             <Tab key={label} className={styles.segment}>
               {label}
-              <span className={styles.count}>{counts[index]}</span>
+              <span className={styles.count}>
+                {counts[index] ?? (
+                  <>
+                    …<span className="cds--visually-hidden"> loading</span>
+                  </>
+                )}
+              </span>
             </Tab>
           ))}
         </TabList>
@@ -271,7 +284,15 @@ function ProjectFileView({ project }: { project: Project }) {
             ) : null}
           </TabPanel>
           <TabPanel className={styles.tabPanel}>
-            <ExpertsTab project={project} onFound={setExpertsFound} onNotice={setNotice} />
+            {project.leadList ? (
+              <ListExpertsTab
+                leadList={project.leadList}
+                questions={listQuestions}
+                onFound={setExpertsFound}
+              />
+            ) : (
+              <ExpertsTab project={project} onFound={setExpertsFound} onNotice={setNotice} />
+            )}
           </TabPanel>
         </TabPanels>
       </Tabs>

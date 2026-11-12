@@ -138,6 +138,11 @@ export const projectSchema = z.object({
   document: z.object({ pageCount: z.number().int().positive(), pages: z.array(sourcePageSchema) }),
   /** Expert answers waiting for the PM (home summary). */
   pendingExpertReviews: z.number().int().min(0),
+  /**
+   * The GetSales lead list behind this project: its people are the project's experts. Briefs
+   * will become lists; projects without one use the expert search.
+   */
+  leadList: z.object({ uuid: z.string(), name: z.string() }).nullable().optional(),
 });
 export type Project = z.infer<typeof projectSchema>;
 

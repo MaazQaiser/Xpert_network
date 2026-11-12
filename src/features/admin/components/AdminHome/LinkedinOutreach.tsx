@@ -336,7 +336,7 @@ function FoundProfile({
 
 /** The first message, before anything is written. Short enough for a connection note. */
 function initialMessage(profile: LinkedinProfile, sender: SenderProfile): string {
-  return `Hi ${firstName(profile.name)}, I’m ${sender.firstName} from Xpert Network. I came across your profile and would love to connect. Would you be open to a short paid call to share your expertise?`;
+  return `Hi ${firstName(profile.name)}, I’m ${sender.firstName} from Xpert Network. I came across your profile and would love to connect. Would you have a few minutes to fill in a short paid questionnaire about your expertise?`;
 }
 
 /**

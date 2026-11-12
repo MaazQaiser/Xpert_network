@@ -27,6 +27,11 @@ import { scheduleSchema } from '../model/schedule.schema';
 import { callDetailSchema, callRecordSchema } from '../model/calls.schema';
 import { networkExpertSchema } from '../model/network.schema';
 import {
+  leadListSchema,
+  listFollowUpSchema,
+  type ListFollowUpInput,
+} from '../model/leadList.schema';
+import {
   inboxRequestSchema,
   mailAccountSchema,
   linkedinConversationSchema,
@@ -73,6 +78,8 @@ export const adminKeys = {
   linkedinProfile: (uuid: string) => [...adminKeys.all, 'linkedin', 'profile', uuid] as const,
   senderConversations: (uuid: string) =>
     [...adminKeys.all, 'inbox', 'senders', uuid, 'conversations'] as const,
+  leadList: (uuid: string) => [...adminKeys.all, 'leadList', uuid] as const,
+  listFollowUp: (uuid: string) => [...adminKeys.all, 'leadList', uuid, 'followUp'] as const,
   threadActivity: (senderUuid: string, leadUuid: string) =>
     [...adminKeys.all, 'inbox', 'senders', senderUuid, 'activity', leadUuid] as const,
   projects: () => [...adminKeys.all, 'projects'] as const,
@@ -169,6 +176,40 @@ function senderConversationsOptions(uuid: string) {
  * What happened in a thread besides messages (our connection note accepted, a message opened),
  * refreshed with the conversations.
  */
+/** A GetSales lead list and its people: the experts of the project built on it. */
+export function useLeadList(uuid: string) {
+  return useQuery({
+    queryKey: adminKeys.leadList(uuid),
+    queryFn: ({ signal }) =>
+      apiRequest(`/getsales/lists/${encodeURIComponent(uuid)}`, { schema: leadListSchema, signal }),
+  });
+}
+
+/** Whether interested replies on this list get the screening questions automatically. */
+export function useListFollowUp(listUuid: string) {
+  return useQuery({
+    queryKey: adminKeys.listFollowUp(listUuid),
+    queryFn: ({ signal }) =>
+      apiRequest(`/getsales/lists/${encodeURIComponent(listUuid)}/follow-up`, {
+        schema: listFollowUpSchema,
+        signal,
+      }),
+  });
+}
+
+export function useSaveListFollowUp(listUuid: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: ListFollowUpInput) =>
+      apiRequest(`/getsales/lists/${encodeURIComponent(listUuid)}/follow-up`, {
+        method: 'PUT',
+        body: input,
+        schema: listFollowUpSchema,
+      }),
+    onSuccess: (saved) => queryClient.setQueryData(adminKeys.listFollowUp(listUuid), saved),
+  });
+}
+
 export function useThreadActivity(senderUuid: string, leadUuid: string) {
   return useQuery({
     queryKey: adminKeys.threadActivity(senderUuid, leadUuid),

@@ -36,7 +36,7 @@ import type {
   CallSession,
   MailAccount,
 } from '@/features/admin';
-import { seedProjects, type SentMail } from '../fixtures/admin/seed';
+import { seedListProjects, seedProjects, type SentMail } from '../fixtures/admin/seed';
 
 export type DemoState = {
   version: 2;
@@ -171,7 +171,7 @@ function seed(): DemoState {
     // projects stay. Tests load the full demo set themselves (src/test/adminDemo.ts).
     adminInbox: {},
     adminMailAccounts: [],
-    adminProjects: seedProjects(),
+    adminProjects: { ...seedListProjects(), ...seedProjects() },
     adminMail: [],
     adminMatches: {},
     adminShortlists: {},

@@ -47,7 +47,7 @@ const AVATAR_PX = { sm: 32, md: 40, lg: 48 } as const;
 const AVATAR_CLASS = { sm: chat.avatarSm, md: chat.avatarMd, lg: chat.avatarLg };
 
 /** A LinkedIn profile photo, or the person's initials when there's none or it fails to load. */
-function Avatar({
+export function Avatar({
   name,
   url,
   size,
