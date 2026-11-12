@@ -38,6 +38,7 @@ import {
   type SendLinkedinMessageInput,
   type InboxRequest,
 } from '../model/inbox.schema';
+import { linkedinProfileSchema, type LinkedinProfile } from '../model/linkedinProfile.schema';
 import { nudgeResultSchema, responsesSchema } from '../model/responses.schema';
 import {
   generateShortlistInputSchema,
@@ -65,6 +66,7 @@ export const adminKeys = {
   inbox: () => [...adminKeys.all, 'inbox'] as const,
   mailAccounts: () => [...adminKeys.all, 'inbox', 'accounts'] as const,
   senderProfiles: () => [...adminKeys.all, 'inbox', 'senders'] as const,
+  linkedinProfile: (uuid: string) => [...adminKeys.all, 'linkedin', 'profile', uuid] as const,
   senderConversations: (uuid: string) =>
     [...adminKeys.all, 'inbox', 'senders', uuid, 'conversations'] as const,
   projects: () => [...adminKeys.all, 'projects'] as const,
@@ -240,6 +242,102 @@ export function useMarkConversationRead(senderUuid: string) {
       );
     },
     onError: () => void queryClient.invalidateQueries({ queryKey: key }),
+  });
+}
+
+/** Home chat: the person behind a LinkedIn link (GetSales adds them as a lead if new). */
+export function useLookupLinkedinProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (linkedinUrl: string) =>
+      apiRequest('/getsales/leads/lookup', {
+        method: 'POST',
+        body: { linkedinUrl },
+        schema: linkedinProfileSchema,
+      }),
+    onSuccess: (profile) =>
+      queryClient.setQueryData(adminKeys.linkedinProfile(profile.uuid), profile),
+  });
+}
+
+// How long to wait for GetSales to read a new profile before showing what we have.
+export const PROFILE_READ_TIMEOUT_MS = 150_000;
+
+/** A looked-up profile, checked every few seconds until GetSales has read it from LinkedIn. */
+export function useLinkedinProfile(uuid: string, since: number) {
+  return useQuery({
+    queryKey: adminKeys.linkedinProfile(uuid),
+    queryFn: ({ signal }) =>
+      apiRequest(`/getsales/leads/${encodeURIComponent(uuid)}`, {
+        schema: linkedinProfileSchema,
+        signal,
+      }),
+    // Until GetSales has both read them and attached their connection status (or time's up).
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      const isDone = data ? data.enriched && data.settled : false;
+      return isDone || Date.now() - since > PROFILE_READ_TIMEOUT_MS ? false : 4_000;
+    },
+  });
+}
+
+/** Home chat: message a looked-up person from a sender; it then shows in that sender's inbox. */
+export function useMessageLinkedinLead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      senderUuid,
+      lead,
+      text,
+    }: {
+      senderUuid: string;
+      lead: LinkedinProfile;
+      text: string;
+    }) =>
+      apiRequest(
+        `/getsales/sender-profiles/${encodeURIComponent(senderUuid)}/leads/${encodeURIComponent(
+          lead.uuid,
+        )}/messages`,
+        { method: 'POST', body: { text }, schema: linkedinMessageSchema },
+      ),
+    onSuccess: (_message, { senderUuid }) =>
+      queryClient.invalidateQueries({ queryKey: adminKeys.senderConversations(senderUuid) }),
+  });
+}
+
+/**
+ * Invite someone who isn't a 1st-degree connection, with a note (LinkedIn allows 300
+ * characters). GetSales can't message them until they accept.
+ */
+export function useSendConnectionRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      senderUuid,
+      leadUuid,
+      note,
+    }: {
+      senderUuid: string;
+      leadUuid: string;
+      note: string;
+      /** The refused message this replaces, when it comes from one. */
+      messageUuid?: string;
+    }) =>
+      apiRequest(
+        `/getsales/sender-profiles/${encodeURIComponent(senderUuid)}/leads/${encodeURIComponent(
+          leadUuid,
+        )}/connect`,
+        {
+          method: 'POST',
+          body: { note },
+          schema: z.object({ flowUuid: z.string(), status: z.literal('queued') }),
+        },
+      ),
+    onSuccess: (_result, { senderUuid, leadUuid }) => {
+      void queryClient.invalidateQueries({ queryKey: adminKeys.senderConversations(senderUuid) });
+      // The profile now shows the request as sent.
+      void queryClient.invalidateQueries({ queryKey: adminKeys.linkedinProfile(leadUuid) });
+    },
   });
 }
 

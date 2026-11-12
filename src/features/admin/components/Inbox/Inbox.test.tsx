@@ -196,6 +196,66 @@ describe('Inbox (F12, screen 02)', () => {
     expect(within(thread).getByRole('button', { name: 'Retry sending' })).toBeEnabled();
   });
 
+  it('resends a message refused for a non-connection as a connection request', async () => {
+    const sahar = {
+      id: 'lead_sahar',
+      lead: {
+        uuid: 'lead_sahar',
+        name: 'Sahar A',
+        headline: 'Senior Manager UX',
+        company: null,
+        linkedinUrl: 'https://www.linkedin.com/in/sahar',
+        avatarUrl: null,
+      },
+      lastMessageAt: '2026-11-11T15:08:00.000Z',
+      unread: 0,
+      messages: [
+        {
+          uuid: 'm_sahar',
+          direction: 'sent',
+          text: 'Hi Sahar, would you be open to a short paid call?',
+          subject: null,
+          sentAt: '2026-11-11T15:08:00.000Z',
+          status: 'failed',
+          linkedinType: 'message',
+          failReason:
+            'Message failed: the lead is not a 1st-degree connection (RECIPIENT_NOT_FIRST_DEGREE_CONNECTION)',
+          read: true,
+        },
+      ],
+    };
+    const invites: string[] = [];
+    server.use(
+      http.get('/api/getsales/sender-profiles/:uuid/conversations', () =>
+        HttpResponse.json([sahar]),
+      ),
+      http.post(
+        '/api/getsales/sender-profiles/:uuid/leads/:leadUuid/connect',
+        async ({ request }) => {
+          invites.push(((await request.json()) as { note: string }).note);
+          return HttpResponse.json({ flowUuid: 'flow_1', status: 'queued' }, { status: 201 });
+        },
+      ),
+    );
+    mockLocation.search =
+      'account=sender%3A50181726-f022-4c23-8116-1c45e97f8a19&conversation=lead_sahar';
+    renderWithProviders(<Inbox />, { persona: 'ops' });
+    const thread = await screen.findByRole('article', { name: 'Sahar A' });
+    expect(
+      within(thread).getByText(/Sahar isn’t a 1st-degree connection, and LinkedIn only lets you/),
+    ).toBeInTheDocument();
+    // Retrying the message would only fail again.
+    expect(within(thread).queryByRole('button', { name: 'Retry sending' })).toBeNull();
+
+    await userEvent.click(
+      within(thread).getByRole('button', { name: 'Send as connection request' }),
+    );
+    expect(
+      await within(thread).findByText(/Sent as a connection request instead/),
+    ).toBeInTheDocument();
+    expect(invites).toEqual(['Hi Sahar, would you be open to a short paid call?']);
+  });
+
   it('searches conversations by lead and message text', async () => {
     mockLocation.search = 'account=sender%3A50181726-f022-4c23-8116-1c45e97f8a19&q=café';
     renderWithProviders(<Inbox />, { persona: 'ops' });

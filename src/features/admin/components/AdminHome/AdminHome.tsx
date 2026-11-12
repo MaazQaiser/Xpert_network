@@ -11,14 +11,21 @@ import { AIExplainLabel, EmphasisText } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
 import { ErrorState } from '@/shared/ui';
-import { useAskAssistant, useHomeSummary } from '../../api/queries';
+import {
+  useAskAssistant,
+  useHomeSummary,
+  useLookupLinkedinProfile,
+  useSenderProfiles,
+} from '../../api/queries';
 import {
   CARD_PROMPTS,
   SUGGESTED_PROMPTS,
   type AssistantReply,
   type HomeSummary,
 } from '../../model/home.schema';
+import { findLinkedinProfileUrl, type LinkedinProfile } from '../../model/linkedinProfile.schema';
 import { ChatBlocks, ChatChips } from './ChatBlocks';
+import { ProfileLookupAnswer } from './LinkedinOutreach';
 import { StreamedAnswer } from './StreamedAnswer';
 import styles from './AdminHome.module.scss';
 
@@ -59,7 +66,8 @@ function briefLede(summary: HomeSummary): string {
   return `[[!${first} wants to book ${calls}.]] ${counts}`;
 }
 
-type Turn = {
+type AskTurn = {
+  kind: 'ask';
   id: string;
   question: string;
   /** What the person said. The question sent to the assistant can carry an id this hides. */
@@ -67,6 +75,19 @@ type Turn = {
   answer: AssistantReply | null;
   error: unknown;
 };
+
+/** A LinkedIn link typed in the chat: the profile it points to. */
+type ProfileTurn = {
+  kind: 'profile';
+  id: string;
+  spoken: string;
+  url: string;
+  lookedUpAt: number;
+  profile: LinkedinProfile | null;
+  error: unknown;
+};
+
+type Turn = AskTurn | ProfileTurn;
 
 /** What the mascot shows: resting, working, or a short reaction to the last answer. */
 type MascotMood = 'idle' | 'thinking' | 'happy' | 'oops';
@@ -79,6 +100,9 @@ const THINK_MS = IS_TEST ? 0 : 1400;
 // The glide that brings a new question to the top, and where it stops (under the header).
 const SCROLL_MS = 700;
 const SCROLL_GAP_PX = 64;
+
+/** The time now, read in event handlers (never during render). */
+const timestamp = () => Date.now();
 
 /** Reduced motion, tests and background tabs skip the choreography and act at once. */
 function actsAtOnce(): boolean {
@@ -188,6 +212,10 @@ export function AdminHome() {
   const session = useSession();
   const summary = useHomeSummary();
   const ask = useAskAssistant();
+  const lookup = useLookupLinkedinProfile();
+  // Messages go out from the first sender with LinkedIn connected.
+  const sender =
+    useSenderProfiles().data?.find((p) => p.linkedinConnected && p.status === 'enabled') ?? null;
   const [turns, setTurns] = useState<Turn[]>([]);
   const turnCount = useRef(0);
   const [reaction, setReaction] = useState<'happy' | 'oops' | null>(null);
@@ -206,7 +234,8 @@ export function AdminHome() {
     return () => window.clearTimeout(timer);
   }, [reaction]);
 
-  const mood: MascotMood = ask.isPending || summary.isPending ? 'thinking' : (reaction ?? 'idle');
+  const isWorking = ask.isPending || lookup.isPending;
+  const mood: MascotMood = isWorking || summary.isPending ? 'thinking' : (reaction ?? 'idle');
 
   // A new question glides to the top of the view (like ChatGPT / Claude), pushing earlier turns
   // up; its answer then fills in below. Only on a new question, so reading isn't interrupted.
@@ -232,7 +261,7 @@ export function AdminHome() {
     return () => window.cancelAnimationFrame(frame);
   }, [turns.length]);
 
-  const isBusy = ask.isPending;
+  const isBusy = isWorking;
 
   const resetHome = () => {
     setTurns([]);
@@ -241,25 +270,62 @@ export function AdminHome() {
     void summary.refetch();
   };
 
-  const send = (question: string, spoken = question) => {
+  const nextTurnId = () => {
     turnCount.current += 1;
-    const id = `turn_${turnCount.current}`;
-    const askedAt = Date.now();
-    setTurns((current) => [...current, { id, question, spoken, answer: null, error: null }]);
+    return `turn_${turnCount.current}`;
+  };
+  const patchTurn = (id: string, patch: Partial<AskTurn> | Partial<ProfileTurn>) =>
+    setTurns((current) => current.map((t) => (t.id === id ? ({ ...t, ...patch } as Turn) : t)));
+
+  const send = (question: string, spoken = question) => {
+    const id = nextTurnId();
+    const askedAt = timestamp();
+    setTurns((current) => [
+      ...current,
+      { kind: 'ask', id, question, spoken, answer: null, error: null },
+    ]);
     ask.mutate(question, {
       onSuccess: (answer) => {
         // The assistant takes a breath before it answers, so the reply reads as considered.
-        const wait = Math.max(0, THINK_MS - (Date.now() - askedAt));
+        const wait = Math.max(0, THINK_MS - (timestamp() - askedAt));
         window.setTimeout(() => {
-          setTurns((current) => current.map((t) => (t.id === id ? { ...t, answer } : t)));
+          patchTurn(id, { answer });
           setReaction('happy');
         }, wait);
       },
       onError: (error) => {
-        setTurns((current) => current.map((t) => (t.id === id ? { ...t, error } : t)));
+        patchTurn(id, { error });
         setReaction('oops');
       },
     });
+  };
+
+  // A LinkedIn link: find the person (a new turn, or again in the same turn on retry).
+  const lookUp = (url: string, spoken: string, retryId?: string) => {
+    const id = retryId ?? nextTurnId();
+    const lookedUpAt = timestamp();
+    if (retryId) patchTurn(id, { profile: null, error: null, lookedUpAt });
+    else {
+      setTurns((current) => [
+        ...current,
+        { kind: 'profile', id, spoken, url, lookedUpAt, profile: null, error: null },
+      ]);
+    }
+    lookup.mutate(url, {
+      onSuccess: (profile) => patchTurn(id, { profile }),
+      onError: (error) => {
+        patchTurn(id, { error });
+        setReaction('oops');
+      },
+    });
+  };
+
+  // What's typed: a LinkedIn profile link is looked up (its card holds the message draft);
+  // anything else goes to the assistant.
+  const onComposerSend = (text: string) => {
+    const url = findLinkedinProfileUrl(text);
+    if (url) lookUp(url, text);
+    else send(text);
   };
 
   // Once a question is asked, the page becomes the conversation: the greeting, the count cards
@@ -339,7 +405,23 @@ export function AdminHome() {
                 ref={index === turns.length - 1 ? latest : undefined}
               >
                 <p className={styles.question}>{turn.spoken}</p>
-                {turn.answer ? (
+                {turn.kind === 'profile' ? (
+                  <div className={styles.answer}>
+                    <AIExplainLabel
+                      aria-label="AI answer"
+                      isWorking={!turn.profile && !turn.error}
+                    />
+                    <div className={styles.answerBody}>
+                      <ProfileLookupAnswer
+                        profile={turn.profile}
+                        error={turn.error}
+                        lookedUpAt={turn.lookedUpAt}
+                        sender={sender}
+                        onRetry={() => lookUp(turn.url, turn.spoken, turn.id)}
+                      />
+                    </div>
+                  </div>
+                ) : turn.answer ? (
                   <div className={styles.answer}>
                     <AIExplainLabel aria-label="AI answer" isWorking={working[turn.id] ?? false} />
                     <div className={styles.answerBody}>
@@ -403,11 +485,11 @@ export function AdminHome() {
         )}
         <FloatingComposer
           label="Ask your AI assistant"
-          placeholder="Ask anything about your projects, team or recent conversations…"
+          placeholder="Ask anything, or paste a LinkedIn profile link to message someone…"
           placement="inline"
           look="glow"
           isBusy={isBusy}
-          onSend={send}
+          onSend={onComposerSend}
         />
         <p className={styles.disclaimer}>
           AI can make mistakes. Check important details before sending to clients.

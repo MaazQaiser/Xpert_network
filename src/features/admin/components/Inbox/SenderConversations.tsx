@@ -6,10 +6,12 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, IconButton, InlineNotification, SkeletonText, Tag, TextArea } from '@carbon/react';
-import { ArrowLeft, Launch, Renew, Send } from '@carbon/icons-react';
+import { ArrowLeft, Launch, Renew, Send, UserFollow } from '@carbon/icons-react';
 import { toUserMessage } from '@/shared/api';
-import { useSendLinkedinMessage } from '../../api/queries';
+import { useSendConnectionRequest, useSendLinkedinMessage } from '../../api/queries';
 import {
+  CONNECTION_NOTE_MAX,
+  failedAsNonConnection,
   LINKEDIN_MESSAGE_MAX,
   sendLinkedinMessageInputSchema,
   type LinkedinConversation,
@@ -160,6 +162,13 @@ export function ConversationThread({
   const retry = useSendLinkedinMessage(senderUuid, conversation);
   const retryingId = retry.isPending ? retry.variables?.replaces : undefined;
   const retryFailedId = retry.isError ? retry.variables?.replaces : undefined;
+  // A message LinkedIn refused because they aren't a connection goes again as a connection
+  // request, with the message as its note.
+  const invite = useSendConnectionRequest();
+  const [invitedIds, setInvitedIds] = useState<string[]>([]);
+  const invitingId = invite.isPending ? invite.variables?.messageUuid : undefined;
+  const inviteFailedId = invite.isError ? invite.variables?.messageUuid : undefined;
+  const firstName = lead.name.split(' ')[0] ?? lead.name;
 
   // Like any chat, open at the newest message (and follow new replies as they sync in).
   useEffect(() => {
@@ -223,7 +232,46 @@ export function ConversationThread({
                   {message.subject ? <p className={chat.subject}>{message.subject}</p> : null}
                   <p className={chat.text}>{message.text}</p>
                 </div>
-                {isSent && message.status === 'failed' ? (
+                {isSent && failedAsNonConnection(message) ? (
+                  <div className={chat.failedRow}>
+                    <p className={chat.failed}>
+                      {invitedIds.includes(message.uuid)
+                        ? `Sent as a connection request instead, with this message as the note. You can message ${firstName} once they accept.`
+                        : invitingId === message.uuid
+                          ? 'Sending a connection request…'
+                          : inviteFailedId === message.uuid
+                            ? `The connection request didn’t go: ${toUserMessage(invite.error)}`
+                            : message.text.trim().length > CONNECTION_NOTE_MAX
+                              ? `Not sent: ${firstName} isn’t a connection. Shorten it to ${CONNECTION_NOTE_MAX} characters to send it as a connection request note.`
+                              : `Not sent: ${firstName} isn’t a 1st-degree connection, and LinkedIn only lets you message connections.`}
+                    </p>
+                    {/* One connection request per person: once one is out, no more buttons. */}
+                    {invitedIds.length > 0 ||
+                    message.text.trim().length > CONNECTION_NOTE_MAX ? null : (
+                      <Button
+                        kind="ghost"
+                        size="sm"
+                        renderIcon={UserFollow}
+                        disabled={invite.isPending}
+                        onClick={() =>
+                          invite.mutate(
+                            {
+                              senderUuid,
+                              leadUuid: lead.uuid,
+                              note: message.text.trim(),
+                              messageUuid: message.uuid,
+                            },
+                            {
+                              onSuccess: () => setInvitedIds((ids) => [...ids, message.uuid]),
+                            },
+                          )
+                        }
+                      >
+                        Send as connection request
+                      </Button>
+                    )}
+                  </div>
+                ) : isSent && message.status === 'failed' ? (
                   <div className={chat.failedRow}>
                     <p className={chat.failed}>
                       {retryingId === message.uuid
@@ -254,12 +302,7 @@ export function ConversationThread({
 
       <div className={chat.composerDock}>
         {/* Keyed by thread, so a half-written reply never carries over to another person. */}
-        <Composer
-          key={conversation.id}
-          conversation={conversation}
-          senderUuid={senderUuid}
-          senderLabel={senderLabel}
-        />
+        <Composer key={conversation.id} conversation={conversation} senderUuid={senderUuid} />
       </div>
       {/* Scrolling to this, after the sticky reply box, takes the pane to its very bottom. */}
       <div ref={endRef} aria-hidden="true" />
@@ -271,11 +314,9 @@ export function ConversationThread({
 function Composer({
   conversation,
   senderUuid,
-  senderLabel,
 }: {
   conversation: LinkedinConversation;
   senderUuid: string;
-  senderLabel: string;
 }) {
   const send = useSendLinkedinMessage(senderUuid, conversation);
   const firstName = conversation.lead.name.split(' ')[0] ?? conversation.lead.name;
@@ -337,9 +378,7 @@ function Composer({
           {send.isPending ? 'Sending…' : 'Send'}
         </Button>
       </div>
-      <p className={chat.composerHint}>
-        Sends from {senderLabel}’s LinkedIn. ⌘ or Ctrl + Enter to send.
-      </p>
+      <p className={chat.composerHint}>⌘ or Ctrl + Enter to send.</p>
     </form>
   );
 }

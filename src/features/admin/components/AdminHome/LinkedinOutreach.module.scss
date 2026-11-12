@@ -1,0 +1,160 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '../../../../styles/mixins' as mx;
+
+// ——— Home chat: a LinkedIn profile, then the offer to message them ——————————————————————
+.answer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-04;
+}
+
+.text {
+  @include type-style('body-02');
+}
+
+// The profile on a Carbon tile surface, the photo beside the name as in the expert profile.
+.card {
+  @include mx.surface-card;
+
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-05;
+  gap: $spacing-05;
+  inline-size: 100%;
+  max-inline-size: 40rem;
+
+  @include breakpoint(md) {
+    padding: $spacing-06;
+  }
+}
+
+.head {
+  display: grid;
+  align-items: start;
+  gap: $spacing-04 $spacing-05;
+  grid-template-areas:
+    'avatar text'
+    'action action';
+  grid-template-columns: auto minmax(0, 1fr);
+
+  > :first-child {
+    grid-area: avatar;
+  }
+
+  // From md the buttons sit under the name and headline, beside the photo, so the text keeps
+  // the full width.
+  @include breakpoint(md) {
+    grid-template-areas:
+      'avatar text'
+      'avatar action';
+  }
+}
+
+.photo {
+  display: block;
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: cover;
+}
+
+.headText {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+  grid-area: text;
+  min-inline-size: 0;
+}
+
+.headline {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-02;
+  margin-block-start: $spacing-02;
+}
+
+// "Send message" and "View profile", beside the name (under it on a phone).
+.headActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: $spacing-03;
+  grid-area: action;
+}
+
+// Clicking the card opens the message draft.
+.cardClickable {
+  cursor: pointer;
+}
+
+// The draft and what happened to it, set off from the profile by a hairline. The draft
+// stretches so its field spans the card.
+.draft,
+.result {
+  display: flex;
+  flex-direction: column;
+  padding-block-start: $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
+  cursor: auto;
+  gap: $spacing-04;
+}
+
+.draft {
+  align-items: stretch;
+}
+
+.result {
+  align-items: flex-start;
+}
+
+.draftActions {
+  display: flex;
+  gap: $spacing-03;
+}
+
+// The stats sit flush with the card's padding rather than the panel's.
+.stats.stats {
+  padding-block: $spacing-04;
+}
+
+.about {
+  @include type-style('body-01');
+
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  color: $text-secondary;
+  -webkit-line-clamp: 3;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionTitle {
+  @include type-style('heading-compact-01');
+}
+
+.sent {
+  @include type-style('body-02');
+
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-03;
+
+  svg {
+    flex: none;
+    fill: $support-success;
+    margin-block-start: $spacing-01;
+  }
+}

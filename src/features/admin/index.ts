@@ -1,4 +1,5 @@
 export * from './model/inbox.schema';
+export * from './model/linkedinProfile.schema';
 export * from './model/project.schema';
 export * from './model/home.schema';
 export * from './model/match.schema';

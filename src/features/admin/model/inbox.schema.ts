@@ -149,6 +149,17 @@ export function latestReceivedAt(conversation: LinkedinConversation): string | n
   return received.at(-1)?.sentAt ?? null;
 }
 
+/** LinkedIn's limit for the note on a connection request. */
+export const CONNECTION_NOTE_MAX = 300;
+
+/** LinkedIn refused the message because the person isn't a 1st-degree connection. */
+export function failedAsNonConnection(message: LinkedinMessage): boolean {
+  return (
+    message.status === 'failed' &&
+    /NOT_FIRST_DEGREE|not a 1st-degree connection|not a connection/i.test(message.failReason ?? '')
+  );
+}
+
 /** Search a conversation by the lead's name, headline, company or any message text. */
 export function conversationMatches(conversation: LinkedinConversation, query: string): boolean {
   const q = query.trim().toLowerCase();
