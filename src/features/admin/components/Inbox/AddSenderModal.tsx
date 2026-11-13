@@ -13,11 +13,20 @@ import {
 } from '../../model/inbox.schema';
 import styles from './Inbox.module.scss';
 
-/** Create a GetSales sender profile: the identity a LinkedIn account sends outreach from. */
+const sameName = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+
+/**
+ * First step of connecting a LinkedIn account: whose it is. This creates a sender profile (the
+ * identity outreach goes from), or reuses a disconnected one with the same name, so connecting
+ * the same person again doesn't leave duplicates behind.
+ */
 export function AddSenderModal({
+  disconnected = [],
   onClose,
   onAdded,
 }: {
+  /** Senders whose LinkedIn was disconnected, to reconnect instead of creating another. */
+  disconnected?: SenderProfile[];
   onClose: () => void;
   onAdded: (profile: SenderProfile) => void;
 }) {
@@ -31,15 +40,21 @@ export function AddSenderModal({
     defaultValues: { firstName: '', lastName: '', label: '' },
   });
 
-  const submit = handleSubmit((input) => create.mutate(input, { onSuccess: onAdded }));
+  const submit = handleSubmit((input) => {
+    const existing = disconnected.find(
+      (p) => sameName(p.firstName, input.firstName) && sameName(p.lastName, input.lastName),
+    );
+    if (existing) onAdded(existing);
+    else create.mutate(input, { onSuccess: onAdded });
+  });
 
   return createPortal(
     <Modal
       open
       size="sm"
-      modalHeading="Add a LinkedIn sender"
+      modalHeading="Connect a LinkedIn account"
       modalLabel="Inbox"
-      primaryButtonText={create.isPending ? 'Creating…' : 'Create sender'}
+      primaryButtonText={create.isPending ? 'Saving…' : 'Continue'}
       primaryButtonDisabled={create.isPending}
       secondaryButtonText="Cancel"
       onRequestClose={onClose}
@@ -54,15 +69,14 @@ export function AddSenderModal({
       >
         <Stack gap={6}>
           <p className={styles.modalText}>
-            Each sender sends from one LinkedIn account. After adding it, connect that LinkedIn
-            account before sending messages.
+            Whose LinkedIn account is it? Next, you’ll choose a proxy and sign in to LinkedIn.
           </p>
           {create.isError ? (
             <InlineNotification
               kind="error"
               lowContrast
               hideCloseButton
-              title="Couldn’t create the sender."
+              title="Couldn’t save the account."
               subtitle={toUserMessage(create.error)}
             />
           ) : null}

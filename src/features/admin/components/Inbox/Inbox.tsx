@@ -13,6 +13,8 @@ import {
   MenuButton,
   Modal,
   MenuItem,
+  FeatureFlags,
+  OverflowMenu,
   MenuItemDivider,
   MenuItemGroup,
   MenuItemRadioGroup,
@@ -20,7 +22,6 @@ import {
   SkeletonText,
 } from '@carbon/react';
 import {
-  Add,
   ArrowLeft,
   Attachment,
   Email,
@@ -28,6 +29,7 @@ import {
   Folder,
   Locked,
   LogoLinkedin,
+  OverflowMenuHorizontal,
   Time,
   CheckmarkFilled,
   DocumentPdf,
@@ -75,6 +77,8 @@ import {
 import { SourceDocument } from '../SourceDocument/SourceDocument';
 import { AddAccountModal } from './AddAccountModal';
 import { AddSenderModal } from './AddSenderModal';
+import { ConnectLinkedinModal } from './ConnectLinkedinModal';
+import { DisconnectSenderModal } from './DisconnectSenderModal';
 import { SenderScheduleModal } from './SenderScheduleModal';
 import {
   ConversationList,
@@ -154,6 +158,9 @@ function InboxLayout({
   // LinkedIn sender profiles from GetSales sit alongside the mailboxes in the switcher.
   const senderProfiles = useSenderProfiles();
   const senders = senderProfiles.data ?? [];
+  // The account menu lists only senders with LinkedIn connected; a disconnected one is reached
+  // again through Connect LinkedIn account.
+  const connectedSenders = senders.filter((p) => p.linkedinConnected);
   const senderFor = (item: string) => senders.find((p) => senderAccountId(p.uuid) === item);
   const items = [...addresses, ...senders.map((p) => senderAccountId(p.uuid))];
   // The first connected mailbox, else the first LinkedIn sender; null while nothing is connected.
@@ -191,6 +198,9 @@ function InboxLayout({
   const [isAdding, setIsAdding] = useState(false);
   const [isAddingSender, setIsAddingSender] = useState(false);
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
+  // The sender whose LinkedIn is being connected (a new one has no row in the list yet).
+  const [connecting, setConnecting] = useState<SenderProfile | null>(null);
   const markRead = useMarkInboxRead();
   // Emails the PM marked unread on purpose stay unread while they're still open.
   const [keptUnread, setKeptUnread] = useState<string[]>([]);
@@ -249,9 +259,25 @@ function InboxLayout({
     <div className={`${styles.window} ${selectedId || conversationId ? styles.hasSelection : ''}`}>
       <section className={styles.listPane} aria-labelledby="inbox-title">
         <header className={styles.listHeader}>
-          <h1 id="inbox-title" className={styles.title}>
-            Inbox
-          </h1>
+          {/* The title, with the open sender's actions (Disconnect) in the top-right corner. */}
+          <div className={styles.titleRow}>
+            <h1 id="inbox-title" className={styles.title}>
+              Inbox
+            </h1>
+            {sender?.linkedinConnected ? (
+              // Carbon's v12 overflow menu: the same Menu items as the account switcher.
+              <FeatureFlags enableV12Overflowmenu>
+                <OverflowMenu
+                  size="sm"
+                  menuAlignment="bottom-end"
+                  renderIcon={OverflowMenuHorizontal}
+                  label={`More for ${senderName(sender)}`}
+                >
+                  <MenuItem label="Disconnect" onClick={() => setIsDisconnecting(true)} />
+                </OverflowMenu>
+              </FeatureFlags>
+            ) : null}
+          </div>
           {/* The mailbox being read, switchable like accounts in a mail app. */}
           <MenuButton
             kind="ghost"
@@ -281,9 +307,9 @@ function InboxLayout({
                 onChange={(item) => switchAccount(String(item))}
               />
             ) : null}
-            {senders.length > 0 ? (
+            {connectedSenders.length > 0 ? (
               <MenuItemGroup label="LinkedIn senders">
-                {senders.map((profile) => (
+                {connectedSenders.map((profile) => (
                   <MenuItem
                     key={profile.uuid}
                     label={senderItemLabel(profile, unreadBySender[profile.uuid] ?? 0)}
@@ -303,11 +329,15 @@ function InboxLayout({
             ) : null}
             <MenuItemDivider />
             <MenuItem
-              label="Add another account"
-              renderIcon={Add}
+              label="Connect LinkedIn account"
+              renderIcon={LogoLinkedin}
               onClick={() => setIsAddingSender(true)}
             />
-            <MenuItem label="Connect a mailbox" onClick={() => setIsAdding(true)} />
+            <MenuItem
+              label="Connect mailbox"
+              renderIcon={Email}
+              onClick={() => setIsAdding(true)}
+            />
           </MenuButton>
           {sender ? (
             <>
@@ -376,6 +406,13 @@ function InboxLayout({
               title="Connect LinkedIn to this sender."
               subtitle="Log in to this sender’s LinkedIn account before sending messages from it."
             />
+            <Button
+              size="md"
+              className={styles.connectButton}
+              onClick={() => setConnecting(sender)}
+            >
+              Connect LinkedIn
+            </Button>
           </div>
         ) : sender ? (
           <AsyncBoundary
@@ -507,7 +544,7 @@ function InboxLayout({
             <EmptyState
               pictogram={<EmailPictogram aria-hidden="true" />}
               title="No accounts connected"
-              description="Add a LinkedIn sender or connect a mailbox, and its messages will show here."
+              description="Connect a LinkedIn account or a mailbox, and its messages will show here."
             />
           )
         ) : mailbox.length === 0 ? (
@@ -537,14 +574,22 @@ function InboxLayout({
       {isEditingSchedule && sender ? (
         <SenderScheduleModal sender={sender} onClose={() => setIsEditingSchedule(false)} />
       ) : null}
+      {isDisconnecting && sender ? (
+        <DisconnectSenderModal sender={sender} onClose={() => setIsDisconnecting(false)} />
+      ) : null}
       {isAddingSender ? (
         <AddSenderModal
+          disconnected={senders.filter((p) => !p.linkedinConnected)}
           onClose={() => setIsAddingSender(false)}
           onAdded={(profile) => {
             setIsAddingSender(false);
             switchAccount(senderAccountId(profile.uuid));
+            setConnecting(profile);
           }}
         />
+      ) : null}
+      {connecting ? (
+        <ConnectLinkedinModal sender={connecting} onClose={() => setConnecting(null)} />
       ) : null}
     </div>
   );

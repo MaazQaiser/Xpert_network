@@ -196,12 +196,40 @@ function listMember(
 let profiles: SenderProfile[] = structuredClone(SEED);
 let conversations: LinkedinConversation[] = structuredClone(CONVERSATIONS);
 let followUps: Record<string, ListFollowUp> = {};
+// Senders whose "I have logged in" has been pressed: the next session check finds them connected.
+let checking = new Set<string>();
 
 export function resetSenderProfiles() {
   profiles = structuredClone(SEED);
   conversations = structuredClone(CONVERSATIONS);
   followUps = {};
+  checking = new Set();
 }
+
+const PROXY_COUNTRIES = [
+  { code: 'DE', name: 'Germany' },
+  { code: 'PK', name: 'Pakistan' },
+  { code: 'AE', name: 'United Arab Emirates' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'US', name: 'United States' },
+];
+
+const senderNotFound = () =>
+  HttpResponse.json(
+    { code: 'not_found', message: 'That sender isn’t in GetSales any more.' },
+    { status: 404 },
+  );
+
+const noBrowser = () =>
+  HttpResponse.json(
+    { code: 'no_browser', message: 'Choose a proxy country for this sender first.' },
+    { status: 409 },
+  );
+
+const updateProfile = (updated: SenderProfile) => {
+  profiles = profiles.map((p) => (p.uuid === updated.uuid ? updated : p));
+  return updated;
+};
 
 const FOLLOW_UP_OFF: ListFollowUp = {
   enabled: false,
@@ -213,6 +241,48 @@ const FOLLOW_UP_OFF: ListFollowUp = {
 
 export const getsalesHandlers = [
   http.get('/api/getsales/sender-profiles', () => HttpResponse.json(profiles)),
+
+  // Connecting LinkedIn: proxy country, then sign in in the cloud browser, then the check.
+  http.get('/api/getsales/proxy-countries', () => HttpResponse.json(PROXY_COUNTRIES)),
+
+  http.put('/api/getsales/sender-profiles/:uuid/linkedin/proxy', ({ params }) => {
+    const profile = profiles.find((p) => p.uuid === params.uuid);
+    if (!profile) return senderNotFound();
+    return HttpResponse.json(updateProfile({ ...profile, cloudBrowser: true }));
+  }),
+
+  http.post('/api/getsales/sender-profiles/:uuid/linkedin/sign-in', ({ params }) => {
+    const profile = profiles.find((p) => p.uuid === params.uuid);
+    if (!profile) return senderNotFound();
+    if (!profile.cloudBrowser) return noBrowser();
+    // The prototype has no cloud browser to show.
+    return HttpResponse.json({ url: 'about:blank' });
+  }),
+
+  http.post('/api/getsales/sender-profiles/:uuid/linkedin/check', ({ params }) => {
+    const profile = profiles.find((p) => p.uuid === params.uuid);
+    if (!profile) return senderNotFound();
+    if (!profile.cloudBrowser) return noBrowser();
+    checking.add(profile.uuid);
+    return HttpResponse.json({ state: 'checking', issue: null });
+  }),
+
+  http.get('/api/getsales/sender-profiles/:uuid/linkedin/session', ({ params }) => {
+    const profile = profiles.find((p) => p.uuid === params.uuid);
+    if (!profile) return senderNotFound();
+    if (!profile.cloudBrowser) return noBrowser();
+    if (!checking.has(profile.uuid) && !profile.linkedinConnected) {
+      return HttpResponse.json({ state: 'signed_out', issue: null });
+    }
+    checking.delete(profile.uuid);
+    updateProfile({
+      ...profile,
+      linkedinConnected: true,
+      linkedinState: 'ok',
+      linkedinIssue: null,
+    });
+    return HttpResponse.json({ state: 'connected', issue: null });
+  }),
 
   // The seeded sender has two threads; any other sender has none yet.
   http.get('/api/getsales/sender-profiles/:uuid/conversations', ({ params }) =>
@@ -400,6 +470,26 @@ export const getsalesHandlers = [
     };
     profiles = [...profiles, profile];
     return HttpResponse.json(profile, { status: 201 });
+  }),
+
+  // Disconnect: the sender stays, signed out of LinkedIn.
+  http.delete('/api/getsales/sender-profiles/:uuid/linkedin', ({ params }) => {
+    const profile = profiles.find((p) => p.uuid === params.uuid);
+    if (!profile) {
+      return HttpResponse.json(
+        { code: 'not_found', message: 'That sender isn’t in GetSales any more.' },
+        { status: 404 },
+      );
+    }
+    const updated: SenderProfile = {
+      ...profile,
+      linkedinConnected: false,
+      linkedinState: 'not_connected',
+      linkedinIssue: null,
+      cloudBrowser: false,
+    };
+    profiles = profiles.map((p) => (p.uuid === updated.uuid ? updated : p));
+    return HttpResponse.json(updated);
   }),
 
   http.put('/api/getsales/sender-profiles/:uuid/schedule', async ({ params, request }) => {

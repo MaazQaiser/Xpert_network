@@ -151,6 +151,14 @@
 }
 
 // The sender's LinkedIn hours, under the account switcher; opens the schedule dialog.
+// "Inbox" on the left, the open sender's actions menu on the right.
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
+
 .scheduleButton {
   align-self: flex-start;
   margin-block-start: $spacing-02;
@@ -160,6 +168,36 @@
   @include type-style('body-01');
 
   color: $text-secondary;
+}
+
+// The cloud browser someone signs in to LinkedIn in, inside the connect dialog.
+.cloudBrowser {
+  position: relative;
+  overflow: hidden;
+  inline-size: 100%;
+  block-size: 65vh;
+  background: $layer-01;
+}
+
+// Taller than the box by the height of GetSales' bar and shifted up by it (set inline), so the
+// bar sits outside the visible area.
+.cloudBrowserPage {
+  position: absolute;
+  inset-inline: 0;
+  display: block;
+  inline-size: 100%;
+  border: 0;
+}
+
+.connectHelp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $spacing-02;
+}
+
+.connectButton {
+  margin-block-start: $spacing-05;
 }
 
 .noResults {

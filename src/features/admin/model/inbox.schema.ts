@@ -115,8 +115,25 @@ export const senderProfileSchema = z.object({
   linkedinIssue: z.string().nullable().optional(),
   /** Now is outside the sender's schedule; sending resumes then. Null while inside it. */
   outsideHoursUntil: z.string().nullable().optional(),
+  /** It has a cloud browser behind a proxy, so connecting can go straight to signing in. */
+  cloudBrowser: z.boolean().optional(),
 });
 export type SenderProfile = z.infer<typeof senderProfileSchema>;
+
+/* ------------------------------ connecting LinkedIn ------------------------------ */
+
+/** A country the sender's cloud browser can get a proxy in. */
+export const proxyCountrySchema = z.object({ code: z.string(), name: z.string() });
+export type ProxyCountry = z.infer<typeof proxyCountrySchema>;
+
+export const cloudBrowserSchema = z.object({ url: z.string().url() });
+
+/** Whether the account signed in to in the cloud browser has been picked up. */
+export const linkedinSessionSchema = z.object({
+  state: z.enum(['checking', 'connected', 'signed_out', 'failed']),
+  issue: z.string().nullable(),
+});
+export type LinkedinSession = z.infer<typeof linkedinSessionSchema>;
 
 export type SenderHealthTone = 'ok' | 'warning' | 'error' | 'off';
 export interface SenderHealth {

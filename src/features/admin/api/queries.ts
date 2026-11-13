@@ -39,6 +39,9 @@ import {
   isQueuedMessage,
   senderProfileSchema,
   threadEventSchema,
+  cloudBrowserSchema,
+  linkedinSessionSchema,
+  proxyCountrySchema,
   type AddMailAccountInput,
   type SenderProfile,
   type SenderSchedule,
@@ -75,6 +78,9 @@ export const adminKeys = {
   inbox: () => [...adminKeys.all, 'inbox'] as const,
   mailAccounts: () => [...adminKeys.all, 'inbox', 'accounts'] as const,
   senderProfiles: () => [...adminKeys.all, 'inbox', 'senders'] as const,
+  proxyCountries: () => [...adminKeys.all, 'inbox', 'proxy-countries'] as const,
+  linkedinSession: (senderUuid: string) =>
+    [...adminKeys.all, 'inbox', 'linkedin-session', senderUuid] as const,
   linkedinProfile: (uuid: string) => [...adminKeys.all, 'linkedin', 'profile', uuid] as const,
   senderConversations: (uuid: string) =>
     [...adminKeys.all, 'inbox', 'senders', uuid, 'conversations'] as const,
@@ -425,6 +431,88 @@ export function useUpdateSenderSchedule(senderUuid: string) {
       apiRequest(`/getsales/sender-profiles/${encodeURIComponent(senderUuid)}/schedule`, {
         method: 'PUT',
         body: schedule,
+        schema: senderProfileSchema,
+      }),
+    onSuccess: (updated) =>
+      queryClient.setQueryData<SenderProfile[]>(adminKeys.senderProfiles(), (list) =>
+        list?.map((p) => (p.uuid === updated.uuid ? updated : p)),
+      ),
+  });
+}
+
+const linkedinPath = (senderUuid: string) =>
+  `/getsales/sender-profiles/${encodeURIComponent(senderUuid)}/linkedin`;
+
+/** Countries a sender's cloud browser can get a proxy in. They rarely change. */
+export function useProxyCountries() {
+  return useQuery({
+    queryKey: adminKeys.proxyCountries(),
+    queryFn: ({ signal }) =>
+      apiRequest('/getsales/proxy-countries', { schema: z.array(proxyCountrySchema), signal }),
+    staleTime: Infinity,
+  });
+}
+
+/** Step 1 of connecting LinkedIn: a cloud browser behind a proxy in that country. */
+export function useSetSenderProxy(senderUuid: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (countryCode: string) =>
+      apiRequest(`${linkedinPath(senderUuid)}/proxy`, {
+        method: 'PUT',
+        body: { countryCode },
+        schema: senderProfileSchema,
+      }),
+    onSuccess: (updated) =>
+      queryClient.setQueryData<SenderProfile[]>(adminKeys.senderProfiles(), (list) =>
+        list?.map((p) => (p.uuid === updated.uuid ? updated : p)),
+      ),
+  });
+}
+
+/** Step 2: a link to the sender's cloud browser, to sign in to LinkedIn there. */
+export function useOpenCloudBrowser(senderUuid: string) {
+  return useMutation({
+    mutationFn: () =>
+      apiRequest(`${linkedinPath(senderUuid)}/sign-in`, {
+        method: 'POST',
+        schema: cloudBrowserSchema,
+      }),
+  });
+}
+
+/** Step 3, "I have logged in": start the browser so the signed-in account is picked up. */
+export function useCheckLinkedinSession(senderUuid: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () =>
+      apiRequest(`${linkedinPath(senderUuid)}/check`, {
+        method: 'POST',
+        schema: linkedinSessionSchema,
+      }),
+    onSuccess: (session) =>
+      queryClient.setQueryData(adminKeys.linkedinSession(senderUuid), session),
+  });
+}
+
+/** Polls the session while it's being checked; stops once it's connected or has failed. */
+export function useLinkedinSession(senderUuid: string, enabled: boolean) {
+  return useQuery({
+    queryKey: adminKeys.linkedinSession(senderUuid),
+    queryFn: ({ signal }) =>
+      apiRequest(`${linkedinPath(senderUuid)}/session`, { schema: linkedinSessionSchema, signal }),
+    enabled,
+    refetchInterval: (query) => (query.state.data?.state === 'checking' ? 3000 : false),
+  });
+}
+
+/** Sign a sender out of LinkedIn; it then shows as not connected. */
+export function useDisconnectLinkedin(senderUuid: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () =>
+      apiRequest(`/getsales/sender-profiles/${encodeURIComponent(senderUuid)}/linkedin`, {
+        method: 'DELETE',
         schema: senderProfileSchema,
       }),
     onSuccess: (updated) =>

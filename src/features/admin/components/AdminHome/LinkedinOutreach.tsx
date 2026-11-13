@@ -294,7 +294,7 @@ function FoundProfile({
           lowContrast
           hideCloseButton
           title="No LinkedIn sender connected."
-          subtitle="Add a LinkedIn sender from the Inbox to message people from here."
+          subtitle="Connect a LinkedIn account from the Inbox to message people from here."
         />
       )}
       <LinkedinProfileCard

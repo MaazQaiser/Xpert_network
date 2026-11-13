@@ -7,6 +7,10 @@ import { expectNoAxeViolations } from '@/test/axe';
 import { mockLocation, mockRouter } from '@/test/navigation';
 import { renderWithProviders } from '@/test/render';
 import { Inbox } from './Inbox';
+import { connectTiming, signInBarHeight } from './ConnectLinkedinModal';
+
+// The pause before the browser starts after signing in (6 seconds in the app).
+connectTiming.settleMs = 0;
 
 describe('Inbox (F12, screen 02)', () => {
   it('lists client emails and opens the selected one', async () => {
@@ -64,7 +68,7 @@ describe('Inbox (F12, screen 02)', () => {
     await userEvent.click(
       await screen.findByRole('button', { name: 'projects@xpertnetwork.example' }),
     );
-    await userEvent.click(await screen.findByRole('menuitem', { name: 'Connect a mailbox' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Connect mailbox' }));
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByText('Connect another mailbox')).toBeInTheDocument();
     await userEvent.click(within(dialog).getByLabelText('Microsoft 365'));
@@ -391,6 +395,96 @@ describe('Inbox (F12, screen 02)', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
 
+  it('disconnects the sender’s LinkedIn after saying what stops working', async () => {
+    mockLocation.search = 'account=sender%3A50181726-f022-4c23-8116-1c45e97f8a19';
+    const disconnects: string[] = [];
+    server.events.on('request:start', ({ request }) => {
+      if (request.method === 'DELETE') disconnects.push(new URL(request.url).pathname);
+    });
+    renderWithProviders(<Inbox />, { persona: 'ops' });
+    await userEvent.click(await screen.findByRole('button', { name: 'More for Ateeb Ahmad' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Disconnect' }));
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByText('Disconnect Ateeb Ahmad’s LinkedIn?')).toBeInTheDocument();
+    expect(within(dialog).getByText(/still waiting to go out won’t be sent/)).toBeInTheDocument();
+    await expectNoAxeViolations(dialog);
+
+    // Cancel leaves it connected.
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(disconnects).toEqual([]);
+
+    await userEvent.click(screen.getByRole('button', { name: 'More for Ateeb Ahmad' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Disconnect' }));
+    await userEvent.click(
+      within(await screen.findByRole('dialog')).getByRole('button', { name: 'Disconnect' }),
+    );
+    expect(await screen.findByText(/LinkedIn · Not connected/)).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(disconnects).toEqual([
+      '/api/getsales/sender-profiles/50181726-f022-4c23-8116-1c45e97f8a19/linkedin',
+    ]);
+    // Nothing left to disconnect.
+    expect(screen.queryByRole('button', { name: 'More for Ateeb Ahmad' })).toBeNull();
+    // The account menu no longer lists it; connecting again starts from Connect LinkedIn account.
+    await userEvent.click(screen.getByRole('button', { name: 'Ateeb Ahmad' }));
+    expect(await screen.findByRole('menuitem', { name: 'Connect LinkedIn account' })).toBeVisible();
+    expect(screen.getByRole('menuitem', { name: 'Connect mailbox' })).toBeVisible();
+    expect(screen.queryByRole('menuitem', { name: /Ateeb Ahmad/ })).toBeNull();
+    server.events.removeAllListeners();
+  });
+
+  it('reconnects a disconnected sender with the same name instead of adding another', async () => {
+    mockLocation.search = 'account=sender%3A50181726-f022-4c23-8116-1c45e97f8a19';
+    const creates: string[] = [];
+    server.events.on('request:start', ({ request }) => {
+      if (
+        request.method === 'POST' &&
+        new URL(request.url).pathname === '/api/getsales/sender-profiles'
+      )
+        creates.push(request.url);
+    });
+    renderWithProviders(<Inbox />, { persona: 'ops' });
+    await userEvent.click(await screen.findByRole('button', { name: 'More for Ateeb Ahmad' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Disconnect' }));
+    await userEvent.click(
+      within(await screen.findByRole('dialog')).getByRole('button', { name: 'Disconnect' }),
+    );
+    await screen.findByText(/LinkedIn · Not connected/);
+    await userEvent.click(screen.getByRole('button', { name: 'Ateeb Ahmad' }));
+    await userEvent.click(
+      await screen.findByRole('menuitem', { name: 'Connect LinkedIn account' }),
+    );
+    const dialog = await screen.findByRole('dialog');
+    await userEvent.type(within(dialog).getByLabelText('First name'), 'ateeb');
+    await userEvent.type(within(dialog).getByLabelText('Last name'), 'Ahmad ');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Continue' }));
+    expect(
+      await screen.findByRole('dialog', { name: 'Connect Ateeb Ahmad’s LinkedIn' }),
+    ).toBeInTheDocument();
+    expect(creates).toEqual([]);
+    server.events.removeAllListeners();
+  });
+
+  it('keeps the dialog open and explains when disconnecting fails', async () => {
+    mockLocation.search = 'account=sender%3A50181726-f022-4c23-8116-1c45e97f8a19';
+    server.use(
+      http.delete('/api/getsales/sender-profiles/:uuid/linkedin', () =>
+        HttpResponse.json(
+          { code: 'rejected', message: 'The LinkedIn account is busy. Try again in a minute.' },
+          { status: 409 },
+        ),
+      ),
+    );
+    renderWithProviders(<Inbox />, { persona: 'ops' });
+    await userEvent.click(await screen.findByRole('button', { name: 'More for Ateeb Ahmad' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Disconnect' }));
+    const dialog = await screen.findByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Disconnect' }));
+    expect(await within(dialog).findByText('Couldn’t disconnect LinkedIn.')).toBeInTheDocument();
+    expect(screen.getByText(/LinkedIn · Connected/)).toBeInTheDocument();
+  });
+
   it('picks a schedule time from hour and minute lists', async () => {
     mockLocation.search = 'account=sender%3A50181726-f022-4c23-8116-1c45e97f8a19';
     renderWithProviders(<Inbox />, { persona: 'ops' });
@@ -605,28 +699,117 @@ describe('Inbox (F12, screen 02)', () => {
     expect(screen.getByRole('button', { name: /try again|retry/i })).toBeInTheDocument();
   });
 
-  it('creates a sender profile from Add another account and switches to it', async () => {
+  it('creates a sender profile from Connect LinkedIn account and switches to it', async () => {
     mockLocation.pathname = '/admin/inbox';
     renderWithProviders(<Inbox />, { persona: 'ops' });
     await userEvent.click(
       await screen.findByRole('button', { name: 'projects@xpertnetwork.example' }),
     );
-    await userEvent.click(await screen.findByRole('menuitem', { name: 'Add another account' }));
+    await userEvent.click(
+      await screen.findByRole('menuitem', { name: 'Connect LinkedIn account' }),
+    );
     const dialog = await screen.findByRole('dialog');
-    expect(within(dialog).getByText('Add a LinkedIn sender')).toBeInTheDocument();
+    expect(within(dialog).getByText('Connect a LinkedIn account')).toBeInTheDocument();
 
     // Both names are required.
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Create sender' }));
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Continue' }));
     expect(await within(dialog).findByText('Enter a first name.')).toBeInTheDocument();
 
     await userEvent.type(within(dialog).getByLabelText('First name'), 'Sara');
     await userEvent.type(within(dialog).getByLabelText('Last name'), 'Khan');
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Create sender' }));
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Continue' }));
     await waitFor(() =>
       expect(mockRouter.replace).toHaveBeenCalledWith('/admin/inbox?account=sender%3Asp_2', {
         scroll: false,
       }),
     );
+    // Then straight on to connecting its LinkedIn, starting with the proxy.
+    const connect = await screen.findByRole('dialog', { name: /Connect .*LinkedIn/ });
+    expect(connect).toHaveAccessibleName('Connect Sara Khan’s LinkedIn');
+    expect(within(connect).getByRole('radio', { name: 'Use Exscio proxy' })).toBeChecked();
+  });
+
+  it('connects LinkedIn again after disconnecting: proxy, cloud browser, session check', async () => {
+    mockLocation.search = 'account=sender%3A50181726-f022-4c23-8116-1c45e97f8a19';
+    const calls: string[] = [];
+    server.events.on('request:start', ({ request }) => {
+      const path = new URL(request.url).pathname;
+      if (path.includes('/linkedin')) calls.push(`${request.method} ${path.split('/').pop()}`);
+    });
+    renderWithProviders(<Inbox />, { persona: 'ops' });
+    await userEvent.click(await screen.findByRole('button', { name: 'More for Ateeb Ahmad' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Disconnect' }));
+    await userEvent.click(
+      within(await screen.findByRole('dialog')).getByRole('button', { name: 'Disconnect' }),
+    );
+    await userEvent.click(await screen.findByRole('button', { name: 'Connect LinkedIn' }));
+
+    // 1. Set proxy: a country is required.
+    let dialog = await screen.findByRole('dialog', { name: /Connect .*LinkedIn/ });
+    await expectNoAxeViolations(dialog);
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Continue' }));
+    expect(await within(dialog).findByText('Choose a country.')).toBeInTheDocument();
+    await userEvent.type(within(dialog).getByRole('combobox', { name: 'Country' }), 'pak');
+    await userEvent.click(await screen.findByRole('option', { name: 'Pakistan' }));
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Continue' }));
+
+    // 2. Sign in to LinkedIn in the cloud browser, shown in the app.
+    await userEvent.click(
+      await within(dialog).findByRole('button', { name: 'Open cloud browser' }),
+    );
+    dialog = await screen.findByRole('dialog', { name: /Sign in to .*LinkedIn/ });
+    expect(within(dialog).getByTitle('Cloud browser for Ateeb Ahmad')).toBeInTheDocument();
+    await userEvent.click(within(dialog).getByRole('button', { name: 'I have logged in' }));
+
+    // 3. The session is checked until the account shows as connected.
+    dialog = await screen.findByRole('dialog', { name: /Connect .*LinkedIn/ });
+    expect(await within(dialog).findByText('LinkedIn connected.')).toBeInTheDocument();
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Done' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(await screen.findByText(/LinkedIn · Connected/)).toBeInTheDocument();
+    expect(calls).toEqual([
+      'DELETE linkedin',
+      'PUT proxy',
+      'POST sign-in',
+      'POST check',
+      'GET session',
+    ]);
+    server.events.removeAllListeners();
+  });
+
+  it('crops the sign-in bar by the height it has at the frame’s width', () => {
+    expect(signInBarHeight(1400)).toBe(49);
+    expect(signInBarHeight(1000)).toBe(61);
+    expect(signInBarHeight(600)).toBe(105);
+  });
+
+  it('says so when LinkedIn still isn’t signed in after I have logged in', async () => {
+    mockLocation.search = 'account=sender%3A50181726-f022-4c23-8116-1c45e97f8a19';
+    server.use(
+      http.get('/api/getsales/sender-profiles/:uuid/linkedin/session', () =>
+        HttpResponse.json({ state: 'signed_out', issue: null }),
+      ),
+    );
+    renderWithProviders(<Inbox />, { persona: 'ops' });
+    await userEvent.click(await screen.findByRole('button', { name: 'More for Ateeb Ahmad' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Disconnect' }));
+    await userEvent.click(
+      within(await screen.findByRole('dialog')).getByRole('button', { name: 'Disconnect' }),
+    );
+    await userEvent.click(await screen.findByRole('button', { name: 'Connect LinkedIn' }));
+    let dialog = await screen.findByRole('dialog', { name: /Connect .*LinkedIn/ });
+    await userEvent.type(within(dialog).getByRole('combobox', { name: 'Country' }), 'Germ');
+    await userEvent.click(await screen.findByRole('option', { name: 'Germany' }));
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Continue' }));
+    await userEvent.click(
+      await within(dialog).findByRole('button', { name: 'Open cloud browser' }),
+    );
+    dialog = await screen.findByRole('dialog', { name: /Sign in to .*LinkedIn/ });
+    await userEvent.click(within(dialog).getByRole('button', { name: 'I have logged in' }));
+    dialog = await screen.findByRole('dialog', { name: /Connect .*LinkedIn/ });
+    expect(await within(dialog).findByText('LinkedIn isn’t signed in yet.')).toBeInTheDocument();
+    // Opening the browser again is the next step.
+    expect(within(dialog).getByRole('button', { name: 'Open cloud browser' })).toBeEnabled();
   });
 
   it('explains when GetSales rejects the new sender', async () => {
@@ -642,11 +825,13 @@ describe('Inbox (F12, screen 02)', () => {
     await userEvent.click(
       await screen.findByRole('button', { name: 'projects@xpertnetwork.example' }),
     );
-    await userEvent.click(await screen.findByRole('menuitem', { name: 'Add another account' }));
+    await userEvent.click(
+      await screen.findByRole('menuitem', { name: 'Connect LinkedIn account' }),
+    );
     const dialog = await screen.findByRole('dialog');
     await userEvent.type(within(dialog).getByLabelText('First name'), 'Sara');
     await userEvent.type(within(dialog).getByLabelText('Last name'), 'Khan');
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Create sender' }));
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Continue' }));
     expect(
       await within(dialog).findByText('The first name field is too long.'),
     ).toBeInTheDocument();
