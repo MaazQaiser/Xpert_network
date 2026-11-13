@@ -126,12 +126,18 @@ export type SenderProfile = z.infer<typeof senderProfileSchema>;
 export const proxyCountrySchema = z.object({ code: z.string(), name: z.string() });
 export type ProxyCountry = z.infer<typeof proxyCountrySchema>;
 
-export const cloudBrowserSchema = z.object({ url: z.string().url() });
+export const cloudBrowserSchema = z.object({
+  url: z.string().url(),
+  /** When the browser last started before this sign-in. */
+  startedAt: z.string().nullable().optional(),
+});
 
 /** Whether the account signed in to in the cloud browser has been picked up. */
 export const linkedinSessionSchema = z.object({
   state: z.enum(['checking', 'connected', 'signed_out', 'failed']),
   issue: z.string().nullable(),
+  /** When the browser last started; GetSales' "I have logged in" starts it. */
+  startedAt: z.string().nullable().optional(),
 });
 export type LinkedinSession = z.infer<typeof linkedinSessionSchema>;
 

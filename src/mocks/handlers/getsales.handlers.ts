@@ -196,14 +196,15 @@ function listMember(
 let profiles: SenderProfile[] = structuredClone(SEED);
 let conversations: LinkedinConversation[] = structuredClone(CONVERSATIONS);
 let followUps: Record<string, ListFollowUp> = {};
-// Senders whose "I have logged in" has been pressed: the next session check finds them connected.
-let checking = new Set<string>();
+// Session checks since each sender's sign-in page opened. The prototype has no real page to press
+// "I have logged in" on, so the second check counts as pressed and the account connects.
+let signInPolls: Record<string, number> = {};
 
 export function resetSenderProfiles() {
   profiles = structuredClone(SEED);
   conversations = structuredClone(CONVERSATIONS);
   followUps = {};
-  checking = new Set();
+  signInPolls = {};
 }
 
 const PROXY_COUNTRIES = [
@@ -255,33 +256,31 @@ export const getsalesHandlers = [
     const profile = profiles.find((p) => p.uuid === params.uuid);
     if (!profile) return senderNotFound();
     if (!profile.cloudBrowser) return noBrowser();
+    signInPolls[profile.uuid] = 0;
     // The prototype has no cloud browser to show.
-    return HttpResponse.json({ url: 'about:blank' });
-  }),
-
-  http.post('/api/getsales/sender-profiles/:uuid/linkedin/check', ({ params }) => {
-    const profile = profiles.find((p) => p.uuid === params.uuid);
-    if (!profile) return senderNotFound();
-    if (!profile.cloudBrowser) return noBrowser();
-    checking.add(profile.uuid);
-    return HttpResponse.json({ state: 'checking', issue: null });
+    return HttpResponse.json({ url: 'about:blank', startedAt: null });
   }),
 
   http.get('/api/getsales/sender-profiles/:uuid/linkedin/session', ({ params }) => {
     const profile = profiles.find((p) => p.uuid === params.uuid);
     if (!profile) return senderNotFound();
     if (!profile.cloudBrowser) return noBrowser();
-    if (!checking.has(profile.uuid) && !profile.linkedinConnected) {
-      return HttpResponse.json({ state: 'signed_out', issue: null });
+    const polls = (signInPolls[profile.uuid] ?? 0) + 1;
+    signInPolls[profile.uuid] = polls;
+    if (!profile.linkedinConnected && polls < 2) {
+      return HttpResponse.json({ state: 'signed_out', issue: null, startedAt: null });
     }
-    checking.delete(profile.uuid);
     updateProfile({
       ...profile,
       linkedinConnected: true,
       linkedinState: 'ok',
       linkedinIssue: null,
     });
-    return HttpResponse.json({ state: 'connected', issue: null });
+    return HttpResponse.json({
+      state: 'connected',
+      issue: null,
+      startedAt: new Date().toISOString(),
+    });
   }),
 
   // The seeded sender has two threads; any other sender has none yet.

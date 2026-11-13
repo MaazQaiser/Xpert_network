@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -18,7 +18,6 @@ import {
 import { toUserMessage } from '@/shared/api';
 import {
   adminKeys,
-  useCheckLinkedinSession,
   useDisconnectLinkedin,
   useLinkedinSession,
   useOpenCloudBrowser,
@@ -28,62 +27,18 @@ import {
 import { senderName, type ProxyCountry, type SenderProfile } from '../../model/inbox.schema';
 import styles from './Inbox.module.scss';
 
-// closing: the cloud browser was just closed after signing in; it's started a moment later.
-type Step = 'proxy' | 'sign-in' | 'browser' | 'closing' | 'checking';
+type Step = 'proxy' | 'sign-in' | 'browser';
 
 // Past this, the check says it's slow (it keeps going).
 const SLOW_CHECK_MS = 3 * 60 * 1000;
 
-export const connectTiming = {
-  // GetSales' own "I have logged in" ends the remote session and waits this long before starting
-  // the browser, so the LinkedIn login is saved first. Ours does the same.
-  settleMs: 6000,
-};
-
-/**
- * Height of GetSales' "Smart Login" bar at the top of the cloud browser page, which repeats our
- * buttons. The page is on their site, so it can't be hidden; the frame is shifted up by this much
- * instead. It wraps onto more lines as the frame narrows (measured on their page).
- */
-export function signInBarHeight(frameWidth: number): number {
-  if (frameWidth >= 1102) return 49;
-  if (frameWidth >= 795) return 61;
-  return 105;
-}
-
-/** The cloud browser, with GetSales' bar cropped off the top. */
-function CloudBrowserFrame({ url, title }: { url: string; title: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [bar, setBar] = useState(() => signInBarHeight(0));
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || typeof ResizeObserver === 'undefined') return;
-    const observer = new ResizeObserver(([entry]) => {
-      if (entry) setBar(signInBarHeight(entry.contentRect.width));
-    });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div ref={ref} className={styles.cloudBrowser}>
-      <iframe
-        src={url}
-        title={title}
-        className={styles.cloudBrowserPage}
-        style={{ insetBlockStart: -bar, blockSize: `calc(100% + ${bar}px)` }}
-        allow="clipboard-read; clipboard-write"
-      />
-    </div>
-  );
-}
-
 /**
  * Connect a sender's LinkedIn without leaving the app:
  * 1. choose a proxy country, which gives the sender a cloud browser there;
- * 2. sign in to LinkedIn in that cloud browser, shown here, then press "I have logged in";
- * 3. the browser starts and the session is checked until the account shows as connected.
+ * 2. sign in to LinkedIn on GetSales' sign-in page for that browser, shown here, and press its
+ *    own "I have logged in" (it saves the login and starts the browser; closing the page from
+ *    outside doesn't, so the app has no button of its own for this);
+ * 3. once the browser starts, the page closes and the session is checked until it's connected.
  */
 export function ConnectLinkedinModal({
   sender,
@@ -98,41 +53,28 @@ export function ConnectLinkedinModal({
   const [country, setCountry] = useState<ProxyCountry | null>(null);
   const [countryMissing, setCountryMissing] = useState(false);
   const [browserUrl, setBrowserUrl] = useState<string | null>(null);
+  // When the browser last started before this sign-in; a later start means it was pressed.
+  const [startedBefore, setStartedBefore] = useState<string | null>(null);
   const [isSlow, setIsSlow] = useState(false);
 
   const countries = useProxyCountries();
   const setProxy = useSetSenderProxy(sender.uuid);
   const openBrowser = useOpenCloudBrowser(sender.uuid);
-  const check = useCheckLinkedinSession(sender.uuid);
   const startOver = useDisconnectLinkedin(sender.uuid);
-  const session = useLinkedinSession(sender.uuid, step === 'checking');
-  const sessionState =
-    step === 'closing'
-      ? 'checking'
-      : step === 'checking'
-        ? (session.data?.state ?? 'checking')
-        : null;
+  const session = useLinkedinSession(sender.uuid, step === 'browser');
+  const startedAt = session.data?.startedAt ?? null;
+  // "I have logged in" on GetSales' page starts the browser (or it's already connected).
+  const pressedLoggedIn =
+    step === 'browser' &&
+    (session.data?.state === 'connected' ||
+      (startedAt !== null && (startedBefore === null || startedAt > startedBefore)));
+  const sessionState = pressedLoggedIn ? (session.data?.state ?? 'checking') : null;
   const connected = sessionState === 'connected';
 
   // Once connected, the inbox shows the sender's conversations.
   useEffect(() => {
     if (connected) void queryClient.invalidateQueries({ queryKey: adminKeys.senderProfiles() });
   }, [connected, queryClient]);
-
-  // After "I have logged in": wait for the remote session to end, then start the browser.
-  useEffect(() => {
-    if (step !== 'closing') return;
-    const timer = window.setTimeout(
-      () =>
-        check.mutate(undefined, {
-          onSuccess: () => setStep('checking'),
-          onError: () => setStep('sign-in'),
-        }),
-      connectTiming.settleMs,
-    );
-    return () => window.clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per sign-in
-  }, [step]);
 
   useEffect(() => {
     if (sessionState !== 'checking') return;
@@ -150,49 +92,45 @@ export function ConnectLinkedinModal({
 
   const showBrowser = () =>
     openBrowser.mutate(undefined, {
-      onSuccess: ({ url }) => {
+      onSuccess: ({ url, startedAt: before }) => {
         setBrowserUrl(url);
+        setStartedBefore(before ?? null);
+        setIsSlow(false);
         setStep('browser');
       },
     });
 
-  const changeProxy = () => {
-    check.reset();
-    setStep('proxy');
-  };
+  const changeProxy = () => setStep('proxy');
 
   const restart = () =>
     startOver.mutate(undefined, {
       onSuccess: () => {
-        check.reset();
         setCountry(null);
         setStep('proxy');
       },
     });
 
-  // The cloud browser: the sender signs in to LinkedIn here, as they would on linkedin.com.
-  if (step === 'browser' && browserUrl) {
+  // GetSales' sign-in page for the cloud browser, with its own "I have logged in" and Close.
+  if (step === 'browser' && browserUrl && !pressedLoggedIn) {
     return createPortal(
       <Modal
         open
+        passiveModal
         size="lg"
         modalHeading={`Sign in to ${name}’s LinkedIn`}
-        primaryButtonText="I have logged in"
-        secondaryButtonText="Cancel"
         preventCloseOnClickOutside
         onRequestClose={() => setStep('sign-in')}
-        onRequestSubmit={() => {
-          // Closing the frame ends the remote session, as GetSales' own button does.
-          check.reset();
-          setIsSlow(false);
-          setBrowserUrl(null);
-          setStep('closing');
-        }}
       >
         <Stack gap={4}>
-          <CloudBrowserFrame url={browserUrl} title={`Cloud browser for ${name}`} />
+          <iframe
+            src={browserUrl}
+            title={`Cloud browser for ${name}`}
+            className={styles.cloudBrowser}
+            allow="clipboard-read; clipboard-write"
+          />
           <p className={styles.modalText}>
-            Use Ctrl+C and Ctrl+V to copy and paste. When you’re signed in, choose I have logged in.
+            Sign in to LinkedIn above, then press I have logged in at the top. This closes by itself
+            and checks the account.
           </p>
         </Stack>
       </Modal>,
@@ -338,15 +276,6 @@ export function ConnectLinkedinModal({
                 hideCloseButton
                 title="Couldn’t check the session."
                 subtitle={toUserMessage(session.error)}
-              />
-            ) : null}
-            {check.isError ? (
-              <InlineNotification
-                kind="error"
-                lowContrast
-                hideCloseButton
-                title="Couldn’t check the session."
-                subtitle={toUserMessage(check.error)}
               />
             ) : null}
             {openBrowser.isError ? (

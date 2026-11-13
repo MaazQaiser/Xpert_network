@@ -481,28 +481,14 @@ export function useOpenCloudBrowser(senderUuid: string) {
   });
 }
 
-/** Step 3, "I have logged in": start the browser so the signed-in account is picked up. */
-export function useCheckLinkedinSession(senderUuid: string) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: () =>
-      apiRequest(`${linkedinPath(senderUuid)}/check`, {
-        method: 'POST',
-        schema: linkedinSessionSchema,
-      }),
-    onSuccess: (session) =>
-      queryClient.setQueryData(adminKeys.linkedinSession(senderUuid), session),
-  });
-}
-
-/** Polls the session while it's being checked; stops once it's connected or has failed. */
+/** Polls the session while someone signs in and it's checked; stops once it's connected. */
 export function useLinkedinSession(senderUuid: string, enabled: boolean) {
   return useQuery({
     queryKey: adminKeys.linkedinSession(senderUuid),
     queryFn: ({ signal }) =>
       apiRequest(`${linkedinPath(senderUuid)}/session`, { schema: linkedinSessionSchema, signal }),
     enabled,
-    refetchInterval: (query) => (query.state.data?.state === 'checking' ? 3000 : false),
+    refetchInterval: (query) => (query.state.data?.state === 'connected' ? false : 3000),
   });
 }
 
