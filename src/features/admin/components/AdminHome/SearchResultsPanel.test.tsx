@@ -3,7 +3,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { SearchPerson } from '@/features/admin';
 import { expectNoAxeViolations } from '@/test/axe';
-import { seedSearch, type SearchScript } from '@/test/mockBackend';
+import { CAFE_SEARCH, seedSearch, type SearchScript } from '@/test/mockBackend';
 import { renderWithProviders } from '@/test/render';
 import { AdminHome } from './AdminHome';
 import { SearchResultsPanel } from './SearchResultsPanel';
@@ -289,5 +289,61 @@ describe('the live results table', () => {
     expect(await within(panel).findByText('Omar Khalid')).toBeInTheDocument();
     await userEvent.click(within(panel).getByRole('button', { name: 'Close' }));
     expect(screen.queryByRole('complementary', { name: 'Search results' })).toBeNull();
+  });
+
+  it('says_how_the_search_ended_like_the_card', async () => {
+    const id = seedSearch(
+      { ...CAFE_SEARCH, end: { status: 'budget_reached', note: 'Exa budget reached ($2.00)' } },
+      'brief_cafe',
+    );
+    renderWithProviders(<SearchResultsPanel searchId={id} onClose={() => undefined} />, {
+      persona: 'ops',
+    });
+    const panel = await screen.findByRole('complementary', { name: 'Search results' });
+    expect(await within(panel).findByText('Web search budget reached ($2.00)')).toBeInTheDocument();
+    expect(within(panel).queryByRole('button', { name: 'Stop' })).toBeNull();
+    expect(panel.textContent).not.toMatch(/FullEnrich|Exa\b|GetSales/);
+    await expectNoAxeViolations(panel);
+  });
+
+  it('says_found_when_the_target_was_reached', async () => {
+    const id = seedSearch(CAFE_SEARCH, 'brief_cafe');
+    renderWithProviders(<SearchResultsPanel searchId={id} onClose={() => undefined} />, {
+      persona: 'ops',
+    });
+    const panel = await screen.findByRole('complementary', { name: 'Search results' });
+    expect(await within(panel).findByText('Found 2 of 2')).toBeInTheDocument();
+  });
+
+  it('says_the_web_budget_was_reached_while_it_still_runs', async () => {
+    const id = seedSearch(
+      {
+        ...CAFE_SEARCH,
+        steps: [
+          {
+            type: 'progress',
+            progress: { matches: 0, byGroup: [], done: false, analysed: 25 },
+            cost: {
+              exaDollars: 1.5,
+              fullenrichCredits: 6.25,
+              fullenrichDollars: null,
+              totalDollars: 1.5,
+            },
+            status: 'running',
+            note: 'Exa budget reached ($1.50)',
+          },
+        ],
+        waitForStopBefore: 1,
+      },
+      'brief_cafe',
+    );
+    renderWithProviders(<SearchResultsPanel searchId={id} onClose={() => undefined} />, {
+      persona: 'ops',
+    });
+    const panel = await screen.findByRole('complementary', { name: 'Search results' });
+    expect(await within(panel).findByText('Web search budget reached ($1.50)')).toBeInTheDocument();
+    // Still running: profile search can go on, and Stop is still there.
+    expect(within(panel).getByRole('button', { name: 'Stop' })).toBeInTheDocument();
+    expect(panel.textContent).not.toMatch(/Exa\b/);
   });
 });

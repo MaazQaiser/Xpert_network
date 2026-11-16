@@ -10,7 +10,7 @@ import {
 } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { z } from 'zod';
-import { apiRequest, streamEvents } from '@/shared/api';
+import { apiRequest, isApiError, streamEvents } from '@/shared/api';
 import {
   briefRequirementsSchema,
   type BriefRequirements,
@@ -887,15 +887,23 @@ const withPerson = (people: SearchPerson[], person: SearchPerson) =>
     ? people.map((p) => (p.id === person.id ? person : p))
     : [...people, person];
 
+const isPermanentRefusal = (error: unknown) =>
+  isApiError(error) &&
+  error.status >= 400 &&
+  error.status < 500 &&
+  error.status !== 408 &&
+  error.status !== 429;
+
 /**
  * One connection to a search's stream, read into the `useSearch` cache. Says whether it reached
- * done, and whether it got anything at all (a snapshot means the server was reached).
+ * done, whether it got anything at all (a snapshot means the server was reached), and whether
+ * the server refused it outright (a 4xx: not found, not signed in, not allowed).
  */
 async function readSearchStream(
   queryClient: QueryClient,
   id: string,
   signal: AbortSignal,
-): Promise<{ done: boolean; heard: boolean }> {
+): Promise<{ done: boolean; heard: boolean; refused?: boolean }> {
   const key = adminKeys.search(id);
   let heard = false;
   try {
@@ -936,8 +944,12 @@ async function readSearchStream(
         return { done: true, heard };
       }
     }
-  } catch {
-    // Dropped, refused or garbled: the caller decides whether to try again.
+  } catch (error) {
+    // A 4xx won't change by asking again (but a timeout or "too many requests" may). Dropped or
+    // garbled: the caller decides.
+    if (isPermanentRefusal(error)) {
+      return { done: false, heard, refused: true };
+    }
   }
   return { done: false, heard };
 }
@@ -961,13 +973,19 @@ const pause = (ms: number, signal: AbortSignal) =>
 /**
  * Follows a search's stream until it's done or nobody follows it. A stream that drops before done
  * is opened again (the server starts each one with a fresh snapshot) for as long as the search is
- * still running, backing off between tries and starting over once a connection gets through.
+ * still running, backing off between tries and starting over once a connection gets through. A
+ * stream the server refuses (4xx) isn't tried again: the search is fetched afresh instead, so the
+ * view shows what the server says about it.
  */
 async function followSearch(queryClient: QueryClient, id: string, signal: AbortSignal) {
   let wait = SEARCH_RECONNECT_MS.first;
   while (!signal.aborted) {
-    const { done, heard } = await readSearchStream(queryClient, id, signal);
+    const { done, heard, refused } = await readSearchStream(queryClient, id, signal);
     if (done || signal.aborted) return;
+    if (refused) {
+      void queryClient.invalidateQueries({ queryKey: adminKeys.search(id) });
+      return;
+    }
     const status = queryClient.getQueryData<Search>(adminKeys.search(id))?.status;
     if (status !== undefined && status !== 'running') return;
     if (heard) wait = SEARCH_RECONNECT_MS.first;

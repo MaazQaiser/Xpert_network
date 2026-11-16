@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { http, HttpResponse } from 'msw';
 import type { ChatBlock } from '@/features/admin';
 import { expectNoAxeViolations } from '@/test/axe';
 import { CAFE_SEARCH, scriptSearch, server } from '@/test/mockBackend';
@@ -241,6 +242,35 @@ describe('a people search in the chat', () => {
       await within(card).findByText('Found 2 of 2', undefined, { timeout: 4000 }),
     ).toBeInTheDocument();
     expect(streams.length).toBeGreaterThanOrEqual(2);
+    server.events.removeAllListeners();
+  });
+
+  it('stops reconnecting when the stream is refused and reloads the search instead', async () => {
+    // The search loads, but its stream answers 404 (gone, or not allowed): trying again can't help.
+    server.use(
+      http.get('/api/searches/:id/stream', () =>
+        HttpResponse.json(
+          { code: 'not_found', message: 'That search doesn’t exist.' },
+          { status: 404 },
+        ),
+      ),
+    );
+    const streams: string[] = [];
+    const loads: string[] = [];
+    server.events.on('request:start', ({ request }) => {
+      const path = new URL(request.url).pathname;
+      if (path.endsWith('/stream')) streams.push(path);
+      else if (/^\/api\/searches\/[^/]+$/.test(path)) loads.push(path);
+    });
+    renderCard();
+    const card = await screen.findByRole('region', { name: 'People search: Crestline Insights' });
+    await userEvent.click(await within(card).findByRole('button', { name: 'Start' }));
+    await waitFor(() => expect(streams).toHaveLength(1));
+    // The search is fetched again in place of the stream.
+    await waitFor(() => expect(loads.length).toBeGreaterThanOrEqual(2));
+    // Longer than the first reconnect wait (1 s): no second try.
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    expect(streams).toHaveLength(1);
     server.events.removeAllListeners();
   });
 

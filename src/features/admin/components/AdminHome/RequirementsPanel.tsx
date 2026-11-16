@@ -292,7 +292,13 @@ function IcpCount({
         onChange={(_event, state) => setValue(state.value)}
         invalid={value !== '' && !isValid}
         invalidText="Enter a whole number from 1 to 50."
-        helperText={saved === null ? 'Not in the email: add a number' : undefined}
+        helperText={
+          saved === null
+            ? 'Not in the email: add a number'
+            : requirements.status === 'accepted'
+              ? 'Changing this makes the requirements a draft again.'
+              : undefined
+        }
         warn={mismatch}
         warnText={
           mismatch

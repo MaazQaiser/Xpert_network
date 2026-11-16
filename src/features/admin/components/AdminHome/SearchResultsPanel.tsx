@@ -26,7 +26,15 @@ import { toUserMessage } from '@/shared/api';
 import { ErrorState } from '@/shared/ui';
 import { useSearch, useSearchStream, useStopSearch } from '../../api/queries';
 import type { CellVerdict, Search, SearchPerson, Verdict } from '../../model/search.schema';
-import { checkedCount, costText, dollars, groupProgressText } from './SearchCard';
+import {
+  budgetReachedIn,
+  budgetReachedText,
+  checkedCount,
+  costText,
+  dollars,
+  groupProgressText,
+  outcomeText,
+} from './searchFormat';
 import styles from './SearchResultsPanel.module.scss';
 
 type Column = Search['columns'][number];
@@ -343,6 +351,15 @@ export function SearchResultsPanel({
             )}
           </div>
           <footer className={styles.footer}>
+            {!running ? (
+              <p className={styles.outcome} role="status">
+                {outcomeText(search)}
+              </p>
+            ) : budgetReachedIn(search.note) !== null ? (
+              <p className={styles.outcome} role="status">
+                {budgetReachedText(search)}
+              </p>
+            ) : null}
             <p className={styles.footerLine}>
               {`${matchCount === 1 ? '1 match' : `${matchCount} matches`} · ` +
                 `${checkedCount(search)} checked`}

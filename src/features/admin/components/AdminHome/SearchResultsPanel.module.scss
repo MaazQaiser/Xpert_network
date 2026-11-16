@@ -163,6 +163,14 @@
   gap: $spacing-02 $spacing-05;
 }
 
+// How it ended (or that the web budget ran out): a line of its own above the counts.
+.outcome {
+  @include type-style('heading-compact-01');
+
+  flex-basis: 100%;
+  color: $text-primary;
+}
+
 .footerLine {
   @include type-style('body-compact-01');
 

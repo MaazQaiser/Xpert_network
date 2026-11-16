@@ -362,6 +362,23 @@ describe('the number needed and the search plan', () => {
     );
   });
 
+  it('warns that changing the number of accepted requirements makes them a draft', async () => {
+    const panel = await openTrail();
+    const field = within(panel).getByRole('spinbutton', { name: 'Number of ICPs needed' });
+    const hint = within(panel).getByText('Changing this makes the requirements a draft again.');
+    expect(field).toHaveAccessibleDescription(
+      'Changing this makes the requirements a draft again.',
+    );
+    expect(hint).toBeInTheDocument();
+    await expectNoAxeViolations(panel);
+  });
+
+  it('gives no draft warning while the requirements are a draft', async () => {
+    const panel = await openTrail({ ...TRAIL, status: 'draft', acceptedAt: null });
+    within(panel).getByRole('spinbutton', { name: 'Number of ICPs needed' });
+    expect(within(panel).queryByText(/makes the requirements a draft again/)).toBeNull();
+  });
+
   it('saves a new number', async () => {
     const sent: { icpCount?: number; sections?: unknown[] }[] = [];
     server.events.on('request:start', async ({ request }) => {
