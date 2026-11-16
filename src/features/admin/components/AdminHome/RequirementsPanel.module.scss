@@ -232,3 +232,66 @@
   flex-direction: column;
   gap: $spacing-04;
 }
+
+// The number of ICPs needed, with the profile groups' quotas beside it.
+.icpCount {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: $spacing-03 $spacing-05;
+}
+
+.quotas {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  flex-direction: column;
+  padding-block-end: $spacing-02;
+  gap: $spacing-01;
+  color: $text-primary;
+}
+
+.quotasLabel {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.planHeading {
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.planSubtitle {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.planList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.planItem {
+  @include type-style('body-01');
+
+  display: flex;
+  flex-direction: column;
+  padding-inline-start: $spacing-04;
+  border-inline-start: 2px solid $border-subtle-01;
+  gap: $spacing-01;
+  color: $text-primary;
+}
+
+.planCovers {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.purposeTag.purposeTag {
+  margin-inline-start: 0;
+}

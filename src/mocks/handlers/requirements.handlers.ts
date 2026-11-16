@@ -93,6 +93,61 @@ const AI_QUESTIONS: ScreeningQuestion[] = [
   },
 ];
 
+/** The search plan made from the café brief: two profile filters, one web search, two columns. */
+const PLAN: NonNullable<BriefRequirements['plan']> = {
+  routes: [
+    { requirementId: 'req_who', route: 'filter', questions: [] },
+    { requirementId: 'req_gcc', route: 'filter', questions: [] },
+    { requirementId: 'req_years', route: 'screening', questions: [] },
+    { requirementId: 'req_brandx', route: 'screening', questions: [] },
+    { requirementId: 'req_dates', route: 'none', questions: [] },
+  ],
+  columns: [
+    {
+      id: 'col_1',
+      requirementId: 'req_who',
+      label: 'Procurement leader',
+      route: 'filter',
+      group: null,
+      counts: true,
+    },
+    {
+      id: 'col_2',
+      requirementId: 'req_gcc',
+      label: 'In the GCC',
+      route: 'filter',
+      group: null,
+      counts: true,
+    },
+  ],
+  groups: [],
+  filters: [
+    {
+      field: 'current_position_seniority_level',
+      values: ['Manager', 'Head', 'Director', 'VP'],
+      exclude: false,
+      min: null,
+      max: null,
+      covers: ['req_who'],
+    },
+    {
+      field: 'person_locations',
+      values: ['United Arab Emirates', 'Saudi Arabia', 'Qatar', 'Kuwait', 'Oman', 'Bahrain'],
+      exclude: false,
+      min: null,
+      max: null,
+      covers: ['req_gcc'],
+    },
+  ],
+  queries: [
+    {
+      query: 'Coffee and café franchise operators with outlets across the GCC',
+      purpose: 'companies',
+      covers: ['req_who', 'req_gcc'],
+    },
+  ],
+};
+
 const BRIEF = {
   briefId: 'brief_gcc_cafe',
   company: 'Meridian Capital',
@@ -111,6 +166,15 @@ export function resetRequirements() {
   nextId = 1;
 }
 
+/** Put a brief's requirements in place, as if they had been extracted (tests). */
+export function seedRequirements(requirements: BriefRequirements) {
+  saved[requirements.briefId] = structuredClone(requirements);
+  drafts[requirements.briefId] = {
+    sections: structuredClone(requirements.sections),
+    questions: structuredClone(requirements.questions),
+  };
+}
+
 /** Scio "extracts" the café brief: its draft, as the backend would save it. */
 export function extractMockRequirements(): BriefRequirements {
   const now = new Date().toISOString();
@@ -122,6 +186,10 @@ export function extractMockRequirements(): BriefRequirements {
     questions: structuredClone(AI_QUESTIONS),
     updatedAt: now,
     acceptedAt: null,
+    icpCount: 5,
+    planStatus: 'ready',
+    planCurrent: true,
+    plan: structuredClone(PLAN),
   };
   drafts[BRIEF.briefId] = {
     sections: structuredClone(AI_DRAFT),
@@ -173,7 +241,16 @@ export const requirementsHandlers = [
         };
       });
     }
-    Object.assign(found, { edited: true, status: 'draft', acceptedAt: null });
+    if (edits.icpCount !== undefined) found.icpCount = edits.icpCount;
+    // The mock's plan is remade at once, so it's never out of date.
+    Object.assign(found, {
+      edited: true,
+      status: 'draft',
+      acceptedAt: null,
+      updatedAt: new Date().toISOString(),
+      planStatus: 'ready',
+      planCurrent: true,
+    });
     return HttpResponse.json(found);
   }),
 

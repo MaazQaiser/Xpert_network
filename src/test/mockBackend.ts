@@ -5,4 +5,5 @@ export { USERS } from '@/mocks/fixtures/users';
 export { scenarios } from '@/mocks/scenarios';
 export { server } from '@/mocks/node';
 export { scioChatTitle, seedScioChat } from '@/mocks/handlers/scio.handlers';
+export { seedRequirements } from '@/mocks/handlers/requirements.handlers';
 export { adminDemoState, loadAdminDemo, loadListProjects } from './adminDemo';

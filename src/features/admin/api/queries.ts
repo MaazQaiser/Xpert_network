@@ -777,6 +777,8 @@ export function useBriefRequirements(briefId: string | null) {
     queryFn: ({ signal }) =>
       apiRequest(requirementsPath(briefId ?? ''), { schema: briefRequirementsSchema, signal }),
     enabled: briefId !== null,
+    // The search plan is remade in the background after each save: check back until it's in.
+    refetchInterval: (query) => (query.state.data?.planStatus === 'updating' ? 2_000 : false),
   });
 }
 

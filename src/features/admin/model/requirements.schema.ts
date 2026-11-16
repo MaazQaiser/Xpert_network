@@ -50,6 +50,63 @@ export const screeningQuestionSchema = z.object({
 });
 export type ScreeningQuestion = z.infer<typeof screeningQuestionSchema>;
 
+/**
+ * How a requirement is searched: `filter` (profile search can express it), `exa` (only the web
+ * can tell), `screening` (only asking can tell) or `none` (not about the person).
+ */
+export const searchRouteSchema = z.enum(['filter', 'exa', 'screening', 'none']);
+export type SearchRoute = z.infer<typeof searchRouteSchema>;
+
+/**
+ * The search plan the AI makes from the accepted requirements: each requirement's route, the
+ * results table's columns (sorted into shared columns and profile groups), the profile search
+ * filters and the web searches. Read-only for the project manager.
+ */
+export const searchPlanSchema = z.object({
+  routes: z.array(
+    z.object({
+      requirementId: z.string(),
+      route: searchRouteSchema,
+      /** The screening questions (numbered from 1) that cover it, for the screening route. */
+      questions: z.array(z.number().int()),
+    }),
+  ),
+  columns: z.array(
+    z.object({
+      id: z.string(),
+      requirementId: z.string(),
+      label: z.string(),
+      route: z.enum(['filter', 'exa']),
+      /** The profile group it belongs to; null for a column every match needs. */
+      group: z.string().nullable(),
+      /** False for a nice-to-have: shown, but never counts toward a match. */
+      counts: z.boolean(),
+    }),
+  ),
+  groups: z.array(z.object({ name: z.string(), quota: z.number().int().nullable() })),
+  filters: z.array(
+    z.object({
+      field: z.string(),
+      values: z.array(z.string()),
+      exclude: z.boolean(),
+      min: z.number().nullable(),
+      max: z.number().nullable(),
+      /** The requirement ids it covers. */
+      covers: z.array(z.string()),
+    }),
+  ),
+  queries: z.array(
+    z.object({
+      query: z.string(),
+      purpose: z.enum(['companies', 'people', 'check']),
+      covers: z.array(z.string()),
+    }),
+  ),
+});
+export type SearchPlan = z.infer<typeof searchPlanSchema>;
+export type SearchPlanColumn = SearchPlan['columns'][number];
+export type SearchPlanGroup = SearchPlan['groups'][number];
+
 export const briefRequirementsSchema = z.object({
   briefId: z.string(),
   company: z.string(),
@@ -70,6 +127,13 @@ export const briefRequirementsSchema = z.object({
   questions: z.array(screeningQuestionSchema),
   updatedAt: z.string(),
   acceptedAt: z.string().nullable(),
+  /** How many people the client wants; null when the email doesn't say. */
+  icpCount: z.number().int().nullable(),
+  /** The search plan is made in the background after every save: this is where it stands. */
+  planStatus: z.enum(['updating', 'ready', 'failed']).nullable(),
+  /** Whether the plan was made from the requirements as they now stand. */
+  planCurrent: z.boolean(),
+  plan: searchPlanSchema.nullable(),
 });
 export type BriefRequirements = z.infer<typeof briefRequirementsSchema>;
 
@@ -93,4 +157,6 @@ export type RequirementsEdits = {
     items: { id?: string; text: string; source?: string | null }[];
   }[];
   questions?: ScreeningQuestionEdit[];
+  /** The number of ICPs needed (1–50); left out, it stays as it is. */
+  icpCount?: number;
 };

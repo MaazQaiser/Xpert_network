@@ -6,6 +6,7 @@ import {
   IconButton,
   InlineLoading,
   InlineNotification,
+  NumberInput,
   SkeletonText,
   Tag,
   TextArea,
@@ -22,12 +23,14 @@ import {
 } from '../../api/queries';
 import type {
   BriefRequirements,
+  SearchPlan as Plan,
   RequirementItem,
   RequirementSectionKey,
   RequirementsEdits,
 } from '../../model/requirements.schema';
 import styles from './RequirementsPanel.module.scss';
 import { ScreeningQuestions } from './ScreeningQuestions';
+import { quotaText, RouteTag, SearchPlan } from './SearchPlan';
 
 type Section = BriefRequirements['sections'][number];
 
@@ -68,11 +71,13 @@ function Source({ item }: { item: RequirementItem }) {
 
 function Bullet({
   item,
+  plan,
   isSaving,
   onSave,
   onDelete,
 }: {
   item: RequirementItem;
+  plan: Plan | null;
   isSaving: boolean;
   onSave: (text: string) => void;
   onDelete: () => void;
@@ -128,6 +133,7 @@ function Bullet({
       <div className={styles.bulletRow}>
         <p className={styles.bulletText}>
           {item.text}
+          {item.id ? <RouteTag plan={plan} requirementId={item.id} /> : null}
           {item.source && !item.sourceFound ? (
             <Tag size="sm" type="warm-gray" className={styles.checkTag}>
               Check source
@@ -174,10 +180,12 @@ function Bullet({
 
 function RequirementSection({
   section,
+  plan,
   isSaving,
   onChange,
 }: {
   section: Section;
+  plan: Plan | null;
   isSaving: boolean;
   onChange: (change: Parameters<typeof editsWith>[2]) => void;
 }) {
@@ -200,6 +208,7 @@ function RequirementSection({
             <Bullet
               key={item.id || 'new'}
               item={item}
+              plan={plan}
               isSaving={isSaving}
               onSave={(text) => {
                 if (item.id) {
@@ -232,6 +241,72 @@ function RequirementSection({
         </Button>
       )}
     </section>
+  );
+}
+
+/**
+ * How many people the client wants, at the top of the panel. It saves when the field loses focus
+ * (or on Enter), so typing "12" doesn't save "1" first.
+ */
+function IcpCount({
+  requirements,
+  onSave,
+}: {
+  requirements: BriefRequirements;
+  onSave: (icpCount: number) => void;
+}) {
+  const fieldId = useId();
+  const saved = requirements.icpCount;
+  const [value, setValue] = useState<number | string>(saved ?? '');
+  const number = typeof value === 'number' ? value : Number(value);
+  const isValid = value !== '' && Number.isInteger(number) && number >= 1 && number <= 50;
+  const quotas = quotaText(requirements.plan);
+  const quotaSum = requirements.plan?.groups.every((g) => g.quota !== null)
+    ? requirements.plan.groups.reduce((sum, g) => sum + (g.quota ?? 0), 0)
+    : null;
+  const mismatch = quotas !== null && saved !== null && quotaSum !== null && quotaSum !== saved;
+
+  const commit = () => {
+    if (isValid && number !== saved) onSave(number);
+  };
+
+  return (
+    <div
+      className={styles.icpCount}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) commit();
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter') commit();
+      }}
+    >
+      <NumberInput
+        id={fieldId}
+        label="Number of ICPs needed"
+        min={1}
+        max={50}
+        step={1}
+        size="sm"
+        allowEmpty
+        value={value}
+        onChange={(_event, state) => setValue(state.value)}
+        invalid={value !== '' && !isValid}
+        invalidText="Enter a whole number from 1 to 50."
+        helperText={saved === null ? 'Not in the email: add a number' : undefined}
+        warn={mismatch}
+        warnText={
+          mismatch
+            ? `The group quotas add up to ${quotaSum ?? 0} but ${saved ?? 0} people are needed`
+            : undefined
+        }
+      />
+      {quotas ? (
+        <p className={styles.quotas}>
+          <span className={styles.quotasLabel}>By profile group</span>
+          <span>{quotas}</span>
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -298,6 +373,14 @@ export function RequirementsPanel({ briefId, onClose }: { briefId: string; onClo
                 </Tag>
               ) : null}
             </div>
+            <IcpCount
+              // A new number from the server (a save, a revert) starts the field again.
+              key={String(data.icpCount)}
+              requirements={data}
+              onSave={(icpCount) =>
+                save.mutate({ ...editsWith(data.sections, 'who', (items) => items), icpCount })
+              }
+            />
             <div className={styles.summary}>
               <AIExplainLabel aria-label="AI extracted" />
               <p>{data.summary}</p>
@@ -306,6 +389,7 @@ export function RequirementsPanel({ briefId, onClose }: { briefId: string; onClo
               <RequirementSection
                 key={section.key}
                 section={section}
+                plan={data.plan}
                 isSaving={isSaving}
                 onChange={(change) => save.mutate(editsWith(data.sections, section.key, change))}
               />
@@ -319,6 +403,7 @@ export function RequirementsPanel({ briefId, onClose }: { briefId: string; onClo
                 save.mutate({ ...editsWith(data.sections, 'who', (items) => items), questions })
               }
             />
+            <SearchPlan requirements={data} />
           </div>
           <footer className={styles.footer}>
             {failed ? (
