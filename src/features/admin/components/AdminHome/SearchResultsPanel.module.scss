@@ -1,0 +1,186 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/motion' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '../../../../styles/tokens' as *;
+
+// A search's results beside the chat: wider than the requirements panel (about 60% from lg up)
+// so the requirement columns fit; full screen over the chat on smaller screens.
+.panel {
+  position: fixed;
+  z-index: 8000;
+  display: flex;
+  flex-direction: column;
+  background: $layer-01;
+  inset: $pt-shell-header-height 0 0;
+
+  @include breakpoint(lg) {
+    position: sticky;
+    z-index: auto;
+    flex: none;
+    inline-size: 60%;
+    border-inline-start: 1px solid $border-subtle-01;
+    block-size: calc(100vh - #{$pt-shell-header-height});
+    inset-block-start: $pt-shell-header-height;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: $spacing-05 $spacing-05 $spacing-04;
+  border-block-end: 1px solid $border-subtle-01;
+  gap: $spacing-04;
+}
+
+.headerText {
+  min-inline-size: 0;
+}
+
+.eyebrow {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.title {
+  @include type-style('heading-02');
+
+  margin-block-start: $spacing-02;
+  color: $text-primary;
+}
+
+.subtitle {
+  @include type-style('body-compact-01');
+
+  margin-block-start: $spacing-02;
+  color: $text-secondary;
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: $spacing-05;
+  gap: $spacing-04;
+  overflow-y: auto;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+}
+
+.table {
+  overflow-x: auto;
+}
+
+.name {
+  @include type-style('body-compact-01');
+
+  display: block;
+  color: $text-primary;
+}
+
+.matched {
+  @include type-style('label-01');
+
+  display: inline-flex;
+  align-items: center;
+  margin-block-start: $spacing-01;
+  gap: $spacing-02;
+  color: $text-primary;
+}
+
+.matchedGroup {
+  color: $text-secondary;
+}
+
+.matchedIcon {
+  fill: $support-success;
+}
+
+.company {
+  display: block;
+  color: $text-primary;
+}
+
+.muted {
+  @include type-style('helper-text-01');
+
+  display: block;
+  color: $text-secondary;
+}
+
+.verdictButton {
+  display: inline-flex;
+}
+
+.reason {
+  @include type-style('body-compact-01');
+}
+
+.references {
+  display: flex;
+  flex-direction: column;
+  margin-block-start: $spacing-03;
+  gap: $spacing-02;
+}
+
+.empty {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+// A row that just arrived glows briefly; nothing moves for people who'd rather it didn't.
+.arrived td {
+  animation: arrive $duration-slow-02 motion(standard, productive);
+}
+
+@keyframes arrive {
+  from {
+    background-color: $highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrived td {
+    animation: none;
+  }
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: $spacing-04 $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
+  gap: $spacing-02 $spacing-05;
+}
+
+.footerLine {
+  @include type-style('body-compact-01');
+
+  color: $text-primary;
+}
+
+.stop.stop {
+  margin-inline-start: auto;
+}
+
+.visuallyHidden {
+  position: absolute;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  margin: -1px;
+  block-size: 1px;
+  clip-path: inset(50%);
+  inline-size: 1px;
+  white-space: nowrap;
+}

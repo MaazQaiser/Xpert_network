@@ -25,6 +25,7 @@ import {
 } from '../../model/home.schema';
 import { ChatBlocks, ChatChips } from './ChatBlocks';
 import { RequirementsPanel } from './RequirementsPanel';
+import { SearchResultsPanel } from './SearchResultsPanel';
 import { ScioSteps, type ScioStep } from './ScioSteps';
 import { ScioText } from './ScioText';
 import styles from './AdminHome.module.scss';
@@ -264,6 +265,7 @@ function TurnAnswer({
   onWorking,
   isWorking,
   onOpenRequirements,
+  onOpenResults,
   conversationId,
 }: {
   turn: Turn;
@@ -274,6 +276,7 @@ function TurnAnswer({
   onWorking: (isWorking: boolean) => void;
   isWorking: boolean;
   onOpenRequirements: (briefId: string) => void;
+  onOpenResults: (searchId: string) => void;
   conversationId: string | null;
 }) {
   const streaming = turn.status === 'streaming';
@@ -319,6 +322,7 @@ function TurnAnswer({
               onHome={onHome}
               onWorking={onWorking}
               onOpenRequirements={onOpenRequirements}
+              onOpenResults={onOpenResults}
               conversationId={conversationId}
             />
             <ChatChips chips={turn.answer.chips} onAsk={onAsk} isBusy={isBusy} />
@@ -341,6 +345,10 @@ function TurnAnswer({
   );
 }
 
+/** What's open beside the chat. */
+type SidePanel =
+  { kind: 'requirements'; briefId: string } | { kind: 'search'; searchId: string } | null;
+
 /** PRD screen 01: greeting, today's summary and the chat with Scio, the AI assistant. */
 export function AdminHome() {
   const session = useSession();
@@ -355,8 +363,10 @@ export function AdminHome() {
   const [historyId, setHistoryId] = useState<string | null>(routeChatId);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [seenRouteChatId, setSeenRouteChatId] = useState<string | null>(routeChatId);
-  // The brief whose requirements are open beside the chat.
-  const [requirementsFor, setRequirementsFor] = useState<string | null>(null);
+  // What's open beside the chat: a brief's requirements, or a people search's results.
+  const [sidePanel, setSidePanel] = useState<SidePanel>(null);
+  const openRequirements = (briefId: string) => setSidePanel({ kind: 'requirements', briefId });
+  const openResults = (searchId: string) => setSidePanel({ kind: 'search', searchId });
   // Counts moves to another chat, so an answer still streaming in the old one stops.
   const [chatSwitches, setChatSwitches] = useState(0);
   // The URL moved to another chat, or back to Home (a new chat). The URL of the chat started
@@ -367,7 +377,7 @@ export function AdminHome() {
       setConversationId(routeChatId);
       setHistoryId(routeChatId);
       setTurns([]);
-      setRequirementsFor(null);
+      setSidePanel(null);
       setChatSwitches((n) => n + 1);
     }
   }
@@ -491,7 +501,7 @@ export function AdminHome() {
             void queryClient.invalidateQueries({
               queryKey: adminKeys.requirements(extracted.briefId),
             });
-            setRequirementsFor(extracted.briefId);
+            openRequirements(extracted.briefId);
           }
           listChat(answer.conversation);
           setReaction('happy');
@@ -522,8 +532,8 @@ export function AdminHome() {
   const chatting = shownTurns.length > 0 || historyId !== null;
 
   return (
-    // The chat, with a brief's requirements beside it when they're open.
-    <div className={requirementsFor ? `${styles.layout} ${styles.withPanel}` : styles.layout}>
+    // The chat, with a brief's requirements or a search's results beside it when they're open.
+    <div className={sidePanel ? `${styles.layout} ${styles.withPanel}` : styles.layout}>
       <div className={chatting ? `${styles.root} ${styles.chatting}` : styles.root}>
         <div className={styles.stage}>
           {chatting ? null : (
@@ -620,7 +630,8 @@ export function AdminHome() {
                       onStop={() => controller.current?.abort()}
                       onWorking={(isWorking) => setTurnWorking(turn.id, isWorking)}
                       isWorking={working[turn.id] ?? false}
-                      onOpenRequirements={setRequirementsFor}
+                      onOpenRequirements={openRequirements}
+                      onOpenResults={openResults}
                       conversationId={conversationId}
                     />
                   </li>
@@ -661,11 +672,17 @@ export function AdminHome() {
           </p>
         </div>
       </div>
-      {requirementsFor ? (
+      {sidePanel?.kind === 'requirements' ? (
         <RequirementsPanel
-          key={requirementsFor}
-          briefId={requirementsFor}
-          onClose={() => setRequirementsFor(null)}
+          key={sidePanel.briefId}
+          briefId={sidePanel.briefId}
+          onClose={() => setSidePanel(null)}
+        />
+      ) : sidePanel?.kind === 'search' ? (
+        <SearchResultsPanel
+          key={sidePanel.searchId}
+          searchId={sidePanel.searchId}
+          onClose={() => setSidePanel(null)}
         />
       ) : null}
     </div>
