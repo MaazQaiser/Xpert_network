@@ -3,6 +3,7 @@ export * from './model/leadList.schema';
 export * from './model/project.schema';
 export * from './model/home.schema';
 export * from './model/requirements.schema';
+export * from './model/search.schema';
 export * from './model/match.schema';
 export * from './model/expertSearch.schema';
 export * from './model/responses.schema';

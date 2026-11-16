@@ -6,14 +6,23 @@ import {
   useQueries,
   useQuery,
   useQueryClient,
+  type QueryClient,
 } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { z } from 'zod';
-import { apiRequest } from '@/shared/api';
+import { apiRequest, streamEvents } from '@/shared/api';
 import {
   briefRequirementsSchema,
   type BriefRequirements,
   type RequirementsEdits,
 } from '../model/requirements.schema';
+import {
+  searchEventSchema,
+  searchSchema,
+  searchSummarySchema,
+  type Search,
+  type SearchPerson,
+} from '../model/search.schema';
 import {
   homeSummarySchema,
   mailboxSummarySchema,
@@ -112,6 +121,8 @@ export const adminKeys = {
   scioChats: () => [...adminKeys.all, 'scio', 'chats'] as const,
   scioChat: (id: string) => [...adminKeys.all, 'scio', 'chat', id] as const,
   requirements: (briefId: string) => [...adminKeys.all, 'requirements', briefId] as const,
+  search: (id: string) => [...adminKeys.all, 'search', id] as const,
+  briefSearches: (briefId: string) => [...adminKeys.all, 'searches', briefId] as const,
   calls: () => [...adminKeys.all, 'calls'] as const,
   callRecord: (id: string) => [...adminKeys.all, 'calls', id] as const,
 };
@@ -822,6 +833,146 @@ export function useRevertRequirements(briefId: string) {
       schema: briefRequirementsSchema,
     }),
   );
+}
+
+/* ----------------------------- People searches ----------------------------- */
+
+const searchPath = (id: string) => `/searches/${encodeURIComponent(id)}`;
+
+/** A brief's people searches, newest first. */
+export function useBriefSearches(briefId: string) {
+  return useQuery({
+    queryKey: adminKeys.briefSearches(briefId),
+    queryFn: ({ signal }) =>
+      apiRequest(`/searches?briefId=${encodeURIComponent(briefId)}`, {
+        schema: z.array(searchSummarySchema),
+        signal,
+      }),
+  });
+}
+
+/** One search with its people; `useSearchStream` keeps it live. Nothing for null. */
+export function useSearch(id: string | null) {
+  return useQuery({
+    queryKey: adminKeys.search(id ?? 'none'),
+    queryFn: ({ signal }) => apiRequest(searchPath(id ?? ''), { schema: searchSchema, signal }),
+    enabled: id !== null,
+  });
+}
+
+/** Start a search for a brief's accepted requirements. Nothing is searched or spent before. */
+export function useStartSearch() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { briefId: string; conversationId: string | null }) =>
+      apiRequest('/searches', {
+        method: 'POST',
+        body: input,
+        schema: z.object({ id: z.string() }),
+      }),
+    onSuccess: (_started, { briefId }) =>
+      void queryClient.invalidateQueries({ queryKey: adminKeys.briefSearches(briefId) }),
+  });
+}
+
+/** Ask a search to stop; the stream says when it has (a web search already going finishes). */
+export function useStopSearch(id: string) {
+  return useMutation({
+    mutationFn: () => apiRequest(`${searchPath(id)}/stop`, { method: 'POST', schema: z.unknown() }),
+  });
+}
+
+const withPerson = (people: SearchPerson[], person: SearchPerson) =>
+  people.some((p) => p.id === person.id)
+    ? people.map((p) => (p.id === person.id ? person : p))
+    : [...people, person];
+
+/** Reads a search's stream into the `useSearch` cache until it's done or nobody follows it. */
+async function followSearch(queryClient: QueryClient, id: string, signal: AbortSignal) {
+  const key = adminKeys.search(id);
+  try {
+    for await (const event of streamEvents(
+      `${searchPath(id)}/stream`,
+      undefined,
+      searchEventSchema,
+      signal,
+      'GET',
+    )) {
+      // A GET still in flight would land older data over the stream's.
+      await queryClient.cancelQueries({ queryKey: key });
+      if (event.type === 'snapshot' || event.type === 'done') {
+        queryClient.setQueryData<Search>(key, event.search);
+      } else if (event.type === 'person') {
+        queryClient.setQueryData<Search>(key, (search) =>
+          search ? { ...search, people: withPerson(search.people, event.person) } : search,
+        );
+      } else {
+        queryClient.setQueryData<Search>(key, (search) =>
+          search
+            ? {
+                ...search,
+                progress: event.progress,
+                cost: event.cost,
+                status: event.status,
+                note: event.note,
+                analysed: event.progress.analysed ?? search.analysed,
+              }
+            : search,
+        );
+      }
+      if (event.type === 'done') {
+        void queryClient.invalidateQueries({
+          queryKey: adminKeys.briefSearches(event.search.briefId),
+        });
+        return;
+      }
+    }
+  } catch {
+    if (signal.aborted) return;
+  }
+  // The stream broke off before done: fall back to what the server has now.
+  if (!signal.aborted) void queryClient.invalidateQueries({ queryKey: key });
+}
+
+/** One stream per search however many views follow it (the chat card and the results table). */
+const following = new WeakMap<
+  QueryClient,
+  Map<string, { users: number; controller: AbortController }>
+>();
+
+/**
+ * Keeps a search live: reads `/api/searches/{id}/stream` and writes each event into the
+ * `useSearch(id)` cache. It stops on done, or when the last view following it unmounts.
+ */
+export function useSearchStream(id: string | null) {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (id === null) return;
+    let streams = following.get(queryClient);
+    if (!streams) {
+      streams = new Map();
+      following.set(queryClient, streams);
+    }
+    const live = streams;
+    let entry = live.get(id);
+    if (!entry) {
+      const started = { users: 0, controller: new AbortController() };
+      entry = started;
+      live.set(id, started);
+      void followSearch(queryClient, id, started.controller.signal).finally(() => {
+        if (live.get(id) === started) live.delete(id);
+      });
+    }
+    const mine = entry;
+    mine.users += 1;
+    return () => {
+      mine.users -= 1;
+      if (mine.users === 0) {
+        mine.controller.abort();
+        if (live.get(id) === mine) live.delete(id);
+      }
+    };
+  }, [id, queryClient]);
 }
 
 /** Give a Scio chat a name of your own. */

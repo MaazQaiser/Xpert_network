@@ -3,16 +3,22 @@ import { send } from './client';
 import { ApiError, fallbackMessage } from './errors';
 
 /**
- * POSTs to a streaming endpoint and yields newline-delimited JSON events, each validated
- * against `schema`. Used by AI surfaces (goal chat, report Q&A, interviewer).
+ * POSTs to a streaming endpoint (or GETs one, like a search's live stream) and yields
+ * newline-delimited JSON events, each validated against `schema`. Used by AI surfaces (goal
+ * chat, report Q&A, interviewer, people searches).
  */
 export async function* streamEvents<TSchema extends z.ZodType>(
   path: string,
   body: unknown,
   schema: TSchema,
   signal?: AbortSignal,
+  method: 'GET' | 'POST' = 'POST',
 ): AsyncGenerator<z.infer<TSchema>> {
-  const response = await send(path, { method: 'POST', body, ...(signal ? { signal } : {}) });
+  const response = await send(path, {
+    method,
+    ...(method === 'POST' ? { body } : {}),
+    ...(signal ? { signal } : {}),
+  });
   if (!response.body)
     throw new ApiError(500, 'invalid_response', fallbackMessage('invalid_response'));
 

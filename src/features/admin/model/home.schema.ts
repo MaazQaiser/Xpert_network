@@ -73,6 +73,27 @@ export const chatBlockSchema = z.discriminatedUnion('kind', [
     questions: z.number().int().min(0).default(0),
     clientScreener: z.boolean().default(false),
   }),
+  /**
+   * Scio's confirmation before a people search: who it looks for, on what, and within what
+   * budget. Nothing is searched or spent until Start.
+   */
+  z.object({
+    kind: z.literal('searchConfirm'),
+    briefId: z.string(),
+    company: z.string(),
+    /** The number of ICPs needed; null until the PM adds it. */
+    target: z.number().int().nullable(),
+    groups: z.array(z.object({ name: z.string(), quota: z.number().int().nullable() })),
+    columns: z.array(z.object({ id: z.string(), label: z.string(), group: z.string().nullable() })),
+    /** The web search budget for the whole search, in dollars. */
+    exaBudget: z.number(),
+    /** The most profile search credits it may spend. */
+    fullenrichCreditCap: z.number(),
+    ready: z.boolean(),
+    /** Why it can't start yet, e.g. "Accept the requirements first". */
+    blocker: z.string().nullable(),
+    preparedAt: z.string(),
+  }),
   /** The project brief as an editable document canvas. */
   z.object({ kind: z.literal('brief'), projectId: z.string() }),
   /** The AI searching the network for a project, then its top-ranked experts to approach. */

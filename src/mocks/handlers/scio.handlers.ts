@@ -74,12 +74,49 @@ function extractAnswer(message: string) {
   };
 }
 
+/** Scio gets a people search ready for the café brief, for the PM to start. */
+function findPeopleAnswer(message: string) {
+  const text =
+    'Here’s the people search for **Meridian Capital**. Nothing is searched or spent until ' +
+    'you press Start.';
+  return {
+    steps: ['Getting the search ready…'],
+    text,
+    reply: {
+      id: `scio_search_${message.length}`,
+      text,
+      links: [],
+      basis: 'Meridian Capital’s accepted requirements and search plan',
+      blocks: [
+        {
+          kind: 'searchConfirm' as const,
+          briefId: 'brief_gcc_cafe',
+          company: 'Meridian Capital',
+          target: 2,
+          groups: [],
+          columns: [
+            { id: 'col_1', label: 'Procurement leader', group: null },
+            { id: 'col_2', label: 'In the GCC', group: null },
+          ],
+          exaBudget: 2,
+          fullenrichCreditCap: 50,
+          ready: true,
+          blocker: null,
+          preparedAt: new Date(Date.now() - 1000).toISOString(),
+        },
+      ],
+      chips: [],
+    },
+  };
+}
+
 function answerTo(message: string): {
   steps: string[];
   text: string;
   reply: Omit<ScioReply, 'conversation'>;
 } {
   if (/extract/i.test(message)) return extractAnswer(message);
+  if (/find people/i.test(message)) return findPeopleAnswer(message);
   if (/brief/i.test(message)) {
     const text = 'There is **1 new brief** this week, from Meridian Capital.';
     return {

@@ -264,6 +264,7 @@ function TurnAnswer({
   onWorking,
   isWorking,
   onOpenRequirements,
+  conversationId,
 }: {
   turn: Turn;
   isBusy: boolean;
@@ -273,6 +274,7 @@ function TurnAnswer({
   onWorking: (isWorking: boolean) => void;
   isWorking: boolean;
   onOpenRequirements: (briefId: string) => void;
+  conversationId: string | null;
 }) {
   const streaming = turn.status === 'streaming';
   const askAgain = (
@@ -317,6 +319,7 @@ function TurnAnswer({
               onHome={onHome}
               onWorking={onWorking}
               onOpenRequirements={onOpenRequirements}
+              conversationId={conversationId}
             />
             <ChatChips chips={turn.answer.chips} onAsk={onAsk} isBusy={isBusy} />
             {turn.answer.links.length > 0 ? (
@@ -618,6 +621,7 @@ export function AdminHome() {
                       onWorking={(isWorking) => setTurnWorking(turn.id, isWorking)}
                       isWorking={working[turn.id] ?? false}
                       onOpenRequirements={setRequirementsFor}
+                      conversationId={conversationId}
                     />
                   </li>
                 ))}

@@ -5,6 +5,7 @@ import { server } from '@/mocks/node';
 import { resetSenderProfiles } from '@/mocks/handlers/getsales.handlers';
 import { resetScio } from '@/mocks/handlers/scio.handlers';
 import { resetRequirements } from '@/mocks/handlers/requirements.handlers';
+import { resetSearches } from '@/mocks/handlers/search.handlers';
 import { db } from '@/mocks/store/db';
 import { resetControls } from '@/mocks/controls';
 import { loadAdminDemo } from './adminDemo';
@@ -62,6 +63,7 @@ afterEach(() => {
   resetSenderProfiles();
   resetScio();
   resetRequirements();
+  resetSearches();
   resetControls();
 });
 afterAll(() => server.close());

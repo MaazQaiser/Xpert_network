@@ -72,7 +72,9 @@ export async function apiRequest<TSchema extends z.ZodType>(
   { schema, ...options }: RequestOptions<TSchema>,
 ): Promise<z.infer<TSchema>> {
   const response = await send(path, options);
-  const json: unknown = response.status === 204 ? null : await response.json();
+  // 204, or a 202 with nothing in it (e.g. "stop requested"), has no JSON to read.
+  const text = response.status === 204 ? '' : await response.text();
+  const json: unknown = text ? JSON.parse(text) : null;
   const parsed = schema.safeParse(json);
   if (!parsed.success) {
     throw new ApiError(response.status, 'invalid_response', fallbackMessage('invalid_response'));

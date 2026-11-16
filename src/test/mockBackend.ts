@@ -6,4 +6,6 @@ export { scenarios } from '@/mocks/scenarios';
 export { server } from '@/mocks/node';
 export { scioChatTitle, seedScioChat } from '@/mocks/handlers/scio.handlers';
 export { seedRequirements } from '@/mocks/handlers/requirements.handlers';
+export { CAFE_SEARCH, scriptSearch, seedSearch } from '@/mocks/handlers/search.handlers';
+export type { SearchScript } from '@/mocks/handlers/search.handlers';
 export { adminDemoState, loadAdminDemo, loadListProjects } from './adminDemo';

@@ -1,0 +1,88 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+// Scio's people search card in the chat: flat layer, hairline, like the requirements card.
+.card {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-05;
+  border: 1px solid $border-subtle-01;
+  background: $layer-01;
+  gap: $spacing-03;
+}
+
+.title {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.line {
+  @include type-style('heading-compact-01');
+
+  color: $text-primary;
+}
+
+.meta {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
+}
+
+.columnGroups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-03 $spacing-07;
+}
+
+.columnGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+}
+
+.columnGroupTitle {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.columns {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  flex-direction: column;
+  padding-inline-start: $spacing-05;
+  gap: $spacing-01;
+  color: $text-primary;
+  list-style: disc;
+}
+
+.outcome {
+  @include type-style('heading-compact-01');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+  color: $text-primary;
+}
+
+.iconFound {
+  fill: $support-success;
+}
+
+.iconFailed {
+  fill: $support-error;
+}
+
+.iconEnded {
+  fill: $icon-secondary;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  margin-block-start: $spacing-02;
+  gap: $spacing-03;
+}

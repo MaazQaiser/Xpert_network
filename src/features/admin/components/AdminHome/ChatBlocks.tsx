@@ -42,6 +42,7 @@ import { BookMeetings } from './BookMeetings';
 import { ChatClientEmail } from './ChatClientEmail';
 import { ExpertSearch } from './ExpertSearch';
 import { ScreeningAnswers } from './ScreeningAnswers';
+import { SearchCard } from './SearchCard';
 import styles from './ChatBlocks.module.scss';
 
 type AskFn = (prompt: string) => void;
@@ -54,6 +55,8 @@ export function ChatBlocks({
   onWorking,
   onHome,
   onOpenRequirements,
+  onOpenResults,
+  conversationId,
 }: {
   blocks: ChatBlock[];
   onAsk: AskFn;
@@ -64,6 +67,10 @@ export function ChatBlocks({
   onHome?: () => void;
   /** Opens a brief's requirements in the side panel. */
   onOpenRequirements?: (briefId: string) => void;
+  /** Opens a people search's results in the side panel. */
+  onOpenResults?: (searchId: string) => void;
+  /** The chat these blocks are in. */
+  conversationId?: string | null;
 }) {
   return (
     <>
@@ -74,6 +81,15 @@ export function ChatBlocks({
             return <EmailPicks key={key} items={block.items} onAsk={onAsk} isBusy={isBusy} />;
           case 'briefRequirements':
             return <RequirementsCard key={key} block={block} onOpen={onOpenRequirements} />;
+          case 'searchConfirm':
+            return (
+              <SearchCard
+                key={key}
+                block={block}
+                onOpenResults={onOpenResults}
+                conversationId={conversationId ?? null}
+              />
+            );
           case 'brief':
             return <BriefCanvas key={key} projectId={block.projectId} />;
           case 'expertSearch':
