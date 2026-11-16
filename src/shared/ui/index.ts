@@ -1,5 +1,5 @@
 export { AppShell } from './AppShell/AppShell';
-export type { AppShellProps, NavItem } from './AppShell/AppShell';
+export type { AppShellProps, NavItem, NavSubItem } from './AppShell/AppShell';
 export { AsyncBoundary } from './AsyncBoundary/AsyncBoundary';
 export type { AsyncBoundaryProps, AsyncQueryState } from './AsyncBoundary/AsyncBoundary';
 export { EmptyState } from './EmptyState/EmptyState';

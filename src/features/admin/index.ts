@@ -1,8 +1,8 @@
 export * from './model/inbox.schema';
-export * from './model/linkedinProfile.schema';
 export * from './model/leadList.schema';
 export * from './model/project.schema';
 export * from './model/home.schema';
+export * from './model/requirements.schema';
 export * from './model/match.schema';
 export * from './model/expertSearch.schema';
 export * from './model/responses.schema';
@@ -23,6 +23,7 @@ export {
   useShortlist,
 } from './api/queries';
 export { AdminHome } from './components/AdminHome/AdminHome';
+export { AdminConsoleShell } from './components/AdminConsoleShell/AdminConsoleShell';
 export { Inbox } from './components/Inbox/Inbox';
 export { Scheduling } from './components/Scheduling/Scheduling';
 export { Calls } from './components/Calls/Calls';

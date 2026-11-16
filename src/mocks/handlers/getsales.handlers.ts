@@ -4,7 +4,6 @@ import {
   sendLinkedinMessageInputSchema,
   senderScheduleSchema,
   type LinkedinConversation,
-  type LinkedinProfile,
   listFollowUpInputSchema,
   type ListFollowUp,
   type ListMember,
@@ -99,78 +98,6 @@ const CONVERSATIONS: LinkedinConversation[] = [
     ],
   },
 ];
-
-/** People a LinkedIn link can point to, by handle. Hassan is a connection; Sana isn't. */
-const PEOPLE: Record<string, LinkedinProfile> = {
-  'hassan-islam-3bbb98111': {
-    uuid: 'lead_hassan',
-    name: 'Hassan Islam',
-    headline: 'Senior Software Engineer @Tkxel',
-    position: 'Senior Software Engineer',
-    company: 'Tkxel',
-    location: 'Lahore, Punjab, Pakistan',
-    avatarUrl: 'https://cdn.example/hassan.jpg',
-    linkedinUrl: 'https://www.linkedin.com/in/hassan-islam-3bbb98111',
-    connections: 2510,
-    followers: 2495,
-    premium: true,
-    openProfile: false,
-    about: 'I build web apps with React and Node.',
-    experience: [
-      { position: 'Senior Software Engineer', company: 'Tkxel', start: '2024-03-01', end: null },
-      {
-        position: 'MERN Stack Developer',
-        company: 'NexTek Solutions',
-        start: '2022-01-01',
-        end: '2024-02-01',
-      },
-    ],
-    enriched: true,
-    settled: true,
-    connectedSenderUuids: ['50181726-f022-4c23-8116-1c45e97f8a19'],
-    requestedSenderUuids: [],
-  },
-  'sana-mirza': {
-    uuid: 'lead_sana',
-    name: 'Sana Mirza',
-    headline: 'Procurement lead, GCC cafés',
-    position: null,
-    company: null,
-    location: null,
-    avatarUrl: null,
-    linkedinUrl: 'https://www.linkedin.com/in/sana-mirza',
-    connections: null,
-    followers: null,
-    premium: false,
-    openProfile: false,
-    about: null,
-    experience: [],
-    enriched: true,
-    settled: true,
-    connectedSenderUuids: [],
-    requestedSenderUuids: [],
-  },
-  'umar-sarwar': {
-    uuid: 'lead_umar',
-    name: 'Umar Sarwar',
-    headline: 'SEO Team Lead @ Tkxel',
-    position: null,
-    company: null,
-    location: null,
-    avatarUrl: null,
-    linkedinUrl: 'https://www.linkedin.com/in/umar-sarwar',
-    connections: null,
-    followers: null,
-    premium: false,
-    openProfile: false,
-    about: null,
-    experience: [],
-    enriched: true,
-    settled: true,
-    connectedSenderUuids: [],
-    requestedSenderUuids: ['50181726-f022-4c23-8116-1c45e97f8a19'],
-  },
-};
 
 function listMember(
   uuid: string,
@@ -301,32 +228,6 @@ export const getsalesHandlers = [
   }),
 
   // A LinkedIn link from the Home chat: the person behind it.
-  http.post('/api/getsales/leads/lookup', async ({ request }) => {
-    const { linkedinUrl } = (await request.json()) as { linkedinUrl: string };
-    const handle = /linkedin\.com\/in\/([^/?#\s]+)/i.exec(linkedinUrl)?.[1];
-    if (!handle) {
-      return HttpResponse.json(
-        { code: 'validation_error', message: 'That isn’t a LinkedIn profile link.' },
-        { status: 422 },
-      );
-    }
-    const person = PEOPLE[handle];
-    if (!person) {
-      return HttpResponse.json(
-        { code: 'getsales_error', message: 'LinkedIn messaging isn’t responding.' },
-        { status: 502 },
-      );
-    }
-    return HttpResponse.json(person);
-  }),
-
-  http.get('/api/getsales/leads/:uuid', ({ params }) => {
-    const person = Object.values(PEOPLE).find((p) => p.uuid === params.uuid);
-    return person
-      ? HttpResponse.json(person)
-      : HttpResponse.json({ code: 'not_found', message: 'Gone.' }, { status: 404 });
-  }),
-
   // Opening a thread marks the lead's replies read up to the given time.
   // A project's GetSales list: three people, one of each connection state.
   http.get('/api/getsales/lists/:uuid', ({ params }) =>

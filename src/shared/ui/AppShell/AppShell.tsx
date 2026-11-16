@@ -15,10 +15,13 @@ import {
   HeaderMenuButton,
   HeaderName,
   SideNav,
+  SideNavItem,
   SideNavItems,
   SideNavLink,
+  SideNavLinkText,
   SkipToContent,
   Theme,
+  usePrefix,
 } from '@carbon/react';
 import { Menu } from '@carbon/icons-react';
 import { useBreakpointUp } from '../../hooks/useMediaQuery';
@@ -50,12 +53,21 @@ function writeNavCollapsed(value: boolean) {
   navListeners.forEach((listener) => listener());
 }
 
+export type NavSubItem = {
+  href: string;
+  label: string;
+  /** Controls beside the link, e.g. a chat's ⋯ menu (shown on hover and focus). */
+  actions?: ReactNode;
+};
+
 export type NavItem = {
   href: string;
   label: string;
   icon: ComponentType;
   /** Other path prefixes that belong to this item, e.g. Home owns the goal chats under /ask. */
   activeFor?: string[];
+  /** Links listed under it, e.g. recent chats under Home. */
+  children?: NavSubItem[];
 };
 
 export type AppShellProps = {
@@ -84,6 +96,7 @@ export function AppShell({
   children,
 }: AppShellProps) {
   const pathname = usePathname();
+  const prefix = usePrefix();
   // Below lg the nav is an overlay; at lg+ it's docked and the same button collapses it.
   const [isNavOpen, setIsNavOpen] = useState(false);
   const isDesktop = useBreakpointUp('lg');
@@ -131,11 +144,16 @@ export function AppShell({
           href={homeHref}
         >
           <SideNavItems className={styles.navItems}>
-            {navItems.map((item) => {
-              const isActive = [item.href, ...(item.activeFor ?? [])].some(
-                (path) => pathname === path || pathname.startsWith(`${path}/`),
-              );
-              return (
+            {navItems.flatMap((item) => {
+              const children = item.children ?? [];
+              const activeChild = children.find((child) => pathname === child.href);
+              // An open child (a chat) is the current page, not its parent.
+              const isActive =
+                !activeChild &&
+                [item.href, ...(item.activeFor ?? [])].some(
+                  (path) => pathname === path || pathname.startsWith(`${path}/`),
+                );
+              return [
                 <SideNavLink
                   key={item.href}
                   as={Link}
@@ -147,8 +165,30 @@ export function AppShell({
                   className={styles.navLink}
                 >
                   {item.label}
-                </SideNavLink>
-              );
+                </SideNavLink>,
+                ...children.map((child) => (
+                  // Carbon's SideNavLink markup (item, link, text), with room for actions beside it.
+                  <SideNavItem key={child.href} className={styles.navChildRow}>
+                    <Link
+                      href={child.href}
+                      aria-current={child === activeChild ? 'page' : undefined}
+                      onClick={() => setIsNavOpen(false)}
+                      className={[
+                        `${prefix}--side-nav__link`,
+                        child === activeChild ? `${prefix}--side-nav__link--current` : '',
+                        styles.navLink,
+                        styles.navChild,
+                      ].join(' ')}
+                      title={child.label}
+                    >
+                      <SideNavLinkText>{child.label}</SideNavLinkText>
+                    </Link>
+                    {child.actions ? (
+                      <span className={styles.navChildActions}>{child.actions}</span>
+                    ) : null}
+                  </SideNavItem>
+                )),
+              ];
             })}
           </SideNavItems>
         </SideNav>

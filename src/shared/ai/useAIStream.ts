@@ -61,6 +61,8 @@ export function useAIStream<TSchema extends z.ZodType>({
           const event = raw as AIStreamEvent<Result>;
           if (event.type === 'step') {
             setState((s) => ({ ...s, steps: [...s.steps, event.label] }));
+          } else if (event.type === 'plan') {
+            // Not shown by this hook's consumers yet.
           } else if (event.type === 'token') {
             setState((s) => ({ ...s, text: s.text + event.text }));
           } else if (event.type === 'error') {

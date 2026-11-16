@@ -60,15 +60,56 @@
 
 // On phones the action sits under the subject, lined up with it. Carbon keeps room on the right
 // for an icon; with no icon here, even padding lets the button hug its label.
-.noteAction.noteAction {
-  justify-content: center;
+// The email's buttons (Extract requirements, Open brief): under the subject on phones, at the end
+// of the line from md up.
+.noteActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   grid-column: 2;
   justify-self: start;
-  padding-inline: $spacing-04;
+  gap: $spacing-03;
 
   @include breakpoint(md) {
     grid-column: auto;
+    justify-self: end;
   }
+}
+
+.noteAction.noteAction {
+  justify-content: center;
+  padding-inline: $spacing-04;
+}
+
+// A brief's extracted requirements, with the button that opens them beside the chat.
+.requirementsCard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: $spacing-05;
+  border: 1px solid $border-subtle-01;
+  background: $layer-01;
+  gap: $spacing-04;
+}
+
+.requirementsCardBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-inline-size: 0;
+  gap: $spacing-02;
+}
+
+.requirementsCardTitle {
+  @include type-style('heading-compact-01');
+
+  color: $text-primary;
+}
+
+.requirementsCardMeta {
+  @include type-style('body-compact-01');
+
+  color: $text-secondary;
 }
 
 // ——— Email picks ———————————————————————————————————————————————————————————————

@@ -6,7 +6,7 @@ import { NotificationCentre } from '@/features/notifications';
 import { OnboardingGate } from '@/features/onboarding';
 import { BalanceBadge } from '@/features/wallet';
 import { ThemeToggle } from '@/providers/ThemeToggle';
-import { AppShell } from '@/shared/ui';
+import { AppShell, type NavSubItem } from '@/shared/ui';
 import { NAVIGATION } from '../../navigation';
 import { LowBalanceBanner } from '../LowBalanceBanner/LowBalanceBanner';
 import { UserPanel } from '../UserPanel/UserPanel';
@@ -25,8 +25,22 @@ const SUFFIX: Record<Role, string | undefined> = {
   admin: 'Admin',
 };
 
-/** The guarded shell for one role: header, side nav, role-specific header actions. */
-export function RoleShell({ role, children }: { role: Role; children: ReactNode }) {
+/**
+ * The guarded shell for one role: header, side nav, role-specific header actions.
+ * `navChildren` adds links under nav items, by the item's href (e.g. recent chats under Home).
+ */
+export function RoleShell({
+  role,
+  navChildren,
+  children,
+}: {
+  role: Role;
+  navChildren?: Record<string, NavSubItem[]>;
+  children: ReactNode;
+}) {
+  const navItems = NAVIGATION[role].map((item) =>
+    navChildren?.[item.href] ? { ...item, children: navChildren[item.href] } : item,
+  );
   return (
     <RequireRole role={role}>
       {(user) => (
@@ -35,7 +49,7 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
             <AppShell
               {...(SUFFIX[role] ? { productSuffix: SUFFIX[role] } : {})}
               homeHref={ROLE_HOME[role]}
-              navItems={isFocused ? [] : NAVIGATION[role]}
+              navItems={isFocused ? [] : navItems}
               headerActions={
                 <>
                   {role === 'client' && !isFocused ? <BalanceBadge /> : null}

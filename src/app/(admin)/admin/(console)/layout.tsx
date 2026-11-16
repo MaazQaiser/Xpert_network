@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { RoleShell } from '@/features/app-shell';
+import { AdminConsoleShell } from '@/features/admin';
 
 export default function AdminConsoleLayout({ children }: { children: ReactNode }) {
-  return <RoleShell role="admin">{children}</RoleShell>;
+  return <AdminConsoleShell>{children}</AdminConsoleShell>;
 }

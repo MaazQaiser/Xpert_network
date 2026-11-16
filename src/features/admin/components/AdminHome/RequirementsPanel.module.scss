@@ -1,0 +1,234 @@
+@use '@carbon/react/scss/spacing' as *;
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/breakpoint' as *;
+@use '../../../../styles/tokens' as *;
+
+// Beside the chat from lg up, kept in view as the chat scrolls; over it on smaller screens.
+.panel {
+  position: fixed;
+  z-index: 8000;
+  display: flex;
+  flex-direction: column;
+  background: $layer-01;
+  inset: $pt-shell-header-height 0 0;
+
+  @include breakpoint(lg) {
+    position: sticky;
+    z-index: auto;
+    flex: none;
+    inline-size: 40%;
+    max-inline-size: 36rem;
+    border-inline-start: 1px solid $border-subtle-01;
+    block-size: calc(100vh - #{$pt-shell-header-height});
+    inset-block-start: $pt-shell-header-height;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: $spacing-05 $spacing-05 $spacing-04;
+  border-block-end: 1px solid $border-subtle-01;
+  gap: $spacing-04;
+}
+
+.headerText {
+  min-inline-size: 0;
+}
+
+.eyebrow {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.title {
+  @include type-style('heading-02');
+
+  margin-block-start: $spacing-02;
+  color: $text-primary;
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: $spacing-05;
+  gap: $spacing-06;
+  overflow-y: auto;
+}
+
+.status {
+  display: flex;
+  gap: $spacing-02;
+}
+
+.summary {
+  @include type-style('body-01');
+
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-03;
+  color: $text-primary;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-03;
+}
+
+.sectionTitle {
+  @include type-style('heading-compact-01');
+
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+  color: $text-primary;
+}
+
+.count {
+  @include type-style('label-01');
+
+  color: $text-secondary;
+}
+
+.bullets {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+}
+
+.bullet {
+  display: flex;
+  flex-direction: column;
+  padding-block: $spacing-02;
+  padding-inline: $spacing-04 0;
+  border-inline-start: 2px solid $border-subtle-01;
+  gap: $spacing-03;
+}
+
+.bulletRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-03;
+}
+
+.bulletText {
+  @include type-style('body-01');
+
+  color: $text-primary;
+}
+
+.checkTag {
+  margin-inline-start: $spacing-03;
+  vertical-align: middle;
+}
+
+.bulletActions {
+  display: flex;
+  flex: none;
+}
+
+.editActions {
+  display: flex;
+  gap: $spacing-03;
+}
+
+.source {
+  @include type-style('helper-text-01');
+
+  padding: $spacing-03 $spacing-04;
+  background: $layer-02;
+  color: $text-secondary;
+}
+
+.sourceLabel {
+  @include type-style('label-01');
+
+  display: block;
+  margin-block-end: $spacing-02;
+  color: $text-secondary;
+}
+
+// A question quoted with its answers, a line each.
+.sourceLines {
+  white-space: pre-line;
+}
+
+.sourceMissing {
+  color: $text-error;
+}
+
+.empty {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.add.add {
+  align-self: flex-start;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-04 $spacing-05;
+  border-block-start: 1px solid $border-subtle-01;
+  gap: $spacing-03;
+}
+
+.accepted {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.footerActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-03;
+}
+
+.question {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  gap: $spacing-02;
+}
+
+.questionNumber {
+  @include type-style('label-01');
+
+  margin-inline-end: $spacing-03;
+  color: $text-secondary;
+}
+
+.questionMeta {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.answers {
+  display: flex;
+  flex-direction: column;
+  padding-inline-start: $spacing-05;
+  gap: $spacing-01;
+  list-style: disc;
+}
+
+.answer {
+  @include type-style('body-compact-01');
+
+  color: $text-primary;
+}
+
+.questionForm {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+}

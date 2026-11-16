@@ -15,7 +15,19 @@
 $home-width: 41rem;
 $pt-mascot-float: 6s;
 
+// The chat, and a brief's requirements beside it from lg up.
+.layout {
+  display: flex;
+  align-items: flex-start;
+}
+
+.withPanel {
+  gap: $spacing-06;
+}
+
 .root {
+  flex: 1;
+  min-inline-size: 0;
   display: flex;
   flex-direction: column;
   min-block-size: calc(100vh - #{$pt-shell-header-height} - #{$spacing-10});
@@ -474,6 +486,78 @@ $pt-mascot-think: 1.4s;
 
 .thinking {
   color: $text-secondary;
+}
+
+// What Scio is doing while it answers: its plan or steps, done, current or not started.
+.steps {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  gap: $spacing-03;
+  padding: $spacing-04 $spacing-05;
+  border: 1px solid $border-subtle-01;
+  background: $layer-01;
+}
+
+.stepList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-02;
+}
+
+.stepPending {
+  @include type-style('body-compact-01');
+
+  display: flex;
+  align-items: center;
+  min-block-size: $spacing-07;
+  gap: $spacing-03;
+  color: $text-secondary;
+
+  // Lines up with InlineLoading's spinner and checkmark, so every label starts in one column.
+  svg {
+    flex: none;
+  }
+}
+
+.stepsToggle.stepsToggle {
+  margin-inline-start: calc(-1 * #{$spacing-05});
+}
+
+// What Scio is doing before its answer starts, with Stop beside it.
+.working {
+  display: flex;
+  align-items: center;
+  gap: $spacing-03;
+}
+
+.stop {
+  align-self: flex-start;
+}
+
+// What the answer was built from (AI_NATIVE §4.3).
+.basis {
+  @include type-style('helper-text-01');
+
+  color: $text-secondary;
+}
+
+.scioText {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-04;
+}
+
+.scioList {
+  @include type-style('body-01');
+
+  padding-inline-start: $spacing-06;
+  list-style: disc;
+
+  li + li {
+    margin-block-start: $spacing-02;
+  }
 }
 
 .answerError {

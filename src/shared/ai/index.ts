@@ -2,6 +2,7 @@ export { useAIStream } from './useAIStream';
 export type { AIStreamState, AIStreamStatus } from './useAIStream';
 export { aiStreamEventSchema } from './protocol';
 export type { AIStreamEvent } from './protocol';
+export type { AIPlanItem, AIStepEvent } from './protocol';
 export { AIExplainLabel } from './AIExplainLabel/AIExplainLabel';
 export type { AIExplainLabelProps } from './AIExplainLabel/AIExplainLabel';
 export { StreamingText } from './StreamingText/StreamingText';

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { AdminHome } from '@/features/admin';
 
 export const metadata: Metadata = { title: 'Home' };
 
+// Home itself renders in the layout, shared with the saved chats.
 export default function Page() {
-  return <AdminHome />;
+  return null;
 }

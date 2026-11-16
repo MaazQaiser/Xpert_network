@@ -20,6 +20,15 @@ export const homeSummarySchema = z.object({
 });
 export type HomeSummary = z.infer<typeof homeSummarySchema>;
 
+/** New briefs in the mailbox Scio reads (the demo mailbox until Gmail is connected). */
+export const mailboxSummarySchema = z.object({
+  /** In the last 24 hours: "today", as Scio counts it. */
+  newToday: z.number().int().min(0),
+  newThisWeek: z.number().int().min(0),
+  source: z.string(),
+});
+export type MailboxSummary = z.infer<typeof mailboxSummarySchema>;
+
 /** An email the assistant puts in front of the PM to pick from (Home chat). */
 export const chatEmailSchema = z.object({
   requestId: z.string(),
@@ -35,6 +44,8 @@ export const chatEmailSchema = z.object({
   prompt: z.string(),
   /** The label on the pick button. */
   action: z.string(),
+  /** A second button beside it, e.g. Extract requirements. */
+  extraAction: z.object({ label: z.string(), prompt: z.string() }).nullable().optional(),
 });
 export type ChatEmail = z.infer<typeof chatEmailSchema>;
 
@@ -49,6 +60,19 @@ export type ChatChip = z.infer<typeof chatChipSchema>;
 /** Rich parts of an answer, shown under its text in the Home chat. */
 export const chatBlockSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('emails'), items: z.array(chatEmailSchema) }),
+  /** A brief's extracted requirements; they open in the side panel to edit and accept. */
+  z.object({
+    kind: z.literal('briefRequirements'),
+    briefId: z.string(),
+    company: z.string(),
+    subject: z.string(),
+    status: z.enum(['draft', 'accepted']),
+    count: z.number().int().min(0),
+    toConfirm: z.number().int().min(0),
+    /** Screening questions, and whether they're the client's own (else suggested). */
+    questions: z.number().int().min(0).default(0),
+    clientScreener: z.boolean().default(false),
+  }),
   /** The project brief as an editable document canvas. */
   z.object({ kind: z.literal('brief'), projectId: z.string() }),
   /** The AI searching the network for a project, then its top-ranked experts to approach. */
@@ -144,6 +168,35 @@ export const assistantReplySchema = z.object({
   chips: z.array(chatChipSchema).default([]),
 });
 export type AssistantReply = z.output<typeof assistantReplySchema>;
+
+/* ---------------------------------- Scio ---------------------------------- */
+
+/** A Scio chat, as listed under Home in the side nav. */
+export const scioConversationSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  updatedAt: z.string(),
+});
+export type ScioConversation = z.infer<typeof scioConversationSchema>;
+
+/** Scio's answer: the Home chat reply plus the chat it belongs to (with its AI title). */
+export const scioReplySchema = assistantReplySchema.extend({
+  conversation: z.object({ id: z.string(), title: z.string().nullable() }),
+});
+export type ScioReply = z.output<typeof scioReplySchema>;
+
+/** A saved chat, to show again: the person's messages and Scio's answers. */
+export const scioConversationDetailSchema = scioConversationSchema.extend({
+  messages: z.array(
+    z.object({
+      role: z.enum(['user', 'assistant']),
+      text: z.string(),
+      result: scioReplySchema.nullable(),
+      createdAt: z.string(),
+    }),
+  ),
+});
+export type ScioConversationDetail = z.output<typeof scioConversationDetailSchema>;
 
 /** What each Home summary card asks the assistant. */
 export const CARD_PROMPTS = {

@@ -3,6 +3,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import { server } from '@/mocks/node';
 import { resetSenderProfiles } from '@/mocks/handlers/getsales.handlers';
+import { resetScio } from '@/mocks/handlers/scio.handlers';
+import { resetRequirements } from '@/mocks/handlers/requirements.handlers';
 import { db } from '@/mocks/store/db';
 import { resetControls } from '@/mocks/controls';
 import { loadAdminDemo } from './adminDemo';
@@ -58,6 +60,8 @@ afterEach(() => {
   resetNavigationMock();
   db.reset();
   resetSenderProfiles();
+  resetScio();
+  resetRequirements();
   resetControls();
 });
 afterAll(() => server.close());

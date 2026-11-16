@@ -25,11 +25,17 @@ const nextConfig: NextConfig = {
       },
     },
   },
-  // GetSales sender profiles come from the PoC backend, which holds the API key. MSW has no
-  // browser handler for them, so the call passes through to Next.js and on to the backend.
+  // GetSales (LinkedIn), Scio (the AI assistant), the brief mailbox and briefs' requirements come
+  // from the PoC backend, which holds the API keys. MSW has no browser handler for them, so the
+  // calls pass through to Next.js and on to the backend (ADR 0016).
   async rewrites() {
-    const backend = process.env.BACKEND_URL ?? 'http://localhost:8000';
-    return [{ source: '/api/getsales/:path*', destination: `${backend}/api/getsales/:path*` }];
+    const backend = process.env.BACKEND_URL ?? 'http://localhost:8001';
+    return [
+      { source: '/api/getsales/:path*', destination: `${backend}/api/getsales/:path*` },
+      { source: '/api/scio/:path*', destination: `${backend}/api/scio/:path*` },
+      { source: '/api/mailbox/:path*', destination: `${backend}/api/mailbox/:path*` },
+      { source: '/api/requirements/:path*', destination: `${backend}/api/requirements/:path*` },
+    ];
   },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];

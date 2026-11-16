@@ -2,6 +2,7 @@
 @use '../../../styles/tokens' as *;
 @use '@carbon/react/scss/breakpoint' as *;
 @use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
 
 .suffix {
   color: $text-secondary;
@@ -49,6 +50,42 @@
 
 .navLink.navLink {
   min-block-size: $spacing-08;
+}
+
+// Links under an item (recent chats under Home): indented to the parent's label, quieter, with
+// their actions (a ⋯ menu) at the end of the row.
+.navChildRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.navChild.navChild {
+  @include type-style('body-compact-01');
+
+  flex: 1;
+  min-inline-size: 0;
+  min-block-size: $spacing-07;
+  padding-inline: $spacing-09 $spacing-08;
+}
+
+// Shown while the row is hovered or focused, or its menu is open.
+.navChildActions {
+  position: absolute;
+  inset-inline-end: $spacing-02;
+  opacity: 0;
+}
+
+.navChildRow:hover .navChildActions,
+.navChildRow:focus-within .navChildActions,
+.navChildActions:has([aria-expanded='true']) {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .navChildActions {
+    opacity: 1;
+  }
 }
 
 // Collapsed on desktop: the docked nav is removed and content takes the full width.

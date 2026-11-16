@@ -270,6 +270,8 @@ function InboxLayout({
                 <OverflowMenu
                   size="sm"
                   menuAlignment="bottom-end"
+                  // Floating placement: Carbon's older placement shifts bottom-end menus far right.
+                  autoAlign
                   renderIcon={OverflowMenuHorizontal}
                   label={`More for ${senderName(sender)}`}
                 >

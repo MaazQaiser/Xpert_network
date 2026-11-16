@@ -23,7 +23,12 @@ import {
 import { AIExplainLabel } from '@/shared/ai';
 import { toUserMessage } from '@/shared/api';
 import { routes } from '@/shared/config/routes';
-import { useApproveProject, useProject, useUpdateProject } from '../../api/queries';
+import {
+  useApproveProject,
+  useBriefRequirements,
+  useProject,
+  useUpdateProject,
+} from '../../api/queries';
 import {
   CARD_PROMPTS,
   type ChatBlock,
@@ -48,6 +53,7 @@ export function ChatBlocks({
   isBusy,
   onWorking,
   onHome,
+  onOpenRequirements,
 }: {
   blocks: ChatBlock[];
   onAsk: AskFn;
@@ -56,6 +62,8 @@ export function ChatBlocks({
   onWorking?: (working: boolean) => void;
   /** Clears the chat and shows the home summary again. */
   onHome?: () => void;
+  /** Opens a brief's requirements in the side panel. */
+  onOpenRequirements?: (briefId: string) => void;
 }) {
   return (
     <>
@@ -64,6 +72,8 @@ export function ChatBlocks({
         switch (block.kind) {
           case 'emails':
             return <EmailPicks key={key} items={block.items} onAsk={onAsk} isBusy={isBusy} />;
+          case 'briefRequirements':
+            return <RequirementsCard key={key} block={block} onOpen={onOpenRequirements} />;
           case 'brief':
             return <BriefCanvas key={key} projectId={block.projectId} />;
           case 'expertSearch':
@@ -212,19 +222,80 @@ function EmailPicks({
             <span className={styles.noteFrom}>{email.from.name}</span>
             <p className={styles.noteSubject}>{email.subject}</p>
           </div>
-          <Button
-            kind="tertiary"
-            size="sm"
-            className={styles.noteAction}
-            disabled={isBusy}
-            onClick={() => onAsk(email.prompt)}
-            aria-label={`${email.action}: ${email.from.name}, ${email.subject}`}
-          >
-            {email.action}
-          </Button>
+          <div className={styles.noteActions}>
+            {email.extraAction ? (
+              <Button
+                kind="ghost"
+                size="sm"
+                disabled={isBusy}
+                onClick={() => onAsk(email.extraAction?.prompt ?? '')}
+                aria-label={`${email.extraAction.label}: ${email.from.name}, ${email.subject}`}
+              >
+                {email.extraAction.label}
+              </Button>
+            ) : null}
+            <Button
+              kind="tertiary"
+              size="sm"
+              className={styles.noteAction}
+              disabled={isBusy}
+              onClick={() => onAsk(email.prompt)}
+              aria-label={`${email.action}: ${email.from.name}, ${email.subject}`}
+            >
+              {email.action}
+            </Button>
+          </div>
         </li>
       ))}
     </ul>
+  );
+}
+
+/**
+ * A brief's extracted requirements in the chat: what they are and where they stand, with the
+ * button that opens them in the side panel to edit and accept. Shows their latest state.
+ */
+function RequirementsCard({
+  block,
+  onOpen,
+}: {
+  block: Extract<ChatBlock, { kind: 'briefRequirements' }>;
+  onOpen?: ((briefId: string) => void) | undefined;
+}) {
+  const latest = useBriefRequirements(block.briefId).data;
+  const status = latest?.status ?? block.status;
+  const count = latest
+    ? latest.sections.filter((s) => s.key !== 'to_confirm').flatMap((s) => s.items).length
+    : block.count;
+  const toConfirm = latest
+    ? (latest.sections.find((s) => s.key === 'to_confirm')?.items.length ?? 0)
+    : block.toConfirm;
+  const questions = latest ? latest.questions.length : block.questions;
+  const clientScreener = latest
+    ? latest.questions.some((q) => q.origin === 'client')
+    : block.clientScreener;
+  return (
+    <div className={styles.requirementsCard}>
+      <div className={styles.requirementsCardBody}>
+        <p className={styles.requirementsCardTitle}>Requirements: {block.company}</p>
+        <p className={styles.requirementsCardMeta}>
+          {count === 1 ? '1 requirement' : `${count} requirements`}
+          {toConfirm > 0 ? ` · ${toConfirm} to confirm with the client` : ''}
+        </p>
+        {questions > 0 ? (
+          <p className={styles.requirementsCardMeta}>
+            {questions === 1 ? '1 screening question' : `${questions} screening questions`}
+            {clientScreener ? ', from the client' : ', suggested'}
+          </p>
+        ) : null}
+      </div>
+      <Tag type={status === 'accepted' ? 'green' : 'blue'} size="sm">
+        {status === 'accepted' ? 'Accepted' : 'Draft'}
+      </Tag>
+      <Button kind="tertiary" size="sm" onClick={() => onOpen?.(block.briefId)}>
+        {status === 'accepted' ? 'View requirements' : 'Review requirements'}
+      </Button>
+    </div>
   );
 }
 

@@ -4,4 +4,5 @@ export { setControls, resetControls } from '@/mocks/controls';
 export { USERS } from '@/mocks/fixtures/users';
 export { scenarios } from '@/mocks/scenarios';
 export { server } from '@/mocks/node';
+export { scioChatTitle, seedScioChat } from '@/mocks/handlers/scio.handlers';
 export { adminDemoState, loadAdminDemo, loadListProjects } from './adminDemo';

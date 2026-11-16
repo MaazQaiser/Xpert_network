@@ -9,7 +9,18 @@ import {
 } from '@tanstack/react-query';
 import { z } from 'zod';
 import { apiRequest } from '@/shared/api';
-import { assistantReplySchema, homeSummarySchema } from '../model/home.schema';
+import {
+  briefRequirementsSchema,
+  type BriefRequirements,
+  type RequirementsEdits,
+} from '../model/requirements.schema';
+import {
+  homeSummarySchema,
+  mailboxSummarySchema,
+  scioConversationDetailSchema,
+  scioConversationSchema,
+  type ScioConversation,
+} from '../model/home.schema';
 import {
   expertSearchResultSchema,
   screeningResultSchema,
@@ -50,7 +61,6 @@ import {
   type SendLinkedinMessageInput,
   type InboxRequest,
 } from '../model/inbox.schema';
-import { linkedinProfileSchema, type LinkedinProfile } from '../model/linkedinProfile.schema';
 import { nudgeResultSchema, responsesSchema } from '../model/responses.schema';
 import {
   generateShortlistInputSchema,
@@ -81,7 +91,6 @@ export const adminKeys = {
   proxyCountries: () => [...adminKeys.all, 'inbox', 'proxy-countries'] as const,
   linkedinSession: (senderUuid: string) =>
     [...adminKeys.all, 'inbox', 'linkedin-session', senderUuid] as const,
-  linkedinProfile: (uuid: string) => [...adminKeys.all, 'linkedin', 'profile', uuid] as const,
   senderConversations: (uuid: string) =>
     [...adminKeys.all, 'inbox', 'senders', uuid, 'conversations'] as const,
   leadList: (uuid: string) => [...adminKeys.all, 'leadList', uuid] as const,
@@ -100,6 +109,9 @@ export const adminKeys = {
     [...adminKeys.all, 'project', id, 'availability', experts] as const,
   shortlist: (id: string) => [...adminKeys.all, 'project', id, 'shortlist'] as const,
   schedule: () => [...adminKeys.all, 'schedule'] as const,
+  scioChats: () => [...adminKeys.all, 'scio', 'chats'] as const,
+  scioChat: (id: string) => [...adminKeys.all, 'scio', 'chat', id] as const,
+  requirements: (briefId: string) => [...adminKeys.all, 'requirements', briefId] as const,
   calls: () => [...adminKeys.all, 'calls'] as const,
   callRecord: (id: string) => [...adminKeys.all, 'calls', id] as const,
 };
@@ -107,7 +119,15 @@ export const adminKeys = {
 export function useHomeSummary() {
   return useQuery({
     queryKey: adminKeys.summary(),
-    queryFn: ({ signal }) => apiRequest('/admin/summary', { schema: homeSummarySchema, signal }),
+    queryFn: async ({ signal }) => {
+      // New project emails are the briefs in the mailbox Scio reads, so the count matches what
+      // Scio lists. If it can't be reached, the prototype's own count stands.
+      const [summary, mailbox] = await Promise.all([
+        apiRequest('/admin/summary', { schema: homeSummarySchema, signal }),
+        apiRequest('/mailbox/summary', { schema: mailboxSummarySchema, signal }).catch(() => null),
+      ]);
+      return mailbox ? { ...summary, newProjectEmails: mailbox.newToday } : summary;
+    },
   });
 }
 
@@ -314,66 +334,6 @@ export function useMarkConversationRead(senderUuid: string) {
   });
 }
 
-/** Home chat: the person behind a LinkedIn link (GetSales adds them as a lead if new). */
-export function useLookupLinkedinProfile() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (linkedinUrl: string) =>
-      apiRequest('/getsales/leads/lookup', {
-        method: 'POST',
-        body: { linkedinUrl },
-        schema: linkedinProfileSchema,
-      }),
-    onSuccess: (profile) =>
-      queryClient.setQueryData(adminKeys.linkedinProfile(profile.uuid), profile),
-  });
-}
-
-// How long to wait for GetSales to read a new profile before showing what we have.
-export const PROFILE_READ_TIMEOUT_MS = 150_000;
-
-/** A looked-up profile, checked every few seconds until GetSales has read it from LinkedIn. */
-export function useLinkedinProfile(uuid: string, since: number) {
-  return useQuery({
-    queryKey: adminKeys.linkedinProfile(uuid),
-    queryFn: ({ signal }) =>
-      apiRequest(`/getsales/leads/${encodeURIComponent(uuid)}`, {
-        schema: linkedinProfileSchema,
-        signal,
-      }),
-    // Until GetSales has both read them and attached their connection status (or time's up).
-    refetchInterval: (query) => {
-      const data = query.state.data;
-      const isDone = data ? data.enriched && data.settled : false;
-      return isDone || Date.now() - since > PROFILE_READ_TIMEOUT_MS ? false : 4_000;
-    },
-  });
-}
-
-/** Home chat: message a looked-up person from a sender; it then shows in that sender's inbox. */
-export function useMessageLinkedinLead() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      senderUuid,
-      lead,
-      text,
-    }: {
-      senderUuid: string;
-      lead: LinkedinProfile;
-      text: string;
-    }) =>
-      apiRequest(
-        `/getsales/sender-profiles/${encodeURIComponent(senderUuid)}/leads/${encodeURIComponent(
-          lead.uuid,
-        )}/messages`,
-        { method: 'POST', body: { text }, schema: linkedinMessageSchema },
-      ),
-    onSuccess: (_message, { senderUuid }) =>
-      queryClient.invalidateQueries({ queryKey: adminKeys.senderConversations(senderUuid) }),
-  });
-}
-
 /**
  * Invite someone who isn't a 1st-degree connection, with a note (LinkedIn allows 300
  * characters). GetSales can't message them until they accept.
@@ -402,10 +362,8 @@ export function useSendConnectionRequest() {
           schema: z.object({ flowUuid: z.string(), status: z.literal('queued') }),
         },
       ),
-    onSuccess: (_result, { senderUuid, leadUuid }) => {
+    onSuccess: (_result, { senderUuid }) => {
       void queryClient.invalidateQueries({ queryKey: adminKeys.senderConversations(senderUuid) });
-      // The profile now shows the request as sent.
-      void queryClient.invalidateQueries({ queryKey: adminKeys.linkedinProfile(leadUuid) });
     },
   });
 }
@@ -801,14 +759,116 @@ export function useCallAction(id: string) {
   });
 }
 
-export function useAskAssistant() {
+/** Scio's saved chats, most recent first: listed under Home in the side nav. */
+export function useScioConversations() {
+  return useQuery({
+    queryKey: adminKeys.scioChats(),
+    queryFn: ({ signal }) =>
+      apiRequest('/scio/conversations', { schema: z.array(scioConversationSchema), signal }),
+  });
+}
+
+const requirementsPath = (briefId: string) => `/requirements/${encodeURIComponent(briefId)}`;
+
+/** A brief's extracted requirements, for the side panel; nothing when no brief is open (null). */
+export function useBriefRequirements(briefId: string | null) {
+  return useQuery({
+    queryKey: adminKeys.requirements(briefId ?? 'none'),
+    queryFn: ({ signal }) =>
+      apiRequest(requirementsPath(briefId ?? ''), { schema: briefRequirementsSchema, signal }),
+    enabled: briefId !== null,
+  });
+}
+
+/** Changes to a brief's requirements: each returns the requirements as they now stand. */
+function useRequirementsChange<TInput>(
+  briefId: string,
+  request: (input: TInput) => Promise<BriefRequirements>,
+) {
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (text: string) =>
-      apiRequest('/admin/assistant', {
-        method: 'POST',
-        body: { text },
-        schema: assistantReplySchema,
+    mutationFn: request,
+    onSuccess: (saved) => queryClient.setQueryData(adminKeys.requirements(briefId), saved),
+  });
+}
+
+/** Save the PM's edits (editing accepted requirements makes them a draft again). */
+export function useSaveRequirements(briefId: string) {
+  return useRequirementsChange(briefId, (edits: RequirementsEdits) =>
+    apiRequest(requirementsPath(briefId), {
+      method: 'PUT',
+      body: edits,
+      schema: briefRequirementsSchema,
+    }),
+  );
+}
+
+export function useAcceptRequirements(briefId: string) {
+  return useRequirementsChange(briefId, () =>
+    apiRequest(`${requirementsPath(briefId)}/accept`, {
+      method: 'POST',
+      schema: briefRequirementsSchema,
+    }),
+  );
+}
+
+/** Discard the PM's edits: back to the AI's draft. */
+export function useRevertRequirements(briefId: string) {
+  return useRequirementsChange(briefId, () =>
+    apiRequest(`${requirementsPath(briefId)}/revert`, {
+      method: 'POST',
+      schema: briefRequirementsSchema,
+    }),
+  );
+}
+
+/** Give a Scio chat a name of your own. */
+export function useRenameScioChat() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, title }: { id: string; title: string }) =>
+      apiRequest(`/scio/conversations/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: { title },
+        schema: scioConversationSchema,
       }),
+    onSuccess: (renamed) =>
+      queryClient.setQueryData<ScioConversation[]>(adminKeys.scioChats(), (list) =>
+        list?.map((c) => (c.id === renamed.id ? { ...c, title: renamed.title } : c)),
+      ),
+  });
+}
+
+/** Delete a Scio chat with its messages and Scio's memory of it. */
+export function useDeleteScioChat() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiRequest(`/scio/conversations/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        schema: z.null(),
+      }),
+    onSuccess: (_result, id) => {
+      queryClient.setQueryData<ScioConversation[]>(adminKeys.scioChats(), (list) =>
+        list?.filter((c) => c.id !== id),
+      );
+      queryClient.removeQueries({ queryKey: adminKeys.scioChat(id) });
+    },
+  });
+}
+
+/** One saved Scio chat, to show it again; nothing for a new chat (null). */
+export function useScioConversation(id: string | null) {
+  return useQuery({
+    queryKey: adminKeys.scioChat(id ?? 'new'),
+    queryFn: ({ signal }) =>
+      apiRequest(`/scio/conversations/${encodeURIComponent(id ?? '')}`, {
+        schema: scioConversationDetailSchema,
+        signal,
+      }),
+    enabled: id !== null,
+    // A chat's history only changes by being used here, which adds to it locally.
+    staleTime: Infinity,
   });
 }
 

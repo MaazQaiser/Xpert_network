@@ -1,0 +1,8 @@
+@use '@carbon/react/scss/theme' as *;
+@use '@carbon/react/scss/type' as *;
+
+.modalText {
+  @include type-style('body-01');
+
+  color: $text-secondary;
+}

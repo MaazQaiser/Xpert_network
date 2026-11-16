@@ -38,6 +38,8 @@ export const routes = {
   admin: {
     login: '/admin/login',
     home: '/admin/home',
+    /** A saved Scio chat, reopened on Home. */
+    homeChat: (chatId: string) => `/admin/home/chat/${chatId}`,
     inbox: '/admin/inbox',
     inboxRequest: (requestId: string) => `/admin/inbox/${requestId}`,
     projects: '/admin/projects',
