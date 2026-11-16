@@ -13,6 +13,7 @@ import {
 } from '../../api/queries';
 import type { ChatBlock } from '../../model/home.schema';
 import type { Search, SearchCost } from '../../model/search.schema';
+import { withoutProviderNames } from '../../model/searchText';
 import styles from './SearchCard.module.scss';
 
 type Confirm = Extract<ChatBlock, { kind: 'searchConfirm' }>;
@@ -54,9 +55,13 @@ function outcomeText(search: Search, exaBudget: number): string {
     case 'budget_reached':
       return `Web search budget reached (${dollars(exaBudget)})`;
     case 'exhausted':
-      return search.note ? `Couldn’t find more: ${search.note}` : 'Couldn’t find more';
+      // The note is the search agent's own last words: they may name the providers.
+      return search.note
+        ? `Couldn’t find more: ${withoutProviderNames(search.note)}`
+        : 'Couldn’t find more';
     case 'failed':
-      return search.note ? `Failed: ${search.note}` : 'Failed';
+      // The note is an internal error ("HTTPStatusError: …"): never shown.
+      return 'Failed: something went wrong while searching.';
     case 'running':
       return 'Searching';
   }
@@ -64,7 +69,8 @@ function outcomeText(search: Search, exaBudget: number): string {
 
 /** The requirements it searches on: the shared ones, then each profile group's. */
 function Columns({ block }: { block: Confirm }) {
-  const shared = block.columns.filter((c) => c.group === null);
+  // A shared column has no group: null, or "" as the backend sends it.
+  const shared = block.columns.filter((c) => !c.group);
   const groups = block.groups.map((group) => ({
     ...group,
     columns: block.columns.filter((c) => c.group === group.name),

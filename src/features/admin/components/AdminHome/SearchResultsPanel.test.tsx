@@ -78,7 +78,8 @@ const TRAIL_SEARCH: SearchScript = {
         requirementId: 'r_us',
         label: 'In the US',
         route: 'filter',
-        group: null,
+        // The backend sends "" for a shared column.
+        group: '',
         counts: true,
       },
       {
@@ -115,7 +116,10 @@ const TRAIL_SEARCH: SearchScript = {
         ...MAYA,
         verdicts: {
           col_us: match('Based in Denver.'),
+          // A blank and a repeat, as a web search can return them.
           col_hikes: match('Wrote about a 5-day Colorado Trail section hike.', [
+            'https://trailjournals.example/maya-colorado-trail',
+            '',
             'https://trailjournals.example/maya-colorado-trail',
           ]),
           col_runs: miss('No trail runs found.'),
@@ -150,9 +154,9 @@ const TRAIL_SEARCH: SearchScript = {
       person: person({
         id: 'p_sam',
         name: 'Sam Ortiz',
+        // Matches on paper, but with no way to reach them it isn't a match.
         hasContact: false,
-        isMatch: true,
-        profileGroup: 'Hiker',
+        isMatch: false,
         verdicts: {
           col_us: match('Lives in Flagstaff, Arizona.'),
           col_hikes: match('Thru-hiked the Arizona Trail in 2025.'),
@@ -221,8 +225,12 @@ describe('the live results table', () => {
       within(panel).getByText('Wrote about a 5-day Colorado Trail section hike.'),
     ).toBeInTheDocument();
     // The open toggletip auto-aligns, which jsdom can't lay out, so it stays visibility: hidden
-    // and out of the accessibility tree here; the link itself is checked by its text.
-    expect(within(panel).getByText('trailjournals.example').closest('a')).toHaveAttribute(
+    // and out of the accessibility tree here; the link itself is checked by its text. A blank
+    // reference and a repeat give one link.
+    const references = panel.querySelector<HTMLElement>('ul[aria-label="References"]');
+    if (!references) throw new Error('No references');
+    expect(references.querySelectorAll('a')).toHaveLength(1);
+    expect(within(references).getByText('trailjournals.example').closest('a')).toHaveAttribute(
       'href',
       'https://trailjournals.example/maya-colorado-trail',
     );
@@ -259,8 +267,8 @@ describe('the live results table', () => {
     await userEvent.click(within(panel).getByRole('switch', { name: 'Matches only' }));
     await waitFor(() => expect(within(panel).queryByText('Jonas Berg')).toBeNull());
     expect(within(panel).queryByText('Lee Park')).toBeNull();
+    expect(within(panel).queryByText('Sam Ortiz')).toBeNull();
     expect(within(panel).getByText('Maya Torres')).toBeInTheDocument();
-    expect(within(panel).getByText('Sam Ortiz')).toBeInTheDocument();
   });
 
   it('passes axe, with the footer and Stop while it runs', async () => {

@@ -19,7 +19,12 @@ export type SearchScript = {
   waitForStopBefore?: number;
   /** Time between steps. */
   stepMs?: number;
+  /** Close every open stream (without done) right after this step; the search goes on. */
+  dropAfter?: number;
 };
+
+/** An event for a stream, or the word to hang up. */
+type Listener = (event: SearchEvent | 'drop') => void;
 
 type Entry = {
   search: Search;
@@ -27,7 +32,7 @@ type Entry = {
   script: SearchScript;
   started: boolean;
   stopRequested: boolean;
-  listeners: Set<(event: SearchEvent) => void>;
+  listeners: Set<Listener>;
   wake: () => void;
 };
 
@@ -206,7 +211,7 @@ function apply(search: Search, step: Step) {
 
 async function play(entry: Entry) {
   const emit = (event: SearchEvent) => entry.listeners.forEach((listener) => listener(event));
-  const { steps, end, waitForStopBefore, stepMs = STEP_MS } = entry.script;
+  const { steps, end, waitForStopBefore, dropAfter, stepMs = STEP_MS } = entry.script;
   const untilStopped = () => new Promise<void>((resolve) => (entry.wake = resolve));
   for (const [index, step] of steps.entries()) {
     if (index === waitForStopBefore && !entry.stopRequested) await untilStopped();
@@ -215,6 +220,7 @@ async function play(entry: Entry) {
     if (entry.stopRequested) break;
     apply(entry.search, step);
     emit(structuredClone(step));
+    if (index === dropAfter) entry.listeners.forEach((listener) => listener('drop'));
   }
   // Waiting "before" the step after the last one holds it running until Stop.
   if (waitForStopBefore === steps.length && !entry.stopRequested) await untilStopped();
@@ -280,7 +286,7 @@ export const searchHandlers = [
   http.get('/api/searches/:id/stream', ({ params }) => {
     const entry = entries[String(params.id)];
     if (!entry) return notFound();
-    let listener: ((event: SearchEvent) => void) | undefined;
+    let listener: Listener | undefined;
     const body = new ReadableStream<Uint8Array>({
       start(controller) {
         controller.enqueue(line({ type: 'snapshot', search: entry.search }));
@@ -289,15 +295,21 @@ export const searchHandlers = [
           controller.close();
           return;
         }
-        listener = (event) => {
+        const self: Listener = (event) => {
           try {
+            if (event === 'drop') {
+              entry.listeners.delete(self);
+              controller.close();
+              return;
+            }
             controller.enqueue(line(event));
             if (event.type === 'done') controller.close();
           } catch {
             // The reader went away.
           }
         };
-        entry.listeners.add(listener);
+        listener = self;
+        entry.listeners.add(self);
         if (!entry.started) {
           entry.started = true;
           void play(entry);

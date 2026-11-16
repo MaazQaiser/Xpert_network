@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { searchPlanSchema } from './requirements.schema';
+import { cleanReferences } from './searchText';
 
 /**
  * A people search for a brief: the AI hunts with profile search and web search until the number
@@ -13,7 +14,8 @@ export type Verdict = z.infer<typeof verdictSchema>;
 export const cellVerdictSchema = z.object({
   verdict: verdictSchema,
   reason: z.string(),
-  references: z.array(z.string()).default([]),
+  /** Blanks and repeats are dropped, so each is a link with a name. */
+  references: z.array(z.string()).default([]).transform(cleanReferences),
 });
 export type CellVerdict = z.output<typeof cellVerdictSchema>;
 

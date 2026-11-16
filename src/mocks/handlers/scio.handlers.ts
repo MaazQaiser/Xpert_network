@@ -95,8 +95,9 @@ function findPeopleAnswer(message: string) {
           target: 2,
           groups: [],
           columns: [
-            { id: 'col_1', label: 'Procurement leader', group: null },
-            { id: 'col_2', label: 'In the GCC', group: null },
+            // The backend sends "" for a shared column.
+            { id: 'col_1', label: 'Procurement leader', group: '' },
+            { id: 'col_2', label: 'In the GCC', group: '' },
           ],
           exaBudget: 2,
           fullenrichCreditCap: 50,

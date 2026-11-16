@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { columnGroupSchema } from './requirements.schema';
 
 /** A client reply that still needs the calls booked. Shown on Home until the meetings are booked. */
 export const bookingCueSchema = z.object({
@@ -84,7 +85,8 @@ export const chatBlockSchema = z.discriminatedUnion('kind', [
     /** The number of ICPs needed; null until the PM adds it. */
     target: z.number().int().nullable(),
     groups: z.array(z.object({ name: z.string(), quota: z.number().int().nullable() })),
-    columns: z.array(z.object({ id: z.string(), label: z.string(), group: z.string().nullable() })),
+    /** `group` is null for a shared column (the backend sends ""). */
+    columns: z.array(z.object({ id: z.string(), label: z.string(), group: columnGroupSchema })),
     /** The web search budget for the whole search, in dollars. */
     exaBudget: z.number(),
     /** The most profile search credits it may spend. */

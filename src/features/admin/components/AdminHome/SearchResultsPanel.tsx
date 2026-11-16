@@ -42,7 +42,8 @@ const NOT_CHECKED: CellVerdict = { verdict: 'unclear', reason: 'Not checked yet.
 /** The columns in table order: the shared ones, then each profile group's. */
 function orderColumns(search: Search) {
   const groupNames = search.groups.map((g) => g.name);
-  const isShared = (c: Column) => c.group === null || !groupNames.includes(c.group);
+  // A shared column has no group (null, or "" as the backend sends it), or an unknown one.
+  const isShared = (c: Column) => !c.group || !groupNames.includes(c.group);
   const shared = search.columns.filter(isShared);
   const groups = search.groups
     .map((g) => ({ name: g.name, columns: search.columns.filter((c) => c.group === g.name) }))

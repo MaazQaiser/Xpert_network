@@ -58,6 +58,15 @@ export const searchRouteSchema = z.enum(['filter', 'exa', 'screening', 'none']);
 export type SearchRoute = z.infer<typeof searchRouteSchema>;
 
 /**
+ * A column's profile group. The backend sends "" (or null) for a shared column, one every match
+ * needs; both become null here.
+ */
+export const columnGroupSchema = z
+  .string()
+  .nullable()
+  .transform((group) => group || null);
+
+/**
  * The search plan the AI makes from the accepted requirements: each requirement's route, the
  * results table's columns (sorted into shared columns and profile groups), the profile search
  * filters and the web searches. Read-only for the project manager.
@@ -78,7 +87,7 @@ export const searchPlanSchema = z.object({
       label: z.string(),
       route: z.enum(['filter', 'exa']),
       /** The profile group it belongs to; null for a column every match needs. */
-      group: z.string().nullable(),
+      group: columnGroupSchema,
       /** False for a nice-to-have: shown, but never counts toward a match. */
       counts: z.boolean(),
     }),

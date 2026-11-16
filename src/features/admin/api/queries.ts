@@ -887,9 +887,17 @@ const withPerson = (people: SearchPerson[], person: SearchPerson) =>
     ? people.map((p) => (p.id === person.id ? person : p))
     : [...people, person];
 
-/** Reads a search's stream into the `useSearch` cache until it's done or nobody follows it. */
-async function followSearch(queryClient: QueryClient, id: string, signal: AbortSignal) {
+/**
+ * One connection to a search's stream, read into the `useSearch` cache. Says whether it reached
+ * done, and whether it got anything at all (a snapshot means the server was reached).
+ */
+async function readSearchStream(
+  queryClient: QueryClient,
+  id: string,
+  signal: AbortSignal,
+): Promise<{ done: boolean; heard: boolean }> {
   const key = adminKeys.search(id);
+  let heard = false;
   try {
     for await (const event of streamEvents(
       `${searchPath(id)}/stream`,
@@ -898,6 +906,7 @@ async function followSearch(queryClient: QueryClient, id: string, signal: AbortS
       signal,
       'GET',
     )) {
+      heard = true;
       // A GET still in flight would land older data over the stream's.
       await queryClient.cancelQueries({ queryKey: key });
       if (event.type === 'snapshot' || event.type === 'done') {
@@ -924,14 +933,47 @@ async function followSearch(queryClient: QueryClient, id: string, signal: AbortS
         void queryClient.invalidateQueries({
           queryKey: adminKeys.briefSearches(event.search.briefId),
         });
-        return;
+        return { done: true, heard };
       }
     }
   } catch {
-    if (signal.aborted) return;
+    // Dropped, refused or garbled: the caller decides whether to try again.
   }
-  // The stream broke off before done: fall back to what the server has now.
-  if (!signal.aborted) void queryClient.invalidateQueries({ queryKey: key });
+  return { done: false, heard };
+}
+
+/** Waits between reconnects: 1 s, then 2, 4, 8, and at most 10 s. */
+const SEARCH_RECONNECT_MS = { first: 1_000, max: 10_000 };
+
+const pause = (ms: number, signal: AbortSignal) =>
+  new Promise<void>((resolve) => {
+    const timer = setTimeout(resolve, ms);
+    signal.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timer);
+        resolve();
+      },
+      { once: true },
+    );
+  });
+
+/**
+ * Follows a search's stream until it's done or nobody follows it. A stream that drops before done
+ * is opened again (the server starts each one with a fresh snapshot) for as long as the search is
+ * still running, backing off between tries and starting over once a connection gets through.
+ */
+async function followSearch(queryClient: QueryClient, id: string, signal: AbortSignal) {
+  let wait = SEARCH_RECONNECT_MS.first;
+  while (!signal.aborted) {
+    const { done, heard } = await readSearchStream(queryClient, id, signal);
+    if (done || signal.aborted) return;
+    const status = queryClient.getQueryData<Search>(adminKeys.search(id))?.status;
+    if (status !== undefined && status !== 'running') return;
+    if (heard) wait = SEARCH_RECONNECT_MS.first;
+    await pause(wait, signal);
+    wait = Math.min(wait * 2, SEARCH_RECONNECT_MS.max);
+  }
 }
 
 /** One stream per search however many views follow it (the chat card and the results table). */

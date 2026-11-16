@@ -21,7 +21,8 @@ const CRESTLINE: Confirm = {
     { name: 'Runner', quota: 3 },
   ],
   columns: [
-    { id: 'col_1', label: 'In the US', group: null },
+    // The backend sends "" for a shared column.
+    { id: 'col_1', label: 'In the US', group: '' },
     { id: 'col_2', label: '2+ overnight hikes', group: 'Hiker' },
     { id: 'col_3', label: '6+ trail runs', group: 'Runner' },
   ],
@@ -132,7 +133,8 @@ describe('a people search in the chat', () => {
     ).toBeInTheDocument();
     const hikers = within(card).getByRole('list', { name: 'Hiker (3 needed)' });
     expect(within(hikers).getByText('2+ overnight hikes')).toBeInTheDocument();
-    expect(within(card).getByRole('list', { name: 'Every match needs' })).toBeInTheDocument();
+    const shared = within(card).getByRole('list', { name: 'Every match needs' });
+    expect(within(shared).getByText('In the US')).toBeInTheDocument();
     await expectNoAxeViolations(card);
 
     await userEvent.click(within(card).getByRole('button', { name: 'Start' }));
@@ -189,18 +191,57 @@ describe('a people search in the chat', () => {
     await expectNoAxeViolations(card);
   });
 
-  it('says why a search couldn’t find more, or failed', async () => {
+  it('says why a search couldn’t find more, without naming the providers', async () => {
     scriptSearch({
       ...CAFE_SEARCH,
       steps: [],
-      end: { status: 'exhausted', note: 'No more café chains to look in' },
+      end: {
+        status: 'exhausted',
+        note: 'FullEnrich has no one new and Exa found no more café chains',
+      },
     });
     renderCard();
     const card = await screen.findByRole('region', { name: 'People search: Crestline Insights' });
     await userEvent.click(await within(card).findByRole('button', { name: 'Start' }));
     expect(
-      await within(card).findByText('Couldn’t find more: No more café chains to look in'),
+      await within(card).findByText(
+        'Couldn’t find more: Profile search has no one new and Web search found no more café chains',
+      ),
     ).toBeInTheDocument();
+    expect(card.textContent).not.toMatch(/FullEnrich|Exa\b/);
+  });
+
+  it('never shows a failed search’s raw error', async () => {
+    scriptSearch({
+      ...CAFE_SEARCH,
+      steps: [],
+      end: { status: 'failed', note: 'HTTPStatusError: Exa returned 500 for /agent/runs' },
+    });
+    renderCard();
+    const card = await screen.findByRole('region', { name: 'People search: Crestline Insights' });
+    await userEvent.click(await within(card).findByRole('button', { name: 'Start' }));
+    expect(
+      await within(card).findByText('Failed: something went wrong while searching.'),
+    ).toBeInTheDocument();
+    expect(card.textContent).not.toMatch(/HTTPStatusError|Exa\b|500/);
+  });
+
+  it('reconnects when the stream drops mid-search and follows it to the end', async () => {
+    // The first connection closes after the first progress; the search goes on without it.
+    scriptSearch({ ...CAFE_SEARCH, dropAfter: 1 });
+    const streams: string[] = [];
+    server.events.on('request:start', ({ request }) => {
+      if (new URL(request.url).pathname.endsWith('/stream')) streams.push(request.url);
+    });
+    renderCard();
+    const card = await screen.findByRole('region', { name: 'People search: Crestline Insights' });
+    await userEvent.click(await within(card).findByRole('button', { name: 'Start' }));
+    await within(card).findByText(/1 found/);
+    expect(
+      await within(card).findByText('Found 2 of 2', undefined, { timeout: 4000 }),
+    ).toBeInTheDocument();
+    expect(streams.length).toBeGreaterThanOrEqual(2);
+    server.events.removeAllListeners();
   });
 
   it('cancel leaves nothing started', async () => {
